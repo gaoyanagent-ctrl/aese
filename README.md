@@ -49,6 +49,6 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 
 - [Agent 项目背景](docs/agent-project-context.md)
 - [MVP 蓝图](docs/AESE_MVP_Blueprint.md)
+- [华辰热管理系统集团详细蓝图](docs/HCTM_Virtual_Enterprise_Blueprint.md)
 - [进展跟踪](docs/progress-log.md)
 - [原始构思记录](docs/ChatGPT_20260626.md)
-
