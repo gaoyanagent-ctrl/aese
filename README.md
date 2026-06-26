@@ -53,5 +53,6 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - [华辰主数据建模规格](docs/HCTM_Master_Data_Model.md)
 - [华辰事件模型规格](docs/HCTM_Event_Model.md)
 - [华辰种子数据计划](docs/HCTM_Seed_Data_Plan.md)
+- [演示故事 01：客户追加订单下的交付承诺重算](docs/HCTM_Demo_Story_01_Order_Expedite.md)
 - [进展跟踪](docs/progress-log.md)
 - [原始构思记录](docs/ChatGPT_20260626.md)
