@@ -40,3 +40,10 @@
 - 原因：AESE 后续要复用 IAOS Outbox + NATS + Scenario Package 机制，必须先让事件命名、payload 和触发关系与 IAOS 当前事件模型对齐。
 - 影响：M2 的事件规格已成形，后续可以继续编写 seed 数据计划，或基于事件规格准备 `shared/eventdef` 常量和 payload struct 草案。
 - 后续：编写 `docs/HCTM_Seed_Data_Plan.md`，把组织、客户、供应商、物料、BOM、工艺、设备、仓库、库存、订单和第一条演示事件序列整理成可 seed 的数据清单。
+
+## 2026-06-26 - 华辰种子数据计划
+
+- 变更：新增 `docs/HCTM_Seed_Data_Plan.md`，将 HCTM MVP 的基础主数据、演示初始业务数据、初始库存、订单、采购、生产任务、22 步演示事件序列、关键事件 payload 和 Agent 期望输出整理为可脚本化 seed 清单；同时更新 `README.md` 和 `docs/agent-project-context.md` 的文档入口。
+- 原因：AESE 需要从模型规格推进到可初始化的演示数据，后续才能生成 JSON/SQL/Go seed 并在 IAOS 中重放第一条演示故事。
+- 影响：M2 的 seed 数据计划已成形，主数据模型、事件模型和演示初始数据之间有了统一编码和导入顺序。
+- 后续：编写 `docs/HCTM_Demo_Story_01_Order_Expedite.md`，把第一条演示故事转成面向用户操作、系统事件、Agent 输出和验收标准的可执行演示脚本。
