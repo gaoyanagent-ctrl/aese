@@ -28,7 +28,10 @@ func TestProjectRealHCTMPack(t *testing.T) {
 			t.Fatalf("projection must not contain an environment UUID: %+v", object)
 		}
 	}
-	wantCounts := map[string]int{"customer": 1, "material": 6, "bom": 5, "inventory": 5, "sales_order": 1}
+	wantCounts := map[string]int{"customer": 1, "material": 6, "bom": 5, "inventory": 5, "purchase_order": 2, "inspection_order": 1, "sales_order": 1}
+	if len(result.Request.Objects) != 21 {
+		t.Fatalf("object count = %d, want 21", len(result.Request.Objects))
+	}
 	for entity, want := range wantCounts {
 		if counts[entity] != want {
 			t.Errorf("%s count = %d, want %d", entity, counts[entity], want)
@@ -75,12 +78,50 @@ func TestProjectRealHCTMPack(t *testing.T) {
 		t.Fatal("expected an explicit warning for dropped sales order legal_entity_code")
 	}
 
+	firstPO := objectByNaturalKey(t, result, "purchase_order", "po_no", "PO-202607-0001")
+	if firstPO.Data["supplier_code"] != "SUP-ALPHA-AL" || firstPO.Data["material_code"] != "AL-PLATE-6061-T6" || firstPO.Data["order_qty"] != json.Number("5000") {
+		t.Fatalf("unexpected first purchase order: %#v", firstPO.Data)
+	}
+	if firstPO.Data["promised_date"] != "2026-07-08" || firstPO.Data["latest_eta"] != "2026-07-08" || firstPO.Data["status"] != "in_transit" {
+		t.Fatalf("purchase order dates/status must preserve canonical values: %#v", firstPO.Data)
+	}
+	secondPO := objectByNaturalKey(t, result, "purchase_order", "po_no", "PO-202607-0002")
+	if secondPO.Data["supplier_code"] != "SUP-BETA-AL" || secondPO.Data["order_qty"] != json.Number("2000") || secondPO.Data["promised_date"] != "2026-07-12" || secondPO.Data["latest_eta"] != "2026-07-12" || secondPO.Data["status"] != "draft" {
+		t.Fatalf("unexpected second purchase order: %#v", secondPO.Data)
+	}
+	for _, field := range []string{"po_no", "supplier_code", "material_code", "order_qty", "promised_date", "latest_eta", "status"} {
+		if hasDroppedField(result.Warnings, "purchase_order", field) {
+			t.Fatalf("mapped purchase order field %s reported as dropped", field)
+		}
+	}
+	if !hasDroppedField(result.Warnings, "purchase_order", "legal_entity_code") || !hasDroppedField(result.Warnings, "purchase_order", "plant_code") {
+		t.Fatal("expected explicit warnings for unsupported purchase order fields")
+	}
+	inspection := onlyObject(t, result, "inspection_order")
+	if inspection.NaturalKey["inspection_no"] != "IQC-202607-0002" || inspection.Data["po_no"] != "PO-202607-0002" || inspection.Data["material_code"] != "AL-PLATE-6061-T6" {
+		t.Fatalf("unexpected inspection identity: %#v", inspection)
+	}
+	if inspection.Data["inspection_type"] != "incoming" || inspection.Data["sample_qty"] != json.Number("80") || inspection.Data["accepted_qty"] != json.Number("0") || inspection.Data["rejected_qty"] != json.Number("0") || inspection.Data["status"] != "pending" {
+		t.Fatalf("unexpected pending inspection data: %#v", inspection.Data)
+	}
+	if _, exists := inspection.Data["receipt_no"]; exists {
+		t.Fatalf("pending inspection must not invent a receipt: %#v", inspection.Data)
+	}
+	if _, exists := inspection.Data["lot_no"]; exists {
+		t.Fatalf("pending inspection must not invent a lot: %#v", inspection.Data)
+	}
+	for _, field := range []string{"inspection_no", "po_no", "material_code", "inspection_type", "sample_qty", "accepted_qty", "rejected_qty", "status"} {
+		if hasDroppedField(result.Warnings, "inspection_order", field) {
+			t.Fatalf("mapped inspection order field %s reported as dropped", field)
+		}
+	}
+
 	wire, err := json.Marshal(result.Request)
 	if err != nil {
 		t.Fatal(err)
 	}
 	text := string(wire)
-	for _, fragment := range []string{`"objects"`, `"type":"sales_order"`, `"natural_key":{"order_no":"SO-202607-0001"}`, `"unit_price":"128.5000"`} {
+	for _, fragment := range []string{`"objects"`, `"type":"sales_order"`, `"natural_key":{"order_no":"SO-202607-0001"}`, `"type":"purchase_order"`, `"natural_key":{"po_no":"PO-202607-0001"}`, `"type":"inspection_order"`, `"natural_key":{"inspection_no":"IQC-202607-0002"}`, `"unit_price":"128.5000"`} {
 		if !strings.Contains(text, fragment) {
 			t.Errorf("wire request missing %s: %s", fragment, text)
 		}
@@ -128,6 +169,17 @@ func firstObject(t *testing.T, result Result, entity string) Object {
 		}
 	}
 	t.Fatalf("no %s object", entity)
+	return Object{}
+}
+
+func objectByNaturalKey(t *testing.T, result Result, entity, field, value string) Object {
+	t.Helper()
+	for _, object := range result.Request.Objects {
+		if object.Type == entity && object.NaturalKey[field] == value {
+			return object
+		}
+	}
+	t.Fatalf("no %s object with %s=%s", entity, field, value)
 	return Object{}
 }
 

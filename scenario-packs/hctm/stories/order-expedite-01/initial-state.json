@@ -35,6 +35,14 @@
     },
     {
       "schema_version": "1.0.0",
+      "entity": "inspection_order",
+      "natural_key": ["inspection_no"],
+      "records": [
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","inspection_no":"IQC-202607-0002","po_no":"PO-202607-0002","material_code":"AL-PLATE-6061-T6","inspection_type":"incoming","sample_qty":80,"accepted_qty":0,"rejected_qty":0,"status":"pending"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
       "entity": "production_order",
       "natural_key": ["work_order_no"],
       "records": [

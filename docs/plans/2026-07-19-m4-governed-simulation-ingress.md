@@ -21,6 +21,7 @@ tags: [m4, simulation, iaos, hctm]
 - [x] 在 AESE IAOS client 和 replay 中接入设备停机事件。
 - [x] 用 canonical HCTM 事件执行真实 replay 幂等验证。
 - [x] 泛化 AESE replay，将供应商延期和来料检验失败按 metadata 业务对象送入同一 simulation ingress，并保持默认 dry-run。
+- [x] 将两张 canonical 采购单和 `IQC-202607-0002` pending 检验单投影进 DES-047 scenario apply，为异常对象稳定解析提供前置 fixture。
 - [ ] 实现 `o2d.supplier_delivery.delayed` 的稳定采购对象解析和状态影响。
 - [ ] 实现 `qms.incoming_inspection.failed` 的稳定检验/批次解析和质量状态影响。
 - [ ] 对三类异常完成统一权限、RLS、审计、Outbox、重复和碰撞验收。

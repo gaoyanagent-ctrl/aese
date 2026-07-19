@@ -106,6 +106,7 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | --- | --- |
 | AESE simulation request/response 合同 | `internal/iaosclient/client.go` |
 | canonical 事件到受治理入口 | `internal/replay/replay.go` |
+| M4 采购单与待检验单 DES-047 投影 | `internal/legacyprojection/projection.go`、`scenario-packs/hctm/stories/order-expedite-01/initial-state.json` |
 | M4 当前计划 | `docs/plans/2026-07-19-m4-governed-simulation-ingress.md` |
 | 设备停机真实证据 | `docs/reports/hctm-m4-simulation-ingress-evidence.md` |
 | IAOS 入口实现 | `/iaos/iaos-go/platform/internal/api/simulation.go` |

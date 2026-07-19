@@ -132,6 +132,7 @@ var references = map[string][]reference{
 	"storage_location":      {{"warehouse_code", "warehouse"}},
 	"sales_order":           {{"customer_code", "customer"}, {"legal_entity_code", "legal_entity"}, {"material_code", "material"}},
 	"purchase_order":        {{"supplier_code", "supplier"}, {"material_code", "material"}, {"plant_code", "plant"}},
+	"inspection_order":      {{"po_no", "purchase_order"}, {"material_code", "material"}},
 	"production_order":      {{"sales_order_no", "sales_order"}, {"material_code", "material"}, {"routing_code", "routing"}, {"plant_code", "plant"}},
 	"shipment":              {{"sales_order_no", "sales_order"}, {"material_code", "material"}},
 	"inventory_transaction": {{"material_code", "material"}, {"warehouse_code", "warehouse"}, {"storage_location_code", "storage_location"}},

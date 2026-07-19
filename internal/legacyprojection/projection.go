@@ -55,10 +55,11 @@ type Options struct {
 	DryRun   bool
 }
 
-// Project creates the single M3 legacy tracer request. Only the customer used
-// by the tracer is imported; materials are limited to those referenced by the
-// tracer order, BOM and opening inventory. The two HCTM order records are
-// merged into one 12,000-unit draft order with one line.
+// Project creates the narrow HCTM tracer request. Only the customer used by
+// the tracer is imported; materials are limited to those referenced by the
+// tracer order, BOM and opening inventory. Canonical purchase orders remain
+// separate, while the two HCTM sales order records are merged into one
+// 12,000-unit draft order with one line.
 func Project(pack *scenariopack.Pack, opts Options) (Result, error) {
 	if pack == nil {
 		return Result{}, fmt.Errorf("scenario pack is required")
@@ -148,6 +149,43 @@ func Project(pack *scenariopack.Pack, opts Options) (Result, error) {
 			map[string]string{
 				"material_code": "material_code", "warehouse_code": "warehouse_name",
 				"qty": "quantity", "lot_no": "batch_no",
+			})
+	}
+	purchaseOrders, ok := sets["purchase_order"]
+	if !ok {
+		return Result{}, fmt.Errorf("purchase_order record set is required")
+	}
+	for _, record := range purchaseOrders.Records {
+		result.add("purchase_order", purchaseOrders, record,
+			[]string{"po_no"},
+			map[string]string{
+				"po_no":         "po_no",
+				"supplier_code": "supplier_code",
+				"material_code": "material_code",
+				"order_qty":     "order_qty",
+				"promised_date": "promised_date",
+				"latest_eta":    "latest_eta",
+				"status":        "status",
+			})
+	}
+	inspections, ok := sets["inspection_order"]
+	if !ok {
+		return Result{}, fmt.Errorf("inspection_order record set is required")
+	}
+	for _, record := range inspections.Records {
+		result.add("inspection_order", inspections, record,
+			[]string{"inspection_no"},
+			map[string]string{
+				"inspection_no":   "inspection_no",
+				"po_no":           "po_no",
+				"material_code":   "material_code",
+				"inspection_type": "inspection_type",
+				"receipt_no":      "receipt_no",
+				"lot_no":          "lot_no",
+				"sample_qty":      "sample_qty",
+				"accepted_qty":    "accepted_qty",
+				"rejected_qty":    "rejected_qty",
+				"status":          "status",
 			})
 	}
 
@@ -243,7 +281,7 @@ func (r *Result) warn(set scenariopack.RecordSet, record map[string]any, retaine
 	sort.Strings(dropped)
 	r.Warnings = append(r.Warnings, Warning{
 		SourceEntity: set.Entity, NaturalKey: fields(record, set.NaturalKey), DroppedFields: dropped,
-		Message: "fields are not represented by the IAOS M3 legacy contract",
+		Message: "fields are not represented by the IAOS scenario apply contract",
 	})
 }
 

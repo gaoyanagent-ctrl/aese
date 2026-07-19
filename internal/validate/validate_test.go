@@ -24,6 +24,12 @@ func TestPackReportsBrokenFixtures(t *testing.T) {
 			p.RecordSets[0].Records = append(p.RecordSets[0].Records, p.RecordSets[0].Records[0])
 		}},
 		{"missing reference", "references missing customer", func(p *scenariopack.Pack) { p.RecordSets[2].Records[0]["customer_code"] = "missing" }},
+		{"inspection purchase reference", "references missing purchase_order", func(p *scenariopack.Pack) {
+			p.RecordSets = append(p.RecordSets,
+				scenariopack.RecordSet{SchemaVersion: "1.0.0", Entity: "purchase_order", NaturalKey: []string{"po_no"}, Source: "initial.json", Records: []map[string]any{{"po_no": "PO-1", "material_code": "M-1"}}},
+				scenariopack.RecordSet{SchemaVersion: "1.0.0", Entity: "inspection_order", NaturalKey: []string{"inspection_no"}, Source: "initial.json", Records: []map[string]any{{"inspection_no": "IQC-1", "po_no": "PO-MISSING", "material_code": "M-1"}}},
+			)
+		}},
 		{"out of order", "timeline is out of order", func(p *scenariopack.Pack) { p.Stories[0].Events.Events[1].Timestamp = "2026-06-30T00:00:00Z" }},
 		{"duplicate idempotency", "duplicate idempotency key", func(p *scenariopack.Pack) { p.Stories[0].Events.Events[1].IdempotencyKey = "idem-1" }},
 		{"negative quantity", "quantity must be non-negative", func(p *scenariopack.Pack) { p.RecordSets[2].Records[0]["quantity"] = -1 }},

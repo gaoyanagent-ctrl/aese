@@ -29,7 +29,7 @@ go run ./cmd/aese inspect ./scenario-packs/hctm --json
 ```text
 valid: hctm@0.1.0 (19 record sets, 1 stories)
 master_records: 80
-initial_records: 14
+initial_records: 15
 events: 22
 assertions: 17
 correlation_id: corr-so-202607-0001

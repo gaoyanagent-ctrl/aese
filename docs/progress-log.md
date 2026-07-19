@@ -111,3 +111,11 @@
 - 影响：AESE 已具备三类 M4 异常的统一 replay 适配；IAOS 对新增两类事件的采购/检验对象解析、状态变化和真实运行验收仍是 M4 未完成项。
 - 验证：新增两类 canonical 请求、三类 dry-run 零写入、metadata 缺失/错配、完整 duplicate、malformed duplicate、其他事件 unsupported 以及原有 machine/order 回归测试；`go test ./...`、`go vet ./...` 和 `git diff --check` 通过。
 - 后续：在独立 IAOS worktree 完成两类事件的入口实现后，执行统一权限、RLS、审计、Outbox、重复和碰撞验收。
+
+## 2026-07-19 - M4 采购与来检对象 projection 前置
+
+- 变更：canonical initial-state 新增 `IQC-202607-0002` pending 来料检验单，故事初始记录从 14 条增至 15 条；DES-047 legacy projection 新增两张 `purchase_order` 和该 `inspection_order`，稳定自然键分别为 `po_no` 和 `inspection_no`。采购日期保持 DateOnly，待检验单不虚构尚未产生的 receipt/lot。
+- 原因：供应商延期和来料检验失败的 simulation ingress 必须在当前租户内解析到稳定采购单和检验单，真实 replay 前需先由 scenario apply 原子准备这些业务对象。
+- 影响：AESE scenario request 现在包含 21 个对象；inspection 的 `po_no` 与 `material_code` 引用加入离线完整性校验。2D preview 已预置同编码 pending 检验对象，视图数据无需改动。IAOS fixture 已确认 7 字段采购 wire、DateOnly 日期以及 receipt/lot 可空的预分配检验单合同。
+- 验证：projection 测试覆盖对象数量、自然键、全部 wire 字段、DateOnly、可选 receipt/lot 和 dropped-field warning；真实 pack `validate`、`inspect`（80 master、15 initial、22 events、17 assertions）、`go test ./...`、`go vet ./...` 和 `git diff --check` 通过。
+- 后续：使用更新后的 scenario apply fixture 执行两类异常的首次提交、重复、碰撞、跨租户、状态变化和 Outbox 统一验收。

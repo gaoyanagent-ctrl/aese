@@ -7,7 +7,7 @@ Pack：`hctm@0.1.0`
 ## 1. 离线合同
 
 - `aese validate`：`valid: hctm@0.1.0 (19 record sets, 1 stories)`。
-- `aese inspect`：80 条 L1 主数据、14 条故事初始记录、22 个事件、17 条离线断言。
+- `aese inspect`：当前 pack 为 80 条 L1 主数据、15 条故事初始记录、22 个事件、17 条离线断言；其中 1 条 pending 检验单是 M4 为受治理异常 replay 补充的前置 fixture。
 - 4 个 Draft 2020-12 Schema 对 9 个实例文件校验通过。
 - Go 单测覆盖路径逃逸、schema 版本、重复自然键、缺失引用、时间乱序、重复幂等键、负数量、BOM/MRP、库存/发运和 expected outcomes。
 
