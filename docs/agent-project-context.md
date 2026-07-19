@@ -159,8 +159,9 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 - 工程治理已补齐文档索引、架构边界、code map、路线图、ADR、DES 和 active plan。
 - 已生成 `hctm@0.1.0` 机器可读场景包、4 个 JSON Schema、Go loader/validator/inspect CLI，以及默认 dry-run 的 IAOS client/replay 基础实现。
 - M3“可执行 HCTM 场景包”已完成：受治理 scenario apply/reset、tenant isolation、O2D Outbox/NATS/workflow、重复 no-op 和在线 verify 均有实际证据，详见 `docs/reports/hctm-m3-execution-evidence.md`。
-- 当前最高优先级是 M3V 快速 2D 企业沙盘：用现有七幕故事和 22 个事件，在 3 到 4 个工作日内交付只读、可播放的苏州基地 A 线预览版。
-- 当前实施计划是 `docs/plans/2026-07-19-fast-track-2d-enterprise-sandbox.md`，设计见 `docs/designs/DES-002-fast-track-2d-enterprise-sandbox.md`。
+- M3V 快速 2D 企业沙盘已完成：静态 `preview.json`、14 节点 A 线画布、七幕/22 事件播放、五项 KPI、对象详情和三类 Agent 建议已通过桌面与移动验收。
+- M3V 实现位于 `frontend/`，运行见 `docs/runbooks/hctm-m3v-2d-sandbox.md`，验收证据见 `docs/reports/hctm-m3v-2d-sandbox-evidence.md`。
+- 下一最高优先级是 M4：实现受治理 simulation ingress，让供应商延期、设备停机和来料不良进入 IAOS 运行链；之后增加 `IaosScenarioDataSource`。
 - `/iaos/iaos-go` 已提供 DES-047 scenario apply/reset、原子幂等 O2D workflow 和 HCTM work_order/workflow fixture；Platform、PostgreSQL、NATS 和 O2D 当前运行正常。
 
 ## 7. 后续 agent 必须维护的信息

@@ -13,14 +13,14 @@
 | M2 业务与技术规格 | 对象、事件、seed、演示故事 | Completed (docs) | 4 份 HCTM 规格文档 |
 | M2.5 工程治理 | 架构边界、索引、code map、执行规则 | Completed | 本轮治理文档 |
 | M3 可执行场景包 | JSON 场景包、校验器、IAOS apply/replay tracer | Completed | pack、CLI、execution evidence、IAOS commits |
-| M3V 快速 2D 沙盘 | 七幕故事、22 事件、A 线画布、KPI 和 Agent 建议预览 | Active / next | ADR-002、DES-002、PLAN-M3V-001 |
-| M4 异常场景运行 | 延期、设备故障、来料不良进入 IAOS 运行链 | Not started | - |
+| M3V 快速 2D 沙盘 | 七幕故事、22 事件、A 线画布、KPI 和 Agent 建议预览 | Completed | 前端、preview、18 unit/component tests、9 E2E、3 viewport screenshots |
+| M4 异常场景运行 | 延期、设备故障、来料不良进入 IAOS 运行链 | Next | M3/M3V contracts |
 | M5 Agent MVP | 计划、质量、经营分析 Agent | Not started | - |
 | M6 在线 2D 企业沙盘 | IAOS 实时事件、库存、产线、异常和 Agent 运行结果 | Not started | - |
 
 ## 2. 当前阶段
 
-M3 可执行场景包已完成。当前最高优先级改为 M3V：先用现有华辰场景包交付只读、确定性播放的 2D 企业沙盘，再继续 M4 异常事件在线化和 M5 Agent Runtime。
+M3 可执行场景包和 M3V 快速 2D 企业沙盘均已完成。当前最高优先级是 M4：把供应商延期、设备停机和来料不良通过受治理 simulation ingress 接入 IAOS，再用已验证的 `ScenarioDataSource` 边界推进在线数据源。
 
 M3V 的最小成功标准：
 
@@ -61,11 +61,11 @@ M3 已完成的验收基线：
 
 | Slice | 内容 | 状态 |
 | --- | --- | --- |
-| V0 | 前端骨架、视图模型和 preview 数据 | Pending |
-| V1 | 2D 工厂画布和工作台布局 | Pending |
-| V2 | 时间线播放内核和视觉状态变化 | Pending |
-| V3 | 事件、KPI、对象详情和 Agent 建议 | Pending |
-| V4 | 响应式、自动化测试和运行说明 | Pending |
+| V0 | 前端骨架、视图模型和 preview 数据 | Completed |
+| V1 | 2D 工厂画布和工作台布局 | Completed |
+| V2 | 时间线播放内核和视觉状态变化 | Completed |
+| V3 | 事件、KPI、对象详情和 Agent 建议 | Completed |
+| V4 | 响应式、自动化测试和运行说明 | Completed |
 
 ## 5. 风险与依赖
 

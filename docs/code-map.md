@@ -9,7 +9,7 @@
 | 理解项目定位 | `README.md`、`docs/agent-project-context.md` |
 | 查看当前进度 | `docs/roadmap.md`、`docs/progress-log.md` |
 | 理解 AESE/IAOS 边界 | `docs/architecture.md`、ADR-001 |
-| 开始 2D 沙盘实现 | DES-002、M3V active plan |
+| 运行或修改 2D 沙盘 | DES-002、M3V completed plan、M3V runbook |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
 | 修改事件名和 payload | `docs/HCTM_Event_Model.md` |
@@ -87,13 +87,16 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | 任务 | 路径 |
 | --- | --- |
 | 前端工程与依赖 | `frontend/` |
-| 应用壳和响应式布局 | `frontend/src/app/` |
-| 2D 画布与沙盘组件 | `frontend/src/components/sandbox/` |
-| 播放 reducer 和领域类型 | `frontend/src/domain/` |
-| 静态/IAOS 数据源适配器 | `frontend/src/adapters/` |
+| 应用壳和响应式布局 | `frontend/src/App.tsx`、`frontend/src/styles/global.css` |
+| 2D 画布与沙盘组件 | `frontend/src/components/` |
+| 播放 reducer 和 Hook | `frontend/src/playback/` |
+| 视图模型、校验和静态数据源 | `frontend/src/scenario/` |
 | 场景预览数据 | `scenario-packs/hctm/stories/order-expedite-01/preview.json` |
 | 单元与组件测试 | `frontend/src/**/*.test.ts(x)` |
 | 浏览器验收 | `frontend/e2e/` |
+| 固定视口截图 | `frontend/test-results/*-completed.png` |
+| 启动和操作手册 | `docs/runbooks/hctm-m3v-2d-sandbox.md` |
+| M3V 验收证据 | `docs/reports/hctm-m3v-2d-sandbox-evidence.md` |
 
 ## 6. 导航更新触发器
 

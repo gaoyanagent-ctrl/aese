@@ -73,7 +73,8 @@ scenario-packs/hctm/
 ├── stories/order-expedite-01/
 │   ├── initial-state.json
 │   ├── events.json
-│   └── expected-outcomes.json
+│   ├── expected-outcomes.json
+│   └── preview.json
 └── schemas/
     ├── manifest.schema.json
     ├── record-set.schema.json
@@ -89,6 +90,10 @@ internal/scenariopack/       # 加载、规范化和引用解析
 internal/validate/           # schema、关系、时间线和幂等校验
 internal/iaosclient/         # IAOS API 适配器，M3 后半段
 internal/replay/             # 受控事件重放协调器
+frontend/src/scenario/       # SandboxScenario 与静态数据源边界
+frontend/src/playback/       # 确定性重放 reducer 和 React hook
+frontend/src/components/     # 2D 画布、控制栏、事件/KPI/详情面板
+frontend/e2e/                # 三个目标视口的浏览器验收
 ```
 
 这些路径已在 M3 中实现；`internal/replay` 负责默认 dry-run 的 apply/replay/verify 协调，正式写入仍受 IAOS API 合同约束。
@@ -138,6 +143,6 @@ internal/replay/             # 受控事件重放协调器
 - order decompose 使用状态 CAS，O2D workflow 以 event/idempotency key 去重并在单一事务内执行；correlation、Outbox 和重复 no-op 已实证。
 - HCTM 18 类事件尚未全部进入 IAOS `shared/eventdef`。
 - O2D 当前只消费 `o2d.order.confirmed`，其余领域 handler 尚未接线。
-- AESE 前端和 2D 沙盘尚未实现。
+- AESE 只读 2D 沙盘已实现：14 节点 A 线、七幕/22 事件、五项 KPI、对象详情和三类 Agent 建议均可确定性播放。
 - DES-048 的通用外生 simulation ingress 仍是 M4 实现项；M3 只依赖 IAOS 内生 `o2d.order.confirmed`。
-- M3V 将先实现静态场景驱动的只读 2D 预览器；IAOS 在线数据源和正式 UI 集成在预览交互验证后实施。
+- M3V 静态预览器已完成；`ScenarioDataSource` 边界已验证，IAOS 在线数据源和正式 UI 集成留待 M4/M6。

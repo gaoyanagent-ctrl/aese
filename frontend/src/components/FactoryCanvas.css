@@ -1,0 +1,342 @@
+.factory-canvas {
+  --factory-canvas-surface: var(--surface, #111c2d);
+  --factory-canvas-surface-raised: var(--surface-raised, #17253a);
+  --factory-canvas-border: var(--border, #33445d);
+  --factory-canvas-text: var(--text, #f1f5f9);
+  --factory-canvas-muted: var(--text-muted, #a8b4c5);
+  --factory-canvas-normal: var(--normal, #3cba83);
+  --factory-canvas-attention: var(--watch, #f5b942);
+  --factory-canvas-critical: var(--critical, #f16d76);
+  --factory-canvas-selected: var(--info, #56a8ff);
+  position: relative;
+  min-width: 0;
+  min-height: 30rem;
+  height: 100%;
+  overflow: hidden;
+  border: 1px solid var(--factory-canvas-border);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at 50% -25%, rgb(52 96 145 / 18%), transparent 48%),
+    var(--factory-canvas-surface);
+  color: var(--factory-canvas-text);
+  isolation: isolate;
+}
+
+.canvas-section > .factory-canvas {
+  border: 0;
+  border-radius: 0;
+}
+
+.factory-canvas .react-flow__renderer {
+  cursor: grab;
+}
+
+.factory-canvas .react-flow__renderer:active {
+  cursor: grabbing;
+}
+
+.factory-node {
+  --factory-node-state: var(--factory-canvas-normal);
+  display: grid;
+  grid-template-columns: 2.25rem minmax(7.5rem, 1fr);
+  grid-template-areas:
+    'icon content'
+    'icon status';
+  align-items: center;
+  gap: 0.2rem 0.65rem;
+  width: 12.5rem;
+  min-height: 4.75rem;
+  padding: 0.7rem 0.8rem;
+  border: 1px solid color-mix(in srgb, var(--factory-node-state) 65%, var(--factory-canvas-border));
+  border-left: 4px solid var(--factory-node-state);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--factory-canvas-surface-raised) 94%, var(--factory-node-state));
+  box-shadow: 0 7px 18px rgb(2 8 23 / 28%);
+  color: var(--factory-canvas-text);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    border-color 180ms ease-out,
+    box-shadow 180ms ease-out,
+    background-color 180ms ease-out;
+}
+
+.factory-node--watch {
+  --factory-node-state: var(--factory-canvas-attention);
+}
+
+.factory-node--critical {
+  --factory-node-state: var(--factory-canvas-critical);
+}
+
+.factory-node--highlighted {
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--factory-node-state) 28%, transparent),
+    0 9px 22px rgb(2 8 23 / 36%);
+}
+
+.factory-node--selected {
+  border-color: var(--factory-canvas-selected);
+  outline: 3px solid color-mix(in srgb, var(--factory-canvas-selected) 45%, transparent);
+  outline-offset: 3px;
+}
+
+.factory-node:focus-visible {
+  outline: 3px solid var(--factory-canvas-selected);
+  outline-offset: 4px;
+}
+
+.factory-node__icon {
+  grid-area: icon;
+  display: grid;
+  place-items: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--factory-node-state) 16%, transparent);
+  color: var(--factory-node-state);
+}
+
+.factory-node__content {
+  grid-area: content;
+  min-width: 0;
+}
+
+.factory-node__content strong,
+.factory-node__code {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.factory-node__content strong {
+  font-size: 0.9rem;
+  font-weight: 650;
+  line-height: 1.3;
+}
+
+.factory-node__code {
+  margin-top: 0.12rem;
+  color: var(--factory-canvas-muted);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+}
+
+.factory-node__status {
+  grid-area: status;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  width: fit-content;
+  color: var(--factory-node-state);
+  font-size: 0.72rem;
+  font-weight: 650;
+  line-height: 1.25;
+}
+
+.factory-node__handle {
+  width: 7px;
+  height: 7px;
+  border: 1px solid var(--factory-canvas-surface);
+  background: var(--factory-node-state);
+}
+
+.factory-edge .react-flow__edge-path {
+  stroke: #718197;
+  stroke-width: 2;
+  transition:
+    stroke 180ms ease-out,
+    stroke-width 180ms ease-out;
+}
+
+.factory-edge--watch .react-flow__edge-path {
+  stroke: var(--factory-canvas-attention);
+  stroke-dasharray: 7 5;
+}
+
+.factory-edge--critical .react-flow__edge-path {
+  stroke: var(--factory-canvas-critical);
+  stroke-dasharray: 4 4;
+}
+
+.factory-edge--highlighted .react-flow__edge-path {
+  stroke: var(--factory-canvas-selected);
+  stroke-width: 3.5;
+}
+
+.factory-canvas .react-flow__edge:focus-visible .react-flow__edge-path {
+  stroke: var(--factory-canvas-selected);
+  stroke-width: 4;
+}
+
+.factory-canvas .react-flow__edge-text {
+  fill: var(--factory-canvas-text);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.factory-canvas .react-flow__edge-textbg {
+  fill: var(--factory-canvas-surface-raised);
+}
+
+.factory-canvas__controls {
+  bottom: 5.25rem !important;
+  overflow: hidden;
+  border: 1px solid var(--factory-canvas-border);
+  border-radius: 9px;
+  box-shadow: 0 5px 14px rgb(2 8 23 / 28%);
+}
+
+.factory-canvas__controls button {
+  width: 2.75rem;
+  height: 2.75rem;
+  border-bottom-color: var(--factory-canvas-border);
+  background: var(--factory-canvas-surface-raised);
+  color: var(--factory-canvas-text);
+}
+
+.factory-canvas__controls button:hover,
+.factory-canvas__controls button:focus-visible {
+  background: color-mix(in srgb, var(--factory-canvas-selected) 15%, var(--factory-canvas-surface-raised));
+}
+
+.factory-canvas__controls button:focus-visible {
+  outline: 2px solid var(--factory-canvas-selected);
+  outline-offset: -3px;
+}
+
+.factory-canvas__controls button svg {
+  fill: currentcolor;
+}
+
+.factory-canvas__minimap {
+  bottom: 5.25rem !important;
+  border: 1px solid var(--factory-canvas-border);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--factory-canvas-surface) 90%, transparent);
+}
+
+.factory-canvas__minimap .react-flow__minimap-mask {
+  fill: rgb(8 15 28 / 60%);
+}
+
+.factory-canvas__legend {
+  position: absolute;
+  z-index: 10;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.4rem 0.7rem;
+  max-width: calc(100% - 1.5rem);
+  padding: 0.5rem 0.65rem;
+  border: 1px solid var(--factory-canvas-border);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--factory-canvas-surface) 90%, transparent);
+  box-shadow: 0 5px 14px rgb(2 8 23 / 20%);
+  pointer-events: none;
+}
+
+.factory-canvas__legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  color: var(--factory-canvas-muted);
+  font-size: 0.7rem;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.factory-canvas__legend svg {
+  width: 0.8rem;
+  height: 0.8rem;
+}
+
+.factory-canvas__legend [data-status='normal'] svg {
+  color: var(--factory-canvas-normal);
+}
+
+.factory-canvas__legend [data-status='attention'] svg {
+  color: var(--factory-canvas-attention);
+}
+
+.factory-canvas__legend [data-status='critical'] svg {
+  color: var(--factory-canvas-critical);
+}
+
+.factory-canvas__legend [data-status='selected'] svg {
+  color: var(--factory-canvas-selected);
+}
+
+.factory-canvas--empty {
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 0.55rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+.factory-canvas--empty > svg {
+  width: 2rem;
+  height: 2rem;
+  color: var(--factory-canvas-muted);
+}
+
+.factory-canvas--empty span {
+  color: var(--factory-canvas-muted);
+  font-size: 0.88rem;
+}
+
+@media (max-width: 47.99rem) {
+  .factory-canvas {
+    min-height: 27rem;
+    border-radius: 10px;
+  }
+
+  .factory-canvas__legend {
+    right: 0.5rem;
+    top: 5.25rem;
+    gap: 0.35rem 0.55rem;
+    max-width: calc(100% - 1rem);
+  }
+
+  .factory-canvas__legend span {
+    font-size: 0.66rem;
+  }
+
+  .factory-canvas__minimap {
+    display: none;
+  }
+
+  .factory-node {
+    width: 11.75rem;
+  }
+}
+
+@media (min-width: 48rem) and (max-width: 68.75rem) {
+  .factory-canvas__legend {
+    top: 5.25rem;
+  }
+}
+
+@media (max-width: 25rem) {
+  .factory-canvas__legend span span,
+  .factory-canvas__legend span:not([data-status='critical']):not([data-status='selected']) {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .factory-node,
+  .factory-edge .react-flow__edge-path {
+    transition: none;
+  }
+
+  .factory-canvas .react-flow__edge.animated path {
+    animation: none;
+  }
+}

@@ -2,7 +2,7 @@
 id: DES-002
 title: 快速 2D 企业沙盘设计
 date: 2026-07-19
-status: approved
+status: completed
 author: Codex + User
 tags: [frontend, 2d, hctm, visualization]
 ---

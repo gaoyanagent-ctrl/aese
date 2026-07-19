@@ -1,0 +1,2168 @@
+{
+  "key": "order-expedite-01",
+  "name": "客户追加订单下的交付承诺重算",
+  "version": "0.1.0-preview.1",
+  "dataSource": "preview",
+  "timezone": "Asia/Shanghai",
+  "startsAt": "2026-07-01T09:00:00+08:00",
+  "endsAt": "2026-07-20T11:00:00+08:00",
+  "defaultSpeed": 1,
+  "acts": [
+    {
+      "number": 1,
+      "title": "客户追加订单",
+      "eventRange": [
+        1,
+        3
+      ]
+    },
+    {
+      "number": 2,
+      "title": "初次 MRP 与供应计划",
+      "eventRange": [
+        4,
+        6
+      ]
+    },
+    {
+      "number": 3,
+      "title": "供应商延期",
+      "eventRange": [
+        7,
+        8
+      ]
+    },
+    {
+      "number": 4,
+      "title": "设备停机与重排",
+      "eventRange": [
+        9,
+        10
+      ]
+    },
+    {
+      "number": 5,
+      "title": "备选供应与来料不良",
+      "eventRange": [
+        11,
+        16
+      ]
+    },
+    {
+      "number": 6,
+      "title": "生产与入库",
+      "eventRange": [
+        17,
+        20
+      ]
+    },
+    {
+      "number": 7,
+      "title": "分批发运与复盘",
+      "eventRange": [
+        21,
+        22
+      ]
+    }
+  ],
+  "layout": {
+    "width": 1540,
+    "height": 700,
+    "nodes": [
+      {
+        "id": "supplier-alpha",
+        "businessCode": "SUP-ALPHA-AL",
+        "label": "主供应商·华东铝业",
+        "kind": "supplier",
+        "position": {
+          "x": 20,
+          "y": 80
+        },
+        "status": "normal",
+        "entityId": "po-primary"
+      },
+      {
+        "id": "supplier-beta",
+        "businessCode": "SUP-BETA-AL",
+        "label": "备选供应商·江南铝材",
+        "kind": "supplier",
+        "position": {
+          "x": 20,
+          "y": 260
+        },
+        "status": "normal",
+        "entityId": "po-backup"
+      },
+      {
+        "id": "raw-warehouse",
+        "businessCode": "WH-SZ-RM",
+        "label": "原材料仓",
+        "kind": "warehouse",
+        "position": {
+          "x": 210,
+          "y": 170
+        },
+        "status": "normal",
+        "entityId": "inventory-al"
+      },
+      {
+        "id": "incoming-quality",
+        "businessCode": "IQC-SZ",
+        "label": "来料检验区",
+        "kind": "quality",
+        "position": {
+          "x": 390,
+          "y": 170
+        },
+        "status": "normal",
+        "entityId": "iqc-backup"
+      },
+      {
+        "id": "forming",
+        "businessCode": "FRM-01",
+        "label": "成形",
+        "kind": "process",
+        "position": {
+          "x": 570,
+          "y": 60
+        },
+        "status": "normal"
+      },
+      {
+        "id": "cnc",
+        "businessCode": "CNC-01",
+        "label": "机加工",
+        "kind": "process",
+        "position": {
+          "x": 750,
+          "y": 60
+        },
+        "status": "normal"
+      },
+      {
+        "id": "welding",
+        "businessCode": "WLD-02",
+        "label": "激光焊接",
+        "kind": "process",
+        "position": {
+          "x": 930,
+          "y": 60
+        },
+        "status": "normal",
+        "entityId": "equipment-weld"
+      },
+      {
+        "id": "cleaning",
+        "businessCode": "CLN-01",
+        "label": "清洗",
+        "kind": "process",
+        "position": {
+          "x": 570,
+          "y": 260
+        },
+        "status": "normal"
+      },
+      {
+        "id": "leak-test",
+        "businessCode": "LKT-01",
+        "label": "检漏测试",
+        "kind": "quality",
+        "position": {
+          "x": 750,
+          "y": 260
+        },
+        "status": "normal"
+      },
+      {
+        "id": "assembly",
+        "businessCode": "ASM-01",
+        "label": "总装",
+        "kind": "process",
+        "position": {
+          "x": 930,
+          "y": 260
+        },
+        "status": "normal"
+      },
+      {
+        "id": "packing",
+        "businessCode": "PKG-01",
+        "label": "包装",
+        "kind": "process",
+        "position": {
+          "x": 1110,
+          "y": 160
+        },
+        "status": "normal"
+      },
+      {
+        "id": "finished-warehouse",
+        "businessCode": "WH-SZ-FG",
+        "label": "成品仓",
+        "kind": "warehouse",
+        "position": {
+          "x": 1260,
+          "y": 160
+        },
+        "status": "normal",
+        "entityId": "inventory-fg"
+      },
+      {
+        "id": "shipping",
+        "businessCode": "SHIP-SZ",
+        "label": "发运区",
+        "kind": "shipping",
+        "position": {
+          "x": 1260,
+          "y": 370
+        },
+        "status": "normal",
+        "entityId": "shipment-2"
+      },
+      {
+        "id": "customer",
+        "businessCode": "CUST-SGNEV",
+        "label": "星河新能源汽车",
+        "kind": "customer",
+        "position": {
+          "x": 1440,
+          "y": 370
+        },
+        "status": "normal",
+        "entityId": "customer"
+      }
+    ],
+    "edges": [
+      {
+        "id": "alpha-to-rm",
+        "source": "supplier-alpha",
+        "target": "raw-warehouse",
+        "label": "主供铝板",
+        "status": "normal"
+      },
+      {
+        "id": "beta-to-rm",
+        "source": "supplier-beta",
+        "target": "raw-warehouse",
+        "label": "备选铝板",
+        "status": "normal"
+      },
+      {
+        "id": "rm-to-iqc",
+        "source": "raw-warehouse",
+        "target": "incoming-quality",
+        "status": "normal"
+      },
+      {
+        "id": "iqc-to-forming",
+        "source": "incoming-quality",
+        "target": "forming",
+        "status": "normal"
+      },
+      {
+        "id": "forming-to-cnc",
+        "source": "forming",
+        "target": "cnc",
+        "status": "normal"
+      },
+      {
+        "id": "cnc-to-welding",
+        "source": "cnc",
+        "target": "welding",
+        "status": "normal"
+      },
+      {
+        "id": "welding-to-cleaning",
+        "source": "welding",
+        "target": "cleaning",
+        "status": "normal"
+      },
+      {
+        "id": "cleaning-to-leak",
+        "source": "cleaning",
+        "target": "leak-test",
+        "status": "normal"
+      },
+      {
+        "id": "leak-to-assembly",
+        "source": "leak-test",
+        "target": "assembly",
+        "status": "normal"
+      },
+      {
+        "id": "assembly-to-packing",
+        "source": "assembly",
+        "target": "packing",
+        "status": "normal"
+      },
+      {
+        "id": "packing-to-fg",
+        "source": "packing",
+        "target": "finished-warehouse",
+        "status": "normal"
+      },
+      {
+        "id": "fg-to-shipping",
+        "source": "finished-warehouse",
+        "target": "shipping",
+        "status": "normal"
+      },
+      {
+        "id": "shipping-to-customer",
+        "source": "shipping",
+        "target": "customer",
+        "status": "normal"
+      }
+    ]
+  },
+  "initialState": {
+    "entities": [
+      {
+        "id": "customer",
+        "type": "customer",
+        "businessCode": "CUST-SGNEV",
+        "name": "星河新能源汽车有限公司",
+        "status": "active",
+        "risk": "normal",
+        "attributes": {
+          "deliveryDueDate": "2026-07-20"
+        }
+      },
+      {
+        "id": "product",
+        "type": "material",
+        "businessCode": "HCTM-BCP-A01",
+        "name": "电池冷却板组件 A01",
+        "status": "active",
+        "risk": "normal",
+        "attributes": {
+          "unit": "件"
+        }
+      },
+      {
+        "id": "order-main",
+        "type": "sales_order",
+        "businessCode": "SO-202607-0001",
+        "name": "客户原订单",
+        "status": "received",
+        "risk": "normal",
+        "attributes": {
+          "orderQty": 10000,
+          "dueDate": "2026-07-20",
+          "shippedQty": 0
+        }
+      },
+      {
+        "id": "order-add",
+        "type": "sales_order",
+        "businessCode": "SO-202607-0001-ADD1",
+        "name": "客户追加订单",
+        "status": "pending",
+        "risk": "normal",
+        "attributes": {
+          "orderQty": 2000,
+          "dueDate": "2026-07-20",
+          "shippedQty": 0
+        }
+      },
+      {
+        "id": "po-primary",
+        "type": "purchase_order",
+        "businessCode": "PO-202607-0001",
+        "name": "主供应商铝板采购单",
+        "status": "in_transit",
+        "risk": "normal",
+        "attributes": {
+          "orderQty": 5000,
+          "eta": "2026-07-08"
+        }
+      },
+      {
+        "id": "po-backup",
+        "type": "purchase_order",
+        "businessCode": "PO-202607-0002",
+        "name": "备选供应商铝板采购单",
+        "status": "draft",
+        "risk": "normal",
+        "attributes": {
+          "orderQty": 2000,
+          "eta": "2026-07-12"
+        }
+      },
+      {
+        "id": "equipment-weld",
+        "type": "equipment",
+        "businessCode": "LAS-WLD-02",
+        "name": "2 号激光焊接机",
+        "status": "running",
+        "risk": "normal",
+        "attributes": {
+          "workCenter": "WLD-02",
+          "downHours": 0
+        }
+      },
+      {
+        "id": "iqc-primary",
+        "type": "inspection_order",
+        "businessCode": "IQC-202607-0001",
+        "name": "主供应商来料检验",
+        "status": "pending",
+        "risk": "normal",
+        "attributes": {
+          "acceptedQty": 0
+        }
+      },
+      {
+        "id": "iqc-backup",
+        "type": "inspection_order",
+        "businessCode": "IQC-202607-0002",
+        "name": "备选供应商来料检验",
+        "status": "pending",
+        "risk": "normal",
+        "attributes": {
+          "rejectedQty": 0
+        }
+      },
+      {
+        "id": "work-order",
+        "type": "production_order",
+        "businessCode": "WO-202607-0001",
+        "name": "冷却板生产订单",
+        "status": "planned",
+        "risk": "normal",
+        "attributes": {
+          "plannedQty": 10800,
+          "completedQty": 0,
+          "scrapQty": 0
+        }
+      },
+      {
+        "id": "inventory-al",
+        "type": "inventory",
+        "businessCode": "AL-PLATE-6061-T6@WH-SZ-RM",
+        "name": "铝板原料库存",
+        "status": "available",
+        "risk": "normal",
+        "attributes": {
+          "availableQty": 8000,
+          "inTransitQty": 5000,
+          "unit": "张"
+        }
+      },
+      {
+        "id": "inventory-fg",
+        "type": "inventory",
+        "businessCode": "HCTM-BCP-A01@WH-SZ-FG",
+        "name": "冷却板成品库存",
+        "status": "available",
+        "risk": "normal",
+        "attributes": {
+          "availableQty": 1200,
+          "unit": "件"
+        }
+      },
+      {
+        "id": "shipment-1",
+        "type": "shipment",
+        "businessCode": "SHIP-202607-0001",
+        "name": "第一批发运",
+        "status": "planned",
+        "risk": "normal",
+        "attributes": {
+          "requestedQty": 9000,
+          "shippedQty": 0,
+          "shortageQty": 0
+        }
+      },
+      {
+        "id": "shipment-2",
+        "type": "shipment",
+        "businessCode": "SHIP-202607-0002",
+        "name": "第二批发运",
+        "status": "planned",
+        "risk": "normal",
+        "attributes": {
+          "requestedQty": 3000,
+          "shippedQty": 0,
+          "shortageQty": 0
+        }
+      }
+    ],
+    "kpis": {
+      "orderDemand": {
+        "value": 10000,
+        "unit": "件",
+        "risk": "normal",
+        "trend": "flat"
+      },
+      "availableFinishedGoods": {
+        "value": 1200,
+        "unit": "件",
+        "risk": "watch",
+        "trend": "flat"
+      },
+      "materialShortageRisk": {
+        "value": 0,
+        "unit": "级",
+        "risk": "normal",
+        "trend": "flat"
+      },
+      "capacityRisk": {
+        "value": 0,
+        "unit": "级",
+        "risk": "normal",
+        "trend": "flat"
+      },
+      "deliveryRisk": {
+        "value": 0,
+        "unit": "级",
+        "risk": "normal",
+        "trend": "flat"
+      }
+    }
+  },
+  "timeline": [
+    {
+      "sequence": 1,
+      "id": "evt-20260701-0001",
+      "timestamp": "2026-07-01T09:00:00+08:00",
+      "eventType": "o2d.order.received",
+      "title": "收到原订单",
+      "description": "星河新能源下达 10,000 件原订单。",
+      "act": 1,
+      "domain": "order",
+      "severity": "normal",
+      "relatedEntityIds": [
+        "order-main",
+        "customer"
+      ],
+      "delta": {
+        "edgeStatuses": [
+          {
+            "id": "shipping-to-customer",
+            "status": "normal"
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 10000,
+          "unit": "件",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 2,
+      "id": "evt-20260701-0002",
+      "timestamp": "2026-07-01T09:30:00+08:00",
+      "eventType": "o2d.order.received",
+      "title": "收到追加订单",
+      "description": "客户追加 2,000 件，交期保持 7 月 20 日。",
+      "act": 1,
+      "domain": "order",
+      "severity": "watch",
+      "relatedEntityIds": [
+        "order-main",
+        "order-add",
+        "customer"
+      ],
+      "delta": {
+        "entityUpdates": [
+          {
+            "id": "order-add",
+            "status": "received",
+            "risk": "watch"
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "up"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "up"
+        }
+      }
+    },
+    {
+      "sequence": 3,
+      "id": "evt-20260701-0003",
+      "timestamp": "2026-07-01T10:10:00+08:00",
+      "eventType": "o2d.order.confirmed",
+      "title": "确认总需求",
+      "description": "订单合并确认，总需求为 12,000 件。",
+      "act": 1,
+      "domain": "order",
+      "severity": "watch",
+      "relatedEntityIds": [
+        "order-main",
+        "order-add"
+      ],
+      "delta": {
+        "entityUpdates": [
+          {
+            "id": "order-main",
+            "status": "confirmed",
+            "risk": "watch",
+            "attributes": {
+              "orderQty": 12000
+            }
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 4,
+      "id": "evt-20260701-0004",
+      "timestamp": "2026-07-01T10:20:00+08:00",
+      "eventType": "o2d.mrp.generated",
+      "title": "生成初始 MRP",
+      "description": "扣除 1,200 件成品后，净生产需求为 10,800 件。",
+      "act": 2,
+      "domain": "planning",
+      "severity": "normal",
+      "relatedEntityIds": [
+        "order-main",
+        "work-order",
+        "inventory-fg",
+        "inventory-al"
+      ],
+      "delta": {},
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 5,
+      "id": "evt-20260701-0005",
+      "timestamp": "2026-07-01T10:25:00+08:00",
+      "eventType": "o2d.purchase_requirement.created",
+      "title": "创建采购需求",
+      "description": "系统识别铝板到料时点风险并准备备选采购。",
+      "act": 2,
+      "domain": "planning",
+      "severity": "watch",
+      "relatedEntityIds": [
+        "po-backup",
+        "inventory-al"
+      ],
+      "delta": {
+        "entityUpdates": [
+          {
+            "id": "po-backup",
+            "status": "proposed",
+            "risk": "watch"
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "up"
+        },
+        "capacityRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 6,
+      "id": "evt-20260701-0006",
+      "timestamp": "2026-07-01T11:00:00+08:00",
+      "eventType": "o2d.purchase_order.released",
+      "title": "释放主供应商采购单",
+      "description": "5,000 张铝板采购单已释放。",
+      "act": 2,
+      "domain": "supply",
+      "severity": "normal",
+      "relatedEntityIds": [
+        "po-primary",
+        "inventory-al"
+      ],
+      "delta": {
+        "edgeStatuses": [
+          {
+            "id": "alpha-to-rm",
+            "status": "normal"
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 7,
+      "id": "evt-20260702-0001",
+      "timestamp": "2026-07-02T15:00:00+08:00",
+      "eventType": "o2d.supplier_shipment.dispatched",
+      "title": "主供应商发货",
+      "description": "主供应商发出 5,000 张铝板。",
+      "act": 3,
+      "domain": "supply",
+      "severity": "normal",
+      "relatedEntityIds": [
+        "po-primary",
+        "inventory-al"
+      ],
+      "delta": {
+        "entityUpdates": [
+          {
+            "id": "po-primary",
+            "status": "in_transit",
+            "attributes": {
+              "eta": "2026-07-08"
+            }
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 8,
+      "id": "evt-20260708-0001",
+      "timestamp": "2026-07-08T09:00:00+08:00",
+      "eventType": "o2d.supplier_delivery.delayed",
+      "title": "主供应商延期",
+      "description": "铝板 ETA 从 7 月 8 日延期至 7 月 11 日。",
+      "act": 3,
+      "domain": "supply",
+      "severity": "critical",
+      "relatedEntityIds": [
+        "po-primary",
+        "inventory-al"
+      ],
+      "delta": {
+        "nodeStatuses": [
+          {
+            "id": "supplier-alpha",
+            "status": "critical"
+          },
+          {
+            "id": "raw-warehouse",
+            "status": "watch"
+          }
+        ],
+        "edgeStatuses": [
+          {
+            "id": "alpha-to-rm",
+            "status": "critical"
+          }
+        ],
+        "entityUpdates": [
+          {
+            "id": "po-primary",
+            "status": "delayed",
+            "risk": "critical",
+            "attributes": {
+              "eta": "2026-07-11",
+              "delayDays": 3
+            }
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "up"
+        },
+        "capacityRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "up"
+        }
+      }
+    },
+    {
+      "sequence": 9,
+      "id": "evt-20260708-0002",
+      "timestamp": "2026-07-08T09:30:00+08:00",
+      "eventType": "eam.machine.down",
+      "title": "焊接设备停机",
+      "description": "2 号激光焊接机预计停机 8 小时，产能损失 35%。",
+      "act": 4,
+      "domain": "equipment",
+      "severity": "critical",
+      "relatedEntityIds": [
+        "equipment-weld",
+        "work-order"
+      ],
+      "delta": {
+        "nodeStatuses": [
+          {
+            "id": "welding",
+            "status": "critical"
+          }
+        ],
+        "edgeStatuses": [
+          {
+            "id": "cnc-to-welding",
+            "status": "critical"
+          },
+          {
+            "id": "welding-to-cleaning",
+            "status": "critical"
+          }
+        ],
+        "entityUpdates": [
+          {
+            "id": "equipment-weld",
+            "status": "down",
+            "risk": "critical",
+            "attributes": {
+              "downHours": 8,
+              "capacityLossPercent": 35
+            }
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "up"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 10,
+      "id": "evt-20260708-0003",
+      "timestamp": "2026-07-08T09:40:00+08:00",
+      "eventType": "o2d.mrp.generated",
+      "title": "异常重排 MRP",
+      "description": "重排识别 280 件产能影响，建议备选采购、加班和分批发运。",
+      "act": 4,
+      "domain": "planning",
+      "severity": "critical",
+      "relatedEntityIds": [
+        "order-main",
+        "work-order",
+        "po-backup",
+        "equipment-weld"
+      ],
+      "delta": {
+        "entityUpdates": [
+          {
+            "id": "work-order",
+            "status": "replanned",
+            "risk": "critical"
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 11,
+      "id": "evt-20260708-0004",
+      "timestamp": "2026-07-08T10:20:00+08:00",
+      "eventType": "o2d.purchase_order.released",
+      "title": "释放备选采购单",
+      "description": "向备选供应商加急采购 2,000 张铝板。",
+      "act": 5,
+      "domain": "supply",
+      "severity": "watch",
+      "relatedEntityIds": [
+        "po-backup",
+        "inventory-al"
+      ],
+      "delta": {
+        "nodeStatuses": [
+          {
+            "id": "supplier-beta",
+            "status": "watch"
+          }
+        ],
+        "edgeStatuses": [
+          {
+            "id": "beta-to-rm",
+            "status": "watch"
+          }
+        ],
+        "entityUpdates": [
+          {
+            "id": "po-backup",
+            "status": "released",
+            "risk": "watch"
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 12,
+      "id": "evt-20260711-0001",
+      "timestamp": "2026-07-11T10:00:00+08:00",
+      "eventType": "whs.material.received",
+      "title": "主供应商来料",
+      "description": "延期的 5,000 张铝板抵达来料区。",
+      "act": 5,
+      "domain": "logistics",
+      "severity": "watch",
+      "relatedEntityIds": [
+        "po-primary",
+        "iqc-primary",
+        "inventory-al"
+      ],
+      "delta": {
+        "nodeStatuses": [
+          {
+            "id": "supplier-alpha",
+            "status": "normal"
+          },
+          {
+            "id": "raw-warehouse",
+            "status": "normal"
+          }
+        ],
+        "edgeStatuses": [
+          {
+            "id": "alpha-to-rm",
+            "status": "normal"
+          }
+        ],
+        "entityUpdates": [
+          {
+            "id": "po-primary",
+            "status": "received",
+            "risk": "normal"
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "down"
+        },
+        "capacityRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 13,
+      "id": "evt-20260711-0002",
+      "timestamp": "2026-07-11T14:00:00+08:00",
+      "eventType": "qms.incoming_inspection.passed",
+      "title": "主供来料检验通过",
+      "description": "主供应商 5,000 张铝板全部检验合格。",
+      "act": 5,
+      "domain": "quality",
+      "severity": "normal",
+      "relatedEntityIds": [
+        "iqc-primary",
+        "inventory-al"
+      ],
+      "delta": {
+        "nodeStatuses": [
+          {
+            "id": "incoming-quality",
+            "status": "normal"
+          }
+        ],
+        "entityUpdates": [
+          {
+            "id": "iqc-primary",
+            "status": "passed",
+            "attributes": {
+              "acceptedQty": 5000
+            }
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 14,
+      "id": "evt-20260711-0003",
+      "timestamp": "2026-07-11T15:00:00+08:00",
+      "eventType": "whs.inventory.putaway_completed",
+      "title": "主供铝板上架",
+      "description": "合格铝板入原材料仓，可用库存增至 13,000 张。",
+      "act": 5,
+      "domain": "logistics",
+      "severity": "normal",
+      "relatedEntityIds": [
+        "inventory-al"
+      ],
+      "delta": {
+        "entityUpdates": [
+          {
+            "id": "inventory-al",
+            "status": "available",
+            "risk": "normal",
+            "attributes": {
+              "availableQty": 13000,
+              "inTransitQty": 2000
+            }
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "down"
+        },
+        "capacityRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 15,
+      "id": "evt-20260712-0001",
+      "timestamp": "2026-07-12T11:00:00+08:00",
+      "eventType": "whs.material.received",
+      "title": "备选供应商来料",
+      "description": "备选供应商 2,000 张铝板抵达来料区。",
+      "act": 5,
+      "domain": "logistics",
+      "severity": "watch",
+      "relatedEntityIds": [
+        "po-backup",
+        "iqc-backup",
+        "inventory-al"
+      ],
+      "delta": {
+        "entityUpdates": [
+          {
+            "id": "po-backup",
+            "status": "received"
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 16,
+      "id": "evt-20260712-0002",
+      "timestamp": "2026-07-12T15:00:00+08:00",
+      "eventType": "qms.incoming_inspection.failed",
+      "title": "备选来料检验失败",
+      "description": "发现 300 张表面划伤并隔离，质量风险升高。",
+      "act": 5,
+      "domain": "quality",
+      "severity": "critical",
+      "relatedEntityIds": [
+        "po-backup",
+        "iqc-backup",
+        "inventory-al"
+      ],
+      "delta": {
+        "nodeStatuses": [
+          {
+            "id": "supplier-beta",
+            "status": "critical"
+          },
+          {
+            "id": "incoming-quality",
+            "status": "critical"
+          }
+        ],
+        "edgeStatuses": [
+          {
+            "id": "rm-to-iqc",
+            "status": "critical"
+          }
+        ],
+        "entityUpdates": [
+          {
+            "id": "iqc-backup",
+            "status": "failed",
+            "risk": "critical",
+            "attributes": {
+              "rejectedQty": 300,
+              "acceptedQty": 1700,
+              "defectCode": "SURFACE_SCRATCH"
+            }
+          },
+          {
+            "id": "po-backup",
+            "risk": "critical"
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "up"
+        },
+        "capacityRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 17,
+      "id": "evt-20260713-0001",
+      "timestamp": "2026-07-13T08:00:00+08:00",
+      "eventType": "proc.production_order.released",
+      "title": "生产订单释放",
+      "description": "10,800 件冷却板生产订单进入 A 线。",
+      "act": 6,
+      "domain": "production",
+      "severity": "watch",
+      "relatedEntityIds": [
+        "work-order"
+      ],
+      "delta": {
+        "nodeStatuses": [
+          {
+            "id": "forming",
+            "status": "watch"
+          },
+          {
+            "id": "cnc",
+            "status": "watch"
+          }
+        ],
+        "edgeStatuses": [
+          {
+            "id": "iqc-to-forming",
+            "status": "watch"
+          },
+          {
+            "id": "forming-to-cnc",
+            "status": "watch"
+          }
+        ],
+        "entityUpdates": [
+          {
+            "id": "work-order",
+            "status": "released",
+            "risk": "watch"
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 18,
+      "id": "evt-20260714-0001",
+      "timestamp": "2026-07-14T08:00:00+08:00",
+      "eventType": "proc.operation.started",
+      "title": "焊接工序开始",
+      "description": "重排后焊接工序启动，设备恢复运行。",
+      "act": 6,
+      "domain": "production",
+      "severity": "watch",
+      "relatedEntityIds": [
+        "work-order",
+        "equipment-weld"
+      ],
+      "delta": {
+        "nodeStatuses": [
+          {
+            "id": "welding",
+            "status": "watch"
+          }
+        ],
+        "edgeStatuses": [
+          {
+            "id": "cnc-to-welding",
+            "status": "watch"
+          },
+          {
+            "id": "welding-to-cleaning",
+            "status": "watch"
+          }
+        ],
+        "entityUpdates": [
+          {
+            "id": "equipment-weld",
+            "status": "running",
+            "risk": "watch"
+          },
+          {
+            "id": "work-order",
+            "status": "in_progress"
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "down"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 19,
+      "id": "evt-20260717-0001",
+      "timestamp": "2026-07-17T20:00:00+08:00",
+      "eventType": "proc.operation.completed",
+      "title": "焊接工序完成",
+      "description": "焊接完成 10,520 件，报废 80 件。",
+      "act": 6,
+      "domain": "production",
+      "severity": "watch",
+      "relatedEntityIds": [
+        "work-order",
+        "equipment-weld"
+      ],
+      "delta": {
+        "nodeStatuses": [
+          {
+            "id": "welding",
+            "status": "normal"
+          },
+          {
+            "id": "cleaning",
+            "status": "watch"
+          },
+          {
+            "id": "leak-test",
+            "status": "watch"
+          },
+          {
+            "id": "assembly",
+            "status": "watch"
+          },
+          {
+            "id": "packing",
+            "status": "watch"
+          }
+        ],
+        "edgeStatuses": [
+          {
+            "id": "cnc-to-welding",
+            "status": "normal"
+          },
+          {
+            "id": "welding-to-cleaning",
+            "status": "watch"
+          },
+          {
+            "id": "cleaning-to-leak",
+            "status": "watch"
+          },
+          {
+            "id": "leak-to-assembly",
+            "status": "watch"
+          },
+          {
+            "id": "assembly-to-packing",
+            "status": "watch"
+          }
+        ],
+        "entityUpdates": [
+          {
+            "id": "equipment-weld",
+            "status": "running",
+            "risk": "normal"
+          },
+          {
+            "id": "work-order",
+            "status": "completed",
+            "risk": "watch",
+            "attributes": {
+              "completedQty": 10520,
+              "scrapQty": 80
+            }
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 1200,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "materialShortageRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "down"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 20,
+      "id": "evt-20260718-0001",
+      "timestamp": "2026-07-18T10:00:00+08:00",
+      "eventType": "whs.finished_goods.received",
+      "title": "成品入库",
+      "description": "10,500 件成品入库，可发数量达到 11,700 件。",
+      "act": 6,
+      "domain": "logistics",
+      "severity": "watch",
+      "relatedEntityIds": [
+        "work-order",
+        "inventory-fg"
+      ],
+      "delta": {
+        "nodeStatuses": [
+          {
+            "id": "forming",
+            "status": "normal"
+          },
+          {
+            "id": "cnc",
+            "status": "normal"
+          },
+          {
+            "id": "cleaning",
+            "status": "normal"
+          },
+          {
+            "id": "leak-test",
+            "status": "normal"
+          },
+          {
+            "id": "assembly",
+            "status": "normal"
+          },
+          {
+            "id": "packing",
+            "status": "normal"
+          },
+          {
+            "id": "finished-warehouse",
+            "status": "watch"
+          }
+        ],
+        "edgeStatuses": [
+          {
+            "id": "welding-to-cleaning",
+            "status": "normal"
+          },
+          {
+            "id": "cleaning-to-leak",
+            "status": "normal"
+          },
+          {
+            "id": "leak-to-assembly",
+            "status": "normal"
+          },
+          {
+            "id": "assembly-to-packing",
+            "status": "normal"
+          },
+          {
+            "id": "packing-to-fg",
+            "status": "watch"
+          }
+        ],
+        "entityUpdates": [
+          {
+            "id": "inventory-fg",
+            "status": "available",
+            "risk": "watch",
+            "attributes": {
+              "availableQty": 11700,
+              "receivedQty": 10500
+            }
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 11700,
+          "unit": "件",
+          "risk": "normal",
+          "trend": "up"
+        },
+        "materialShortageRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 21,
+      "id": "evt-20260719-0001",
+      "timestamp": "2026-07-19T16:00:00+08:00",
+      "eventType": "o2d.shipment.dispatched",
+      "title": "第一批发运",
+      "description": "第一批按计划发出 9,000 件。",
+      "act": 7,
+      "domain": "logistics",
+      "severity": "watch",
+      "relatedEntityIds": [
+        "shipment-1",
+        "inventory-fg",
+        "order-main",
+        "customer"
+      ],
+      "delta": {
+        "nodeStatuses": [
+          {
+            "id": "finished-warehouse",
+            "status": "watch"
+          },
+          {
+            "id": "shipping",
+            "status": "watch"
+          },
+          {
+            "id": "customer",
+            "status": "watch"
+          }
+        ],
+        "edgeStatuses": [
+          {
+            "id": "fg-to-shipping",
+            "status": "watch"
+          },
+          {
+            "id": "shipping-to-customer",
+            "status": "watch"
+          }
+        ],
+        "entityUpdates": [
+          {
+            "id": "shipment-1",
+            "status": "dispatched",
+            "attributes": {
+              "shippedQty": 9000
+            }
+          },
+          {
+            "id": "inventory-fg",
+            "attributes": {
+              "availableQty": 2700
+            }
+          },
+          {
+            "id": "order-main",
+            "status": "partially_shipped",
+            "attributes": {
+              "shippedQty": 9000
+            }
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 2700,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "down"
+        },
+        "materialShortageRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        }
+      }
+    },
+    {
+      "sequence": 22,
+      "id": "evt-20260720-0001",
+      "timestamp": "2026-07-20T11:00:00+08:00",
+      "eventType": "o2d.shipment.dispatched",
+      "title": "第二批部分发运",
+      "description": "第二批请求 3,000 件，实际发出 2,700 件；累计实发 11,700 件，短缺 300 件。",
+      "act": 7,
+      "domain": "logistics",
+      "severity": "critical",
+      "relatedEntityIds": [
+        "shipment-2",
+        "shipment-1",
+        "inventory-fg",
+        "order-main",
+        "customer"
+      ],
+      "delta": {
+        "nodeStatuses": [
+          {
+            "id": "finished-warehouse",
+            "status": "critical"
+          },
+          {
+            "id": "shipping",
+            "status": "critical"
+          },
+          {
+            "id": "customer",
+            "status": "critical"
+          }
+        ],
+        "edgeStatuses": [
+          {
+            "id": "fg-to-shipping",
+            "status": "critical"
+          },
+          {
+            "id": "shipping-to-customer",
+            "status": "critical"
+          }
+        ],
+        "entityUpdates": [
+          {
+            "id": "shipment-2",
+            "status": "partially_dispatched",
+            "risk": "critical",
+            "attributes": {
+              "shippedQty": 2700,
+              "shortageQty": 300
+            }
+          },
+          {
+            "id": "inventory-fg",
+            "status": "depleted",
+            "risk": "critical",
+            "attributes": {
+              "availableQty": 0
+            }
+          },
+          {
+            "id": "order-main",
+            "status": "partially_shipped",
+            "risk": "critical",
+            "attributes": {
+              "shippedQty": 11700,
+              "shortageQty": 300
+            }
+          }
+        ]
+      },
+      "kpis": {
+        "orderDemand": {
+          "value": 12000,
+          "unit": "件",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "availableFinishedGoods": {
+          "value": 0,
+          "unit": "件",
+          "risk": "critical",
+          "trend": "down"
+        },
+        "materialShortageRisk": {
+          "value": 1,
+          "unit": "级",
+          "risk": "watch",
+          "trend": "flat"
+        },
+        "capacityRisk": {
+          "value": 0,
+          "unit": "级",
+          "risk": "normal",
+          "trend": "flat"
+        },
+        "deliveryRisk": {
+          "value": 2,
+          "unit": "级",
+          "risk": "critical",
+          "trend": "flat"
+        }
+      }
+    }
+  ],
+  "agentOutputs": [
+    {
+      "id": "agent-plan-initial",
+      "eventSequence": 4,
+      "agent": "planning",
+      "title": "初始供产计划",
+      "recommendation": "释放主供应商采购订单并准备 WO-202607-0001。",
+      "evidence": [
+        "总需求 12,000 件",
+        "成品库存 1,200 件",
+        "铝板在库 8,000 张、在途 5,000 张"
+      ],
+      "impact": "形成 10,800 件净生产计划，并持续监控到料时点。",
+      "confidence": 0.94,
+      "status": "executed",
+      "requiresHumanConfirmation": false
+    },
+    {
+      "id": "agent-plan-replan",
+      "eventSequence": 10,
+      "agent": "planning",
+      "title": "异常重排建议",
+      "recommendation": "释放备选采购、启用加班并采用 9,000 + 3,000 分批发运。",
+      "evidence": [
+        "主供应商延期 3 天",
+        "焊接设备停机 8 小时",
+        "预计产能影响 280 件"
+      ],
+      "impact": "降低供应与产能叠加风险，但不能消除最终 300 件缺口。",
+      "confidence": 0.91,
+      "status": "executed",
+      "requiresHumanConfirmation": true
+    },
+    {
+      "id": "agent-quality-isolate",
+      "eventSequence": 16,
+      "agent": "quality",
+      "title": "隔离不合格来料",
+      "recommendation": "隔离备选供应商 300 张划伤铝板，禁止投入生产并发起供应商纠正。",
+      "evidence": [
+        "IQC-202607-0002 检验失败",
+        "缺陷 SURFACE_SCRATCH",
+        "不合格数量 300 张"
+      ],
+      "impact": "防止不合格原料流入 A 线，保留批次追溯链。",
+      "confidence": 0.98,
+      "status": "executed",
+      "requiresHumanConfirmation": true
+    },
+    {
+      "id": "agent-business-review",
+      "eventSequence": 22,
+      "agent": "business_analysis",
+      "title": "交付复盘",
+      "recommendation": "向客户确认剩余 300 件补交承诺，并复盘供应、设备和质量的叠加影响。",
+      "evidence": [
+        "总需求 12,000 件",
+        "累计实发 11,700 件",
+        "第二批实发 2,700 件",
+        "最终短缺 300 件"
+      ],
+      "impact": "订单维持 partially_shipped，交付承诺未完全达成。",
+      "confidence": 0.99,
+      "status": "suggested",
+      "requiresHumanConfirmation": true
+    }
+  ]
+}

@@ -52,9 +52,19 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M2 主数据、事件、Seed 和演示规格：文档完成。
 - M2.5 工程治理：完成。
 - M3 可执行 HCTM 场景包：完成；pack、Schema、CLI、受治理 apply/reset、O2D replay/verify 和幂等证据均已落地。
-- M3V 快速 2D 企业沙盘：当前 active，目标 3 到 4 个工作日交付可播放的七幕/22 事件预览版。
+- M3V 快速 2D 企业沙盘：完成；七幕/22 事件、A 线画布、KPI、对象详情和三类 Agent 建议已通过桌面与移动端验收。
 
-当前优先把 M3 pack 和七幕故事转成可访问的 2D 企业沙盘，首版由静态场景数据确定性驱动，后续再接 IAOS API/SSE。当前状态以 [Roadmap](docs/roadmap.md) 为准。
+当前可直接运行静态场景驱动的 2D 企业沙盘。下一优先级是 M4 受治理异常事件入口，再通过 `IaosScenarioDataSource` 接入 IAOS API/SSE。当前状态以 [Roadmap](docs/roadmap.md) 为准。
+
+## 快速启动 2D 沙盘
+
+```bash
+cd frontend
+npm install
+npm run dev
+```
+
+访问 `http://localhost:4173/`。详细操作和验证命令见 [M3V 运行手册](docs/runbooks/hctm-m3v-2d-sandbox.md)。
 
 ## 文档入口
 
@@ -66,8 +76,10 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - [M3 实施计划](docs/plans/2026-07-19-m3-executable-scenario-package.md)
 - [快速 2D 企业沙盘实施计划](docs/plans/2026-07-19-fast-track-2d-enterprise-sandbox.md)
 - [M3 本地运行手册](docs/runbooks/hctm-m3-local-run.md)
+- [M3V 2D 沙盘运行手册](docs/runbooks/hctm-m3v-2d-sandbox.md)
 - [HCTM → IAOS 兼容性报告](docs/reports/hctm-iaos-compatibility.md)
 - [M3 执行证据](docs/reports/hctm-m3-execution-evidence.md)
+- [M3V 2D 沙盘验收证据](docs/reports/hctm-m3v-2d-sandbox-evidence.md)
 - [MVP 蓝图](docs/AESE_MVP_Blueprint.md)
 - [华辰热管理系统集团详细蓝图](docs/HCTM_Virtual_Enterprise_Blueprint.md)
 - [华辰主数据建模规格](docs/HCTM_Master_Data_Model.md)

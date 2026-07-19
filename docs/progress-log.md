@@ -87,3 +87,11 @@
 - 影响：下一步不等待 M4/M5 完成，先在 3 到 4 个工作日内实现 React 2D 工作台、A 线画布、时间线、事件流、KPI、对象详情和 Agent 建议。首版不新增业务后端，不复制 IAOS 运行时，并通过 `ScenarioDataSource` 为后续 IAOS API/SSE 接入保留边界。
 - 验证：M3V 计划拆为 V0-V4、T1-T26，定义每日可见成果、功能/视觉/边界测试和完成标准；本地 Markdown 相对链接检查无缺失，active plan 数量为 1，`git diff --check` 通过。
 - 后续：从 V0/T1 开始创建 `frontend/` 和 `preview.json`，第 1 天结束前交付可缩放、可点击的苏州基地 A 线画布。
+
+## 2026-07-19 - M3V 快速 2D 企业沙盘完成
+
+- 变更：一次性完成 PLAN-M3V-001 的 V0–V4、T1–T26；新增 React + TypeScript + Vite 前端、14 节点/13 连线 A 线画布、七幕/22 canonical 事件 `preview.json`、`ScenarioDataSource` 合同、确定性播放 reducer、事件/KPI/对象详情和计划/质量/经营分析 Agent 面板；新增 M3V runbook、验收报告和三个固定视口截图，并同步 README、Agent Context、Architecture、Code Map、Roadmap、Blueprint、DES-002 和文档索引。
+- 原因：用户要求不分阶段直接执行完整快速 2D 沙盘计划，并明确允许把可独立的场景数据、播放内核和画布实现交给 sub agent 并行推进。
+- 影响：M3V 从计划态转为 Completed。AESE 现在已有可访问的产品预览界面，但仍严格保持只读 Preview 边界；浏览器只应用预计算 delta，不复制 IAOS 的 MRP、流程、权限或 Agent Runtime。下一优先级转为 M4 受治理异常事件入口和后续 `IaosScenarioDataSource`。
+- 验证：`npm run typecheck`、ESLint 0 warning、Vitest 5 files/18 tests、Vite build、Playwright 3 projects/9 tests、npm audit 0 vulnerabilities、Go test/vet、preview 七幕/22 事件/3 Agent 合同检查、Markdown links 和 `git diff --check` 通过；1440×900、1280×720、390×844 截图人工检查无阻塞性重叠或整页横向溢出；开发服务绑定 `0.0.0.0:4173`，本机 HTTP 探测返回 200。
+- 后续：M4 为供应商延期、设备停机和来料不良实现 IAOS simulation ingress；基于同一 `SandboxScenario` 视图模型增加 `IaosScenarioDataSource`，保留 Preview/Live 明示与受治理写入边界。
