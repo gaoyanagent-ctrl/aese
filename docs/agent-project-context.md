@@ -1,6 +1,6 @@
 # AESE Agent Project Context
 
-本文是给后续 agent 的项目背景入口。进入 `/iaos/aese` 后，请先阅读本文，再阅读 `docs/AESE_MVP_Blueprint.md`、`docs/HCTM_Virtual_Enterprise_Blueprint.md`、`docs/HCTM_Master_Data_Model.md`、`docs/HCTM_Event_Model.md`、`docs/HCTM_Seed_Data_Plan.md`、`docs/HCTM_Demo_Story_01_Order_Expedite.md` 和 `docs/progress-log.md`。
+本文是给后续 agent 的项目背景入口。进入 `/iaos/aese` 后，先按 `AGENTS.md` 的顺序阅读项目级入口，再按任务从 `docs/code-map.md` 选择 HCTM 领域文档。
 
 ## 1. 项目定位
 
@@ -152,15 +152,19 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 
 ## 6. 当前状态
 
-截至 2026-06-25：
+截至 2026-07-19：
 
-- `/iaos/aese` 只有原始构思文档和本轮新增项目文档。
-- 尚未建立代码、数据模型、场景包或前端沙盘。
-- `/iaos/iaos-go` 已有 IAOS 平台基础，AESE 后续应优先与其对齐。
+- M0、M1 已完成。
+- M2 的业务与技术规格文档已完成：28 个对象、18 类事件、Seed 数据计划和第一条演示故事均有明确合同。
+- 工程治理已补齐文档索引、架构边界、code map、路线图、ADR、DES 和 active plan。
+- 尚未生成机器可读场景包、JSON Schema、Go 校验器或 IAOS 导入/重放代码。
+- 当前阶段是 M3“可执行 HCTM 场景包”，权威状态见 `docs/roadmap.md`。
+- 当前实施计划是 `docs/plans/2026-07-19-m3-executable-scenario-package.md`。
+- `/iaos/iaos-go` 提供可复用平台能力，但当前平台后端 `8082` 未运行；M3 集成测试前需要恢复服务。
 
 ## 7. 后续 agent 必须维护的信息
 
-任何实质性进展都要更新 `docs/progress-log.md`。
+任何实质性进展都要更新 active plan、`docs/roadmap.md` 和 `docs/progress-log.md`，具体规则见 `AGENTS.md`。
 
 更新内容包括：
 
@@ -169,4 +173,4 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 - 对 MVP 范围或架构有什么影响。
 - 留下了什么后续问题。
 
-如果后续创建任务、PRD、设计文档或代码实现，也要在进展日志中追加链接。
+新增文档、代码入口或 IAOS 集成点时，还必须同步 `docs/README.md` 和 `docs/code-map.md`。

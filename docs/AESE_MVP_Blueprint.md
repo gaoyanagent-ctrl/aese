@@ -268,25 +268,27 @@ ShipmentShortageDetected
 
 ## 9. 开发里程碑
 
-### M0 - 项目初始化
+当前状态以 `docs/roadmap.md` 为准。本节保留 MVP 阶段定义。
+
+### M0 - 项目初始化（已完成）
 
 - 建立 AESE 仓库。
 - 建立项目背景、MVP 蓝图和进展跟踪规则。
 - 固化虚拟客户和 MVP 范围。
 
-### M1 - 虚拟企业蓝图
+### M1 - 虚拟企业蓝图（已完成）
 
 - 完成华辰热管理系统集团设定。
 - 完成苏州制造基地设定。
 - 完成电池冷却板产品、BOM、工艺、设备、仓库、角色设定。
 
-### M2 - 主数据与事件清单
+### M2 - 主数据与事件清单（文档已完成）
 
 - 定义 MVP 主数据。
 - 定义 MVP 事件类型。
 - 映射到 IAOS metadata、eventdef 和 scenario package。
 
-### M3 - O2D 仿真主线
+### M3 - O2D 仿真主线（下一阶段）
 
 - 复用或扩展 IAOS `scenarios/o2d`。
 - 跑通订单确认、MRP、采购、生产、入库、发货事件链。
@@ -316,11 +318,15 @@ ShipmentShortageDetected
 
 ## 11. 下一步建议
 
-优先完成 M1：
+进入 M3“可执行 HCTM 场景包”：
 
-- 写出华辰热管理系统集团详细蓝图。
-- 选定苏州制造基地的一条电池冷却板生产线。
-- 明确 20 到 30 个关键主数据对象。
-- 明确 15 到 20 个关键事件。
-- 明确第一条演示故事线的数据输入和预期输出。
+- 把 HCTM Markdown 规格转换为版本化 JSON pack 和 JSON Schema。
+- 建立 Go loader、validator 和 inspect CLI。
+- 生成 HCTM 到 IAOS 的 compatibility report。
+- 通过 IAOS 受治理入口导入最小数据并触发 `o2d.order.confirmed` tracer。
+- 验证租户隔离、幂等执行、reset 和故事结果。
 
+详细设计与任务见：
+
+- `docs/designs/DES-001-m3-executable-scenario-package.md`
+- `docs/plans/2026-07-19-m3-executable-scenario-package.md`

@@ -10,6 +10,7 @@
 - 变更：
 - 原因：
 - 影响：
+- 验证：
 - 后续：
 ```
 
@@ -54,3 +55,11 @@
 - 原因：AESE 需要一条能被产品、研发、销售和后续 agent 共同理解和执行的端到端故事，作为从文档模型进入可运行仿真的验收锚点。
 - 影响：M2 文档闭环基本完成，已经具备虚拟企业蓝图、主数据模型、事件模型、种子数据计划和第一条演示脚本。
 - 后续：进入实现准备阶段，建议先生成 `seed/hctm/*.json` 数据文件或设计 IAOS metadata/entity seed 转换方案。
+
+## 2026-07-19 - 工程治理完善与 M3 开发规划
+
+- 变更：重写 `AGENTS.md`，新增 `docs/README.md`、`docs/architecture.md`、`docs/code-map.md`、`docs/roadmap.md`、ADR-001、DES-001 和 M3 active plan；同步更新 README、Agent Context 和 MVP Blueprint 的当前状态与下一步。
+- 原因：原仓库只有轻量规则和高层里程碑，缺少与 `iaos-go` 类似的文档索引、代码导航、架构边界、状态权威来源和可执行任务计划，且多处状态已过期。
+- 影响：AESE 与 IAOS 的仓库职责已经固定；M3 被拆成场景包、校验器、兼容性报告、IAOS apply、O2D replay 和 closeout 六个切片，共 30 项可追踪任务。
+- 验证：核对 AESE 全部现有文档和 `/iaos/iaos-go` 的 AGENTS、agent context、code map、eventdef、O2D 入口及动态实体 API；本地 Markdown 相对链接检查无缺失，M3 plan 确认包含 T1-T30 共 30 项任务，`git diff --check` 通过。
+- 后续：从 M3 S1/T1-T4 开始，创建 `scenario-packs/hctm` 的 manifest、record sets、故事数据和 JSON Schema。
