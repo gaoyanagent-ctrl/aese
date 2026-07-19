@@ -10,11 +10,14 @@ import (
 )
 
 type fakeIAOS struct {
-	plans      map[string]iaosclient.UpsertPlan
-	records    map[string][]map[string]any
-	planCalls  int
-	writeCalls int
-	decomposes int
+	plans            map[string]iaosclient.UpsertPlan
+	records          map[string][]map[string]any
+	planCalls        int
+	writeCalls       int
+	decomposes       int
+	simulations      int
+	lastSimulation   iaosclient.SimulationEventRequest
+	simulationResult iaosclient.SimulationEventResult
 }
 
 func (f *fakeIAOS) Schema(context.Context, string) (iaosclient.Schema, error) {
@@ -45,6 +48,22 @@ func (f *fakeIAOS) DecomposeSalesOrder(context.Context, string) (iaosclient.Deco
 }
 func (f *fakeIAOS) DecomposeSalesOrderTrace(ctx context.Context, id, correlation, idempotency string) (iaosclient.DecomposeResult, error) {
 	return f.DecomposeSalesOrder(ctx, id)
+}
+func (f *fakeIAOS) IngestSimulationEvent(_ context.Context, request iaosclient.SimulationEventRequest) (iaosclient.SimulationEventResult, error) {
+	f.simulations++
+	f.lastSimulation = request
+	if f.simulationResult.EventID != "" || f.simulationResult.Duplicate || f.simulationResult.Committed {
+		return f.simulationResult, nil
+	}
+	var result iaosclient.SimulationEventResult
+	result.EventID = "evt-sim-1"
+	result.Subject = "iaos.tenant-hctm.eam.machine.down"
+	result.CorrelationID = request.CorrelationID
+	result.Committed = true
+	result.BusinessObject.Type = request.BusinessObject.Type
+	result.BusinessObject.Code = request.BusinessObject.Code
+	result.BusinessObject.ID = "equipment-uuid"
+	return result, nil
 }
 
 func TestApplyRecordSetsDryRunNeverWrites(t *testing.T) {
@@ -90,15 +109,37 @@ func TestReplayApplyUsesDecomposeAndSkipsUnsupported(t *testing.T) {
 	fake := &fakeIAOS{records: map[string][]map[string]any{"sales_order": {{"id": "so-id", "order_no": "SO-1"}}}}
 	runner, _ := New(fake)
 	story := scenariopack.Story{Ref: scenariopack.StoryRef{Key: "story"}, Events: scenariopack.EventSequence{Events: []scenariopack.Event{
-		{EventID: "evt-x", EventType: "eam.machine.down", Payload: map[string]any{}},
+		{EventID: "evt-x", EventType: "eam.machine.down", Timestamp: "2026-07-08T09:30:00+08:00", Metadata: map[string]any{"business_object_type": "equipment", "business_object_id": "LAS-WLD-02", "idempotency_key": "machine-down-1", "correlation_id": "corr-1"}, Payload: map[string]any{"equipment_code": "LAS-WLD-02"}},
 		{EventID: "evt-1", EventType: "o2d.order.confirmed", Payload: map[string]any{"order_no": "SO-1"}},
 	}}}
-	summary, err := runner.Replay(context.Background(), story, Options{Apply: true})
+	summary, err := runner.Replay(context.Background(), story, Options{Apply: true, PackKey: "hctm"})
 	if err != nil {
 		t.Fatal(err)
 	}
-	if summary.Triggered != 1 || summary.Skipped != 1 || fake.decomposes != 1 {
-		t.Fatalf("summary=%#v decomposes=%d", summary, fake.decomposes)
+	if summary.Triggered != 2 || summary.Skipped != 0 || fake.decomposes != 1 || fake.simulations != 1 {
+		t.Fatalf("summary=%#v decomposes=%d simulations=%d", summary, fake.decomposes, fake.simulations)
+	}
+	if fake.lastSimulation.EventType != "eam.machine.down" || fake.lastSimulation.BusinessObject.Code != "LAS-WLD-02" || fake.lastSimulation.IdempotencyKey != "machine-down-1" {
+		t.Fatalf("simulation request=%#v", fake.lastSimulation)
+	}
+	if fake.lastSimulation.Source != "aese:hctm/story" {
+		t.Fatalf("simulation source=%q", fake.lastSimulation.Source)
+	}
+}
+
+func TestReplayFailsClosedWhenSimulationResponseIsNotCommitted(t *testing.T) {
+	fake := &fakeIAOS{}
+	fake.simulationResult.EventID = "evt-sim-1"
+	fake.simulationResult.BusinessObject.ID = "equipment-uuid"
+	runner, _ := New(fake)
+	story := scenariopack.Story{Ref: scenariopack.StoryRef{Key: "story"}, Events: scenariopack.EventSequence{Events: []scenariopack.Event{{
+		EventID: "evt-x", EventType: "eam.machine.down", Timestamp: "2026-07-08T09:30:00+08:00",
+		Metadata: map[string]any{"business_object_type": "equipment", "business_object_id": "LAS-WLD-02", "idempotency_key": "machine-down-1"},
+	}}}}
+
+	summary, err := runner.Replay(context.Background(), story, Options{Apply: true, PackKey: "hctm"})
+	if err == nil || summary.Failed != 1 || summary.Triggered != 0 {
+		t.Fatalf("summary=%#v err=%v", summary, err)
 	}
 }
 

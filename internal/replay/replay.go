@@ -23,6 +23,7 @@ type IAOS interface {
 	FindExact(context.Context, string, map[string]any) ([]map[string]any, error)
 	DecomposeSalesOrder(context.Context, string) (iaosclient.DecomposeResult, error)
 	DecomposeSalesOrderTrace(context.Context, string, string, string) (iaosclient.DecomposeResult, error)
+	IngestSimulationEvent(context.Context, iaosclient.SimulationEventRequest) (iaosclient.SimulationEventResult, error)
 }
 
 type Runner struct {
@@ -43,6 +44,8 @@ type Options struct {
 	Target string
 	Tenant string
 	Actor  string
+	// PackKey identifies the scenario package in IAOS audit records.
+	PackKey string
 	// OrderID is the governed UUID returned by scenario apply. It avoids
 	// requiring a legacy sales_order metadata schema only for ID resolution.
 	OrderID string
@@ -172,15 +175,63 @@ type ReplaySummary struct {
 	Impacts    []ReplayImpact `json:"impacts"`
 }
 
-// Replay uses the only governed M3 ingress IAOS currently exposes. The HCTM
-// order-confirmed fixture is translated to the sales-order decompose action;
-// other external simulation events remain visibly unsupported instead of
-// being published directly to NATS.
+// Replay translates supported canonical events to governed IAOS business and
+// simulation ingress endpoints. Unsupported events remain visible and are
+// never published directly to NATS.
 func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Options) (ReplaySummary, error) {
 	started := r.now().UTC()
 	summary := ReplaySummary{RunID: newRunID(), Mode: map[bool]string{true: "apply", false: "dry-run"}[opts.Apply], Target: sanitizedTarget(opts.Target), Tenant: opts.Tenant, Actor: opts.Actor, StoryKey: story.Ref.Key, StartedAt: started, Impacts: []ReplayImpact{}}
 	for _, event := range story.Events.Events {
 		impact := ReplayImpact{EventID: event.EventID, EventType: event.EventType, CorrelationID: event.Correlation(), Action: "unsupported"}
+		if event.EventType == "eam.machine.down" {
+			objectType := stringField(event.Metadata, "business_object_type")
+			objectCode := stringField(event.Metadata, "business_object_id")
+			if objectType != "equipment" || objectCode == "" {
+				impact.Error = "eam.machine.down requires equipment business object metadata"
+				summary.Failed++
+				summary.Impacts = append(summary.Impacts, impact)
+				summary.FinishedAt = r.now().UTC()
+				return summary, fmt.Errorf("event %s: %s", event.EventID, impact.Error)
+			}
+			impact.Action, impact.RecordID = "simulation_ingress", objectCode
+			if opts.Apply {
+				packKey := strings.TrimSpace(opts.PackKey)
+				if packKey == "" {
+					packKey = "unknown-pack"
+				}
+				request := iaosclient.SimulationEventRequest{
+					EventType: event.EventType, Source: "aese:" + packKey + "/" + story.Ref.Key,
+					OccurredAt: event.Timestamp, CorrelationID: event.Correlation(), CausationID: event.Causation(),
+					IdempotencyKey: event.Idempotency(),
+					BusinessObject: iaosclient.SimulationBusinessObject{Type: objectType, Code: objectCode}, Payload: event.Payload,
+				}
+				result, err := r.client.IngestSimulationEvent(ctx, request)
+				if err != nil {
+					impact.Error = err.Error()
+					summary.Failed++
+					summary.Impacts = append(summary.Impacts, impact)
+					summary.FinishedAt = r.now().UTC()
+					return summary, fmt.Errorf("event %s: %w", event.EventID, err)
+				}
+				if err := validateSimulationResult(request, result); err != nil {
+					impact.Error = err.Error()
+					summary.Failed++
+					summary.Impacts = append(summary.Impacts, impact)
+					summary.FinishedAt = r.now().UTC()
+					return summary, fmt.Errorf("event %s: %w", event.EventID, err)
+				}
+				impact.RecordID = result.BusinessObject.ID
+				if result.Duplicate {
+					impact.Action = "duplicate"
+					summary.Skipped++
+				} else {
+					impact.Applied = result.Committed
+					summary.Triggered++
+				}
+			}
+			summary.Impacts = append(summary.Impacts, impact)
+			continue
+		}
 		if event.EventType != "o2d.order.confirmed" {
 			summary.Skipped++
 			summary.Impacts = append(summary.Impacts, impact)
@@ -241,6 +292,22 @@ func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Opti
 	}
 	summary.FinishedAt = r.now().UTC()
 	return summary, nil
+}
+
+func validateSimulationResult(request iaosclient.SimulationEventRequest, result iaosclient.SimulationEventResult) error {
+	if strings.TrimSpace(result.EventID) == "" || strings.TrimSpace(result.Subject) == "" || strings.TrimSpace(result.BusinessObject.ID) == "" {
+		return fmt.Errorf("simulation ingress returned an incomplete success response")
+	}
+	if result.BusinessObject.Type != request.BusinessObject.Type || result.BusinessObject.Code != request.BusinessObject.Code {
+		return fmt.Errorf("simulation ingress returned a different business object")
+	}
+	if request.CorrelationID != "" && result.CorrelationID != request.CorrelationID {
+		return fmt.Errorf("simulation ingress returned a different correlation_id")
+	}
+	if !result.Duplicate && !result.Committed {
+		return fmt.Errorf("simulation ingress did not commit the event")
+	}
+	return nil
 }
 
 type Assertion struct {

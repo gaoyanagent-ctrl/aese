@@ -126,6 +126,35 @@ func TestDecomposeUsesGovernedEndpoint(t *testing.T) {
 	}
 }
 
+func TestSimulationIngressUsesGovernedEndpointAndWireContract(t *testing.T) {
+	client := testClient(t, func(r *http.Request) (*http.Response, error) {
+		if r.Method != http.MethodPost || r.URL.Path != "/api/v1/simulation/events" {
+			t.Fatalf("request = %s %s", r.Method, r.URL.Path)
+		}
+		if r.Header.Get("Authorization") != "Bearer secret" || r.Header.Get("X-IAOS-Tenant-ID") != "tenant-hctm" {
+			t.Fatalf("governance headers missing: %#v", r.Header)
+		}
+		var body SimulationEventRequest
+		if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+			t.Fatal(err)
+		}
+		if body.EventType != "eam.machine.down" || body.Source != "aese:hctm/story" || body.BusinessObject.Code != "LAS-WLD-02" || body.IdempotencyKey != "idem-1" {
+			t.Fatalf("body = %#v", body)
+		}
+		return response(200, `{"event_id":"evt-1","subject":"iaos.tenant-hctm.eam.machine.down","correlation_id":"corr-1","committed":true,"business_object":{"type":"equipment","code":"LAS-WLD-02","id":"equipment-uuid"}}`), nil
+	})
+
+	got, err := client.IngestSimulationEvent(context.Background(), SimulationEventRequest{
+		EventType: "eam.machine.down", Source: "aese:hctm/story", OccurredAt: "2026-07-08T09:30:00+08:00",
+		CorrelationID: "corr-1", IdempotencyKey: "idem-1",
+		BusinessObject: SimulationBusinessObject{Type: "equipment", Code: "LAS-WLD-02"},
+		Payload:        map[string]any{"equipment_code": "LAS-WLD-02"},
+	})
+	if err != nil || !got.Committed || got.EventID != "evt-1" || got.BusinessObject.ID != "equipment-uuid" {
+		t.Fatalf("got=%#v err=%v", got, err)
+	}
+}
+
 func TestScenarioApplyUsesGovernedEndpointAndCorrelation(t *testing.T) {
 	client := testClient(t, func(r *http.Request) (*http.Response, error) {
 		if r.Method != http.MethodPost || r.URL.Path != "/api/v1/scenarios/apply" {

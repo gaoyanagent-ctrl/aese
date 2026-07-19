@@ -161,7 +161,7 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 - M3“可执行 HCTM 场景包”已完成：受治理 scenario apply/reset、tenant isolation、O2D Outbox/NATS/workflow、重复 no-op 和在线 verify 均有实际证据，详见 `docs/reports/hctm-m3-execution-evidence.md`。
 - M3V 快速 2D 企业沙盘已完成：静态 `preview.json`、14 节点 A 线画布、七幕/22 事件播放、五项 KPI、对象详情和三类 Agent 建议已通过桌面与移动验收。
 - M3V 实现位于 `frontend/`，运行见 `docs/runbooks/hctm-m3v-2d-sandbox.md`，验收证据见 `docs/reports/hctm-m3v-2d-sandbox-evidence.md`。
-- 下一最高优先级是 M4：实现受治理 simulation ingress，让供应商延期、设备停机和来料不良进入 IAOS 运行链；之后增加 `IaosScenarioDataSource`。
+- M4 已 active：`eam.machine.down` 已通过 IAOS 受治理 ingress、事务 Outbox 和 AESE replay 实证；下一步实现供应商延期和来料检验失败，再增加 `IaosScenarioDataSource`。
 - `/iaos/iaos-go` 已提供 DES-047 scenario apply/reset、原子幂等 O2D workflow 和 HCTM work_order/workflow fixture；Platform、PostgreSQL、NATS 和 O2D 当前运行正常。
 
 ## 7. 后续 agent 必须维护的信息

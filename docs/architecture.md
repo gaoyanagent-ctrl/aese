@@ -138,11 +138,11 @@ frontend/e2e/                # 三个目标视口的浏览器验收
 ## 9. 当前架构缺口
 
 - 场景包 JSON、schema、AESE CLI、校验器和 IAOS client 已实现并通过离线测试。
-- IAOS 尚无专用 simulation ingress。
+- IAOS 已实现 DES-048 首个专用 simulation ingress 切片：`eam.machine.down` 通过权限、tenant、动态设备解析、状态 CAS、幂等审计和事务 Outbox 进入运行链。
 - IAOS 已实现 M3 allowlist 的原子、自然键幂等 scenario apply/reset，稳定编码在服务端解析 UUID，并显式绑定 tenant。
 - order decompose 使用状态 CAS，O2D workflow 以 event/idempotency key 去重并在单一事务内执行；correlation、Outbox 和重复 no-op 已实证。
 - HCTM 18 类事件尚未全部进入 IAOS `shared/eventdef`。
 - O2D 当前只消费 `o2d.order.confirmed`，其余领域 handler 尚未接线。
 - AESE 只读 2D 沙盘已实现：14 节点 A 线、七幕/22 事件、五项 KPI、对象详情和三类 Agent 建议均可确定性播放。
-- DES-048 的通用外生 simulation ingress 仍是 M4 实现项；M3 只依赖 IAOS 内生 `o2d.order.confirmed`。
+- DES-048 仍是 M4 active 范围；设备停机已贯通，供应商延期和来料检验失败仍待实现。M3 的订单 tracer 仍只依赖 IAOS 内生 `o2d.order.confirmed`。
 - M3V 静态预览器已完成；`ScenarioDataSource` 边界已验证，IAOS 在线数据源和正式 UI 集成留待 M4/M6。

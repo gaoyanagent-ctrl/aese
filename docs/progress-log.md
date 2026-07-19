@@ -95,3 +95,11 @@
 - 影响：M3V 从计划态转为 Completed。AESE 现在已有可访问的产品预览界面，但仍严格保持只读 Preview 边界；浏览器只应用预计算 delta，不复制 IAOS 的 MRP、流程、权限或 Agent Runtime。下一优先级转为 M4 受治理异常事件入口和后续 `IaosScenarioDataSource`。
 - 验证：`npm run typecheck`、ESLint 0 warning、Vitest 5 files/18 tests、Vite build、Playwright 3 projects/9 tests、npm audit 0 vulnerabilities、Go test/vet、preview 七幕/22 事件/3 Agent 合同检查、Markdown links 和 `git diff --check` 通过；1440×900、1280×720、390×844 截图人工检查无阻塞性重叠或整页横向溢出；开发服务绑定 `0.0.0.0:4173`，本机 HTTP 探测返回 200。
 - 后续：M4 为供应商延期、设备停机和来料不良实现 IAOS simulation ingress；基于同一 `SandboxScenario` 视图模型增加 `IaosScenarioDataSource`，保留 Preview/Live 明示与受治理写入边界。
+
+## 2026-07-19 - M4 设备停机受治理入口贯通
+
+- 变更：IAOS `main` 合并 `9a8f5ca`、`463abd6`、`153a97a`，新增 DES-048 `POST /api/v1/simulation/events` 首个 `eam.machine.down` allowlist、动态设备解析、状态 CAS、幂等审计和事务 Outbox；AESE client/replay 接入 canonical 设备停机事件，对不完整或未提交的 2xx 响应失败关闭，并新增 M4 active plan 与执行证据。
+- 原因：M4 需要证明外生仿真事实可进入 IAOS 现有权限、租户和事件治理边界，而不是从 AESE 直接发布 NATS；真实执行还发现设备属于 tenant 动态物理表，以及 PostgreSQL text advisory lock 不能包含 NUL。
+- 影响：`LAS-WLD-02` 已可由 HCTM 事件稳定解析并从 `running` 转为 `maintenance`；重复重放返回相同事件，碰撞和跨租户失败关闭。当前只完成设备停机，供应商延期和来料检验失败仍是 M4 active 范围，O2D 尚未消费该事件。
+- 验证：首次 HTTP 200/committed、重复 HTTP 200/duplicate、碰撞 409、跨租户 404；数据库仅 1 条 ingress 和 1 条 `PROCESSED` Outbox、目标外租户 0 条；AESE 22 事件 canonical replay 成功并将设备事件识别为 duplicate；client wire contract 与 malformed success 回归测试、IAOS Platform 测试/vet、部署健康检查与 AESE Go 测试/vet 通过。
+- 后续：按同一合同实现 `o2d.supplier_delivery.delayed` 和 `qms.incoming_inspection.failed`，完成三类异常统一验收后再固定 M5/M6 消费合同。

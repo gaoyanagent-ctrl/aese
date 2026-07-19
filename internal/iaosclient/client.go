@@ -198,6 +198,50 @@ type DecomposeResult struct {
 	OrderNo      string `json:"order_no"`
 }
 
+type SimulationBusinessObject struct {
+	Type string `json:"type"`
+	Code string `json:"code"`
+}
+
+type SimulationEventRequest struct {
+	EventType      string                   `json:"event_type"`
+	Source         string                   `json:"source"`
+	OccurredAt     string                   `json:"occurred_at"`
+	CorrelationID  string                   `json:"correlation_id"`
+	CausationID    string                   `json:"causation_id,omitempty"`
+	IdempotencyKey string                   `json:"idempotency_key"`
+	BusinessObject SimulationBusinessObject `json:"business_object"`
+	Payload        map[string]any           `json:"payload"`
+}
+
+type SimulationEventResult struct {
+	EventID        string `json:"event_id"`
+	Subject        string `json:"subject"`
+	CorrelationID  string `json:"correlation_id"`
+	Duplicate      bool   `json:"duplicate"`
+	Committed      bool   `json:"committed"`
+	BusinessObject struct {
+		Type string `json:"type"`
+		Code string `json:"code"`
+		ID   string `json:"id"`
+	} `json:"business_object"`
+	Transition struct {
+		From string `json:"from"`
+		To   string `json:"to"`
+	} `json:"transition"`
+}
+
+// IngestSimulationEvent invokes DES-048. Tenant and actor remain owned by the
+// authenticated IAOS context; callers cannot provide a NATS subject.
+func (c *Client) IngestSimulationEvent(ctx context.Context, request SimulationEventRequest) (SimulationEventResult, error) {
+	var out SimulationEventResult
+	if strings.TrimSpace(request.EventType) == "" || strings.TrimSpace(request.IdempotencyKey) == "" {
+		return out, fmt.Errorf("simulation event_type and idempotency_key are required")
+	}
+	err := c.request(ctx, http.MethodPost, "api/v1/simulation/events", request, &out)
+	return out, err
+}
+
 // DecomposeSalesOrder is the governed O2D ingress currently exposed by IAOS.
 // IAOS confirms the order and records o2d.order.confirmed in its Outbox.
 func (c *Client) DecomposeSalesOrder(ctx context.Context, id string) (DecomposeResult, error) {

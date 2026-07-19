@@ -10,6 +10,7 @@
 | 查看当前进度 | `docs/roadmap.md`、`docs/progress-log.md` |
 | 理解 AESE/IAOS 边界 | `docs/architecture.md`、ADR-001 |
 | 运行或修改 2D 沙盘 | DES-002、M3V completed plan、M3V runbook |
+| 修改 M4 异常入口 | M4 active plan、M4 evidence、`internal/iaosclient/`、`internal/replay/` |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
 | 修改事件名和 payload | `docs/HCTM_Event_Model.md` |
@@ -55,7 +56,7 @@
 | CLI 命令分发 | `cmd/aese/main.go` |
 | pack 合同、加载与 inspect | `internal/scenariopack/` |
 | 结构、引用、时间线与经营不变量 | `internal/validate/` |
-| IAOS 认证、schema、upsert 与 decompose | `internal/iaosclient/` |
+| IAOS 认证、schema、upsert、decompose 与 simulation ingress | `internal/iaosclient/` |
 | HCTM 到 IAOS DES-047 wire 投影 | `internal/legacyprojection/` |
 | dry-run/apply/replay/verify 协调 | `internal/replay/` |
 | HCTM machine-readable pack | `scenario-packs/hctm/` |
@@ -76,6 +77,7 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | 动态实体 CRUD/import | `/iaos/iaos-go/platform/internal/api/router.go`、`router_entity_*` | `/api/v1/entities/:entity` 和 import 路由 |
 | 订单分解入口 | `/iaos/iaos-go/platform/internal/api/router.go` | `POST /api/v1/entities/sales_order/:id/decompose`；commit `0260f28` 增加状态 CAS/no-op 与 trace metadata |
 | 场景 apply/reset | `/iaos/iaos-go/platform/internal/api/scenario.go` | `POST /api/v1/scenarios/apply|reset`；M3 allowlist、原子事务、自然键幂等、服务端 UUID resolve |
+| 异常事件入口 | `/iaos/iaos-go/platform/internal/api/simulation.go` | `POST /api/v1/simulation/events`；当前深度支持 `eam.machine.down` |
 | O2D workflow 幂等 | `/iaos/iaos-go/platform/pkg/workflow/` | `workflow_run` 去重，DAG/库存/工单/节点 Outbox 单一事务 |
 | Outbox 注册 | `/iaos/iaos-go/platform/internal/capability/generic_atomic.go` | `RegisterOutboxMessage` |
 | Capability 执行 | `/iaos/iaos-go/platform/internal/capability/` | 受治理业务动作入口 |
@@ -98,7 +100,17 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | 启动和操作手册 | `docs/runbooks/hctm-m3v-2d-sandbox.md` |
 | M3V 验收证据 | `docs/reports/hctm-m3v-2d-sandbox-evidence.md` |
 
-## 6. 导航更新触发器
+## 6. M4 实现路径
+
+| 能力 | 路径 |
+| --- | --- |
+| AESE simulation request/response 合同 | `internal/iaosclient/client.go` |
+| canonical 事件到受治理入口 | `internal/replay/replay.go` |
+| M4 当前计划 | `docs/plans/2026-07-19-m4-governed-simulation-ingress.md` |
+| 设备停机真实证据 | `docs/reports/hctm-m4-simulation-ingress-evidence.md` |
+| IAOS 入口实现 | `/iaos/iaos-go/platform/internal/api/simulation.go` |
+
+## 7. 导航更新触发器
 
 以下改动必须更新本文件：
 

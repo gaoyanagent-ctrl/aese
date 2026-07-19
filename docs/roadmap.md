@@ -14,13 +14,13 @@
 | M2.5 工程治理 | 架构边界、索引、code map、执行规则 | Completed | 本轮治理文档 |
 | M3 可执行场景包 | JSON 场景包、校验器、IAOS apply/replay tracer | Completed | pack、CLI、execution evidence、IAOS commits |
 | M3V 快速 2D 沙盘 | 七幕故事、22 事件、A 线画布、KPI 和 Agent 建议预览 | Completed | 前端、preview、18 unit/component tests、9 E2E、3 viewport screenshots |
-| M4 异常场景运行 | 延期、设备故障、来料不良进入 IAOS 运行链 | Next | M3/M3V contracts |
+| M4 异常场景运行 | 延期、设备故障、来料不良进入 IAOS 运行链 | Active | `eam.machine.down` ingress/replay evidence；另两类待实现 |
 | M5 Agent MVP | 计划、质量、经营分析 Agent | Not started | - |
 | M6 在线 2D 企业沙盘 | IAOS 实时事件、库存、产线、异常和 Agent 运行结果 | Not started | - |
 
 ## 2. 当前阶段
 
-M3 可执行场景包和 M3V 快速 2D 企业沙盘均已完成。当前最高优先级是 M4：把供应商延期、设备停机和来料不良通过受治理 simulation ingress 接入 IAOS，再用已验证的 `ScenarioDataSource` 边界推进在线数据源。
+M3 和 M3V 已完成，M4 正在执行。`eam.machine.down` 已通过受治理 simulation ingress、事务 Outbox 和 AESE canonical replay 的真实验收；当前继续实现供应商延期和来料检验失败，再用已验证的 `ScenarioDataSource` 边界推进在线数据源。
 
 M3V 的最小成功标准：
 

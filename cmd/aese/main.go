@@ -257,7 +257,9 @@ func replayCommand(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, err)
 		return 2
 	}
-	summary, runErr := runner.Replay(context.Background(), story, options(values))
+	replayOptions := options(values)
+	replayOptions.PackKey = pack.Manifest.PackKey
+	summary, runErr := runner.Replay(context.Background(), story, replayOptions)
 	_ = writeJSON(stdout, summary)
 	if runErr != nil {
 		fmt.Fprintln(stderr, runErr)
