@@ -119,3 +119,11 @@
 - 影响：AESE scenario request 现在包含 21 个对象；inspection 的 `po_no` 与 `material_code` 引用加入离线完整性校验。2D preview 已预置同编码 pending 检验对象，视图数据无需改动。IAOS fixture 已确认 7 字段采购 wire、DateOnly 日期以及 receipt/lot 可空的预分配检验单合同。
 - 验证：projection 测试覆盖对象数量、自然键、全部 wire 字段、DateOnly、可选 receipt/lot 和 dropped-field warning；真实 pack `validate`、`inspect`（80 master、15 initial、22 events、17 assertions）、`go test ./...`、`go vet ./...` 和 `git diff --check` 通过。
 - 后续：使用更新后的 scenario apply fixture 执行两类异常的首次提交、重复、碰撞、跨租户、状态变化和 Outbox 统一验收。
+
+## 2026-07-19 - M4 replay 与 projection fail-closed 加固
+
+- 变更：simulation success response 改为精确验证目标 tenant subject；无显式 tenant 的内部调用也只接受合法 `iaos.<tenant>.<event-type>`。DES-047 projection 对采购 7 字段和检验 8 字段显式必填，validator 只对 purchase/inspection 的合同必需引用报告缺失，不改变其他 optional reference 语义。
+- 原因：只校验 subject 后缀会误接受其他 tenant 或任意前缀的成功回显；通用 mapping/引用逻辑会静默省略 M4 wire 必填字段，两者都会削弱真实 replay 的失败关闭边界。
+- 影响：canonical pack 字段漂移会在离线 validator 或 projection 阶段失败；replay 不再把错误 tenant subject 计为成功。runbook 已按当前 21-object apply 和 9-L2 reset 计划更新，兼容性报告明确采购/检验对象已进入 M4 窄合同。
+- 验证：新增 wrong-tenant、wrong-prefix、PO/inspection 缺字段、缺 required reference 和真实 pack 22 事件路由测试；真实 pack dry-run 识别 3 个 simulation candidate、1 个 decompose 和 18 个 unsupported，apply fake 路径触发 3+1。`go test ./...`、`go vet ./...`、pack validate/inspect、JSON Schema 和 `git diff --check` 通过。
+- 后续：在 IAOS fixture 与两类 ingress 合并后执行真实 apply/reset/replay，并用实际回显确认 21-object apply 和 9-L2 reset 计数。

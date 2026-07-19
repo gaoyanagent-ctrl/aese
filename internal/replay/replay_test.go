@@ -3,6 +3,7 @@ package replay
 import (
 	"context"
 	"fmt"
+	"path/filepath"
 	"reflect"
 	"testing"
 
@@ -252,6 +253,86 @@ func TestReplayRejectsMalformedDuplicateSimulationResponse(t *testing.T) {
 	if err == nil || summary.Failed != 1 || summary.Skipped != 0 {
 		t.Fatalf("summary=%#v err=%v", summary, err)
 	}
+}
+
+func TestReplayRejectsSimulationSubjectForWrongTenant(t *testing.T) {
+	fake := &fakeIAOS{}
+	fake.simulationResult.EventID = "evt-sim-1"
+	fake.simulationResult.Subject = "iaos.tenant-other.eam.machine.down"
+	fake.simulationResult.Committed = true
+	fake.simulationResult.BusinessObject.Type = "equipment"
+	fake.simulationResult.BusinessObject.Code = "EQ-1"
+	fake.simulationResult.BusinessObject.ID = "eq-uuid"
+	runner, _ := New(fake)
+	story := scenariopack.Story{Events: scenariopack.EventSequence{Events: []scenariopack.Event{{EventID: "evt", EventType: "eam.machine.down", Metadata: map[string]any{"business_object_type": "equipment", "business_object_id": "EQ-1", "idempotency_key": "idem-1"}}}}}
+
+	summary, err := runner.Replay(context.Background(), story, Options{Apply: true, Tenant: "tenant-hctm"})
+	if err == nil || summary.Failed != 1 || summary.Triggered != 0 {
+		t.Fatalf("summary=%#v err=%v", summary, err)
+	}
+}
+
+func TestReplayRejectsMalformedSimulationSubjectWhenTenantIsUnknown(t *testing.T) {
+	fake := &fakeIAOS{}
+	fake.simulationResult.EventID = "evt-sim-1"
+	fake.simulationResult.Subject = "evil.tenant-hctm.eam.machine.down"
+	fake.simulationResult.Committed = true
+	fake.simulationResult.BusinessObject.Type = "equipment"
+	fake.simulationResult.BusinessObject.Code = "EQ-1"
+	fake.simulationResult.BusinessObject.ID = "eq-uuid"
+	runner, _ := New(fake)
+	story := scenariopack.Story{Events: scenariopack.EventSequence{Events: []scenariopack.Event{{EventID: "evt", EventType: "eam.machine.down", Metadata: map[string]any{"business_object_type": "equipment", "business_object_id": "EQ-1", "idempotency_key": "idem-1"}}}}}
+
+	summary, err := runner.Replay(context.Background(), story, Options{Apply: true})
+	if err == nil || summary.Failed != 1 || summary.Triggered != 0 {
+		t.Fatalf("summary=%#v err=%v", summary, err)
+	}
+}
+
+func TestReplayRealPackRoutingContract(t *testing.T) {
+	pack, err := scenariopack.Load(filepath.Join("..", "..", "scenario-packs", "hctm"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	story := pack.Stories[0]
+
+	dryFake := &fakeIAOS{}
+	dryRunner, _ := New(dryFake)
+	dry, err := dryRunner.Replay(context.Background(), story, Options{PackKey: pack.Manifest.PackKey, OrderID: "so-uuid", Tenant: pack.Manifest.TenantTemplate})
+	if err != nil || dryFake.simulations != 0 || dryFake.decomposes != 0 || countReplayAction(dry.Impacts, "simulation_ingress") != 3 || countReplayAction(dry.Impacts, "decompose_sales_order") != 1 || dry.Skipped != 18 {
+		t.Fatalf("dry=%#v simulations=%d decomposes=%d err=%v", dry, dryFake.simulations, dryFake.decomposes, err)
+	}
+
+	applyFake := &fakeIAOS{}
+	applyRunner, _ := New(applyFake)
+	applied, err := applyRunner.Replay(context.Background(), story, Options{Apply: true, PackKey: pack.Manifest.PackKey, OrderID: "so-uuid", Tenant: pack.Manifest.TenantTemplate})
+	if err != nil || applyFake.simulations != 3 || applyFake.decomposes != 1 || applied.Triggered != 4 || applied.Skipped != 18 {
+		t.Fatalf("applied=%#v simulations=%d decomposes=%d err=%v", applied, applyFake.simulations, applyFake.decomposes, err)
+	}
+	want := []struct{ eventType, objectType, objectCode string }{
+		{"o2d.supplier_delivery.delayed", "purchase_order", "PO-202607-0001"},
+		{"eam.machine.down", "equipment", "LAS-WLD-02"},
+		{"qms.incoming_inspection.failed", "inspection_order", "IQC-202607-0002"},
+	}
+	canonicalPayloads := map[string]map[string]any{}
+	for _, event := range story.Events.Events {
+		canonicalPayloads[event.EventType] = event.Payload
+	}
+	for index, request := range applyFake.simulationCalls {
+		if request.EventType != want[index].eventType || request.BusinessObject.Type != want[index].objectType || request.BusinessObject.Code != want[index].objectCode || request.Source != "aese:hctm/order-expedite-01" || !reflect.DeepEqual(request.Payload, canonicalPayloads[request.EventType]) {
+			t.Fatalf("simulation[%d]=%#v", index, request)
+		}
+	}
+}
+
+func countReplayAction(impacts []ReplayImpact, action string) int {
+	count := 0
+	for _, impact := range impacts {
+		if impact.Action == action {
+			count++
+		}
+	}
+	return count
 }
 
 func TestReplayFailsClosedWhenSimulationResponseIsNotCommitted(t *testing.T) {

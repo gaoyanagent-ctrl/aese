@@ -138,13 +138,21 @@ var references = map[string][]reference{
 	"inventory_transaction": {{"material_code", "material"}, {"warehouse_code", "warehouse"}, {"storage_location_code", "storage_location"}},
 }
 
+var requiredReferences = map[string]map[string]bool{
+	"purchase_order":   {"supplier_code": true, "material_code": true},
+	"inspection_order": {"po_no": true, "material_code": true},
+}
+
 func validateReferences(sets []scenariopack.RecordSet, indexes map[string]map[string]struct{}, add func(string, string, string, string)) {
 	for _, set := range sets {
 		for n, record := range set.Records {
 			label := fmt.Sprintf("%s[%d]", set.Entity, n)
 			for _, ref := range references[set.Entity] {
 				value, exists := record[ref.field]
-				if !exists || fmt.Sprint(value) == "" {
+				if !exists || value == nil || strings.TrimSpace(fmt.Sprint(value)) == "" {
+					if requiredReferences[set.Entity][ref.field] {
+						add(set.Source, label, ref.field, "required reference is missing")
+					}
 					continue
 				}
 				if _, ok := indexes[ref.target][fmt.Sprint(value)]; !ok {

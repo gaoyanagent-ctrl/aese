@@ -7,7 +7,7 @@
 - IAOS 仅允许 `eam.machine.down`，服务端生成 subject 和事件 ID。
 - 设备通过 tenant entity metadata 的物理表和稳定 code 解析；状态只允许 `running|idle -> maintenance`。
 - advisory lock、状态 CAS、ingress audit/idempotency 和事务 Outbox 位于同一 tenant transaction。
-- AESE replay 从 canonical event metadata 构造 business object、correlation、causation 和 idempotency，不直发 NATS；IAOS 的 2xx 回显若缺少稳定事件/对象标识或未实际提交，AESE 会失败关闭。
+- AESE replay 从 canonical event metadata 构造 business object、correlation、causation 和 idempotency，不直发 NATS；IAOS 的 2xx 回显若缺少稳定事件/对象标识、未实际提交，或 subject 不精确匹配 `iaos.<target-tenant>.<event-type>`，AESE 会失败关闭。
 
 ## 真实验收
 

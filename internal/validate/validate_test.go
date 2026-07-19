@@ -30,6 +30,16 @@ func TestPackReportsBrokenFixtures(t *testing.T) {
 				scenariopack.RecordSet{SchemaVersion: "1.0.0", Entity: "inspection_order", NaturalKey: []string{"inspection_no"}, Source: "initial.json", Records: []map[string]any{{"inspection_no": "IQC-1", "po_no": "PO-MISSING", "material_code": "M-1"}}},
 			)
 		}},
+		{"inspection missing required reference", "required reference is missing", func(p *scenariopack.Pack) {
+			p.RecordSets = append(p.RecordSets,
+				scenariopack.RecordSet{SchemaVersion: "1.0.0", Entity: "inspection_order", NaturalKey: []string{"inspection_no"}, Source: "initial.json", Records: []map[string]any{{"inspection_no": "IQC-1", "material_code": "M-1"}}},
+			)
+		}},
+		{"purchase missing required reference", "required reference is missing", func(p *scenariopack.Pack) {
+			p.RecordSets = append(p.RecordSets,
+				scenariopack.RecordSet{SchemaVersion: "1.0.0", Entity: "purchase_order", NaturalKey: []string{"po_no"}, Source: "initial.json", Records: []map[string]any{{"po_no": "PO-1", "material_code": "M-1"}}},
+			)
+		}},
 		{"out of order", "timeline is out of order", func(p *scenariopack.Pack) { p.Stories[0].Events.Events[1].Timestamp = "2026-06-30T00:00:00Z" }},
 		{"duplicate idempotency", "duplicate idempotency key", func(p *scenariopack.Pack) { p.Stories[0].Events.Events[1].IdempotencyKey = "idem-1" }},
 		{"negative quantity", "quantity must be non-negative", func(p *scenariopack.Pack) { p.RecordSets[2].Records[0]["quantity"] = -1 }},

@@ -156,6 +156,9 @@ func Project(pack *scenariopack.Pack, opts Options) (Result, error) {
 		return Result{}, fmt.Errorf("purchase_order record set is required")
 	}
 	for _, record := range purchaseOrders.Records {
+		if err := requireFields("purchase_order", record, "po_no", "supplier_code", "material_code", "order_qty", "promised_date", "latest_eta", "status"); err != nil {
+			return Result{}, err
+		}
 		result.add("purchase_order", purchaseOrders, record,
 			[]string{"po_no"},
 			map[string]string{
@@ -173,6 +176,9 @@ func Project(pack *scenariopack.Pack, opts Options) (Result, error) {
 		return Result{}, fmt.Errorf("inspection_order record set is required")
 	}
 	for _, record := range inspections.Records {
+		if err := requireFields("inspection_order", record, "inspection_no", "po_no", "material_code", "inspection_type", "sample_qty", "accepted_qty", "rejected_qty", "status"); err != nil {
+			return Result{}, err
+		}
 		result.add("inspection_order", inspections, record,
 			[]string{"inspection_no"},
 			map[string]string{
@@ -325,6 +331,25 @@ func fields(record map[string]any, names []string) map[string]any {
 		}
 	}
 	return out
+}
+
+func requireFields(entity string, record map[string]any, names ...string) error {
+	for _, name := range names {
+		value, exists := record[name]
+		if !exists || value == nil || strings.TrimSpace(fmt.Sprint(value)) == "" {
+			return fmt.Errorf("%s %s: %s is required by the IAOS scenario apply contract", entity, firstRecordCode(record), name)
+		}
+	}
+	return nil
+}
+
+func firstRecordCode(record map[string]any) string {
+	for _, field := range []string{"po_no", "inspection_no", "order_no"} {
+		if value := strings.TrimSpace(fmt.Sprint(record[field])); value != "" && value != "<nil>" {
+			return value
+		}
+	}
+	return "<unknown>"
 }
 
 func idempotencyKey(entity string, key map[string]any) string {

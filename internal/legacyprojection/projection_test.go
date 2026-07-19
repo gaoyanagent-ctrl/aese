@@ -147,6 +147,30 @@ func TestProjectRejectsNonTracerQuantity(t *testing.T) {
 	}
 }
 
+func TestProjectRejectsMissingPurchaseOrderWireField(t *testing.T) {
+	pack, err := scenariopack.Load(filepath.Join("..", "..", "scenario-packs", "hctm"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	delete(pack.Stories[0].Initial.RecordSets[2].Records[0], "latest_eta")
+	_, err = Project(pack, Options{StoryKey: "order-expedite-01", RunID: "run-missing-po"})
+	if err == nil || !strings.Contains(err.Error(), "purchase_order") || !strings.Contains(err.Error(), "latest_eta") {
+		t.Fatalf("expected missing purchase order field error, got %v", err)
+	}
+}
+
+func TestProjectRejectsMissingInspectionWireField(t *testing.T) {
+	pack, err := scenariopack.Load(filepath.Join("..", "..", "scenario-packs", "hctm"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	delete(pack.Stories[0].Initial.RecordSets[3].Records[0], "po_no")
+	_, err = Project(pack, Options{StoryKey: "order-expedite-01", RunID: "run-missing-iqc"})
+	if err == nil || !strings.Contains(err.Error(), "inspection_order") || !strings.Contains(err.Error(), "po_no") {
+		t.Fatalf("expected missing inspection field error, got %v", err)
+	}
+}
+
 func onlyObject(t *testing.T, result Result, entity string) Object {
 	t.Helper()
 	var found []Object

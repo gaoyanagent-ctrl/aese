@@ -100,7 +100,7 @@ go run ./cmd/aese apply ./scenario-packs/hctm \
   --apply
 ```
 
-AESE 会把 HCTM 稳定业务编码投影为 DES-047 wire；IAOS 在单一 tenant 事务中解析 UUID，并对 customer/product/BOM/inventory/order 执行 insert/update/no-op。输出中的 mapping warnings 明示未进入 legacy tracer 的字段。
+AESE 会把 HCTM 稳定业务编码投影为 DES-047 wire；IAOS 在单一 tenant 事务中解析 UUID，并对 customer/product/BOM/inventory/sales order/purchase order/inspection order 执行 insert/update/no-op。当前 request 共 21 个对象。输出中的 mapping warnings 明示未进入受治理 scenario apply 合同的字段。
 
 ## 5. Replay 和 Verify
 
@@ -144,7 +144,7 @@ go run ./cmd/aese reset ./scenario-packs/hctm \
   --target http://127.0.0.1:8082
 ```
 
-确认 dry-run 只包含 1 个 sales order、5 个 inventory 和对应派生状态后，显式执行：
+确认 dry-run 只包含 1 个 sales order、5 个 inventory、2 个 purchase order、1 个 inspection order 和对应派生状态后，显式执行：
 
 ```bash
 go run ./cmd/aese reset ./scenario-packs/hctm \
@@ -154,7 +154,7 @@ go run ./cmd/aese reset ./scenario-packs/hctm \
   --apply
 ```
 
-预期删除 6 个 L2 对象并保留 12 个 L1 customer/product/BOM。不得用直接 SQL 删除或重置租户数据。
+按当前 M4 fixture，预期删除 9 个 L2 对象并保留 12 个 L1 customer/product/BOM。不得用直接 SQL 删除或重置租户数据；最终计数仍须以 IAOS reset dry-run 回显为准。
 
 ## 7. 完成证据
 

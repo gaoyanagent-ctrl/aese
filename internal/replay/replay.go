@@ -208,7 +208,7 @@ func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Opti
 					summary.FinishedAt = r.now().UTC()
 					return summary, fmt.Errorf("event %s: %w", event.EventID, err)
 				}
-				if err := validateSimulationResult(request, result); err != nil {
+				if err := validateSimulationResult(request, result, opts.Tenant); err != nil {
 					impact.Error = err.Error()
 					summary.Failed++
 					summary.Impacts = append(summary.Impacts, impact)
@@ -307,11 +307,17 @@ func simulationEventRequest(event scenariopack.Event, expectedObjectType, packKe
 	}, nil
 }
 
-func validateSimulationResult(request iaosclient.SimulationEventRequest, result iaosclient.SimulationEventResult) error {
+func validateSimulationResult(request iaosclient.SimulationEventRequest, result iaosclient.SimulationEventResult, expectedTenant string) error {
 	if strings.TrimSpace(result.EventID) == "" || strings.TrimSpace(result.Subject) == "" || strings.TrimSpace(result.BusinessObject.ID) == "" {
 		return fmt.Errorf("simulation ingress returned an incomplete success response")
 	}
-	if !strings.HasSuffix(result.Subject, "."+request.EventType) {
+	expectedTenant = strings.TrimSpace(expectedTenant)
+	if expectedTenant != "" {
+		expectedSubject := "iaos." + expectedTenant + "." + request.EventType
+		if result.Subject != expectedSubject {
+			return fmt.Errorf("simulation ingress returned a different event subject")
+		}
+	} else if !validSimulationSubject(result.Subject, request.EventType) {
 		return fmt.Errorf("simulation ingress returned a different event subject")
 	}
 	if result.BusinessObject.Type != request.BusinessObject.Type || result.BusinessObject.Code != request.BusinessObject.Code {
@@ -324,6 +330,15 @@ func validateSimulationResult(request iaosclient.SimulationEventRequest, result 
 		return fmt.Errorf("simulation ingress did not commit the event")
 	}
 	return nil
+}
+
+func validSimulationSubject(subject, eventType string) bool {
+	suffix := "." + eventType
+	if !strings.HasPrefix(subject, "iaos.") || !strings.HasSuffix(subject, suffix) {
+		return false
+	}
+	tenant := strings.TrimSuffix(strings.TrimPrefix(subject, "iaos."), suffix)
+	return tenant != "" && !strings.Contains(tenant, ".")
 }
 
 type Assertion struct {
