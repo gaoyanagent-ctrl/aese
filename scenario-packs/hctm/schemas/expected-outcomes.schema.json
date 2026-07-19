@@ -1,0 +1,42 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aese.iaos.local/schemas/expected-outcomes.schema.json",
+  "title": "AESE machine-verifiable expected outcomes",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version","story_key","assertions"],
+  "properties": {
+    "$schema":{"type":"string"},
+    "schema_version":{"const":"1.0.0"},
+    "story_key":{"type":"string","pattern":"^[a-z][a-z0-9-]*$"},
+    "assertions":{"type":"array","minItems":1,"items":{"$ref":"#/$defs/assertion"}},
+    "iaos_assertions":{"type":"array","items":{"$ref":"#/$defs/iaos_assertion"}},
+    "summary":{"type":"object","additionalProperties":true}
+  },
+  "$defs": {
+    "assertion": {
+      "type":"object","additionalProperties":false,
+      "required":["key","type","field","operator","expected"],
+      "properties": {
+        "key":{"type":"string","pattern":"^[a-z][a-z0-9_]*$"},
+        "type":{"enum":["event_count","event_sequence","record_aggregate","event_payload","event_aggregate","derived","invariant"]},
+        "entity":{"type":"string","minLength":1},
+        "field":{"type":"string","minLength":1},
+        "operator":{"enum":["equals","count_equals","sum_equals","sum_where_material_equals","contains","less_than_or_equal"]},
+        "expected":{}
+      }
+    },
+    "iaos_assertion": {
+      "type":"object","additionalProperties":false,
+      "required":["key","entity","match","operator"],
+      "properties": {
+        "key":{"type":"string","pattern":"^[a-z][a-z0-9_]*$"},
+        "entity":{"type":"string","pattern":"^[a-z][a-z0-9_]*$"},
+        "match":{"type":"object","minProperties":1,"additionalProperties":true},
+        "field":{"type":"string","minLength":1},
+        "operator":{"enum":["exists","count_eq","eq","gte","lte"]},
+        "expected":{}
+      }
+    }
+  }
+}

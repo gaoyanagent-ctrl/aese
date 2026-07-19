@@ -1,0 +1,31 @@
+{
+  "$schema": "../schemas/record-set.schema.json",
+  "schema_version": "1.0.0",
+  "record_sets": [
+    {
+      "schema_version": "1.0.0",
+      "entity": "warehouse",
+      "natural_key": ["warehouse_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","warehouse_code":"WH-SZ-RM","warehouse_name":"苏州原材料仓","plant_code":"PLT-SZ","warehouse_type":"raw_material","managed_by_dept_code":"DEPT-SZ-WH","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","warehouse_code":"WH-SZ-WIP","warehouse_name":"苏州半成品暂存区","plant_code":"PLT-SZ","warehouse_type":"wip","managed_by_dept_code":"DEPT-SZ-WH","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","warehouse_code":"WH-SZ-FG","warehouse_name":"苏州成品仓","plant_code":"PLT-SZ","warehouse_type":"finished_goods","managed_by_dept_code":"DEPT-SZ-WH","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","warehouse_code":"WH-SZ-NG","warehouse_name":"苏州不合格品区","plant_code":"PLT-SZ","warehouse_type":"nonconforming","managed_by_dept_code":"DEPT-SZ-QUALITY","status":"active"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "storage_location",
+      "natural_key": ["location_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","location_code":"RM-A01-01","warehouse_code":"WH-SZ-RM","location_name":"原材料 A 区 01-01","location_type":"normal","material_restriction":"AL-PLATE-6061-T6","status":"available"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","location_code":"RM-B01-01","warehouse_code":"WH-SZ-RM","location_name":"原材料 B 区 01-01","location_type":"normal","material_restriction":"SEAL-RING-A01","status":"available"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","location_code":"RM-C01-01","warehouse_code":"WH-SZ-RM","location_name":"原材料 C 区 01-01","location_type":"normal","material_restriction":"FITTING-A01","status":"available"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","location_code":"PKG-A01-01","warehouse_code":"WH-SZ-RM","location_name":"包材 A 区 01-01","location_type":"normal","material_restriction":"PKG-BOX-A01","status":"available"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","location_code":"WIP-A01-01","warehouse_code":"WH-SZ-WIP","location_name":"半成品 A 区 01-01","location_type":"normal","status":"available"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","location_code":"FG-A01-01","warehouse_code":"WH-SZ-FG","location_name":"成品 A 区 01-01","location_type":"normal","material_restriction":"HCTM-BCP-A01","status":"available"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","location_code":"NG-QA-01","warehouse_code":"WH-SZ-NG","location_name":"不合格品隔离区 01","location_type":"blocked","status":"available"}
+      ]
+    }
+  ]
+}

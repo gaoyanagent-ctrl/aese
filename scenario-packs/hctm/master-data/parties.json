@@ -1,0 +1,27 @@
+{
+  "$schema": "../schemas/record-set.schema.json",
+  "schema_version": "1.0.0",
+  "record_sets": [
+    {
+      "schema_version": "1.0.0",
+      "entity": "customer",
+      "natural_key": ["customer_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","customer_code":"CUST-SGNEV","customer_name":"星河新能源汽车有限公司","customer_type":"oem","priority":"high","payment_terms":"NET60","delivery_mode":"jit_split","default_ship_to":"星河苏州整车工厂","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","customer_code":"CUST-ORBITHM","customer_name":"欧瑞热管理系统有限公司","customer_type":"tier1","priority":"normal","payment_terms":"NET45","delivery_mode":"weekly_delivery","default_ship_to":"欧瑞合肥工厂","status":"active"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "supplier",
+      "natural_key": ["supplier_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","supplier_code":"SUP-ALPHA-AL","supplier_name":"安铝金属材料有限公司","supplier_type":"material","rating":"A","default_lead_time_days":7,"certified_materials":["AL-PLATE-6061-T6"],"inspection_level":"normal","status":"qualified"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","supplier_code":"SUP-BETA-AL","supplier_name":"贝塔铝业有限公司","supplier_type":"material","rating":"B","default_lead_time_days":5,"certified_materials":["AL-PLATE-6061-T6"],"inspection_level":"tightened","status":"qualified"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","supplier_code":"SUP-SEAL-01","supplier_name":"恒密密封科技有限公司","supplier_type":"material","rating":"A","default_lead_time_days":5,"certified_materials":["SEAL-RING-A01"],"inspection_level":"normal","status":"qualified"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","supplier_code":"SUP-FIT-01","supplier_name":"鼎联接头制造有限公司","supplier_type":"material","rating":"B","default_lead_time_days":6,"certified_materials":["FITTING-A01"],"inspection_level":"normal","status":"qualified"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","supplier_code":"SUP-PKG-01","supplier_name":"诚达包装材料有限公司","supplier_type":"packaging","rating":"A","default_lead_time_days":3,"certified_materials":["PKG-BOX-A01","LBL-TRACE-A01"],"inspection_level":"skip_lot","status":"qualified"}
+      ]
+    }
+  ]
+}

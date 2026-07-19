@@ -1,0 +1,44 @@
+{
+  "$schema": "../../schemas/expected-outcomes.schema.json",
+  "schema_version": "1.0.0",
+  "story_key": "order-expedite-01",
+  "assertions": [
+    {"key":"event_count","type":"event_count","field":"events","operator":"count_equals","expected":22},
+    {"key":"correlation_id","type":"event_sequence","field":"correlation_id","operator":"equals","expected":"corr-so-202607-0001"},
+    {"key":"total_customer_demand","type":"record_aggregate","entity":"sales_order","field":"order_qty","operator":"sum_equals","expected":12000},
+    {"key":"opening_finished_goods","type":"record_aggregate","entity":"inventory_transaction","field":"quantity","operator":"sum_where_material_equals","expected":1200},
+    {"key":"net_production_requirement","type":"event_payload","entity":"o2d.mrp.generated","field":"net_production_qty","operator":"equals","expected":10800},
+    {"key":"aluminum_requirement","type":"event_payload","entity":"o2d.mrp.generated","field":"material_shortages.AL-PLATE-6061-T6.required_qty","operator":"equals","expected":12600},
+    {"key":"supplier_delay_days","type":"event_payload","entity":"o2d.supplier_delivery.delayed","field":"delay_days","operator":"equals","expected":3},
+    {"key":"machine_down_hours","type":"event_payload","entity":"eam.machine.down","field":"expected_down_hours","operator":"equals","expected":8},
+    {"key":"backup_supplier_rejected_qty","type":"event_payload","entity":"qms.incoming_inspection.failed","field":"rejected_qty","operator":"equals","expected":300},
+    {"key":"welding_completed_qty","type":"event_payload","entity":"proc.operation.completed","field":"completed_qty","operator":"equals","expected":10520},
+    {"key":"welding_scrap_qty","type":"event_payload","entity":"proc.operation.completed","field":"scrap_qty","operator":"equals","expected":80},
+    {"key":"finished_goods_received_qty","type":"event_payload","entity":"whs.finished_goods.received","field":"received_qty","operator":"equals","expected":10500},
+    {"key":"available_to_ship_qty","type":"derived","field":"opening_finished_goods + finished_goods_received","operator":"equals","expected":11700},
+    {"key":"actual_shipped_qty","type":"event_aggregate","entity":"o2d.shipment.dispatched","field":"shipped_quantity","operator":"sum_equals","expected":11700},
+    {"key":"unfulfilled_qty","type":"derived","field":"total_customer_demand - actual_shipped_qty","operator":"equals","expected":300},
+    {"key":"final_delivery_status","type":"derived","field":"sales_order.delivery_status","operator":"equals","expected":"partially_shipped"},
+    {"key":"no_inventory_overissue","type":"invariant","field":"actual_shipped_qty <= available_to_ship_qty","operator":"equals","expected":true}
+  ],
+  "iaos_assertions": [
+    {"key":"o2d_work_order_exists","entity":"work_order","match":{"status":"pending"},"operator":"exists"},
+    {"key":"o2d_work_order_count","entity":"work_order","match":{"status":"pending"},"operator":"count_eq","expected":3}
+  ],
+  "summary": {
+    "demand_qty": 12000,
+    "opening_finished_goods_qty": 1200,
+    "net_production_qty": 10800,
+    "aluminum_required_qty": 12600,
+    "finished_goods_received_qty": 10500,
+    "available_to_ship_qty": 11700,
+    "first_shipment_qty": 9000,
+    "second_shipment_requested_qty": 3000,
+    "second_shipment_actual_qty": 2700,
+    "total_shipped_qty": 11700,
+    "unfulfilled_qty": 300,
+    "delivery_status": "partially_shipped",
+    "delivery_commitment_met": false,
+    "known_risks": ["supplier_eta_delayed","machine_down","backup_supplier_quality_rejection","finished_goods_shortage"]
+  }
+}

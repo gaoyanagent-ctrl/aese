@@ -1,0 +1,31 @@
+{
+  "$schema": "../schemas/record-set.schema.json",
+  "schema_version": "1.0.0",
+  "record_sets": [
+    {
+      "schema_version": "1.0.0",
+      "entity": "material",
+      "natural_key": ["material_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","material_code":"HCTM-BCP-A01","material_name":"电池冷却板组件 A01","material_type":"finished_good","uom":"pcs","lot_control":true,"serial_control":false,"customer_material_no":"SGNEV-CP-7788","default_plant_code":"PLT-SZ","safety_stock_qty":1200,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","material_code":"AL-PLATE-6061-T6","material_name":"6061-T6 铝板","material_type":"raw_material","uom":"sheet","lot_control":true,"serial_control":false,"default_plant_code":"PLT-SZ","safety_stock_qty":6000,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","material_code":"SEAL-RING-A01","material_name":"密封圈 A01","material_type":"purchased_part","uom":"pcs","lot_control":true,"serial_control":false,"default_plant_code":"PLT-SZ","safety_stock_qty":20000,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","material_code":"FITTING-A01","material_name":"接头组件 A01","material_type":"purchased_part","uom":"set","lot_control":true,"serial_control":false,"default_plant_code":"PLT-SZ","safety_stock_qty":12000,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","material_code":"PKG-BOX-A01","material_name":"包装箱 A01","material_type":"packaging","uom":"box","lot_control":false,"serial_control":false,"default_plant_code":"PLT-SZ","safety_stock_qty":800,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","material_code":"LBL-TRACE-A01","material_name":"追溯标签 A01","material_type":"packaging","uom":"pcs","lot_control":false,"serial_control":false,"default_plant_code":"PLT-SZ","safety_stock_qty":10000,"status":"active"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "bom",
+      "natural_key": ["bom_code","component_material_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","bom_code":"BOM-HCTM-BCP-A01-V1","parent_material_code":"HCTM-BCP-A01","component_material_code":"AL-PLATE-6061-T6","qty_per":1.05,"uom":"sheet","scrap_rate":0.02,"effective_from":"2026-07-01","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","bom_code":"BOM-HCTM-BCP-A01-V1","parent_material_code":"HCTM-BCP-A01","component_material_code":"SEAL-RING-A01","qty_per":2,"uom":"pcs","scrap_rate":0.005,"effective_from":"2026-07-01","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","bom_code":"BOM-HCTM-BCP-A01-V1","parent_material_code":"HCTM-BCP-A01","component_material_code":"FITTING-A01","qty_per":2,"uom":"set","scrap_rate":0.005,"effective_from":"2026-07-01","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","bom_code":"BOM-HCTM-BCP-A01-V1","parent_material_code":"HCTM-BCP-A01","component_material_code":"PKG-BOX-A01","qty_per":0.1,"uom":"box","scrap_rate":0,"effective_from":"2026-07-01","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","bom_code":"BOM-HCTM-BCP-A01-V1","parent_material_code":"HCTM-BCP-A01","component_material_code":"LBL-TRACE-A01","qty_per":1,"uom":"pcs","scrap_rate":0,"effective_from":"2026-07-01","status":"active"}
+      ]
+    }
+  ]
+}

@@ -63,3 +63,27 @@
 - 影响：AESE 与 IAOS 的仓库职责已经固定；M3 被拆成场景包、校验器、兼容性报告、IAOS apply、O2D replay 和 closeout 六个切片，共 30 项可追踪任务。
 - 验证：核对 AESE 全部现有文档和 `/iaos/iaos-go` 的 AGENTS、agent context、code map、eventdef、O2D 入口及动态实体 API；本地 Markdown 相对链接检查无缺失，M3 plan 确认包含 T1-T30 共 30 项任务，`git diff --check` 通过。
 - 后续：从 M3 S1/T1-T4 开始，创建 `scenario-packs/hctm` 的 manifest、record sets、故事数据和 JSON Schema。
+
+## 2026-07-19 - M3 场景包与离线执行链完成，在线 tracer 缺口固化
+
+- 变更：新增 `hctm@0.1.0` 场景包（80 条 L1 主数据、14 条故事初始记录、22 个事件、17 条离线断言、2 条 IAOS 断言和 4 个 JSON Schema）；新增 Go CLI、loader、分层 validator、inspect、IAOS client、dry-run/apply/replay/verify 协调与安全 reset 计划；新增 compatibility report 和本地 runbook；更新项目入口、架构、code map、roadmap、DES-001 和 M3 checklist。IAOS `main` fast-forward 合并 commit `0260f28`，增加 decimal BOM、订单确认 CAS/no-op、trace metadata 及 DES-047/DES-048。
+- 原因：把 M2 Markdown 合同转成可解析、可计算、默认零写入的执行资产，并通过真实平台取证区分 AESE 已实现能力和 IAOS 尚缺平台合同。
+- 影响：实现核对发现原故事可发库存 11,700 却安排发运 12,000 的矛盾；为保持业务真实性，第 22 个事件修订为请求 3,000、实发 2,700、短缺 300，最终状态为 `partially_shipped`。M3 的 S1-S3 已完成，S4-S6 的代码和文档主体已完成，但 T20-T24 在线实证仍未完成，因此 M3 保持 active。
+- 验证：`go test ./...`、`go vet ./...`、真实 pack `validate`/`inspect`、Draft 2020-12 Schema 校验和 `git diff --check` 通过；inspect 输出 80 master、14 initial、22 events、17 assertions。Platform `/health` 为 UP、`/ready` 的 DB/EventBus 为 OK。`tenant-hctm` apply dry-run 以 customer schema 404 fail closed，verify 的 work_order/inventory 两条断言同样明确失败；只读数据库复核 schema/customer/outbox 均为 0，证明 dry-run 零写入。IAOS platform 与 O2D 全量 Go 测试由独立 worktree 验证通过；commit 合并后又从 IAOS `main` 重新构建部署，Platform 与 O2D 进程均运行主 checkout 二进制并成功连接 DB/NATS。
+- 后续：实现 DES-047 的受治理 scenario apply/reset、HCTM 稳定编码到 legacy UUID 映射和 tenant-hctm schema/workflow seed；补齐 workflow/event 去重、跨节点失败原子性和 work_order API 对齐，然后执行 T20-T24，保存 correlation、Outbox subject/event ID、O2D 日志、库存/工单结果和第二次运行 no-op 证据。
+
+## 2026-07-19 - M3 受治理 O2D tracer 完成
+
+- 变更：AESE 新增 HCTM→IAOS legacy projection，`apply` 改用 IAOS DES-047 原子 scenario endpoint，`replay` 支持 scenario apply 返回的 order UUID 并传递固定 correlation/idempotency，`reset` 接入服务端 L2/派生状态清理；expected outcomes 增加 2 条 IAOS work order 断言。IAOS `main` 合并 scenario apply/reset、O2D workflow 原子幂等、work_order metadata/workflow seed，以及真实执行发现的 dry-run、reset、correlation 和 tenant 显式绑定修正。新增 `docs/reports/hctm-m3-execution-evidence.md`，同步 README、Agent Context、architecture、code map、roadmap、DES-001、M3 plan 和 runbook。
+- 原因：用户要求不分阶段完整执行计划；离线实现后继续关闭真实平台阻塞，并用实际 dry-run/apply/replay/reset 暴露和修正单测无法发现的跨服务问题。
+- 影响：M3 T1-T30、S1-S6 全部完成。`tenant-hctm` 当前保留 1 customer、6 product、5 BOM、5 inventory、1 order/line、3 work orders 和 completed workflow，可直接演示。scenario reset 能删除 6 个 L2 对象与本轮派生工单/workflow，同时保留 12 个 L1。legacy 表未全面 FORCE RLS 的长期风险仍存在，但 scenario adapter 已通过每条 SQL 显式 tenant 条件关闭本合同的越界路径。
+- 验证：dry-run 18 insert 且数据库零写；首次 apply 18 insert；第二 run 18 no-op 且对象数不变；`tenant-other` dry-run 18 insert 且目标租户零数据；O2D 完成 `corr-so-202607-0001` / event `evt-conf-d2f7c859b9e7d9fd10a7bd1a` / workflow `af706c43-b080-42de-8c98-b421d1b9e815`，decimal BOM 得到铝板 12,600，生成 3 个工单；第二次 replay 返回 `already_confirmed`，确认 Outbox 数不变；在线 verify 2/2；reset dry-run/apply 均显示删除 6、保留 12，reset 后恢复再次通过。AESE `go test ./...`、`go vet ./...`、Schema/Markdown 链接/diff checks 通过；IAOS platform/O2D tests、real-PG atomic/idempotency integration 和主 checkout 重部署通过。
+- 后续：进入 M4 时实现 DES-048 的外生 simulation ingress，把供应商延期、设备故障和来料不良接入同样的权限、RLS、幂等、审计与 Outbox 边界；继续推动 legacy 表 FORCE RLS 平台 hardening。
+
+## 2026-07-19 - 快速 2D 企业沙盘提升为当前里程碑
+
+- 变更：新增 ADR-002、DES-002 和 PLAN-M3V-001，将只读 2D 场景预览器明确为 AESE 可拥有的产品验证界面；把 M3V 插入为当前 active 里程碑，并同步 README、Agent Context、Architecture、Roadmap、Code Map 和文档索引。
+- 原因：原路线要到 M6 才出现 2D 沙盘，用户看到可用产品形态的时间过晚。现有 M3 已具备 80 条主数据、22 个事件和确定性结果，足以先形成可见、可操作的预览版。
+- 影响：下一步不等待 M4/M5 完成，先在 3 到 4 个工作日内实现 React 2D 工作台、A 线画布、时间线、事件流、KPI、对象详情和 Agent 建议。首版不新增业务后端，不复制 IAOS 运行时，并通过 `ScenarioDataSource` 为后续 IAOS API/SSE 接入保留边界。
+- 验证：M3V 计划拆为 V0-V4、T1-T26，定义每日可见成果、功能/视觉/边界测试和完成标准；本地 Markdown 相对链接检查无缺失，active plan 数量为 1，`git diff --check` 通过。
+- 后续：从 V0/T1 开始创建 `frontend/` 和 `preview.json`，第 1 天结束前交付可缩放、可点击的苏州基地 A 线画布。

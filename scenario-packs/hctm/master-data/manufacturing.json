@@ -1,0 +1,66 @@
+{
+  "$schema": "../schemas/record-set.schema.json",
+  "schema_version": "1.0.0",
+  "record_sets": [
+    {
+      "schema_version": "1.0.0",
+      "entity": "routing",
+      "natural_key": ["routing_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","routing_code":"RT-HCTM-BCP-A01-V1","material_code":"HCTM-BCP-A01","plant_code":"PLT-SZ","version":"V1","effective_from":"2026-07-01","standard_daily_capacity":800,"status":"active"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "operation",
+      "natural_key": ["routing_code","operation_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","operation_code":"OP-IQC","routing_code":"RT-HCTM-BCP-A01-V1","sequence_no":10,"operation_name":"来料检验","work_center_code":"IQC-01","standard_time_min":0.3,"inspection_required":true,"yield_rate":1.0,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","operation_code":"OP-CNC","routing_code":"RT-HCTM-BCP-A01-V1","sequence_no":20,"operation_name":"CNC 精加工","work_center_code":"CNC-01","standard_time_min":1.0,"inspection_required":false,"yield_rate":0.99,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","operation_code":"OP-WLD","routing_code":"RT-HCTM-BCP-A01-V1","sequence_no":30,"operation_name":"焊接","work_center_code":"WLD-02","standard_time_min":1.2,"inspection_required":false,"yield_rate":0.98,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","operation_code":"OP-CLN","routing_code":"RT-HCTM-BCP-A01-V1","sequence_no":40,"operation_name":"清洗","work_center_code":"CLN-01","standard_time_min":0.5,"inspection_required":false,"yield_rate":0.995,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","operation_code":"OP-LKT","routing_code":"RT-HCTM-BCP-A01-V1","sequence_no":50,"operation_name":"气密检漏","work_center_code":"LKT-01","standard_time_min":0.7,"inspection_required":true,"yield_rate":0.99,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","operation_code":"OP-DIM","routing_code":"RT-HCTM-BCP-A01-V1","sequence_no":60,"operation_name":"尺寸检测","work_center_code":"DIM-01","standard_time_min":0.4,"inspection_required":true,"yield_rate":0.995,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","operation_code":"OP-ASM","routing_code":"RT-HCTM-BCP-A01-V1","sequence_no":70,"operation_name":"总装包装","work_center_code":"ASM-01","standard_time_min":0.8,"inspection_required":false,"yield_rate":0.995,"status":"active"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "work_center",
+      "natural_key": ["work_center_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","work_center_code":"IQC-01","work_center_name":"来料检验工作中心","plant_code":"PLT-SZ","center_type":"quality","line_code":"SZ-BCP-LINE-A","capacity_per_shift":6000,"bottleneck_flag":false,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","work_center_code":"CNC-01","work_center_name":"CNC 加工工作中心","plant_code":"PLT-SZ","center_type":"production","line_code":"SZ-BCP-LINE-A","capacity_per_shift":420,"bottleneck_flag":false,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","work_center_code":"WLD-01","work_center_name":"焊接工作中心 1","plant_code":"PLT-SZ","center_type":"production","line_code":"SZ-BCP-LINE-A","capacity_per_shift":400,"bottleneck_flag":true,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","work_center_code":"WLD-02","work_center_name":"焊接工作中心 2","plant_code":"PLT-SZ","center_type":"production","line_code":"SZ-BCP-LINE-A","capacity_per_shift":400,"bottleneck_flag":true,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","work_center_code":"CLN-01","work_center_name":"清洗工作中心","plant_code":"PLT-SZ","center_type":"production","line_code":"SZ-BCP-LINE-A","capacity_per_shift":900,"bottleneck_flag":false,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","work_center_code":"LKT-01","work_center_name":"气密检漏工作中心","plant_code":"PLT-SZ","center_type":"quality","line_code":"SZ-BCP-LINE-A","capacity_per_shift":850,"bottleneck_flag":false,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","work_center_code":"DIM-01","work_center_name":"尺寸检测工作中心","plant_code":"PLT-SZ","center_type":"quality","line_code":"SZ-BCP-LINE-A","capacity_per_shift":1000,"bottleneck_flag":false,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","work_center_code":"ASM-01","work_center_name":"总装包装工作中心","plant_code":"PLT-SZ","center_type":"production","line_code":"SZ-BCP-LINE-A","capacity_per_shift":950,"bottleneck_flag":false,"status":"active"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "equipment",
+      "natural_key": ["equipment_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","equipment_code":"CNC-A01","equipment_name":"CNC 加工中心 A01","plant_code":"PLT-SZ","work_center_code":"CNC-01","equipment_type":"cnc","criticality":"medium","commissioned_date":"2023-04-01","current_status":"running"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","equipment_code":"CNC-A02","equipment_name":"CNC 加工中心 A02","plant_code":"PLT-SZ","work_center_code":"CNC-01","equipment_type":"cnc","criticality":"medium","commissioned_date":"2023-05-01","current_status":"running"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","equipment_code":"LAS-WLD-01","equipment_name":"激光焊接机 1","plant_code":"PLT-SZ","work_center_code":"WLD-01","equipment_type":"laser_welder","criticality":"high","commissioned_date":"2024-03-01","current_status":"running"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","equipment_code":"LAS-WLD-02","equipment_name":"激光焊接机 2","plant_code":"PLT-SZ","work_center_code":"WLD-02","equipment_type":"laser_welder","criticality":"high","commissioned_date":"2024-05-01","current_status":"running"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","equipment_code":"USC-CLN-01","equipment_name":"超声波清洗机","plant_code":"PLT-SZ","work_center_code":"CLN-01","equipment_type":"cleaning","criticality":"medium","commissioned_date":"2024-01-10","current_status":"running"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","equipment_code":"AIR-LKT-01","equipment_name":"气密检漏台 1","plant_code":"PLT-SZ","work_center_code":"LKT-01","equipment_type":"leak_tester","criticality":"high","commissioned_date":"2024-02-01","current_status":"running"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","equipment_code":"AIR-LKT-02","equipment_name":"气密检漏台 2","plant_code":"PLT-SZ","work_center_code":"LKT-01","equipment_type":"leak_tester","criticality":"high","commissioned_date":"2024-02-15","current_status":"running"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","equipment_code":"LAS-MRK-01","equipment_name":"激光打标机","plant_code":"PLT-SZ","work_center_code":"ASM-01","equipment_type":"laser_marker","criticality":"medium","commissioned_date":"2024-04-01","current_status":"running"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "tooling",
+      "natural_key": ["tooling_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","tooling_code":"FIX-BCP-A01-WLD","tooling_name":"电池冷却板焊接夹具","plant_code":"PLT-SZ","work_center_code":"WLD-02","lifetime_cycles":50000,"used_cycles":12000,"current_status":"available"}
+      ]
+    }
+  ]
+}

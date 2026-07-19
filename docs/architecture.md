@@ -19,11 +19,14 @@ AESE 不拥有 ERP/MES 运行时，也不复制 IAOS 的安全和治理能力。
 | Outbox + NATS | No | Own |
 | Capability / Process / Decision | No | Own |
 | Agent Tool Registry | No | Own |
-| 业务 UI 和 2D 沙盘 | Specification | Own or integrate |
+| 正式业务 UI | Specification | Own |
+| 只读 2D 场景预览器 | Own | Integrate later |
 
 长期原则：
 
 > AESE 版本化“企业场景内容”，IAOS 执行“企业业务能力”。
+
+ADR-002 允许 AESE 拥有只读 2D 场景预览器，用于快速验证场景表达和回归。预览器不拥有业务写入、权限、流程和 Agent 运行时；在线模式的数据仍来自 IAOS 受治理 API 和事件流。
 
 ## 3. 目标运行链路
 
@@ -38,6 +41,20 @@ HCTM scenario pack
   -> O2D / QMS / EAM / WHS handlers
   -> Capability / Process / Agent
   -> IAOS UI / AESE 2D simulation view
+```
+
+2D 预览器的数据链路：
+
+```text
+preview.json
+  -> StaticScenarioDataSource
+  -> SandboxScenario view model
+  -> deterministic timeline reducer
+  -> 2D canvas / event feed / KPI / Agent suggestion
+
+IAOS snapshot API + SSE (later)
+  -> IaosScenarioDataSource
+  -> same SandboxScenario view model and UI
 ```
 
 ## 4. 场景包结构
@@ -74,7 +91,7 @@ internal/iaosclient/         # IAOS API 适配器，M3 后半段
 internal/replay/             # 受控事件重放协调器
 ```
 
-这些路径是设计目标，当前尚未实现。
+这些路径已在 M3 中实现；`internal/replay` 负责默认 dry-run 的 apply/replay/verify 协调，正式写入仍受 IAOS API 合同约束。
 
 ## 5. 数据合同
 
@@ -115,9 +132,12 @@ internal/replay/             # 受控事件重放协调器
 
 ## 9. 当前架构缺口
 
-- 场景包 JSON 和 schema 尚未生成。
-- AESE CLI、校验器和 IAOS client 尚未实现。
+- 场景包 JSON、schema、AESE CLI、校验器和 IAOS client 已实现并通过离线测试。
 - IAOS 尚无专用 simulation ingress。
+- IAOS 已实现 M3 allowlist 的原子、自然键幂等 scenario apply/reset，稳定编码在服务端解析 UUID，并显式绑定 tenant。
+- order decompose 使用状态 CAS，O2D workflow 以 event/idempotency key 去重并在单一事务内执行；correlation、Outbox 和重复 no-op 已实证。
 - HCTM 18 类事件尚未全部进入 IAOS `shared/eventdef`。
 - O2D 当前只消费 `o2d.order.confirmed`，其余领域 handler 尚未接线。
 - AESE 前端和 2D 沙盘尚未实现。
+- DES-048 的通用外生 simulation ingress 仍是 M4 实现项；M3 只依赖 IAOS 内生 `o2d.order.confirmed`。
+- M3V 将先实现静态场景驱动的只读 2D 预览器；IAOS 在线数据源和正式 UI 集成在预览交互验证后实施。

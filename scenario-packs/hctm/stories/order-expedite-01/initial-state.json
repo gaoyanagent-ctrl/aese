@@ -1,0 +1,56 @@
+{
+  "$schema": "../../schemas/record-set.schema.json",
+  "schema_version": "1.0.0",
+  "story_key": "order-expedite-01",
+  "record_sets": [
+    {
+      "schema_version": "1.0.0",
+      "entity": "inventory_transaction",
+      "natural_key": ["transaction_no"],
+      "records": [
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","transaction_no":"INV-OPEN-0001","transaction_type":"opening_balance","plant_code":"PLT-SZ","warehouse_code":"WH-SZ-FG","location_code":"FG-A01-01","material_code":"HCTM-BCP-A01","lot_no":"FG-OPEN-20260701","qty":1200,"quantity":1200,"direction":"in","source_object_type":"seed","source_object_no":"SEED-HCTM-MVP","status":"posted"},
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","transaction_no":"INV-OPEN-0002","transaction_type":"opening_balance","plant_code":"PLT-SZ","warehouse_code":"WH-SZ-RM","location_code":"RM-A01-01","material_code":"AL-PLATE-6061-T6","lot_no":"AL-OPEN-20260701","qty":8000,"quantity":8000,"direction":"in","source_object_type":"seed","source_object_no":"SEED-HCTM-MVP","status":"posted"},
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","transaction_no":"INV-OPEN-0003","transaction_type":"opening_balance","plant_code":"PLT-SZ","warehouse_code":"WH-SZ-RM","location_code":"RM-B01-01","material_code":"SEAL-RING-A01","lot_no":"SEAL-OPEN-20260701","qty":30000,"quantity":30000,"direction":"in","source_object_type":"seed","source_object_no":"SEED-HCTM-MVP","status":"posted"},
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","transaction_no":"INV-OPEN-0004","transaction_type":"opening_balance","plant_code":"PLT-SZ","warehouse_code":"WH-SZ-RM","location_code":"RM-C01-01","material_code":"FITTING-A01","lot_no":"FIT-OPEN-20260701","qty":18000,"quantity":18000,"direction":"in","source_object_type":"seed","source_object_no":"SEED-HCTM-MVP","status":"posted"},
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","transaction_no":"INV-OPEN-0005","transaction_type":"opening_balance","plant_code":"PLT-SZ","warehouse_code":"WH-SZ-RM","location_code":"PKG-A01-01","material_code":"PKG-BOX-A01","lot_no":"PKG-OPEN-20260701","qty":1500,"quantity":1500,"direction":"in","source_object_type":"seed","source_object_no":"SEED-HCTM-MVP","status":"posted"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "sales_order",
+      "natural_key": ["order_no"],
+      "records": [
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","order_no":"SO-202607-0001","customer_code":"CUST-SGNEV","legal_entity_code":"LE-HCTM-SH","material_code":"HCTM-BCP-A01","order_qty":10000,"due_date":"2026-07-20","priority":"high","status":"confirmed"},
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","order_no":"SO-202607-0001-ADD1","customer_code":"CUST-SGNEV","legal_entity_code":"LE-HCTM-SH","material_code":"HCTM-BCP-A01","order_qty":2000,"due_date":"2026-07-20","priority":"high","original_order_no":"SO-202607-0001","status":"confirmed"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "purchase_order",
+      "natural_key": ["po_no"],
+      "records": [
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","po_no":"PO-202607-0001","supplier_code":"SUP-ALPHA-AL","legal_entity_code":"LE-HCTM-SH","plant_code":"PLT-SZ","material_code":"AL-PLATE-6061-T6","order_qty":5000,"promised_date":"2026-07-08","latest_eta":"2026-07-08","status":"in_transit"},
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","po_no":"PO-202607-0002","supplier_code":"SUP-BETA-AL","legal_entity_code":"LE-HCTM-SH","plant_code":"PLT-SZ","material_code":"AL-PLATE-6061-T6","order_qty":2000,"promised_date":"2026-07-12","latest_eta":"2026-07-12","status":"draft"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "production_order",
+      "natural_key": ["work_order_no"],
+      "records": [
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","work_order_no":"WO-202607-0001","sales_order_no":"SO-202607-0001","plant_code":"PLT-SZ","material_code":"HCTM-BCP-A01","routing_code":"RT-HCTM-BCP-A01-V1","planned_qty":10800,"released_qty":0,"due_date":"2026-07-20","priority":"high","status":"planned"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "operation_task",
+      "natural_key": ["task_no"],
+      "records": [
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","task_no":"OPT-202607-0001-020","work_order_no":"WO-202607-0001","operation_code":"OP-CNC","work_center_code":"CNC-01","equipment_code":"CNC-A01","team_code":"TEAM-SZ-BCP-A-DAY","planned_qty":10800,"status":"pending"},
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","task_no":"OPT-202607-0001-030","work_order_no":"WO-202607-0001","operation_code":"OP-WLD","work_center_code":"WLD-02","equipment_code":"LAS-WLD-02","team_code":"TEAM-SZ-BCP-A-DAY","planned_qty":10800,"status":"pending"},
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","task_no":"OPT-202607-0001-050","work_order_no":"WO-202607-0001","operation_code":"OP-LKT","work_center_code":"LKT-01","equipment_code":"AIR-LKT-01","team_code":"TEAM-SZ-BCP-A-DAY","planned_qty":10800,"status":"pending"},
+        {"tenant_id":"tenant-hctm","scenario":"hctm_order_expedite_01","seed_version":"2026-06-26-mvp","task_no":"OPT-202607-0001-070","work_order_no":"WO-202607-0001","operation_code":"OP-ASM","work_center_code":"ASM-01","equipment_code":"LAS-MRK-01","team_code":"TEAM-SZ-BCP-A-DAY","planned_qty":10800,"status":"pending"}
+      ]
+    }
+  ]
+}

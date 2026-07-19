@@ -157,10 +157,11 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 - M0、M1 已完成。
 - M2 的业务与技术规格文档已完成：28 个对象、18 类事件、Seed 数据计划和第一条演示故事均有明确合同。
 - 工程治理已补齐文档索引、架构边界、code map、路线图、ADR、DES 和 active plan。
-- 尚未生成机器可读场景包、JSON Schema、Go 校验器或 IAOS 导入/重放代码。
-- 当前阶段是 M3“可执行 HCTM 场景包”，权威状态见 `docs/roadmap.md`。
-- 当前实施计划是 `docs/plans/2026-07-19-m3-executable-scenario-package.md`。
-- `/iaos/iaos-go` 提供可复用平台能力，但当前平台后端 `8082` 未运行；M3 集成测试前需要恢复服务。
+- 已生成 `hctm@0.1.0` 机器可读场景包、4 个 JSON Schema、Go loader/validator/inspect CLI，以及默认 dry-run 的 IAOS client/replay 基础实现。
+- M3“可执行 HCTM 场景包”已完成：受治理 scenario apply/reset、tenant isolation、O2D Outbox/NATS/workflow、重复 no-op 和在线 verify 均有实际证据，详见 `docs/reports/hctm-m3-execution-evidence.md`。
+- 当前最高优先级是 M3V 快速 2D 企业沙盘：用现有七幕故事和 22 个事件，在 3 到 4 个工作日内交付只读、可播放的苏州基地 A 线预览版。
+- 当前实施计划是 `docs/plans/2026-07-19-fast-track-2d-enterprise-sandbox.md`，设计见 `docs/designs/DES-002-fast-track-2d-enterprise-sandbox.md`。
+- `/iaos/iaos-go` 已提供 DES-047 scenario apply/reset、原子幂等 O2D workflow 和 HCTM work_order/workflow fixture；Platform、PostgreSQL、NATS 和 O2D 当前运行正常。
 
 ## 7. 后续 agent 必须维护的信息
 

@@ -1,0 +1,251 @@
+{
+  "$schema": "../../schemas/event-sequence.schema.json",
+  "schema_version": "1.0.0",
+  "story_key": "order-expedite-01",
+  "scenario": "hctm_order_expedite_01",
+  "correlation_id": "corr-so-202607-0001",
+  "events": [
+    {
+      "sequence": 1,
+      "event_id": "evt-20260701-0001",
+      "tenant_id": "tenant-hctm",
+      "event_type": "o2d.order.received",
+      "subject": "iaos.tenant-hctm.o2d.order.received",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-01T09:00:00+08:00",
+      "payload": {"order_no":"SO-202607-0001","customer_code":"CUST-SGNEV","material_code":"HCTM-BCP-A01","order_qty":10000,"due_date":"2026-07-20","priority":"high","delivery_policy":"split_allowed_final_due_fixed"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"sales_order","business_object_id":"SO-202607-0001","idempotency_key":"tenant-hctm:o2d.order.received:SO-202607-0001:10000:2026-07-20"}
+    },
+    {
+      "sequence": 2,
+      "event_id": "evt-20260701-0002",
+      "tenant_id": "tenant-hctm",
+      "event_type": "o2d.order.received",
+      "subject": "iaos.tenant-hctm.o2d.order.received",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-01T09:30:00+08:00",
+      "payload": {"order_no":"SO-202607-0001-ADD1","customer_code":"CUST-SGNEV","material_code":"HCTM-BCP-A01","order_qty":2000,"additional_qty":2000,"due_date":"2026-07-20","priority":"high","delivery_policy":"split_allowed_final_due_fixed","original_order_no":"SO-202607-0001"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260701-0001","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"sales_order","business_object_id":"SO-202607-0001-ADD1","idempotency_key":"tenant-hctm:o2d.order.received:SO-202607-0001-ADD1:2000:2026-07-20"}
+    },
+    {
+      "sequence": 3,
+      "event_id": "evt-20260701-0003",
+      "tenant_id": "tenant-hctm",
+      "event_type": "o2d.order.confirmed",
+      "subject": "iaos.tenant-hctm.o2d.order.confirmed",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-01T10:10:00+08:00",
+      "payload": {"order_no":"SO-202607-0001","customer_code":"CUST-SGNEV","material_code":"HCTM-BCP-A01","confirmed_qty":12000,"due_date":"2026-07-20","plant_code":"PLT-SZ","confirmed_by":"EMP-SH-SALES-001","confirmed_at":"2026-07-01T10:10:00+08:00"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260701-0002","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"sales_order","business_object_id":"SO-202607-0001","idempotency_key":"tenant-hctm:o2d.order.confirmed:SO-202607-0001:12000:2026-07-20"}
+    },
+    {
+      "sequence": 4,
+      "event_id": "evt-20260701-0004",
+      "tenant_id": "tenant-hctm",
+      "event_type": "o2d.mrp.generated",
+      "subject": "iaos.tenant-hctm.o2d.mrp.generated",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-01T10:20:00+08:00",
+      "payload": {"mrp_run_id":"MRP-202607-0001","run_reason":"initial_plan","order_no":"SO-202607-0001","material_code":"HCTM-BCP-A01","demand_qty":12000,"available_finished_goods_qty":1200,"net_production_qty":10800,"material_shortages":[{"material_code":"AL-PLATE-6061-T6","required_qty":12600,"available_qty":8000,"in_transit_qty":5000,"shortage_qty":0,"timing_risk":"none"}],"capacity_risks":[],"recommended_actions":["release_purchase_order_PO-202607-0001","prepare_production_order_WO-202607-0001"]},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260701-0003","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"sales_order","business_object_id":"SO-202607-0001","idempotency_key":"tenant-hctm:o2d.mrp.generated:MRP-202607-0001"}
+    },
+    {
+      "sequence": 5,
+      "event_id": "evt-20260701-0005",
+      "tenant_id": "tenant-hctm",
+      "event_type": "o2d.purchase_requirement.created",
+      "subject": "iaos.tenant-hctm.o2d.purchase_requirement.created",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-01T10:25:00+08:00",
+      "payload": {"requirement_no":"PR-202607-0001","mrp_run_id":"MRP-202607-0001","material_code":"AL-PLATE-6061-T6","required_qty":2000,"need_by_date":"2026-07-12","preferred_supplier_code":"SUP-BETA-AL","reason":"timing_risk"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260701-0004","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"sales_order","business_object_id":"SO-202607-0001","idempotency_key":"tenant-hctm:o2d.purchase_requirement.created:PR-202607-0001"}
+    },
+    {
+      "sequence": 6,
+      "event_id": "evt-20260701-0006",
+      "tenant_id": "tenant-hctm",
+      "event_type": "o2d.purchase_order.released",
+      "subject": "iaos.tenant-hctm.o2d.purchase_order.released",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-01T11:00:00+08:00",
+      "payload": {"po_no":"PO-202607-0001","supplier_code":"SUP-ALPHA-AL","material_code":"AL-PLATE-6061-T6","order_qty":5000,"promised_date":"2026-07-08","plant_code":"PLT-SZ","expedite_flag":false},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260701-0005","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"purchase_order","business_object_id":"PO-202607-0001","idempotency_key":"tenant-hctm:o2d.purchase_order.released:PO-202607-0001"}
+    },
+    {
+      "sequence": 7,
+      "event_id": "evt-20260702-0001",
+      "tenant_id": "tenant-hctm",
+      "event_type": "o2d.supplier_shipment.dispatched",
+      "subject": "iaos.tenant-hctm.o2d.supplier_shipment.dispatched",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-02T15:00:00+08:00",
+      "payload": {"po_no":"PO-202607-0001","supplier_code":"SUP-ALPHA-AL","supplier_lot_no":"ALPHA-20260711-01","shipped_qty":5000,"eta":"2026-07-08","carrier":"安铝物流"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260701-0006","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"purchase_order","business_object_id":"PO-202607-0001","idempotency_key":"tenant-hctm:o2d.supplier_shipment.dispatched:PO-202607-0001:ALPHA-20260711-01"}
+    },
+    {
+      "sequence": 8,
+      "event_id": "evt-20260708-0001",
+      "tenant_id": "tenant-hctm",
+      "event_type": "o2d.supplier_delivery.delayed",
+      "subject": "iaos.tenant-hctm.o2d.supplier_delivery.delayed",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-08T09:00:00+08:00",
+      "payload": {"po_no":"PO-202607-0001","supplier_code":"SUP-ALPHA-AL","material_code":"AL-PLATE-6061-T6","original_eta":"2026-07-08","new_eta":"2026-07-11","delay_days":3,"reason":"供应商熔炼排产延迟","affected_order_no":"SO-202607-0001"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260702-0001","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"purchase_order","business_object_id":"PO-202607-0001","idempotency_key":"tenant-hctm:o2d.supplier_delivery.delayed:PO-202607-0001:2026-07-11"}
+    },
+    {
+      "sequence": 9,
+      "event_id": "evt-20260708-0002",
+      "tenant_id": "tenant-hctm",
+      "event_type": "eam.machine.down",
+      "subject": "iaos.tenant-hctm.eam.machine.down",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-08T09:30:00+08:00",
+      "payload": {"equipment_code":"LAS-WLD-02","work_center_code":"WLD-02","plant_code":"PLT-SZ","down_at":"2026-07-08T09:30:00+08:00","expected_repair_at":"2026-07-08T17:30:00+08:00","expected_down_hours":8,"capacity_loss_ratio":0.35,"reason_code":"LASER_POWER_ALARM","affected_task_no":"OPT-202607-0001-030"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260708-0001","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"equipment","business_object_id":"LAS-WLD-02","idempotency_key":"tenant-hctm:eam.machine.down:LAS-WLD-02:2026-07-08T09:30:00+08:00"}
+    },
+    {
+      "sequence": 10,
+      "event_id": "evt-20260708-0003",
+      "tenant_id": "tenant-hctm",
+      "event_type": "o2d.mrp.generated",
+      "subject": "iaos.tenant-hctm.o2d.mrp.generated",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-08T09:40:00+08:00",
+      "payload": {"mrp_run_id":"MRP-202607-0002","run_reason":"exception_replan","order_no":"SO-202607-0001","material_code":"HCTM-BCP-A01","demand_qty":12000,"available_finished_goods_qty":1200,"net_production_qty":10800,"material_shortages":[{"material_code":"AL-PLATE-6061-T6","required_qty":12600,"available_qty":8000,"in_transit_qty":5000,"shortage_qty":0,"timing_risk":"supplier_eta_delayed"}],"capacity_risks":[{"work_center_code":"WLD-02","equipment_code":"LAS-WLD-02","risk_type":"machine_down","impact_qty":280,"risk_level":"high"}],"recommended_actions":["release_backup_supplier_po_PO-202607-0002","enable_overtime_SHIFT-OT","split_shipment_9000_plus_3000","tighten_incoming_inspection_for_SUP-BETA-AL"]},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260708-0002","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"sales_order","business_object_id":"SO-202607-0001","idempotency_key":"tenant-hctm:o2d.mrp.generated:MRP-202607-0002"}
+    },
+    {
+      "sequence": 11,
+      "event_id": "evt-20260708-0004",
+      "tenant_id": "tenant-hctm",
+      "event_type": "o2d.purchase_order.released",
+      "subject": "iaos.tenant-hctm.o2d.purchase_order.released",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-08T10:20:00+08:00",
+      "payload": {"po_no":"PO-202607-0002","supplier_code":"SUP-BETA-AL","material_code":"AL-PLATE-6061-T6","order_qty":2000,"promised_date":"2026-07-12","plant_code":"PLT-SZ","expedite_flag":true},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260708-0003","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"purchase_order","business_object_id":"PO-202607-0002","idempotency_key":"tenant-hctm:o2d.purchase_order.released:PO-202607-0002"}
+    },
+    {
+      "sequence": 12,
+      "event_id": "evt-20260711-0001",
+      "tenant_id": "tenant-hctm",
+      "event_type": "whs.material.received",
+      "subject": "iaos.tenant-hctm.whs.material.received",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-11T10:00:00+08:00",
+      "payload": {"receipt_no":"GR-202607-0001","po_no":"PO-202607-0001","supplier_code":"SUP-ALPHA-AL","material_code":"AL-PLATE-6061-T6","supplier_lot_no":"ALPHA-20260711-01","received_qty":5000,"received_at":"2026-07-11T10:00:00+08:00"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260708-0004","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"goods_receipt","business_object_id":"GR-202607-0001","idempotency_key":"tenant-hctm:whs.material.received:GR-202607-0001"}
+    },
+    {
+      "sequence": 13,
+      "event_id": "evt-20260711-0002",
+      "tenant_id": "tenant-hctm",
+      "event_type": "qms.incoming_inspection.passed",
+      "subject": "iaos.tenant-hctm.qms.incoming_inspection.passed",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-11T14:00:00+08:00",
+      "payload": {"inspection_no":"IQC-202607-0001","receipt_no":"GR-202607-0001","material_code":"AL-PLATE-6061-T6","lot_no":"ALPHA-20260711-01","accepted_qty":5000,"inspection_level":"normal","inspector_employee_code":"EMP-SZ-IQC-001"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260711-0001","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"inspection_order","business_object_id":"IQC-202607-0001","idempotency_key":"tenant-hctm:qms.incoming_inspection.passed:IQC-202607-0001"}
+    },
+    {
+      "sequence": 14,
+      "event_id": "evt-20260711-0003",
+      "tenant_id": "tenant-hctm",
+      "event_type": "whs.inventory.putaway_completed",
+      "subject": "iaos.tenant-hctm.whs.inventory.putaway_completed",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-11T15:00:00+08:00",
+      "payload": {"transaction_no":"INV-202607-0001","source_object_type":"goods_receipt","source_object_no":"GR-202607-0001","warehouse_code":"WH-SZ-RM","location_code":"RM-A01-01","material_code":"AL-PLATE-6061-T6","lot_no":"ALPHA-20260711-01","qty":5000},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260711-0002","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"inventory_transaction","business_object_id":"INV-202607-0001","idempotency_key":"tenant-hctm:whs.inventory.putaway_completed:INV-202607-0001"}
+    },
+    {
+      "sequence": 15,
+      "event_id": "evt-20260712-0001",
+      "tenant_id": "tenant-hctm",
+      "event_type": "whs.material.received",
+      "subject": "iaos.tenant-hctm.whs.material.received",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-12T11:00:00+08:00",
+      "payload": {"receipt_no":"GR-202607-0002","po_no":"PO-202607-0002","supplier_code":"SUP-BETA-AL","material_code":"AL-PLATE-6061-T6","supplier_lot_no":"BETA-20260712-01","received_qty":2000,"received_at":"2026-07-12T11:00:00+08:00"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260711-0003","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"goods_receipt","business_object_id":"GR-202607-0002","idempotency_key":"tenant-hctm:whs.material.received:GR-202607-0002"}
+    },
+    {
+      "sequence": 16,
+      "event_id": "evt-20260712-0002",
+      "tenant_id": "tenant-hctm",
+      "event_type": "qms.incoming_inspection.failed",
+      "subject": "iaos.tenant-hctm.qms.incoming_inspection.failed",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-12T15:00:00+08:00",
+      "payload": {"inspection_no":"IQC-202607-0002","receipt_no":"GR-202607-0002","supplier_code":"SUP-BETA-AL","material_code":"AL-PLATE-6061-T6","lot_no":"BETA-20260712-01","rejected_qty":300,"defect_code":"SURFACE_SCRATCH","severity":"major"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260712-0001","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"inspection_order","business_object_id":"IQC-202607-0002","idempotency_key":"tenant-hctm:qms.incoming_inspection.failed:IQC-202607-0002:SURFACE_SCRATCH"}
+    },
+    {
+      "sequence": 17,
+      "event_id": "evt-20260713-0001",
+      "tenant_id": "tenant-hctm",
+      "event_type": "proc.production_order.released",
+      "subject": "iaos.tenant-hctm.proc.production_order.released",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-13T08:00:00+08:00",
+      "payload": {"work_order_no":"WO-202607-0001","sales_order_no":"SO-202607-0001","material_code":"HCTM-BCP-A01","routing_code":"RT-HCTM-BCP-A01-V1","planned_qty":10800,"due_date":"2026-07-20","plant_code":"PLT-SZ"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260712-0002","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"production_order","business_object_id":"WO-202607-0001","idempotency_key":"tenant-hctm:proc.production_order.released:WO-202607-0001"}
+    },
+    {
+      "sequence": 18,
+      "event_id": "evt-20260714-0001",
+      "tenant_id": "tenant-hctm",
+      "event_type": "proc.operation.started",
+      "subject": "iaos.tenant-hctm.proc.operation.started",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-14T08:00:00+08:00",
+      "payload": {"task_no":"OPT-202607-0001-030","work_order_no":"WO-202607-0001","operation_code":"OP-WLD","work_center_code":"WLD-02","equipment_code":"LAS-WLD-02","team_code":"TEAM-SZ-BCP-A-DAY","started_at":"2026-07-14T08:00:00+08:00"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260713-0001","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"operation_task","business_object_id":"OPT-202607-0001-030","idempotency_key":"tenant-hctm:proc.operation.started:OPT-202607-0001-030:2026-07-14T08:00:00+08:00"}
+    },
+    {
+      "sequence": 19,
+      "event_id": "evt-20260717-0001",
+      "tenant_id": "tenant-hctm",
+      "event_type": "proc.operation.completed",
+      "subject": "iaos.tenant-hctm.proc.operation.completed",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-17T20:00:00+08:00",
+      "payload": {"task_no":"OPT-202607-0001-030","work_order_no":"WO-202607-0001","operation_code":"OP-WLD","work_center_code":"WLD-02","completed_qty":10520,"scrap_qty":80,"completed_at":"2026-07-17T20:00:00+08:00"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260714-0001","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"operation_task","business_object_id":"OPT-202607-0001-030","idempotency_key":"tenant-hctm:proc.operation.completed:OPT-202607-0001-030:2026-07-17T20:00:00+08:00"}
+    },
+    {
+      "sequence": 20,
+      "event_id": "evt-20260718-0001",
+      "tenant_id": "tenant-hctm",
+      "event_type": "whs.finished_goods.received",
+      "subject": "iaos.tenant-hctm.whs.finished_goods.received",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-18T10:00:00+08:00",
+      "payload": {"transaction_no":"INV-FG-202607-0001","work_order_no":"WO-202607-0001","material_code":"HCTM-BCP-A01","lot_no":"FG-20260717-01","warehouse_code":"WH-SZ-FG","location_code":"FG-A01-01","received_qty":10500,"received_quantity":10500,"received_at":"2026-07-18T10:00:00+08:00"},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260717-0001","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"inventory_transaction","business_object_id":"INV-FG-202607-0001","idempotency_key":"tenant-hctm:whs.finished_goods.received:INV-FG-202607-0001"}
+    },
+    {
+      "sequence": 21,
+      "event_id": "evt-20260719-0001",
+      "tenant_id": "tenant-hctm",
+      "event_type": "o2d.shipment.dispatched",
+      "subject": "iaos.tenant-hctm.o2d.shipment.dispatched",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-19T16:00:00+08:00",
+      "payload": {"shipment_no":"SHIP-202607-0001","sales_order_no":"SO-202607-0001","customer_code":"CUST-SGNEV","material_code":"HCTM-BCP-A01","requested_quantity":9000,"quantity":9000,"shipped_quantity":9000,"ship_qty":9000,"shortage_quantity":0,"ship_date":"2026-07-19","batch_lots":["FG-OPEN-20260701","FG-20260717-01"],"split_shipment_flag":true},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260718-0001","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"shipment","business_object_id":"SHIP-202607-0001","idempotency_key":"tenant-hctm:o2d.shipment.dispatched:SHIP-202607-0001"}
+    },
+    {
+      "sequence": 22,
+      "event_id": "evt-20260720-0001",
+      "tenant_id": "tenant-hctm",
+      "event_type": "o2d.shipment.dispatched",
+      "subject": "iaos.tenant-hctm.o2d.shipment.dispatched",
+      "source": "aese.hctm.simulator",
+      "timestamp": "2026-07-20T11:00:00+08:00",
+      "payload": {"shipment_no":"SHIP-202607-0002","sales_order_no":"SO-202607-0001","customer_code":"CUST-SGNEV","material_code":"HCTM-BCP-A01","requested_quantity":3000,"quantity":2700,"shipped_quantity":2700,"ship_qty":2700,"shortage_quantity":300,"ship_date":"2026-07-20","batch_lots":["FG-20260717-01"],"split_shipment_flag":true},
+      "metadata": {"correlation_id":"corr-so-202607-0001","causation_id":"evt-20260719-0001","scenario":"hctm_order_expedite_01","plant_code":"PLT-SZ","business_object_type":"shipment","business_object_id":"SHIP-202607-0002","idempotency_key":"tenant-hctm:o2d.shipment.dispatched:SHIP-202607-0002"}
+    }
+  ]
+}

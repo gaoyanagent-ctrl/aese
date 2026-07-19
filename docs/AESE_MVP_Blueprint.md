@@ -288,10 +288,16 @@ ShipmentShortageDetected
 - 定义 MVP 事件类型。
 - 映射到 IAOS metadata、eventdef 和 scenario package。
 
-### M3 - O2D 仿真主线（下一阶段）
+### M3 - O2D 仿真主线（已完成）
 
 - 复用或扩展 IAOS `scenarios/o2d`。
 - 跑通订单确认、MRP、采购、生产、入库、发货事件链。
+
+### M3V - 快速 2D 企业沙盘（当前）
+
+- 用现有场景数据确定性播放七幕故事和 22 个事件。
+- 展示苏州基地 A 线、事件流、KPI、对象详情和 Agent 建议。
+- 首版为只读预览，通过数据源适配器为 IAOS 在线模式保留边界。
 
 ### M4 - 异常场景
 
@@ -303,9 +309,9 @@ ShipmentShortageDetected
 - 接入计划 Agent、质量 Agent、经营分析 Agent 的最小能力。
 - Agent 先生成建议和解释，再逐步进入受治理动作。
 
-### M6 - 2D 企业沙盘
+### M6 - 在线 2D 企业沙盘
 
-- 展示订单流、库存流、产线状态、异常事件和 Agent 建议。
+- 将已验证的 2D 交互接入 IAOS 实时事件、库存、产线状态和 Agent 运行结果。
 - 不做 3D，除非业务链路已经稳定。
 
 ## 10. 关键风险
@@ -318,7 +324,7 @@ ShipmentShortageDetected
 
 ## 11. 下一步建议
 
-进入 M3“可执行 HCTM 场景包”：
+M3“可执行 HCTM 场景包”已完成：
 
 - 把 HCTM Markdown 规格转换为版本化 JSON pack 和 JSON Schema。
 - 建立 Go loader、validator 和 inspect CLI。
@@ -326,7 +332,11 @@ ShipmentShortageDetected
 - 通过 IAOS 受治理入口导入最小数据并触发 `o2d.order.confirmed` tracer。
 - 验证租户隔离、幂等执行、reset 和故事结果。
 
+当前先执行 M3V：在 3 到 4 个工作日内把现有场景数据转换为可播放的 2D 企业沙盘预览版。完成交互验证后，再进入 M4，基于 IAOS DES-048 接入供应商延期、设备故障和来料不良三类在线事件。
+
 详细设计与任务见：
 
 - `docs/designs/DES-001-m3-executable-scenario-package.md`
 - `docs/plans/2026-07-19-m3-executable-scenario-package.md`
+- `docs/designs/DES-002-fast-track-2d-enterprise-sandbox.md`
+- `docs/plans/2026-07-19-fast-track-2d-enterprise-sandbox.md`

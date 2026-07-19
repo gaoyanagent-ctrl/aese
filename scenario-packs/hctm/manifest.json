@@ -1,0 +1,28 @@
+{
+  "$schema": "./schemas/manifest.schema.json",
+  "schema_version": "1.0.0",
+  "pack_key": "hctm",
+  "pack_version": "0.1.0",
+  "display_name": "华辰热管理系统集团 MVP",
+  "description": "华辰苏州制造基地电池冷却板 A 线的确定性企业运行场景包",
+  "timezone": "Asia/Shanghai",
+  "tenant_template": "tenant-hctm",
+  "seed_version": "2026-06-26-mvp",
+  "master_data": [
+    {"key": "organization", "path": "master-data/organization.json"},
+    {"key": "parties", "path": "master-data/parties.json"},
+    {"key": "materials", "path": "master-data/materials.json"},
+    {"key": "manufacturing", "path": "master-data/manufacturing.json"},
+    {"key": "logistics", "path": "master-data/logistics.json"}
+  ],
+  "stories": [
+    {
+      "key": "order-expedite-01",
+      "scenario": "hctm_order_expedite_01",
+      "display_name": "客户追加订单下的交付承诺重算",
+      "initial_state": "stories/order-expedite-01/initial-state.json",
+      "events": "stories/order-expedite-01/events.json",
+      "expected_outcomes": "stories/order-expedite-01/expected-outcomes.json"
+    }
+  ]
+}

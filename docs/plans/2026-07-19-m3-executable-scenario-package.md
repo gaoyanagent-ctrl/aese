@@ -2,7 +2,7 @@
 id: PLAN-M3-001
 title: M3 可执行 HCTM 场景包实施计划
 date: 2026-07-19
-status: active
+status: completed
 author: Codex + User
 tags: [m3, implementation, hctm, iaos]
 ---
@@ -30,61 +30,61 @@ M3 只有同时满足以下条件才可标记 completed：
 
 ### S1 - 场景包与 Schema
 
-- [ ] T1 创建 `scenario-packs/hctm/manifest.json`。
-- [ ] T2 把组织、交易方、物料、制造和物流主数据转换为 JSON record sets。
-- [ ] T3 创建 `order-expedite-01` initial state、events 和 expected outcomes。
-- [ ] T4 创建 manifest、record set、event sequence、expected outcomes JSON Schema。
-- [ ] T5 人工核对 Markdown 规格与 JSON 数量、编码和时间线。
+- [x] T1 创建 `scenario-packs/hctm/manifest.json`。
+- [x] T2 把组织、交易方、物料、制造和物流主数据转换为 JSON record sets。
+- [x] T3 创建 `order-expedite-01` initial state、events 和 expected outcomes。
+- [x] T4 创建 manifest、record set、event sequence、expected outcomes JSON Schema。
+- [x] T5 人工核对 Markdown 规格与 JSON 数量、编码和时间线。
 
 验收：所有 JSON 能被标准解析器读取；22 个事件、固定 correlation ID 和关键数量与 Seed Data Plan 一致。
 
 ### S2 - Go Loader、Validator 和 Inspect
 
-- [ ] T6 初始化最小 Go module 和 `cmd/aese`。
-- [ ] T7 实现场景包加载、路径安全和 schema version 检查。
-- [ ] T8 实现结构、自然键、跨文件引用和事件时间线校验。
-- [ ] T9 实现 BOM/MRP/库存/发货经营不变量。
-- [ ] T10 实现 `aese validate` 和 `aese inspect`。
-- [ ] T11 增加有效 pack 和破损 fixture 的表驱动测试。
+- [x] T6 初始化最小 Go module 和 `cmd/aese`。
+- [x] T7 实现场景包加载、路径安全和 schema version 检查。
+- [x] T8 实现结构、自然键、跨文件引用和事件时间线校验。
+- [x] T9 实现 BOM/MRP/库存/发货经营不变量。
+- [x] T10 实现 `aese validate` 和 `aese inspect`。
+- [x] T11 增加有效 pack 和破损 fixture 的表驱动测试。
 
 验收：离线命令退出码稳定；错误包含文件、记录和字段位置；测试覆盖重复键、缺失引用、乱序事件、重复幂等键和数量不变量。
 
 ### S3 - IAOS Compatibility
 
-- [ ] T12 启动并验证 IAOS platform `8082`、PostgreSQL、NATS 和 O2D。
-- [ ] T13 读取 IAOS metadata schema/API，生成 HCTM → IAOS compatibility report。
-- [ ] T14 固定第一批 compatible/mapped/unsupported 对象清单。
-- [ ] T15 对 legacy `sales_order`、product/material、BOM、inventory 字段作出映射决策。
-- [ ] T16 判断是否需要 IAOS 新的 scenario import 或 simulation ingress；若需要，单独建立 IAOS DES/ADR。
+- [x] T12 启动并验证 IAOS platform `8082`、PostgreSQL、NATS 和 O2D。
+- [x] T13 读取 IAOS metadata schema/API，生成 HCTM → IAOS compatibility report。
+- [x] T14 固定第一批 compatible/mapped/unsupported 对象清单。
+- [x] T15 对 legacy `sales_order`、product/material、BOM、inventory 字段作出映射决策。
+- [x] T16 判断是否需要 IAOS 新的 scenario import 或 simulation ingress；结论为需要，IAOS 已合并 DES-047、DES-048 和最小 O2D 修正（commit `0260f28`）。
 
 验收：报告逐对象列出字段映射、API、权限、缺口和处理策略；不得使用直接 SQL 作为正式解决方案。
 
 ### S4 - Dry-run 与 Apply Tracer
 
-- [ ] T17 实现 IAOS client 的认证、schema 查询和记录 upsert adapter。
-- [ ] T18 实现 `aese apply` 默认 dry-run impact report。
-- [ ] T19 实现显式 `--apply` 和 run summary。
-- [ ] T20 导入最小 customer/material/BOM/inventory/sales order 数据。
-- [ ] T21 验证租户隔离和第二次 apply 幂等。
+- [x] T17 实现 IAOS client 的认证、schema 查询和记录 upsert adapter。
+- [x] T18 实现 `aese apply` 默认 dry-run impact report。
+- [x] T19 实现显式 `--apply` 和 run summary。
+- [x] T20 导入最小 customer/material/BOM/inventory/sales order 数据。
+- [x] T21 验证租户隔离和第二次 apply 幂等。
 
 验收：dry-run 零写入；apply 只写 `tenant-hctm`；重复 apply 无重复自然键；失败报告可定位到具体记录。
 
 ### S5 - O2D Replay Tracer
 
-- [ ] T22 通过 IAOS 订单业务入口触发 `o2d.order.confirmed`。
-- [ ] T23 验证 NATS subject、workflow 执行和 work order/inventory 结果。
-- [ ] T24 保存 correlation、事件 ID、运行日志和查询证据。
-- [ ] T25 实现 `aese verify` 的最小断言。
+- [x] T22 通过 IAOS 订单业务入口触发 `o2d.order.confirmed`。
+- [x] T23 验证 NATS subject、workflow 执行和 work order/inventory 结果。
+- [x] T24 保存 correlation、事件 ID、运行日志和查询证据到 `docs/reports/hctm-m3-execution-evidence.md`。
+- [x] T25 实现 `aese verify` 的最小断言，在线 work order exists/count 2/2 通过。
 
 验收：订单确认到 O2D 结果可重复；事件属于 `tenant-hctm`；第二次触发受幂等保护或明确拒绝。
 
 ### S6 - Reset 与 Closeout
 
-- [ ] T26 实现场景级 reset 计划和安全确认，不删除 L1 公共主数据。
-- [ ] T27 编写 `docs/runbooks/hctm-m3-local-run.md`。
-- [ ] T28 更新 README、architecture、code map、roadmap 和 progress log。
-- [ ] T29 记录测试命令、结果和剩余风险。
-- [ ] T30 将 DES-001 状态从 draft 更新为 approved/completed（按实际情况）。
+- [x] T26 实现场景级 reset 计划和安全确认，不删除 L1 公共主数据；实际删除 6 个 L2、保留 12 个 L1，并完成恢复。
+- [x] T27 编写 `docs/runbooks/hctm-m3-local-run.md`。
+- [x] T28 更新 README、architecture、code map、roadmap 和 progress log。
+- [x] T29 记录测试命令、结果和剩余风险。
+- [x] T30 将 DES-001 状态从 draft 更新为 completed。
 
 ## 4. 跨仓库工作安排
 
@@ -116,5 +116,6 @@ go run ./cmd/aese verify ./scenario-packs/hctm --story order-expedite-01 --targe
 ## 6. 当前状态
 
 - S0 工程治理：completed。
-- S1-S6：pending。
-- 当前第一项开发任务：T1-T4，建立 HCTM machine-readable pack 和 JSON Schema。
+- S1-S6：completed。
+- T1-T30：completed。
+- 完整验收证据：`docs/reports/hctm-m3-execution-evidence.md`。

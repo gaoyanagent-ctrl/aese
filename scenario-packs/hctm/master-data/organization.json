@@ -1,0 +1,88 @@
+{
+  "$schema": "../schemas/record-set.schema.json",
+  "schema_version": "1.0.0",
+  "record_sets": [
+    {
+      "schema_version": "1.0.0",
+      "entity": "enterprise_group",
+      "natural_key": ["group_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","group_code":"GRP-HCTM","group_name":"华辰热管理系统集团有限公司","english_name":"Huachen Thermal Management Systems Group Co., Ltd.","industry":"nev_thermal_management","headquarter_city":"上海","status":"active"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "business_unit",
+      "natural_key": ["bu_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","bu_code":"BU-EAST","bu_name":"华东事业部","group_code":"GRP-HCTM","region":"华东","status":"active"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "legal_entity",
+      "natural_key": ["legal_entity_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","legal_entity_code":"LE-HCTM-SH","legal_entity_name":"华辰热管理系统上海有限公司","group_code":"GRP-HCTM","tax_id":"91310000HCTM000001","currency":"CNY","status":"active"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "plant",
+      "natural_key": ["plant_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","plant_code":"PLT-SZ","plant_name":"苏州制造基地","bu_code":"BU-EAST","legal_entity_code":"LE-HCTM-SH","city":"苏州","plant_type":"manufacturing","timezone":"Asia/Shanghai","status":"active"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "department",
+      "natural_key": ["dept_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","dept_code":"DEPT-SZ-MGMT","dept_name":"工厂管理部","plant_code":"PLT-SZ","dept_type":"management","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","dept_code":"DEPT-SZ-PLAN","dept_name":"计划物流部","plant_code":"PLT-SZ","dept_type":"planning","parent_dept_code":"DEPT-SZ-MGMT","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","dept_code":"DEPT-SZ-MFG","dept_name":"生产制造部","plant_code":"PLT-SZ","dept_type":"manufacturing","parent_dept_code":"DEPT-SZ-MGMT","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","dept_code":"DEPT-SZ-QUALITY","dept_name":"质量管理部","plant_code":"PLT-SZ","dept_type":"quality","parent_dept_code":"DEPT-SZ-MGMT","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","dept_code":"DEPT-SZ-WH","dept_name":"仓储物流部","plant_code":"PLT-SZ","dept_type":"warehouse","parent_dept_code":"DEPT-SZ-MGMT","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","dept_code":"DEPT-SZ-EAM","dept_name":"设备工程部","plant_code":"PLT-SZ","dept_type":"equipment","parent_dept_code":"DEPT-SZ-MGMT","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","dept_code":"DEPT-SZ-FIN","dept_name":"财务驻厂组","plant_code":"PLT-SZ","dept_type":"finance","parent_dept_code":"DEPT-SZ-MGMT","status":"active"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "shift",
+      "natural_key": ["shift_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","shift_code":"SHIFT-DAY","shift_name":"白班","start_time":"08:00","end_time":"16:00","work_hours":8,"overtime_allowed":true,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","shift_code":"SHIFT-NIGHT","shift_name":"夜班","start_time":"16:00","end_time":"00:00","work_hours":8,"overtime_allowed":true,"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","shift_code":"SHIFT-OT","shift_name":"加班时段","start_time":"00:00","end_time":"02:00","work_hours":2,"overtime_allowed":true,"status":"active"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "employee",
+      "natural_key": ["employee_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","employee_code":"EMP-SZ-GM-001","employee_name":"周厂长","dept_code":"DEPT-SZ-MGMT","plant_code":"PLT-SZ","role_code":"plant_manager","skill_tags":["operation","kpi"],"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","employee_code":"EMP-SH-SALES-001","employee_name":"陈销售","dept_code":"DEPT-SZ-PLAN","plant_code":"PLT-SZ","role_code":"sales_manager","skill_tags":["customer_order"],"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","employee_code":"EMP-SZ-PLAN-001","employee_name":"李计划","dept_code":"DEPT-SZ-PLAN","plant_code":"PLT-SZ","role_code":"planner","skill_tags":["mrp","scheduling"],"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","employee_code":"EMP-SZ-BUY-001","employee_name":"王采购","dept_code":"DEPT-SZ-PLAN","plant_code":"PLT-SZ","role_code":"buyer","skill_tags":["purchase","expedite"],"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","employee_code":"EMP-SZ-WH-001","employee_name":"赵仓管","dept_code":"DEPT-SZ-WH","plant_code":"PLT-SZ","role_code":"warehouse_supervisor","skill_tags":["receipt","putaway","shipment"],"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","employee_code":"EMP-SZ-IQC-001","employee_name":"钱检验","dept_code":"DEPT-SZ-QUALITY","plant_code":"PLT-SZ","role_code":"incoming_inspector","skill_tags":["iqc","aluminum"],"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","employee_code":"EMP-SZ-QE-001","employee_name":"孙质量","dept_code":"DEPT-SZ-QUALITY","plant_code":"PLT-SZ","role_code":"quality_engineer","skill_tags":["root_cause","containment"],"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","employee_code":"EMP-SZ-TL-001","employee_name":"吴班长","dept_code":"DEPT-SZ-MFG","plant_code":"PLT-SZ","role_code":"team_leader","skill_tags":["line_a","welding"],"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","employee_code":"EMP-SZ-EAM-001","employee_name":"郑设备","dept_code":"DEPT-SZ-EAM","plant_code":"PLT-SZ","role_code":"equipment_engineer","skill_tags":["laser_welder","maintenance"],"status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","employee_code":"EMP-SZ-FIN-001","employee_name":"冯财务","dept_code":"DEPT-SZ-FIN","plant_code":"PLT-SZ","role_code":"accountant","skill_tags":["invoice","cost"],"status":"active"}
+      ]
+    },
+    {
+      "schema_version": "1.0.0",
+      "entity": "production_team",
+      "natural_key": ["team_code"],
+      "records": [
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","team_code":"TEAM-SZ-BCP-A-DAY","team_name":"电池冷却板 A 线白班","plant_code":"PLT-SZ","dept_code":"DEPT-SZ-MFG","shift_code":"SHIFT-DAY","line_code":"SZ-BCP-LINE-A","leader_employee_code":"EMP-SZ-TL-001","status":"active"},
+        {"tenant_id":"tenant-hctm","seed_version":"2026-06-26-mvp","team_code":"TEAM-SZ-BCP-A-NIGHT","team_name":"电池冷却板 A 线夜班","plant_code":"PLT-SZ","dept_code":"DEPT-SZ-MFG","shift_code":"SHIFT-NIGHT","line_code":"SZ-BCP-LINE-A","leader_employee_code":"EMP-SZ-TL-001","status":"active"}
+      ]
+    }
+  ]
+}
