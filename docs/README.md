@@ -12,7 +12,7 @@
 | 当前里程碑和优先级 | `docs/roadmap.md` |
 | 任务到文件导航 | `docs/code-map.md` |
 | 历史进展 | `docs/progress-log.md` |
-| 当前实施计划 | `docs/plans/2026-07-19-m4-governed-simulation-ingress.md` |
+| 最近完成计划 | `docs/plans/2026-07-19-m4-governed-simulation-ingress.md` |
 
 若内容冲突，当前状态以 `docs/roadmap.md` 为准，长期架构决策以 ADR 为准。
 
@@ -43,7 +43,7 @@
 | [HCTM M3 Execution Evidence](reports/hctm-m3-execution-evidence.md) | apply/replay/verify/reset、租户和幂等验收证据 | Completed |
 | [HCTM M3V 2D Sandbox Runbook](runbooks/hctm-m3v-2d-sandbox.md) | 前端启动、操作、验证与故障排查 | Active |
 | [HCTM M3V 2D Sandbox Evidence](reports/hctm-m3v-2d-sandbox-evidence.md) | 功能、自动化和三目标视口截图证据 | Completed |
-| [HCTM M4 Simulation Ingress Evidence](reports/hctm-m4-simulation-ingress-evidence.md) | 设备停机入口、幂等、跨租户和 Outbox 真实证据 | Active |
+| [HCTM M4 Simulation Ingress Evidence](reports/hctm-m4-simulation-ingress-evidence.md) | 三类异常入口、状态、幂等、跨租户和 Outbox 证据 | Completed |
 | [Original Chat](ChatGPT_20260626.md) | 原始构思记录，仅供追溯 | Archive |
 
 ### 设计、决策和计划
@@ -56,7 +56,7 @@
 | DES-002 | [快速 2D 企业沙盘设计](designs/DES-002-fast-track-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M3 | [M3 实施计划](plans/2026-07-19-m3-executable-scenario-package.md) | Completed |
 | PLAN-M3V | [快速 2D 企业沙盘实施计划](plans/2026-07-19-fast-track-2d-enterprise-sandbox.md) | Completed |
-| PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Active |
+| PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Completed |
 
 ## 3. 命名与状态
 

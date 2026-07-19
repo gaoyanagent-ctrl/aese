@@ -54,7 +54,7 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M3 可执行 HCTM 场景包：完成；pack、Schema、CLI、受治理 apply/reset、O2D replay/verify 和幂等证据均已落地。
 - M3V 快速 2D 企业沙盘：完成；七幕/22 事件、A 线画布、KPI、对象详情和三类 Agent 建议已通过桌面与移动端验收。
 
-当前可直接运行静态场景驱动的 2D 企业沙盘。M4 已完成 `eam.machine.down` 受治理入口和 canonical replay 首个切片，正在继续供应商延期与来料检验失败。当前状态以 [Roadmap](docs/roadmap.md) 为准。
+当前可直接运行静态场景驱动的 2D 企业沙盘。M4 三类异常已完成 IAOS 受治理入口、状态影响、事务 Outbox 和 canonical replay 验收；下一优先级是 M5 Agent MVP。当前状态以 [Roadmap](docs/roadmap.md) 为准。
 
 ## 快速启动 2D 沙盘
 

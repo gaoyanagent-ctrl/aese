@@ -10,7 +10,7 @@
 | 查看当前进度 | `docs/roadmap.md`、`docs/progress-log.md` |
 | 理解 AESE/IAOS 边界 | `docs/architecture.md`、ADR-001 |
 | 运行或修改 2D 沙盘 | DES-002、M3V completed plan、M3V runbook |
-| 修改 M4 异常入口 | M4 active plan、M4 evidence、`internal/iaosclient/`、`internal/replay/` |
+| 修改 M4 异常入口 | M4 completed plan、M4 evidence、`internal/iaosclient/`、`internal/replay/` |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
 | 修改事件名和 payload | `docs/HCTM_Event_Model.md` |
@@ -77,7 +77,7 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | 动态实体 CRUD/import | `/iaos/iaos-go/platform/internal/api/router.go`、`router_entity_*` | `/api/v1/entities/:entity` 和 import 路由 |
 | 订单分解入口 | `/iaos/iaos-go/platform/internal/api/router.go` | `POST /api/v1/entities/sales_order/:id/decompose`；commit `0260f28` 增加状态 CAS/no-op 与 trace metadata |
 | 场景 apply/reset | `/iaos/iaos-go/platform/internal/api/scenario.go` | `POST /api/v1/scenarios/apply|reset`；M3 allowlist、原子事务、自然键幂等、服务端 UUID resolve |
-| 异常事件入口 | `/iaos/iaos-go/platform/internal/api/simulation.go` | `POST /api/v1/simulation/events`；当前深度支持 `eam.machine.down` |
+| 异常事件入口 | `/iaos/iaos-go/platform/internal/api/simulation.go` | `POST /api/v1/simulation/events`；支持设备停机、供应延期和来检失败 |
 | O2D workflow 幂等 | `/iaos/iaos-go/platform/pkg/workflow/` | `workflow_run` 去重，DAG/库存/工单/节点 Outbox 单一事务 |
 | Outbox 注册 | `/iaos/iaos-go/platform/internal/capability/generic_atomic.go` | `RegisterOutboxMessage` |
 | Capability 执行 | `/iaos/iaos-go/platform/internal/capability/` | 受治理业务动作入口 |
@@ -107,8 +107,8 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | AESE simulation request/response 合同 | `internal/iaosclient/client.go` |
 | canonical 事件到受治理入口 | `internal/replay/replay.go` |
 | M4 采购单与待检验单 DES-047 投影 | `internal/legacyprojection/projection.go`、`scenario-packs/hctm/stories/order-expedite-01/initial-state.json` |
-| M4 当前计划 | `docs/plans/2026-07-19-m4-governed-simulation-ingress.md` |
-| 设备停机真实证据 | `docs/reports/hctm-m4-simulation-ingress-evidence.md` |
+| M4 completed plan | `docs/plans/2026-07-19-m4-governed-simulation-ingress.md` |
+| 三类异常验收证据 | `docs/reports/hctm-m4-simulation-ingress-evidence.md` |
 | IAOS 入口实现 | `/iaos/iaos-go/platform/internal/api/simulation.go` |
 
 ## 7. 导航更新触发器

@@ -14,13 +14,13 @@
 | M2.5 工程治理 | 架构边界、索引、code map、执行规则 | Completed | 本轮治理文档 |
 | M3 可执行场景包 | JSON 场景包、校验器、IAOS apply/replay tracer | Completed | pack、CLI、execution evidence、IAOS commits |
 | M3V 快速 2D 沙盘 | 七幕故事、22 事件、A 线画布、KPI 和 Agent 建议预览 | Completed | 前端、preview、18 unit/component tests、9 E2E、3 viewport screenshots |
-| M4 异常场景运行 | 延期、设备故障、来料不良进入 IAOS 运行链 | Active | `eam.machine.down` ingress/replay evidence；另两类待实现 |
+| M4 异常场景运行 | 延期、设备故障、来料不良进入 IAOS 运行链 | Completed | 三类 ingress、状态影响、事务 Outbox、租户/幂等及 canonical replay evidence |
 | M5 Agent MVP | 计划、质量、经营分析 Agent | Not started | - |
 | M6 在线 2D 企业沙盘 | IAOS 实时事件、库存、产线、异常和 Agent 运行结果 | Not started | - |
 
 ## 2. 当前阶段
 
-M3 和 M3V 已完成，M4 正在执行。`eam.machine.down` 已通过受治理 simulation ingress、事务 Outbox 和 AESE canonical replay 的真实验收；AESE replay 已能把供应商延期和来料检验失败按 canonical metadata 送入同一受治理入口，DES-047 投影已包含两张采购单和待检验的 `IQC-202607-0002`，并对 tenant subject、必填字段和引用完整性失败关闭。当前继续完成 IAOS 对这两类事件的对象解析、状态影响和真实验收，再用已验证的 `ScenarioDataSource` 边界推进在线数据源。
+M3、M3V 和 M4 已完成。三类异常均通过受治理 simulation ingress、事务 Outbox、租户隔离和幂等验收；canonical 22-event replay 可更新设备、采购和检验业务上下文，第二次完整 replay 为 0 写入。下一优先级是 M5：把计划、质量和经营分析 Agent 接到 IAOS Capability / AI Tool 治理边界；在线 `IaosScenarioDataSource` 仍属于 M6。
 
 M3V 的最小成功标准：
 
@@ -76,6 +76,7 @@ M3 已完成的验收基线：
 - 正式事件必须走 Outbox 或受治理 ingress，不能把 direct NATS 当最终实现。
 - IAOS 受治理 scenario apply/reset 已实现 M3 allowlist；订单确认 CAS、workflow/event 去重、跨节点原子事务及 work_order API 已实证。
 - legacy 表没有全面 FORCE RLS；M3 scenario adapter 已在所有查询/更新/删除中显式绑定 tenant。平台长期仍应继续推进全表 RLS FORCE hardening。
+- M4 的显式 tenant predicates 已关闭当前入口越界路径，但 tenant-safe composite foreign key 和 metadata `version` 的平台级排序仍需后续 hardening。
 - 首版 2D 沙盘是确定性预览，不应被描述为 IAOS 实时运行结果；界面必须显示 Preview 数据源状态。
 - `preview.json` 只承载视图状态和 delta，不得复制 MRP、排产或 Agent 决策逻辑。
 

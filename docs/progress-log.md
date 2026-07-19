@@ -127,3 +127,11 @@
 - 影响：canonical pack 字段漂移会在离线 validator 或 projection 阶段失败；replay 不再把错误 tenant subject 计为成功。runbook 已按当前 21-object apply 和 9-L2 reset 计划更新，兼容性报告明确采购/检验对象已进入 M4 窄合同。
 - 验证：新增 wrong-tenant、wrong-prefix、PO/inspection 缺字段、缺 required reference 和真实 pack 22 事件路由测试；真实 pack dry-run 识别 3 个 simulation candidate、1 个 decompose 和 18 个 unsupported，apply fake 路径触发 3+1。`go test ./...`、`go vet ./...`、pack validate/inspect、JSON Schema 和 `git diff --check` 通过。
 - 后续：在 IAOS fixture 与两类 ingress 合并后执行真实 apply/reset/replay，并用实际回显确认 21-object apply 和 9-L2 reset 计数。
+
+## 2026-07-19 - M4 三类受治理异常入口完成
+
+- 变更：IAOS 完成供应延期和来检失败的稳定对象解析、严格 payload、状态影响、幂等审计和事务 Outbox，并补齐采购/检验 scenario fixture；AESE 完成 21-object projection、三类 canonical replay 和精确 tenant subject 失败关闭。M4 plan、roadmap、evidence、architecture、code map 和项目入口同步转为 Completed。
+- 原因：M4 的完成标准不是直接发布消息，而是让三类外生事实在同一权限、租户、事务和可重复性边界内形成可查询业务上下文，供后续 Agent 和在线沙盘消费。
+- 影响：`LAS-WLD-02`、`PO-202607-0001` 和 `IQC-202607-0002` 均有稳定受治理状态；事件常量、simulation response、租户 subject、metadata/entity query 和 Outbox 构成 M5/M6 的消费合同。领域消费者、自动重排产、Agent Runtime 和 `IaosScenarioDataSource` 未提前计入 M4。
+- 验证：21-object dry-run 为 9 insert/12 no-op，apply 后第二次为 21 no-op；首次 canonical replay 3 triggered/19 skipped/0 failed，第二次 0/22/0；三类 ingress/Outbox 各 1 条，采购 ETA、IQC 数量/缺陷/批次/严重度及设备状态均落库；O2D workflow completed 并生成 3 张工单。AESE test/vet/validate/inspect、IAOS 各模块 test/vet、real-PostgreSQL `-race` integration、部署健康检查和 diff checks 通过。
+- 后续：进入 M5 时只通过 IAOS Capability / AI Tool Registry 为计划、质量和经营分析 Agent 暴露受治理读写工具；M6 再实现 `IaosScenarioDataSource`。继续推进 legacy FORCE RLS、tenant-safe composite foreign key 和 metadata 版本排序 hardening。
