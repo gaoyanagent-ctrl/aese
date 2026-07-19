@@ -20,7 +20,7 @@
 
 ## 2. 当前阶段
 
-M3 和 M3V 已完成，M4 正在执行。`eam.machine.down` 已通过受治理 simulation ingress、事务 Outbox 和 AESE canonical replay 的真实验收；当前继续实现供应商延期和来料检验失败，再用已验证的 `ScenarioDataSource` 边界推进在线数据源。
+M3 和 M3V 已完成，M4 正在执行。`eam.machine.down` 已通过受治理 simulation ingress、事务 Outbox 和 AESE canonical replay 的真实验收；AESE replay 已能把供应商延期和来料检验失败按 canonical metadata 送入同一受治理入口，当前继续完成 IAOS 对这两类事件的对象解析、状态影响和真实验收，再用已验证的 `ScenarioDataSource` 边界推进在线数据源。
 
 M3V 的最小成功标准：
 

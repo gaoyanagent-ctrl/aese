@@ -103,3 +103,11 @@
 - 影响：`LAS-WLD-02` 已可由 HCTM 事件稳定解析并从 `running` 转为 `maintenance`；重复重放返回相同事件，碰撞和跨租户失败关闭。当前只完成设备停机，供应商延期和来料检验失败仍是 M4 active 范围，O2D 尚未消费该事件。
 - 验证：首次 HTTP 200/committed、重复 HTTP 200/duplicate、碰撞 409、跨租户 404；数据库仅 1 条 ingress 和 1 条 `PROCESSED` Outbox、目标外租户 0 条；AESE 22 事件 canonical replay 成功并将设备事件识别为 duplicate；client wire contract 与 malformed success 回归测试、IAOS Platform 测试/vet、部署健康检查与 AESE Go 测试/vet 通过。
 - 后续：按同一合同实现 `o2d.supplier_delivery.delayed` 和 `qms.incoming_inspection.failed`，完成三类异常统一验收后再固定 M5/M6 消费合同。
+
+## 2026-07-19 - M4 canonical 异常 replay 泛化
+
+- 变更：AESE replay 将 `o2d.supplier_delivery.delayed`、`eam.machine.down` 和 `qms.incoming_inspection.failed` 统一投影为 `IngestSimulationEvent` 请求；业务对象类型和稳定编码只从 canonical metadata 获取，source 固定为 `aese:<pack>/<story>`，payload 原样透传；订单确认继续独立调用 decompose，其余事件保持 unsupported。
+- 原因：供应商延期和来料检验失败需要复用设备停机已经验证的受治理入口与 fail-closed 响应边界，避免为每类异常复制请求构造和成功判定逻辑。
+- 影响：AESE 已具备三类 M4 异常的统一 replay 适配；IAOS 对新增两类事件的采购/检验对象解析、状态变化和真实运行验收仍是 M4 未完成项。
+- 验证：新增两类 canonical 请求、三类 dry-run 零写入、metadata 缺失/错配、完整 duplicate、malformed duplicate、其他事件 unsupported 以及原有 machine/order 回归测试；`go test ./...`、`go vet ./...` 和 `git diff --check` 通过。
+- 后续：在独立 IAOS worktree 完成两类事件的入口实现后，执行统一权限、RLS、审计、Outbox、重复和碰撞验收。

@@ -175,6 +175,12 @@ type ReplaySummary struct {
 	Impacts    []ReplayImpact `json:"impacts"`
 }
 
+var simulationBusinessObjectTypes = map[string]string{
+	"o2d.supplier_delivery.delayed":  "purchase_order",
+	"eam.machine.down":               "equipment",
+	"qms.incoming_inspection.failed": "inspection_order",
+}
+
 // Replay translates supported canonical events to governed IAOS business and
 // simulation ingress endpoints. Unsupported events remain visible and are
 // never published directly to NATS.
@@ -183,28 +189,17 @@ func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Opti
 	summary := ReplaySummary{RunID: newRunID(), Mode: map[bool]string{true: "apply", false: "dry-run"}[opts.Apply], Target: sanitizedTarget(opts.Target), Tenant: opts.Tenant, Actor: opts.Actor, StoryKey: story.Ref.Key, StartedAt: started, Impacts: []ReplayImpact{}}
 	for _, event := range story.Events.Events {
 		impact := ReplayImpact{EventID: event.EventID, EventType: event.EventType, CorrelationID: event.Correlation(), Action: "unsupported"}
-		if event.EventType == "eam.machine.down" {
-			objectType := stringField(event.Metadata, "business_object_type")
-			objectCode := stringField(event.Metadata, "business_object_id")
-			if objectType != "equipment" || objectCode == "" {
-				impact.Error = "eam.machine.down requires equipment business object metadata"
+		if objectType, supported := simulationBusinessObjectTypes[event.EventType]; supported {
+			request, err := simulationEventRequest(event, objectType, opts.PackKey, story.Ref.Key)
+			if err != nil {
+				impact.Error = err.Error()
 				summary.Failed++
 				summary.Impacts = append(summary.Impacts, impact)
 				summary.FinishedAt = r.now().UTC()
 				return summary, fmt.Errorf("event %s: %s", event.EventID, impact.Error)
 			}
-			impact.Action, impact.RecordID = "simulation_ingress", objectCode
+			impact.Action, impact.RecordID = "simulation_ingress", request.BusinessObject.Code
 			if opts.Apply {
-				packKey := strings.TrimSpace(opts.PackKey)
-				if packKey == "" {
-					packKey = "unknown-pack"
-				}
-				request := iaosclient.SimulationEventRequest{
-					EventType: event.EventType, Source: "aese:" + packKey + "/" + story.Ref.Key,
-					OccurredAt: event.Timestamp, CorrelationID: event.Correlation(), CausationID: event.Causation(),
-					IdempotencyKey: event.Idempotency(),
-					BusinessObject: iaosclient.SimulationBusinessObject{Type: objectType, Code: objectCode}, Payload: event.Payload,
-				}
 				result, err := r.client.IngestSimulationEvent(ctx, request)
 				if err != nil {
 					impact.Error = err.Error()
@@ -294,9 +289,30 @@ func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Opti
 	return summary, nil
 }
 
+func simulationEventRequest(event scenariopack.Event, expectedObjectType, packKey, storyKey string) (iaosclient.SimulationEventRequest, error) {
+	objectType := stringField(event.Metadata, "business_object_type")
+	objectCode := stringField(event.Metadata, "business_object_id")
+	if objectType != expectedObjectType || objectCode == "" {
+		return iaosclient.SimulationEventRequest{}, fmt.Errorf("%s requires %s business object metadata", event.EventType, expectedObjectType)
+	}
+	packKey = strings.TrimSpace(packKey)
+	if packKey == "" {
+		packKey = "unknown-pack"
+	}
+	return iaosclient.SimulationEventRequest{
+		EventType: event.EventType, Source: "aese:" + packKey + "/" + storyKey,
+		OccurredAt: event.Timestamp, CorrelationID: event.Correlation(), CausationID: event.Causation(),
+		IdempotencyKey: event.Idempotency(),
+		BusinessObject: iaosclient.SimulationBusinessObject{Type: objectType, Code: objectCode}, Payload: event.Payload,
+	}, nil
+}
+
 func validateSimulationResult(request iaosclient.SimulationEventRequest, result iaosclient.SimulationEventResult) error {
 	if strings.TrimSpace(result.EventID) == "" || strings.TrimSpace(result.Subject) == "" || strings.TrimSpace(result.BusinessObject.ID) == "" {
 		return fmt.Errorf("simulation ingress returned an incomplete success response")
+	}
+	if !strings.HasSuffix(result.Subject, "."+request.EventType) {
+		return fmt.Errorf("simulation ingress returned a different event subject")
 	}
 	if result.BusinessObject.Type != request.BusinessObject.Type || result.BusinessObject.Code != request.BusinessObject.Code {
 		return fmt.Errorf("simulation ingress returned a different business object")
