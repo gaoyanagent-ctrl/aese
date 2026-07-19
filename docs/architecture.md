@@ -90,6 +90,7 @@ internal/scenariopack/       # 加载、规范化和引用解析
 internal/validate/           # schema、关系、时间线和幂等校验
 internal/iaosclient/         # IAOS API 适配器，M3 后半段
 internal/replay/             # 受控事件重放协调器
+internal/agenttrace/         # M5 tool bundle setup、受审计查询和三 Agent 建议构建
 frontend/src/scenario/       # SandboxScenario 与静态数据源边界
 frontend/src/playback/       # 确定性重放 reducer 和 React hook
 frontend/src/components/     # 2D 画布、控制栏、事件/KPI/详情面板
@@ -97,6 +98,22 @@ frontend/e2e/                # 三个目标视口的浏览器验收
 ```
 
 这些路径已在 M3 中实现；`internal/replay` 负责默认 dry-run 的 apply/replay/verify 协调，正式写入仍受 IAOS API 合同约束。
+
+M5 Agent tracer 的运行链路：
+
+```text
+agent-tools.json
+  -> aese agent-setup（默认 dry-run）
+  -> IAOS metadata schema + AI Tool Registry
+  -> source_ref=entity.records
+  -> latest tenant metadata + server-owned field/filter/order/limit allowlist
+  -> explicit tenant predicate + PostgreSQL RLS
+  -> ai_tool_call / call_id audit
+  -> aese agent-run deterministic recommendation builder
+  -> planning / quality / business_analysis suggestions
+```
+
+`entity.records` 不是任意实体 CRUD 或任意 SQL 入口。tool metadata 固定 entity、可返回字段、可过滤字段、排序和最大行数；调用 input 只能给标量 filter value 和 limit。未知字段、不安全物理映射和未注册 source 均失败关闭。AESE 不直接访问 IAOS 数据库，也不在本地复制权限或查询引擎。
 
 ## 5. 数据合同
 
@@ -125,6 +142,8 @@ frontend/e2e/                # 三个目标视口的浏览器验收
 - 目标 tenant 在 apply 时绑定，pack 中只提供模板值或演示默认值。
 - IAOS 写入必须经过 RLS 事务和权限检查。
 - Agent 不能直接执行场景文件中的任意命令；只允许调用已注册的 IAOS Tool/Capability。
+- M5 查询工具固定为 `low` risk、`none` confirmation 的只读 `entity.records`；工具注册、启用、调用和 call history 仍经过 IAOS AI Tool Registry 权限与审计边界。
+- `agent-run --apply` 的外部副作用仅是 IAOS 受治理的 tool call/audit 记录；当前建议保持 `suggested` 且要求人工确认，不自动执行推荐动作。
 - 每次 apply/replay 需要生成 run ID，并记录目标环境、pack 版本、actor 和结果摘要。
 
 ## 8. 可重复性
@@ -145,4 +164,6 @@ frontend/e2e/                # 三个目标视口的浏览器验收
 - O2D 当前只消费 `o2d.order.confirmed`，其余领域 handler 尚未接线。
 - AESE 只读 2D 沙盘已实现：14 节点 A 线、七幕/22 事件、五项 KPI、对象详情和三类 Agent 建议均可确定性播放。
 - DES-048 的 M4 三类入口已贯通。M3 的订单 tracer 仍只依赖 IAOS 内生 `o2d.order.confirmed`；异常领域消费者和自动重排产不属于 M4。
+- M5 已有 `agent-setup` / `agent-run`、版本化 tool bundle、9 个 metadata 约束查询和 `internal/agenttrace` 三 Agent tracer。计划与质量结论可引用当前受治理业务状态；经营分析因缺少完工入库、发运和成本实际数据而明确返回 `partial`。
+- Preview 的 11,700 件累计实发和 300 件最终缺口不能反向写入在线 Agent 结论。要关闭经营分析数据缺口，IAOS 仍需受治理的完工入库、发运和成本事实合同。
 - M3V 静态预览器已完成；`ScenarioDataSource` 边界已验证，IAOS 在线数据源和正式 UI 集成留待 M6。

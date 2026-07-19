@@ -15,12 +15,12 @@
 | M3 可执行场景包 | JSON 场景包、校验器、IAOS apply/replay tracer | Completed | pack、CLI、execution evidence、IAOS commits |
 | M3V 快速 2D 沙盘 | 七幕故事、22 事件、A 线画布、KPI 和 Agent 建议预览 | Completed | 前端、preview、18 unit/component tests、9 E2E、3 viewport screenshots |
 | M4 异常场景运行 | 延期、设备故障、来料不良进入 IAOS 运行链 | Completed | 三类 ingress、状态影响、事务 Outbox、租户/幂等及 canonical replay evidence |
-| M5 Agent MVP | 计划、质量、经营分析 Agent | Not started | - |
+| M5 Agent MVP | 计划、质量、经营分析 Agent | Completed | 9 个受治理只读工具、三 Agent live tracer、跨租户与零业务写入证据 |
 | M6 在线 2D 企业沙盘 | IAOS 实时事件、库存、产线、异常和 Agent 运行结果 | Not started | - |
 
 ## 2. 当前阶段
 
-M3、M3V 和 M4 已完成。三类异常均通过受治理 simulation ingress、事务 Outbox、租户隔离和幂等验收；canonical 22-event replay 可更新设备、采购和检验业务上下文，第二次完整 replay 为 0 写入。下一优先级是 M5：把计划、质量和经营分析 Agent 接到 IAOS Capability / AI Tool 治理边界；在线 `IaosScenarioDataSource` 仍属于 M6。
+M3、M3V、M4 和 M5 已完成。计划、质量和经营分析 Agent 已通过 IAOS AI Tool Registry 读取真实业务上下文、留下审计并输出可解释建议；缺少完工入库、发运和实际成本事实时，经营分析按合同返回 `partial`。下一里程碑是 M6 在线 `IaosScenarioDataSource`，但尚未建立 active plan。
 
 M3V 的最小成功标准：
 

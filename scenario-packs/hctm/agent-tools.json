@@ -1,0 +1,59 @@
+{
+  "$schema": "./schemas/agent-tools.schema.json",
+  "schema_version": "1.0.0",
+  "pack_key": "hctm",
+  "metadata_schemas": [
+    {"entity_code":"product","display_name":"产品","fields":[{"name":"code","type":"string","label":"编码"},{"name":"name","type":"string","label":"名称"}]},
+    {"entity_code":"sales_order","display_name":"销售订单","fields":[{"name":"order_no","type":"string","label":"订单号"},{"name":"customer_id","type":"reference","label":"客户"},{"name":"required_date","type":"datetime","label":"需求日期"},{"name":"status","type":"string","label":"状态"}]},
+    {"entity_code":"sales_order_line","display_name":"销售订单行","fields":[{"name":"sales_order_id","type":"reference","label":"销售订单"},{"name":"product_id","type":"reference","label":"产品"},{"name":"quantity","type":"integer","label":"数量"},{"name":"unit_price","type":"decimal","label":"单价"}]},
+    {"entity_code":"inventory","display_name":"库存","fields":[{"name":"product_id","type":"reference","label":"产品"},{"name":"warehouse_name","type":"string","label":"仓库"},{"name":"quantity","type":"decimal","label":"数量"},{"name":"batch_no","type":"string","label":"批次"}]},
+    {"entity_code":"bom","display_name":"BOM","fields":[{"name":"parent_product_id","type":"reference","label":"父产品"},{"name":"child_product_id","type":"reference","label":"子产品"},{"name":"quantity_required","type":"decimal","label":"单位用量"},{"name":"process_name","type":"string","label":"工艺"}]}
+  ],
+  "tools": [
+    {
+      "tool_key":"hctm.product.read","display_name":"读取 HCTM 产品","tool_type":"query","source_ref":"entity.records","description":"按稳定产品编码读取最小产品引用。","risk_level":"low","confirmation_mode":"none","permission_resource":"ai.tool.read","enabled":true,
+      "input_schema":{"type":"object","properties":{"filters":{"type":"object","properties":{"code":{"type":"string"}},"additionalProperties":false},"limit":{"type":"integer"}},"additionalProperties":false},
+      "metadata":{"entity_query":{"entity_code":"product","fields":["id","code","name"],"filter_fields":["code"],"order_by":"code","max_rows":20}}
+    },
+    {
+      "tool_key":"hctm.sales_order.read","display_name":"读取 HCTM 销售订单","tool_type":"query","source_ref":"entity.records","description":"读取订单头及稳定订单号。","risk_level":"low","confirmation_mode":"none","permission_resource":"ai.tool.read","enabled":true,
+      "input_schema":{"type":"object","properties":{"filters":{"type":"object","properties":{"order_no":{"type":"string"}},"additionalProperties":false},"limit":{"type":"integer"}},"additionalProperties":false},
+      "metadata":{"entity_query":{"entity_code":"sales_order","fields":["id","order_no","required_date","status"],"filter_fields":["order_no"],"order_by":"order_no","max_rows":20}}
+    },
+    {
+      "tool_key":"hctm.sales_order_line.read","display_name":"读取 HCTM 销售订单行","tool_type":"query","source_ref":"entity.records","description":"读取租户内订单行，供 Agent 按订单 UUID 关联。","risk_level":"low","confirmation_mode":"none","permission_resource":"ai.tool.read","enabled":true,
+      "input_schema":{"type":"object","properties":{"filters":{"type":"object","properties":{"sales_order_id":{"type":"string"},"product_id":{"type":"string"}},"additionalProperties":false},"limit":{"type":"integer"}},"additionalProperties":false},
+      "metadata":{"entity_query":{"entity_code":"sales_order_line","fields":["id","sales_order_id","product_id","quantity","unit_price"],"filter_fields":["sales_order_id","product_id"],"order_by":"id","max_rows":100}}
+    },
+    {
+      "tool_key":"hctm.inventory.read","display_name":"读取 HCTM 库存","tool_type":"query","source_ref":"entity.records","description":"按产品 UUID 读取库存数量和批次。","risk_level":"low","confirmation_mode":"none","permission_resource":"ai.tool.read","enabled":true,
+      "input_schema":{"type":"object","properties":{"filters":{"type":"object","properties":{"product_id":{"type":"string"},"warehouse_name":{"type":"string"}},"additionalProperties":false},"limit":{"type":"integer"}},"additionalProperties":false},
+      "metadata":{"entity_query":{"entity_code":"inventory","fields":["id","product_id","warehouse_name","quantity","batch_no"],"filter_fields":["product_id","warehouse_name"],"order_by":"id","max_rows":100}}
+    },
+    {
+      "tool_key":"hctm.bom.read","display_name":"读取 HCTM BOM","tool_type":"query","source_ref":"entity.records","description":"按父产品 UUID 读取 BOM 用量。","risk_level":"low","confirmation_mode":"none","permission_resource":"ai.tool.read","enabled":true,
+      "input_schema":{"type":"object","properties":{"filters":{"type":"object","properties":{"parent_product_id":{"type":"string"},"child_product_id":{"type":"string"}},"additionalProperties":false},"limit":{"type":"integer"}},"additionalProperties":false},
+      "metadata":{"entity_query":{"entity_code":"bom","fields":["id","parent_product_id","child_product_id","quantity_required","process_name"],"filter_fields":["parent_product_id","child_product_id"],"order_by":"id","max_rows":100}}
+    },
+    {
+      "tool_key":"hctm.purchase_order.read","display_name":"读取 HCTM 采购订单","tool_type":"query","source_ref":"entity.records","description":"读取供应商、数量、承诺日期、ETA 和状态。","risk_level":"low","confirmation_mode":"none","permission_resource":"ai.tool.read","enabled":true,
+      "input_schema":{"type":"object","properties":{"filters":{"type":"object","properties":{"po_no":{"type":"string"},"status":{"type":"string"}},"additionalProperties":false},"limit":{"type":"integer"}},"additionalProperties":false},
+      "metadata":{"entity_query":{"entity_code":"purchase_order","fields":["id","po_no","supplier_code","material_code","order_qty","promised_date","latest_eta","status"],"filter_fields":["po_no","status"],"order_by":"po_no","max_rows":50}}
+    },
+    {
+      "tool_key":"hctm.equipment.read","display_name":"读取 HCTM 设备","tool_type":"query","source_ref":"entity.records","description":"按设备编码读取状态。","risk_level":"low","confirmation_mode":"none","permission_resource":"ai.tool.read","enabled":true,
+      "input_schema":{"type":"object","properties":{"filters":{"type":"object","properties":{"code":{"type":"string"},"status":{"type":"string"}},"additionalProperties":false},"limit":{"type":"integer"}},"additionalProperties":false},
+      "metadata":{"entity_query":{"entity_code":"equipment","fields":["id","code","name","status"],"filter_fields":["code","status"],"order_by":"code","max_rows":50}}
+    },
+    {
+      "tool_key":"hctm.inspection_order.read","display_name":"读取 HCTM 来料检验","tool_type":"query","source_ref":"entity.records","description":"按检验单号读取批次、不良数量、缺陷和严重度。","risk_level":"low","confirmation_mode":"none","permission_resource":"ai.tool.read","enabled":true,
+      "input_schema":{"type":"object","properties":{"filters":{"type":"object","properties":{"inspection_no":{"type":"string"},"status":{"type":"string"}},"additionalProperties":false},"limit":{"type":"integer"}},"additionalProperties":false},
+      "metadata":{"entity_query":{"entity_code":"inspection_order","fields":["id","inspection_no","po_no","receipt_no","material_code","lot_no","sample_qty","accepted_qty","rejected_qty","defect_code","severity","inspection_level","status"],"filter_fields":["inspection_no","status"],"order_by":"inspection_no","max_rows":50}}
+    },
+    {
+      "tool_key":"hctm.work_order.read","display_name":"读取 HCTM 工单","tool_type":"query","source_ref":"entity.records","description":"按销售订单 UUID 读取缺料工单和状态。","risk_level":"low","confirmation_mode":"none","permission_resource":"ai.tool.read","enabled":true,
+      "input_schema":{"type":"object","properties":{"filters":{"type":"object","properties":{"sales_order_id":{"type":"string"},"status":{"type":"string"}},"additionalProperties":false},"limit":{"type":"integer"}},"additionalProperties":false},
+      "metadata":{"entity_query":{"entity_code":"work_order","fields":["id","wo_no","sales_order_id","product_id","quantity","status"],"filter_fields":["sales_order_id","status"],"order_by":"wo_no","max_rows":100}}
+    }
+  ]
+}

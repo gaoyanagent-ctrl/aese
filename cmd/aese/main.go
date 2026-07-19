@@ -10,6 +10,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/industrial-ai/iaos-aese/internal/agenttrace"
 	"github.com/industrial-ai/iaos-aese/internal/iaosclient"
 	"github.com/industrial-ai/iaos-aese/internal/legacyprojection"
 	"github.com/industrial-ai/iaos-aese/internal/replay"
@@ -26,6 +27,8 @@ Online commands are available after an IAOS target is configured:
   aese replay <pack-dir> --story <key> --target <url> [--apply]
   aese verify <pack-dir> --story <key> --target <url>
   aese reset <pack-dir> --story <key> --target <url> [--apply]
+  aese agent-setup <pack-dir> --target <url> [--apply]
+  aese agent-run <pack-dir> --story <key> --target <url> [--apply]
 `
 
 func main() { os.Exit(run(os.Args[1:], os.Stdout, os.Stderr)) }
@@ -48,6 +51,10 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return verifyCommand(args[1:], stdout, stderr)
 	case "reset":
 		return resetCommand(args[1:], stdout, stderr)
+	case "agent-setup":
+		return agentSetupCommand(args[1:], stdout, stderr)
+	case "agent-run":
+		return agentRunCommand(args[1:], stdout, stderr)
 	case "help", "-h", "--help":
 		fmt.Fprint(stdout, usage)
 		return 0
@@ -324,6 +331,68 @@ func resetCommand(args []string, stdout, stderr io.Writer) int {
 	_ = writeJSON(stdout, summary)
 	if runErr != nil {
 		fmt.Fprintln(stderr, runErr)
+		return 1
+	}
+	return 0
+}
+
+func agentSetupCommand(args []string, stdout, stderr io.Writer) int {
+	pack, values, code := parseOnline("agent-setup", args, stderr, false, true)
+	if code != 0 {
+		return code
+	}
+	bundle, err := agenttrace.LoadBundle(pack.Root)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	if err := bundle.ValidatePack(pack.Manifest.PackKey); err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	client, err := clientFor(values)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 2
+	}
+	summary, err := agenttrace.Setup(context.Background(), client, bundle, values.apply)
+	_ = writeJSON(stdout, summary)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	return 0
+}
+
+func agentRunCommand(args []string, stdout, stderr io.Writer) int {
+	pack, values, code := parseOnline("agent-run", args, stderr, true, true)
+	if code != 0 {
+		return code
+	}
+	bundle, err := agenttrace.LoadBundle(pack.Root)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	if err := bundle.ValidatePack(pack.Manifest.PackKey); err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	story, err := findStory(pack, values.story)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 2
+	}
+	runID := effectiveRunID(values.runID, "agent")
+	client, err := clientFor(values)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 2
+	}
+	summary, err := agenttrace.Run(context.Background(), client, pack.Manifest.PackKey, values.story, story.Events.CorrelationID, runID, values.apply)
+	_ = writeJSON(stdout, summary)
+	if err != nil {
+		fmt.Fprintln(stderr, err)
 		return 1
 	}
 	return 0

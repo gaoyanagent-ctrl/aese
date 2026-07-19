@@ -306,6 +306,92 @@ type ScenarioResetRequest struct {
 	DryRun      bool   `json:"dry_run"`
 }
 
+type MetadataSchemaRequest struct {
+	DisplayName string          `json:"display_name"`
+	Fields      json.RawMessage `json:"fields"`
+}
+
+func (c *Client) UpsertMetadataSchema(ctx context.Context, entity string, request MetadataSchemaRequest) error {
+	if err := validateEntity(entity); err != nil {
+		return err
+	}
+	if strings.TrimSpace(request.DisplayName) == "" || len(request.Fields) == 0 {
+		return fmt.Errorf("metadata display_name and fields are required")
+	}
+	return c.request(ctx, http.MethodPost, "api/v1/metadata/schema/"+url.PathEscape(entity), request, nil)
+}
+
+type AIToolManifest struct {
+	ToolKey            string          `json:"tool_key"`
+	DisplayName        string          `json:"display_name"`
+	ToolType           string          `json:"tool_type"`
+	SourceRef          string          `json:"source_ref"`
+	Description        string          `json:"description,omitempty"`
+	InputSchema        json.RawMessage `json:"input_schema"`
+	OutputSchema       json.RawMessage `json:"output_schema,omitempty"`
+	RiskLevel          string          `json:"risk_level"`
+	ConfirmationMode   string          `json:"confirmation_mode"`
+	PermissionResource string          `json:"permission_resource,omitempty"`
+	DecisionScope      json.RawMessage `json:"decision_scope,omitempty"`
+	Examples           json.RawMessage `json:"examples,omitempty"`
+	Enabled            bool            `json:"enabled"`
+	Metadata           json.RawMessage `json:"metadata,omitempty"`
+}
+
+type AIToolSummary struct {
+	ToolKey string `json:"tool_key"`
+}
+
+func (c *Client) ListAITools(ctx context.Context, includeDisabled bool) ([]AIToolSummary, error) {
+	path := "api/v1/ai/tools?limit=200"
+	if includeDisabled {
+		path += "&include_disabled=true"
+	}
+	var response struct {
+		Items []AIToolSummary `json:"items"`
+	}
+	if err := c.request(ctx, http.MethodGet, path, nil, &response); err != nil {
+		return nil, err
+	}
+	return response.Items, nil
+}
+
+func (c *Client) CreateAITool(ctx context.Context, manifest AIToolManifest) error {
+	return c.request(ctx, http.MethodPost, "api/v1/ai/tools", manifest, nil)
+}
+
+func (c *Client) UpdateAITool(ctx context.Context, manifest AIToolManifest) error {
+	patch := map[string]any{
+		"display_name": manifest.DisplayName, "description": manifest.Description,
+		"input_schema": manifest.InputSchema, "risk_level": manifest.RiskLevel,
+		"confirmation_mode":   manifest.ConfirmationMode,
+		"permission_resource": manifest.PermissionResource,
+		"examples":            manifest.Examples, "metadata": manifest.Metadata,
+	}
+	return c.request(ctx, http.MethodPatch, "api/v1/ai/tools/"+url.PathEscape(manifest.ToolKey), patch, nil)
+}
+
+func (c *Client) EnableAITool(ctx context.Context, toolKey string) error {
+	return c.request(ctx, http.MethodPost, "api/v1/ai/tools/"+url.PathEscape(toolKey)+"/enable", map[string]any{}, nil)
+}
+
+type AIToolCallResult struct {
+	CallID       string          `json:"call_id"`
+	Status       string          `json:"status"`
+	Output       json.RawMessage `json:"output"`
+	ExecutionRef json.RawMessage `json:"execution_ref"`
+}
+
+func (c *Client) CallAITool(ctx context.Context, toolKey, correlationID, sessionID string, input any) (AIToolCallResult, error) {
+	var out AIToolCallResult
+	body := map[string]any{"input": input, "session_id": sessionID}
+	err := c.requestHeaders(ctx, http.MethodPost, "api/v1/ai/tools/"+url.PathEscape(toolKey)+"/call", body, &out, map[string]string{"X-Correlation-ID": correlationID})
+	if err == nil && (out.CallID == "" || out.Status != "succeeded") {
+		return out, fmt.Errorf("AI tool %s returned incomplete success", toolKey)
+	}
+	return out, err
+}
+
 func (c *Client) ResetScenario(ctx context.Context, request ScenarioResetRequest, correlationID string) (ScenarioSummary, error) {
 	var out ScenarioSummary
 	err := c.requestHeaders(ctx, http.MethodPost, "api/v1/scenarios/reset", request, &out, map[string]string{"X-Correlation-ID": correlationID})

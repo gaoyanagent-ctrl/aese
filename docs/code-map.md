@@ -11,6 +11,7 @@
 | 理解 AESE/IAOS 边界 | `docs/architecture.md`、ADR-001 |
 | 运行或修改 2D 沙盘 | DES-002、M3V completed plan、M3V runbook |
 | 修改 M4 异常入口 | M4 completed plan、M4 evidence、`internal/iaosclient/`、`internal/replay/` |
+| 修改 M5 Agent tracer | DES-003、M5 completed plan、`internal/agenttrace/`、`scenario-packs/hctm/agent-tools.json` |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
 | 修改事件名和 payload | `docs/HCTM_Event_Model.md` |
@@ -82,6 +83,7 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | Outbox 注册 | `/iaos/iaos-go/platform/internal/capability/generic_atomic.go` | `RegisterOutboxMessage` |
 | Capability 执行 | `/iaos/iaos-go/platform/internal/capability/` | 受治理业务动作入口 |
 | AI Tool 调用 | `/iaos/iaos-go/platform/internal/aitool/` | Agent 安全调用入口 |
+| AI Tool entity query | `/iaos/iaos-go/platform/internal/aitool/dispatcher_entity_records.go` | `source_ref=entity.records`；服务端 metadata 固定 entity/fields/filter/order/limit，调用 input 只给值；显式 tenant predicate + RLS |
 | 前端业务入口 | `/iaos/iaos-go/frontend/src/app/page.tsx` | IAOS 主工作台 |
 
 ## 5. M3V 计划路径
@@ -111,7 +113,23 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | 三类异常验收证据 | `docs/reports/hctm-m4-simulation-ingress-evidence.md` |
 | IAOS 入口实现 | `/iaos/iaos-go/platform/internal/api/simulation.go` |
 
-## 7. 导航更新触发器
+## 7. M5 Agent tracer 实现路径
+
+| 能力 | 路径 |
+| --- | --- |
+| `agent-setup` / `agent-run` 命令分发 | `cmd/aese/main.go` |
+| tool bundle 加载与约束 | `internal/agenttrace/config.go` |
+| metadata/tool 创建、更新和启用 | `internal/agenttrace/setup.go` |
+| 9 次受审计读取与三 Agent 建议构建 | `internal/agenttrace/run.go` |
+| IAOS metadata / AI Tool client 合同 | `internal/iaosclient/client.go` |
+| 版本化 HCTM tool manifest | `scenario-packs/hctm/agent-tools.json` |
+| tool bundle JSON Schema | `scenario-packs/hctm/schemas/agent-tools.schema.json` |
+| Agent tracer 单元测试 | `internal/agenttrace/run_test.go` |
+| IAOS `entity.records` dispatcher | `/iaos/iaos-go/platform/internal/aitool/dispatcher_entity_records.go` |
+
+当前经营分析边界：在线工具可读订单、订单行、库存、BOM、采购、设备、检验和工单；完工入库、发运及成本实际仍没有受治理在线事实，所以 `business_analysis` 必须保留 `partial` / data gaps，不能复述 Preview 的 11,700/300 为在线结果。
+
+## 8. 导航更新触发器
 
 以下改动必须更新本文件：
 

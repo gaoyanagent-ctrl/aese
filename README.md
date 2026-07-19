@@ -53,8 +53,20 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M2.5 工程治理：完成。
 - M3 可执行 HCTM 场景包：完成；pack、Schema、CLI、受治理 apply/reset、O2D replay/verify 和幂等证据均已落地。
 - M3V 快速 2D 企业沙盘：完成；七幕/22 事件、A 线画布、KPI、对象详情和三类 Agent 建议已通过桌面与移动端验收。
+- M5 Agent MVP：完成；默认 dry-run 的 `agent-setup` / `agent-run`、9 个低风险只读 AI Tool bundle 和三 Agent 确定性 tracer 已通过 live、重复调用、零业务写入与跨租户验收。
 
-当前可直接运行静态场景驱动的 2D 企业沙盘。M4 三类异常已完成 IAOS 受治理入口、状态影响、事务 Outbox 和 canonical replay 验收；下一优先级是 M5 Agent MVP。当前状态以 [Roadmap](docs/roadmap.md) 为准。
+当前可直接运行静态场景驱动的 2D 企业沙盘。M4 三类异常已完成 IAOS 受治理入口、状态影响、事务 Outbox 和 canonical replay 验收；M5 tracer 能依据 IAOS 中的订单、库存、BOM、采购、设备、检验和工单事实生成计划、质量与经营分析建议。经营分析结果会对缺失的完工入库、发运和实际成本明确标记 `partial`，不会把 Preview 中的 11,700 件实发和 300 件缺口冒充在线事实。下一里程碑是尚未启动的 M6 在线沙盘，当前状态以 [Roadmap](docs/roadmap.md) 为准。
+
+## M5 Agent tracer
+
+`agent-setup` 从 `scenario-packs/hctm/agent-tools.json` 安装 HCTM 最小 metadata 和 9 个 `source_ref=entity.records` 查询工具；`agent-run` 通过 IAOS Tool API 读取上下文并返回三类结构化建议。两个命令默认都不写入，只有显式 `--apply` 才会注册工具或产生受审计的 tool calls：
+
+```bash
+go run ./cmd/aese agent-setup ./scenario-packs/hctm --target http://127.0.0.1:8082
+go run ./cmd/aese agent-run ./scenario-packs/hctm --story order-expedite-01 --target http://127.0.0.1:8082
+```
+
+这条 tracer 是可验证的只读建议链，不是独立 Agent Runtime，也不调用真实 LLM 或自动执行业务动作。
 
 ## 快速启动 2D 沙盘
 
@@ -77,9 +89,11 @@ npm run dev
 - [快速 2D 企业沙盘实施计划](docs/plans/2026-07-19-fast-track-2d-enterprise-sandbox.md)
 - [M3 本地运行手册](docs/runbooks/hctm-m3-local-run.md)
 - [M3V 2D 沙盘运行手册](docs/runbooks/hctm-m3v-2d-sandbox.md)
+- [M5 受治理 Agent Tracer 运行手册](docs/runbooks/hctm-m5-governed-agent-tracers.md)
 - [HCTM → IAOS 兼容性报告](docs/reports/hctm-iaos-compatibility.md)
 - [M3 执行证据](docs/reports/hctm-m3-execution-evidence.md)
 - [M3V 2D 沙盘验收证据](docs/reports/hctm-m3v-2d-sandbox-evidence.md)
+- [M5 受治理 Agent Tracer 验收证据](docs/reports/hctm-m5-agent-evidence.md)
 - [MVP 蓝图](docs/AESE_MVP_Blueprint.md)
 - [华辰热管理系统集团详细蓝图](docs/HCTM_Virtual_Enterprise_Blueprint.md)
 - [华辰主数据建模规格](docs/HCTM_Master_Data_Model.md)

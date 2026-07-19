@@ -135,3 +135,18 @@
 - 影响：`LAS-WLD-02`、`PO-202607-0001` 和 `IQC-202607-0002` 均有稳定受治理状态；事件常量、simulation response、租户 subject、metadata/entity query 和 Outbox 构成 M5/M6 的消费合同。领域消费者、自动重排产、Agent Runtime 和 `IaosScenarioDataSource` 未提前计入 M4。
 - 验证：21-object dry-run 为 9 insert/12 no-op，apply 后第二次为 21 no-op；首次 canonical replay 3 triggered/19 skipped/0 failed，第二次 0/22/0；三类 ingress/Outbox 各 1 条，采购 ETA、IQC 数量/缺陷/批次/严重度及设备状态均落库；O2D workflow completed 并生成 3 张工单。AESE test/vet/validate/inspect、IAOS 各模块 test/vet、real-PostgreSQL `-race` integration、部署健康检查和 diff checks 通过。
 - 后续：进入 M5 时只通过 IAOS Capability / AI Tool Registry 为计划、质量和经营分析 Agent 暴露受治理读写工具；M6 再实现 `IaosScenarioDataSource`。继续推进 legacy FORCE RLS、tenant-safe composite foreign key 和 metadata 版本排序 hardening。
+
+## 2026-07-19 - M5 受治理 Agent MVP 启动
+
+- 变更：新增 DES-003 和 PLAN-M5-001，将 M5 设为唯一 active plan；并行审计计划、质量和经营分析 Agent 的现有规格、实时数据与 IAOS AI Tool Registry 能力。
+- 原因：M4 已提供三类结构化异常和可查询业务状态，但 IAOS query tool 当前仅能列出工具，三个 Agent 尚不能通过受治理工具读取 HCTM 上下文。
+- 影响：M5 采用通用 metadata 约束的 `entity.records` dispatcher，HCTM tool manifests 和 Agent 编排保留在 AESE；首版只读建议，不执行业务动作。经营分析必须显式报告尚缺完工入库、发运和实际成本事实，不能复用 Preview 答案冒充在线结果。
+- 验证：三个独立审计均确认 AI Tool Registry 的 RLS、权限、schema、call audit 和 milestone event 可复用，并识别当前 `tenant-hctm` tool registry 为空及 shipment/cost 数据缺口。
+- 后续：实现通用 query dispatcher、HCTM tool bundle 和三 Agent tracer，完成 live 调用、跨租户及业务零写验收。
+
+## 2026-07-19 - 完成 M5 受治理 Agent MVP
+
+- 变更：IAOS 增加 metadata 约束的通用 `entity.records` query dispatcher；AESE 增加 5 个 metadata schema、9 个 HCTM 只读 AI Tool manifest、`agent-setup`/`agent-run` 命令及计划、质量、经营分析三个 tracer。
+- 原因：让 Agent 基于 `tenant-hctm` 的在线业务状态生成可解释建议，并复用 IAOS 的权限、RLS、Tool Registry 和调用审计，而不是读取 Preview 或绕过平台另造运行时。
+- 影响：重复 setup 收敛为 9 个工具；重复 live run 不改变 24 条目标业务记录或 39 条 Outbox，只新增 9 条 Tool Call 和 36 条 milestone event；`tenant-other` 看不到 HCTM 工具。计划 Agent 会按当前库存报告 7,600 的物料缺口；质量和经营分析对缺失事实显式返回 `partial`，不虚构 1,700 合格放行、11,700 已发运或成本结果。
+- 后续：M6 只消费稳定 recommendation envelope 与 IAOS 在线状态；补齐完工入库、发运和实际成本受治理事实后，再扩展经营分析的最终交付和利润结论。

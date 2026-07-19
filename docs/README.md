@@ -12,7 +12,7 @@
 | 当前里程碑和优先级 | `docs/roadmap.md` |
 | 任务到文件导航 | `docs/code-map.md` |
 | 历史进展 | `docs/progress-log.md` |
-| 最近完成计划 | `docs/plans/2026-07-19-m4-governed-simulation-ingress.md` |
+| 最近完成计划 | `docs/plans/2026-07-19-m5-governed-agent-mvp.md` |
 
 若内容冲突，当前状态以 `docs/roadmap.md` 为准，长期架构决策以 ADR 为准。
 
@@ -44,6 +44,8 @@
 | [HCTM M3V 2D Sandbox Runbook](runbooks/hctm-m3v-2d-sandbox.md) | 前端启动、操作、验证与故障排查 | Active |
 | [HCTM M3V 2D Sandbox Evidence](reports/hctm-m3v-2d-sandbox-evidence.md) | 功能、自动化和三目标视口截图证据 | Completed |
 | [HCTM M4 Simulation Ingress Evidence](reports/hctm-m4-simulation-ingress-evidence.md) | 三类异常入口、状态、幂等、跨租户和 Outbox 证据 | Completed |
+| [HCTM M5 Agent Tracer Runbook](runbooks/hctm-m5-governed-agent-tracers.md) | Tool setup、Agent run、重复和跨租户验收步骤 | Active |
+| [HCTM M5 Agent Tracer Evidence](reports/hctm-m5-agent-evidence.md) | 三 Agent 在线结果、零业务写入和调用审计证据 | Completed |
 | [Original Chat](ChatGPT_20260626.md) | 原始构思记录，仅供追溯 | Archive |
 
 ### 设计、决策和计划
@@ -54,9 +56,11 @@
 | ADR-002 | [AESE 只读 2D 场景预览界面](decisions/ADR-002-aese-2d-preview-ui.md) | Accepted |
 | DES-001 | [M3 可执行场景包与重放架构](designs/DES-001-m3-executable-scenario-package.md) | Completed |
 | DES-002 | [快速 2D 企业沙盘设计](designs/DES-002-fast-track-2d-enterprise-sandbox.md) | Completed |
+| DES-003 | [M5 受治理 Agent Tracer 设计](designs/DES-003-governed-agent-tracers.md) | Completed |
 | PLAN-M3 | [M3 实施计划](plans/2026-07-19-m3-executable-scenario-package.md) | Completed |
 | PLAN-M3V | [快速 2D 企业沙盘实施计划](plans/2026-07-19-fast-track-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Completed |
+| PLAN-M5 | [M5 受治理 Agent MVP 实施计划](plans/2026-07-19-m5-governed-agent-mvp.md) | Completed |
 
 ## 3. 命名与状态
 

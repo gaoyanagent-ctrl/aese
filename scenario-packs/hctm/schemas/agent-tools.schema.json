@@ -1,0 +1,11 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema",
+  "$id":"https://aese.iaos.local/schemas/agent-tools.schema.json",
+  "type":"object","additionalProperties":false,
+  "required":["schema_version","pack_key","metadata_schemas","tools"],
+  "properties":{
+    "$schema":{"type":"string"},"schema_version":{"const":"1.0.0"},"pack_key":{"const":"hctm"},
+    "metadata_schemas":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["entity_code","display_name","fields"],"properties":{"entity_code":{"type":"string","pattern":"^[a-z][a-z0-9_]*$"},"display_name":{"type":"string","minLength":1},"fields":{"type":"array","minItems":1,"items":{"type":"object"}}}}},
+    "tools":{"type":"array","minItems":1,"items":{"type":"object","required":["tool_key","display_name","tool_type","source_ref","input_schema","risk_level","confirmation_mode","enabled","metadata"],"properties":{"tool_key":{"type":"string"},"display_name":{"type":"string"},"tool_type":{"const":"query"},"source_ref":{"const":"entity.records"},"description":{"type":"string"},"input_schema":{"type":"object"},"output_schema":{"type":"object"},"risk_level":{"const":"low"},"confirmation_mode":{"const":"none"},"permission_resource":{"type":"string"},"decision_scope":{"type":"object"},"examples":{"type":"array"},"enabled":{"const":true},"metadata":{"type":"object"}},"additionalProperties":false}}
+  }
+}
