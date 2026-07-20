@@ -1,4 +1,4 @@
-import { AlertTriangle, LoaderCircle, Map } from 'lucide-react';
+import { AlertTriangle, LoaderCircle } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import previewJson from '../../scenario-packs/hctm/stories/order-expedite-01/preview.json';
 import { ControlBar } from './components/ControlBar';
@@ -18,7 +18,7 @@ const SCENARIO_KEY = 'order-expedite-01';
 const scenarioSource = new StaticScenarioDataSource({ [SCENARIO_KEY]: previewJson });
 type MobileView = 'enterprise' | 'canvas' | 'events';
 
-function Sandbox({ scenario, onModeChange, onOpenIntegration }: { scenario: SandboxScenario; onModeChange: (mode: 'preview' | 'live') => void; onOpenIntegration: () => void }) {
+function Sandbox({ scenario, onModeChange, onOpenIntegration, onOpenAtlas }: { scenario: SandboxScenario; onModeChange: (mode: 'preview' | 'live') => void; onOpenIntegration: () => void; onOpenAtlas: () => void }) {
   const playback = usePlayback(scenario);
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -70,6 +70,7 @@ function Sandbox({ scenario, onModeChange, onOpenIntegration }: { scenario: Sand
         mode="preview"
         onModeChange={onModeChange}
         onOpenIntegration={onOpenIntegration}
+        onOpenAtlas={onOpenAtlas}
       />
       <div className="mobile-tabs" role="tablist" aria-label="移动端沙盘区域">
         {([['enterprise', '企业'], ['canvas', 'A 线画布'], ['events', '事件 / Agent']] as const).map(([value, label]) => (
@@ -138,9 +139,8 @@ export default function App() {
   if (mode === 'atlas') return <SystemAtlas onExit={() => setMode('preview')} />;
   return <>
     {mode === 'live'
-      ? <LiveSandbox key={connectionVersion} layoutScenario={scenario} onModeChange={setMode} onOpenIntegration={openIntegration} />
-      : <Sandbox scenario={scenario} onModeChange={setMode} onOpenIntegration={openIntegration} />}
-    <button className="aese-atlas-launch" onClick={() => setMode('atlas')}><Map aria-hidden="true"/><span>系统全景</span></button>
+      ? <LiveSandbox key={connectionVersion} layoutScenario={scenario} onModeChange={setMode} onOpenIntegration={openIntegration} onOpenAtlas={() => setMode('atlas')} />
+      : <Sandbox scenario={scenario} onModeChange={setMode} onOpenIntegration={openIntegration} onOpenAtlas={() => setMode('atlas')} />}
     <IntegrationConsole
       open={integrationOpen}
       onClose={() => setIntegrationOpen(false)}

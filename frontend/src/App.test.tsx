@@ -23,4 +23,12 @@ describe('AESE sandbox', () => {
     expect(screen.getByText('焊接设备停机')).toBeInTheDocument();
     expect(screen.queryByText('收到原订单')).not.toBeInTheDocument();
   });
+
+  it('places the system atlas command in the control bar', async () => {
+    render(<App />);
+    await screen.findByText('事件 0/22');
+    const atlasButton = screen.getByRole('button', { name: '打开系统全景' });
+    expect(atlasButton.closest('.playback-controls')).not.toBeNull();
+    expect(document.querySelector('.aese-atlas-launch')).toBeNull();
+  });
 });

@@ -68,7 +68,7 @@ function entityForNode(nodeId: string, entities: IaosScenarioEntity[]) {
   return entities.find(matchers[nodeId] ?? (() => false));
 }
 
-export function LiveSandbox({ layoutScenario, onModeChange, onOpenIntegration }: { layoutScenario: SandboxScenario; onModeChange: (mode: 'preview' | 'live') => void; onOpenIntegration: () => void }) {
+export function LiveSandbox({ layoutScenario, onModeChange, onOpenIntegration, onOpenAtlas }: { layoutScenario: SandboxScenario; onModeChange: (mode: 'preview' | 'live') => void; onOpenIntegration: () => void; onOpenAtlas: () => void }) {
   const source = useMemo(() => liveDataSourceFromEnvironment(), []);
   const [snapshot, setSnapshot] = useState<IaosScenarioSnapshot | null>(null);
   const [connection, setConnection] = useState<Connection>('connecting');
@@ -150,7 +150,7 @@ export function LiveSandbox({ layoutScenario, onModeChange, onOpenIntegration }:
   return <div className="app-shell live-shell">
     <ControlBar scenarioName="华辰苏州基地 · 在线企业沙盘" currentTime={new Date(snapshot.observed_at).toLocaleString('zh-CN', { hour12: false })}
       step={events.length} totalSteps={events.length} playing={false} speed={1} onTogglePlay={() => {}} onPrevious={() => {}} onNext={() => {}} onReset={() => {}} onSpeedChange={() => {}}
-      mode="live" onModeChange={onModeChange} sourceStatus={statusLabel} onRefresh={() => { void refresh().catch(() => undefined); }} onReconnect={() => setGeneration((v) => v + 1)} onOpenIntegration={onOpenIntegration} />
+      mode="live" onModeChange={onModeChange} sourceStatus={statusLabel} onRefresh={() => { void refresh().catch(() => undefined); }} onReconnect={() => setGeneration((v) => v + 1)} onOpenIntegration={onOpenIntegration} onOpenAtlas={onOpenAtlas} />
     <div className="live-integrity" role="status"><span>IAOS · tenant-hctm</span><span>游标 {snapshot.cursor}</span><span>最后更新 {new Date(snapshot.observed_at).toLocaleTimeString('zh-CN')}</span><span>完整度 {snapshot.completeness}</span>{snapshot.gaps.length > 0 && <strong>数据缺口：{snapshot.gaps.join('、')}</strong>}</div>
     <div className="mobile-tabs" role="tablist">{([['enterprise', '企业'], ['canvas', 'A 线画布'], ['events', '事件 / Agent']] as const).map(([value, label]) => <button key={value} role="tab" aria-selected={mobileView === value} className={mobileView === value ? 'active' : ''} onClick={() => setMobileView(value)}>{label}</button>)}</div>
     <main className="workspace">
