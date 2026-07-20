@@ -28,3 +28,10 @@ Substantial AESE progress is written to `docs/progress-log.md` and a versioned `
 ## Boundary
 
 System Atlas tracks product construction, not HCTM simulated business facts. Scenario runtime truth remains in IAOS tenant-scoped business tables and scenario observation APIs.
+
+## Explainable Drill-Down
+
+- Dagre creates the initial layered layout from actual node dimensions; nodes remain draggable and the toolbar can restore automatic layout.
+- Selecting a component highlights its one-hop neighbors and directional relationship labels while dimming unrelated components.
+- Detail content is separated into design documents, functional entries, code locations and evidence. Registered Markdown is rendered in a modal reader through IAOS's restricted document API.
+- AESE `entry_refs` resolve `#sandbox`, `#live`, `#integration` and `#atlas` to real application states. IAOS entries open the corresponding IAOS workspace route.

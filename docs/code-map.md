@@ -165,7 +165,8 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 
 | 能力 | 路径 |
 | --- | --- |
-| AESE 仿真完成体图谱 | `frontend/src/components/SystemAtlas.tsx`、`SystemAtlas.css` |
+| AESE 仿真完成体图谱 | `frontend/src/components/SystemAtlas.tsx`、`SystemAtlas.css`；Dagre 自动布局、拖动、关系高亮、Markdown 阅读器与功能入口 |
+| AESE Atlas 深链接 | `frontend/src/App.tsx`；`#sandbox`、`#live`、`#integration`、`#atlas` 到真实界面状态 |
 | IAOS 数据合同 | `/iaos/iaos-go/platform/internal/systematlas/`、`/api/v1/system-atlas` |
 | 双系统视图设计 | `docs/designs/DES-006-system-atlas-aese-projection.md`、IAOS DES-049 |
 | 进展登记 | `scripts/record_system_atlas_update.sh` |

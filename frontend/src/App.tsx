@@ -12,7 +12,7 @@ import { usePlayback } from './playback';
 import { StaticScenarioDataSource } from './scenario';
 import type { SandboxScenario } from './scenario/types';
 import { LiveSandbox } from './LiveSandbox';
-import { SystemAtlas } from './components/SystemAtlas';
+import { SystemAtlas, type AtlasEntryRef } from './components/SystemAtlas';
 
 const SCENARIO_KEY = 'order-expedite-01';
 const scenarioSource = new StaticScenarioDataSource({ [SCENARIO_KEY]: previewJson });
@@ -125,6 +125,24 @@ export default function App() {
   const [integrationOpen, setIntegrationOpen] = useState(false);
   const [connectionVersion, setConnectionVersion] = useState(0);
 
+  const navigate = (target: 'preview' | 'live' | 'atlas') => {
+    setMode(target);
+    window.location.hash = target === 'preview' ? 'sandbox' : target;
+  };
+
+  useEffect(() => {
+    const applyHash = () => {
+      const target = window.location.hash.replace(/^#/, '');
+      if (target === 'atlas') setMode('atlas');
+      if (target === 'live') setMode('live');
+      if (target === 'sandbox') setMode('preview');
+      if (target === 'integration') { setMode('preview'); setIntegrationOpen(true); }
+    };
+    applyHash();
+    window.addEventListener('hashchange', applyHash);
+    return () => window.removeEventListener('hashchange', applyHash);
+  }, []);
+
   useEffect(() => {
     let active = true;
     scenarioSource.loadScenario(SCENARIO_KEY)
@@ -136,11 +154,16 @@ export default function App() {
   if (error) return <main className="error-state"><AlertTriangle aria-hidden="true" /><strong>场景无法加载</strong><p>{error}</p><p>请检查 preview.json 是否存在且包含七幕和 22 个事件。</p></main>;
   if (!scenario) return <main className="loading-state"><LoaderCircle aria-hidden="true" className="loading-spinner" /><strong>正在装载苏州基地场景…</strong></main>;
   const openIntegration = () => setIntegrationOpen(true);
-  if (mode === 'atlas') return <SystemAtlas onExit={() => setMode('preview')} />;
+  const navigateAtlasEntry = (entry: AtlasEntryRef) => {
+    const target = entry.path.replace(/^#/, '');
+    if (target === 'integration') { navigate('preview'); setIntegrationOpen(true); return; }
+    navigate(target === 'live' ? 'live' : target === 'atlas' ? 'atlas' : 'preview');
+  };
+  if (mode === 'atlas') return <SystemAtlas onExit={() => navigate('preview')} onNavigate={navigateAtlasEntry} />;
   return <>
     {mode === 'live'
-      ? <LiveSandbox key={connectionVersion} layoutScenario={scenario} onModeChange={setMode} onOpenIntegration={openIntegration} onOpenAtlas={() => setMode('atlas')} />
-      : <Sandbox scenario={scenario} onModeChange={setMode} onOpenIntegration={openIntegration} onOpenAtlas={() => setMode('atlas')} />}
+      ? <LiveSandbox key={connectionVersion} layoutScenario={scenario} onModeChange={navigate} onOpenIntegration={openIntegration} onOpenAtlas={() => navigate('atlas')} />
+      : <Sandbox scenario={scenario} onModeChange={navigate} onOpenIntegration={openIntegration} onOpenAtlas={() => navigate('atlas')} />}
     <IntegrationConsole
       open={integrationOpen}
       onClose={() => setIntegrationOpen(false)}
