@@ -123,7 +123,7 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | metadata/tool 创建、更新和启用 | `internal/agenttrace/setup.go` |
 | 9 次受审计读取与三 Agent 建议构建 | `internal/agenttrace/run.go` |
 | IAOS metadata / AI Tool client 合同 | `internal/iaosclient/client.go` |
-| 版本化 HCTM tool manifest | `scenario-packs/hctm/agent-tools.json` |
+| 版本化 HCTM tool / UI metadata manifest | `scenario-packs/hctm/agent-tools.json`；`sales_order.lines` 声明 `sales_order_line` child-list，reference 字段携带 `ref_entity` 供 IAOS 列表与详情解析业务标签 |
 | tool bundle JSON Schema | `scenario-packs/hctm/schemas/agent-tools.schema.json` |
 | Agent tracer 单元测试 | `internal/agenttrace/run_test.go` |
 | IAOS `entity.records` dispatcher | `/iaos/iaos-go/platform/internal/aitool/dispatcher_entity_records.go` |

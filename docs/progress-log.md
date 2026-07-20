@@ -178,3 +178,10 @@
 - 原因：`tenant-hctm` 只存在于控制面目录，导致 IAOS 主界面租户下拉不可见；原侧栏只改 `localStorage`，不能改变后端强制执行的 JWT tenant claim。
 - 影响：华辰租户可从 IAOS 平台工作区直接选择，切换后业务菜单、实体数据与 AESE Live 使用相同 `tenant-hctm` 边界；普通用户不能使用开发切换入口，租户状态仍按 active gate 检查。
 - 后续：生产身份体系应使用真实跨租户 membership/SSO，不依赖 dev-user token exchange；AESE 本地演示继续使用该受限开发入口。
+
+## 2026-07-20 - 修复 HCTM 业务菜单与订单明细可用性
+
+- 变更：HCTM metadata bundle 为销售订单补充订单行 `child_list`，为客户、产品和订单引用补充目标实体；IAOS 数据浏览器在缺少独立 Formily UI Schema 时从实体字段生成可用详情表单，忽略请求去重产生的预期 AbortError，并隐藏当前租户不存在 Schema 的核心实体菜单。
+- 原因：销售订单虽有头和行数据，但 `/metadata/ui/sales_order` 缺失导致详情抽屉永久停留在加载态，订单头又未声明行关系；全局 `inventory_lot` 菜单被错误投影到只使用 `inventory` 的 HCTM 租户。
+- 影响：销售订单列表和明细可稳定查看，客户/产品引用显示业务标签；HCTM 不再展示会报错的“仓储物资”入口，库存继续通过“实物库存与库区”查看；工单、设备和库存页面沿用同一详情 fallback。
+- 后续：其他行业包若需要定制表单布局可继续注册 `/metadata/ui/:entity`，不注册时使用字段驱动 fallback；生产环境应逐步将通用核心菜单改为完整的 capability/metadata 可用性投影。

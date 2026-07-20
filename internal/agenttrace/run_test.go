@@ -81,6 +81,27 @@ func TestLoadCanonicalAgentToolBundle(t *testing.T) {
 	}
 }
 
+func TestLoadBundlePreservesSalesOrderChildMetadata(t *testing.T) {
+	bundle, err := LoadBundle("../../scenario-packs/hctm")
+	if err != nil {
+		t.Fatal(err)
+	}
+	for _, schema := range bundle.MetadataSchemas {
+		if schema.EntityCode != "sales_order" {
+			continue
+		}
+		for _, field := range schema.Fields {
+			if field.Name == "lines" {
+				if field.Type != "child_list" || field.ChildEntity != "sales_order_line" || field.ChildRelationField != "sales_order_id" {
+					t.Fatalf("unexpected sales order lines metadata: %+v", field)
+				}
+				return
+			}
+		}
+	}
+	t.Fatal("sales_order.lines metadata not found")
+}
+
 func TestAgentToolBundleFailsClosedForWrongPackOrMissingTool(t *testing.T) {
 	bundle, err := LoadBundle("../../scenario-packs/hctm")
 	if err != nil {

@@ -12,9 +12,13 @@ import (
 const BundleSchemaVersion = "1.0.0"
 
 type MetadataField struct {
-	Name  string `json:"name"`
-	Type  string `json:"type"`
-	Label string `json:"label"`
+	Name               string   `json:"name"`
+	Type               string   `json:"type"`
+	Label              string   `json:"label"`
+	RefEntity          string   `json:"ref_entity,omitempty"`
+	ChildEntity        string   `json:"child_entity,omitempty"`
+	ChildRelationField string   `json:"child_relation_field,omitempty"`
+	Options            []string `json:"options,omitempty"`
 }
 
 type MetadataSchema struct {
