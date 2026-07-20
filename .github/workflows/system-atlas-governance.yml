@@ -1,0 +1,39 @@
+name: System Atlas Governance
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Validate Atlas tracking coverage
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            ./scripts/check_system_atlas_tracking.sh "${{ github.event.pull_request.base.sha }}" "${{ github.sha }}"
+          else
+            ./scripts/check_system_atlas_tracking.sh "${{ github.event.before }}" "${{ github.sha }}"
+          fi
+
+  sync:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: validate
+    runs-on: ubuntu-latest
+    environment: system-atlas
+    steps:
+      - uses: actions/checkout@v4
+      - name: Sync declarations when endpoint is configured
+        env:
+          IAOS_BASE_URL: ${{ secrets.IAOS_ATLAS_BASE_URL }}
+          IAOS_TOKEN: ${{ secrets.IAOS_ATLAS_TOKEN }}
+          ATLAS_COMMIT_SHA: ${{ github.sha }}
+        run: |
+          if [ -z "$IAOS_BASE_URL" ] || [ -z "$IAOS_TOKEN" ]; then
+            echo "System Atlas endpoint secrets are not configured; validation remains enforced."
+            exit 0
+          fi
+          ./scripts/sync_system_atlas_updates.sh

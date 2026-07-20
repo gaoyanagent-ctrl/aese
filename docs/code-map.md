@@ -169,6 +169,7 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | IAOS 数据合同 | `/iaos/iaos-go/platform/internal/systematlas/`、`/api/v1/system-atlas` |
 | 双系统视图设计 | `docs/designs/DES-006-system-atlas-aese-projection.md`、IAOS DES-049 |
 | 进展登记 | `scripts/record_system_atlas_update.sh` |
+| 声明式进展与 CI | `atlas-updates/`、`scripts/check_system_atlas_tracking.sh`、`scripts/sync_system_atlas_updates.sh`、`.github/workflows/system-atlas-governance.yml` |
 
 ## 11. 导航更新触发器
 

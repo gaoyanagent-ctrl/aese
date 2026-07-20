@@ -23,7 +23,7 @@ AESE needs to show both the target intelligent-enterprise simulation environment
 
 ## Progress Contract
 
-Substantial AESE progress is written to `docs/progress-log.md` and registered against the relevant Atlas node with `scripts/record_system_atlas_update.sh`. Percentages are explicit architectural assessments supported by a document, test report or commit.
+Substantial AESE progress is written to `docs/progress-log.md` and a versioned `atlas-updates/*.json` declaration. CI rejects substantive changes without both records. Main-branch environments configured with Atlas endpoint secrets run `scripts/sync_system_atlas_updates.sh`; the API uses a unique `update_key`, so retries do not duplicate history. Percentages remain explicit architectural assessments supported by evidence rather than commit-count inference.
 
 ## Boundary
 

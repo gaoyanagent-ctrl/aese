@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "update_key", "node_key", "update_type", "summary", "detail", "evidence_ref"],
+  "properties": {
+    "schema_version": { "const": 1 },
+    "update_key": { "type": "string", "pattern": "^[a-z0-9][a-z0-9._-]{7,239}$" },
+    "node_key": { "type": "string", "minLength": 2, "maxLength": 160 },
+    "update_type": { "enum": ["design", "implementation", "test", "release", "decision", "risk", "status"] },
+    "summary": { "type": "string", "minLength": 4, "maxLength": 300 },
+    "detail": { "type": "string", "minLength": 4 },
+    "status_after": { "enum": ["planned", "designed", "building", "validating", "completed", "blocked", "deferred"] },
+    "progress_after": { "type": "integer", "minimum": 0, "maximum": 100 },
+    "current_state": { "type": "string" },
+    "evidence_ref": { "type": "string", "minLength": 2, "maxLength": 500 },
+    "commit_sha": { "type": "string", "maxLength": 80 },
+    "occurred_at": { "type": "string", "format": "date-time" }
+  }
+}

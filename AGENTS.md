@@ -134,6 +134,7 @@ tags: [aese]
 
 ## 10. System Atlas 更新要求
 
-- 每次实质性进展在更新 `docs/progress-log.md` 后，还必须通过 `scripts/record_system_atlas_update.sh` 更新对应的 Atlas 构件。
+- 每次实质性进展必须同时更新 `docs/progress-log.md`、提交一个 `atlas-updates/*.json` 声明，并通过 `scripts/check_system_atlas_tracking.sh`。
+- 主分支部署通过 `scripts/sync_system_atlas_updates.sh` 幂等同步声明；`scripts/record_system_atlas_update.sh` 仅用于修复和历史补录。
 - 更新必须引用设计文档、测试证据或 commit；完成度是架构判断，不得按提交数量自动计算。
 - 如果 IAOS API 暂时不可用，先在进展日志记录待补登记项，服务恢复后立即补录。

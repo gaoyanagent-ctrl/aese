@@ -239,3 +239,11 @@
 - 影响：系统全景入口不再脱离布局覆盖内容；Preview 和 Live 保持同一入口位置，移动端沿用控制栏自动换行。
 - 验证：TypeScript、lint、25 项 Vitest 和 Vite 生产构建通过；桌面与移动浏览器确认图标按钮、联动按钮和状态区边界互不重叠，页面无运行异常。
 - 后续：Atlas 数据更新仍按 Agent 强制规则执行：实质进展必须更新进展日志并调用登记脚本；完成度不从 commit 数自动推断。
+
+## 2026-07-20 - System Atlas 声明式自动治理
+
+- 变更：两仓新增版本化 `atlas-updates` 声明、实质变更覆盖检查、GitHub Actions 守门和主分支同步脚本；IAOS API 增加唯一 `update_key`，重复同步返回既有记录而不重复更新节点。
+- 原因：仅靠 Agent 规则和直接调用脚本无法阻止漏登记，也无法让 CI 在不能访问内网 IAOS 时验证进展是否已被描述。
+- 影响：设计、实现、测试、发布、决策或风险变更必须随代码提交机器可读声明和证据；CI 负责拒绝遗漏，配置 Atlas endpoint secrets 的主分支环境负责自动入库。完成度仍由设计者明确判断，不按 commit 数推断。
+- 验证：待完成漏声明失败、合法声明通过、重复同步幂等、数据库历史和双端图景读取验收。
+- 后续：在 GitHub `system-atlas` environment 配置 `IAOS_ATLAS_BASE_URL` 和 `IAOS_ATLAS_TOKEN`，使云端主分支同步作业连接正式 Atlas API。

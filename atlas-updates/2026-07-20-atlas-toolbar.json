@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260720-atlas-toolbar-v1",
+  "node_key": "aese.sandbox2d",
+  "update_type": "implementation",
+  "summary": "系统全景入口移入沙盘工具栏",
+  "detail": "移除覆盖页面的固定入口，改为顶部 Map 图标按钮并完成桌面和移动边界验收。",
+  "status_after": "validating",
+  "progress_after": 88,
+  "current_state": "2D 沙盘、实时联动和系统全景入口已完成，工具栏无覆盖。",
+  "evidence_ref": "docs/progress-log.md"
+}

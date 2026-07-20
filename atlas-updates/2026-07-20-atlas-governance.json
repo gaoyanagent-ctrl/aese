@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260720-system-atlas-governance-v1",
+  "node_key": "shared.atlas",
+  "update_type": "implementation",
+  "summary": "AESE 接入声明式 Atlas 进展治理",
+  "detail": "新增版本化更新声明、实质变更 CI 守门和主分支数据库同步入口。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "IAOS 与 AESE 均具备声明式、可校验、可幂等同步的 Atlas 治理流程。",
+  "evidence_ref": "docs/designs/DES-006-system-atlas-aese-projection.md"
+}
