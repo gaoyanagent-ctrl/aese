@@ -5,6 +5,8 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+
+	"github.com/industrial-ai/iaos-aese/internal/iaosclient"
 )
 
 func TestAgentRecommendationsUseRuntimeFactsAndBusinessFailsClosed(t *testing.T) {
@@ -39,7 +41,7 @@ func TestAgentRecommendationsUseRuntimeFactsAndBusinessFailsClosed(t *testing.T)
 	if !strings.Contains(quality.Summary, "SURFACE_SCRATCH") || quality.Completeness != "partial" {
 		t.Fatalf("unexpected quality recommendation: %+v", quality)
 	}
-	business, err := buildBusiness("corr-so-202607-0001", c, planning, quality)
+	business, err := buildBusiness("corr-so-202607-0001", c, planning, quality, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -48,6 +50,24 @@ func TestAgentRecommendationsUseRuntimeFactsAndBusinessFailsClosed(t *testing.T)
 	}
 	if strings.Contains(business.Summary, "11,700") || strings.Contains(business.Summary, "11700") {
 		t.Fatalf("business recommendation fabricated shipment: %s", business.Summary)
+	}
+}
+
+func TestBusinessUsesGovernedShipmentSnapshotButKeepsCostPartial(t *testing.T) {
+	c := collectedContext{outputs: map[string]queryOutput{"hctm.sales_order.read": {Records: []map[string]any{{"order_no": "SO-202607-0001"}}}}, calls: map[string]string{"hctm.sales_order.read": "call-so"}}
+	planning := Recommendation{Facts: []Fact{{Key: "demand_qty", Value: "12000"}}}
+	snapshot := iaosclient.ScenarioSnapshot{}
+	snapshot.KPIs.CumulativeShipped.Value = 11700
+	snapshot.KPIs.DeliveryGap.Value = 300
+	business, err := buildBusiness("corr-so-202607-0001", c, planning, Recommendation{}, &snapshot)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !strings.Contains(business.Summary, "11700") || !strings.Contains(business.Summary, "300") {
+		t.Fatalf("business output did not use governed shipment facts: %+v", business)
+	}
+	if business.Completeness != "partial" || !contains(business.DataGaps, "cost_actuals") || contains(business.DataGaps, "shipment_dispatch") {
+		t.Fatalf("unexpected live completeness: %+v", business)
 	}
 }
 

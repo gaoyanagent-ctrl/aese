@@ -204,6 +204,8 @@ export function FactoryCanvas({
           id: node.id,
           type: 'factory',
           position: node.position,
+          initialWidth: 200,
+          initialHeight: 76,
           draggable: false,
           selectable: true,
           focusable: false,

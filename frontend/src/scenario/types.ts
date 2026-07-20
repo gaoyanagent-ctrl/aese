@@ -125,3 +125,57 @@ export interface SandboxScenario {
   timeline: ScenarioEvent[];
   agentOutputs: AgentOutput[];
 }
+
+export interface IaosMetric { value: number; unit: string }
+export interface IaosScenarioEvent {
+  cursor: number;
+  event_id: string;
+  event_type: string;
+  occurred_at: string;
+  correlation_id: string;
+  business_object_type: string;
+  business_object_code: string;
+  payload: Record<string, unknown>;
+}
+export interface IaosScenarioEntity {
+  id: string;
+  type: string;
+  business_code: string;
+  name: string;
+  status: string;
+  attributes: Record<string, EntityAttribute>;
+}
+export interface IaosRecommendation {
+  agent_key: AgentKind;
+  summary: string;
+  recommendations: string[];
+  object_refs: string[];
+  tool_call_ids: string[];
+  completeness: string;
+  data_gaps?: string[];
+  confidence: string;
+  status: 'suggested';
+  requires_human_confirmation: boolean;
+  version?: number;
+  run_id?: string;
+  updated_at?: string;
+}
+export interface IaosScenarioSnapshot {
+  snapshot_version: string;
+  pack_key: string;
+  scenario_key: string;
+  observed_at: string;
+  cursor: number;
+  completeness: string;
+  gaps: string[];
+  entities: IaosScenarioEntity[];
+  kpis: {
+    order_demand: IaosMetric;
+    cumulative_available: IaosMetric;
+    cumulative_shipped: IaosMetric;
+    ending_finished_goods: IaosMetric;
+    delivery_gap: IaosMetric;
+  };
+  events: IaosScenarioEvent[];
+  recommendations: IaosRecommendation[];
+}

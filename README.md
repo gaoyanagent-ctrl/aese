@@ -54,9 +54,9 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M3 可执行 HCTM 场景包：完成；pack、Schema、CLI、受治理 apply/reset、O2D replay/verify 和幂等证据均已落地。
 - M3V 快速 2D 企业沙盘：完成；七幕/22 事件、A 线画布、KPI、对象详情和三类 Agent 建议已通过桌面与移动端验收。
 - M5 Agent MVP：完成；默认 dry-run 的 `agent-setup` / `agent-run`、9 个低风险只读 AI Tool bundle 和三 Agent 确定性 tracer 已通过 live、重复调用、零业务写入与跨租户验收。
-- M6 在线 2D 企业沙盘：当前 active；计划补齐完工/入库/发运事实、可恢复场景事件合同和 `IaosScenarioDataSource`。
+- M6 在线 2D 企业沙盘：完成；受治理完工/入库/发运、snapshot/cursor/SSE、在线 Agent 建议和 Preview/Live 双模式已通过验收。
 
-当前可直接运行静态场景驱动的 2D 企业沙盘。M6 将采用“快照为真、SSE 作增量提示、按持久游标补齐”的在线架构；在 IAOS 未形成完工、发运和成本事实前，仍不会把 Preview 中的 11,700 件实发和 300 件缺口冒充在线结果。当前状态以 [Roadmap](docs/roadmap.md) 为准。
+当前同一页面可运行 Preview 或 IAOS Live 沙盘。Live 采用“快照为真、SSE 作增量提示、按持久游标补齐”，已由在线事实形成 11,700 件实发和 300 件缺口；未批准的成本金额继续显示为 `cost_actuals` 数据缺口。
 
 ## M5 Agent tracer
 
@@ -77,7 +77,7 @@ npm install
 npm run dev
 ```
 
-访问 `http://localhost:4173/`。详细操作和验证命令见 [M3V 运行手册](docs/runbooks/hctm-m3v-2d-sandbox.md)。
+访问 `http://localhost:4173/`。Preview 可直接使用；Live 需将 IAOS JWT 写入 `localStorage.iaos_token`，或构建时提供 `VITE_IAOS_TOKEN`。详细操作见 [M6 运行手册](docs/runbooks/hctm-m6-online-sandbox.md)。
 
 ## 文档入口
 

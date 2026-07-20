@@ -12,7 +12,7 @@
 | 运行或修改 2D 沙盘 | DES-002、M3V completed plan、M3V runbook |
 | 修改 M4 异常入口 | M4 completed plan、M4 evidence、`internal/iaosclient/`、`internal/replay/` |
 | 修改 M5 Agent tracer | DES-003、M5 completed plan、`internal/agenttrace/`、`scenario-packs/hctm/agent-tools.json` |
-| 开始 M6 在线沙盘 | DES-004、M6 active plan、`frontend/src/scenario/`、IAOS scenario API |
+| 维护 M6 在线沙盘 | DES-004、M6 completed plan、`frontend/src/scenario/`、IAOS scenario API |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
 | 修改事件名和 payload | `docs/HCTM_Event_Model.md` |
@@ -135,14 +135,14 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | 能力 | 计划路径 |
 | --- | --- |
 | 在线沙盘架构 | `docs/designs/DES-004-online-2d-enterprise-sandbox.md` |
-| M6 active plan | `docs/plans/2026-07-20-m6-online-2d-enterprise-sandbox.md` |
+| M6 completed plan | `docs/plans/2026-07-20-m6-online-2d-enterprise-sandbox.md` |
 | 前端 Live 类型和 adapter | `frontend/src/scenario/` |
-| 前端连接/恢复状态 | `frontend/src/live/` |
+| 前端连接/恢复状态 | `frontend/src/LiveSandbox.tsx`、`frontend/src/scenario/iaosDataSource.ts` |
 | Preview/Live 应用编排 | `frontend/src/App.tsx` |
 | AESE 完工/发运 replay client | `internal/iaosclient/`、`internal/replay/` |
 | IAOS 场景业务动作 | `/iaos/iaos-go/platform/internal/api/`、`/iaos/iaos-go/platform/internal/capability/` |
 | IAOS snapshot/cursor/SSE | `/iaos/iaos-go/platform/internal/api/` |
-| M6 browser E2E | `frontend/e2e/` |
+| M6 browser E2E | `frontend/e2e/sandbox.spec.ts`、`frontend/test-results/actual-live-*.png` |
 
 ## 9. 导航更新触发器
 

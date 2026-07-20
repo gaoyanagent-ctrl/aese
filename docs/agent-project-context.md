@@ -164,9 +164,9 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 - M4 已完成：设备停机、供应延期和来检失败均通过 IAOS 受治理 ingress、状态影响、事务 Outbox、租户/幂等及 AESE canonical replay 实证。
 - M5 已完成 Agent tracer 基础链：`agent-setup` 读取版本化 tool bundle，幂等准备最小 metadata 并创建/更新/启用 9 个低风险查询工具；`agent-run` 调用这些工具、保留 `call_id` 证据并确定性生成计划、质量和经营分析建议。两个命令均默认 dry-run，外部写入要求显式 `--apply`。
 - `/iaos/iaos-go` 已提供 DES-047 scenario apply/reset、原子幂等 O2D workflow、HCTM work_order/workflow fixture，以及 AI Tool `source_ref=entity.records` 的 metadata 约束查询：entity、字段、filter allowlist、排序和最大行数由服务端 tool metadata 固定，调用者只能提供 filter value 和 limit；查询同时受显式 tenant predicate 与 RLS 约束。
-- 现场上下文目前足以确认订单需求 12,000、成品库存 1,200、采购延期、设备维护、来检拒收 300 和 3 张 pending 工单，但 IAOS 尚无 canonical 完工入库、两次发运和实际成本记录。因此经营分析 Agent 必须返回 `completeness=partial`，不得声称在线已交付 11,700 或已确定 300 件缺口；这些数字当前只属于 Preview/expected outcomes。
+- M6 已补齐 canonical 完工入库和两次发运事实：在线需求 12,000、累计可供/实发 11,700、期末成品 0、缺口 300；实际成本仍无批准基线，因此经营分析只在成本维度保持 `partial`。
 - M5 tracer 是 IAOS AI Tool Registry 上的受审计只读建议链，不是另建的 Agent Runtime，不调用真实 LLM，不执行推荐动作。
-- 当前唯一 active plan 是 `docs/plans/2026-07-20-m6-online-2d-enterprise-sandbox.md`：先补齐完工/入库/发运事实和持久场景观察合同，再实现 `IaosScenarioDataSource` 与 Preview/Live 双模式。
+- M6 plan 已完成，当前没有 active plan。`IaosScenarioDataSource` 与 Preview/Live 双模式已落地。
 - M6 不直接依赖当前通用 `/api/v1/events/stream` 恢复状态；该接口没有持久 cursor。设计见 `docs/designs/DES-004-online-2d-enterprise-sandbox.md`。
 
 ## 7. 后续 agent 必须维护的信息

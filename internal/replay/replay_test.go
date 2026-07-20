@@ -21,6 +21,26 @@ type fakeIAOS struct {
 	lastSimulation   iaosclient.SimulationEventRequest
 	simulationCalls  []iaosclient.SimulationEventRequest
 	simulationResult iaosclient.SimulationEventResult
+	businessCalls    []iaosclient.ScenarioBusinessEventRequest
+	businessResult   iaosclient.ScenarioBusinessEventResult
+}
+
+func (f *fakeIAOS) IngestScenarioBusinessEvent(_ context.Context, _, _ string, request iaosclient.ScenarioBusinessEventRequest) (iaosclient.ScenarioBusinessEventResult, error) {
+	f.businessCalls = append(f.businessCalls, request)
+	if f.businessResult.EventID != "" || f.businessResult.Duplicate || f.businessResult.Committed {
+		return f.businessResult, nil
+	}
+	var result iaosclient.ScenarioBusinessEventResult
+	result.EventID = request.EventID
+	result.EventType = request.EventType
+	result.Cursor = int64(len(f.businessCalls))
+	result.Subject = "iaos.tenant-hctm." + request.EventType
+	result.CorrelationID = request.CorrelationID
+	result.Committed = true
+	result.BusinessObject.Type = request.BusinessObject.Type
+	result.BusinessObject.Code = request.BusinessObject.Code
+	result.BusinessObject.ID = "business-object-uuid"
+	return result, nil
 }
 
 func (f *fakeIAOS) Schema(context.Context, string) (iaosclient.Schema, error) {
@@ -296,17 +316,17 @@ func TestReplayRealPackRoutingContract(t *testing.T) {
 	}
 	story := pack.Stories[0]
 
-	dryFake := &fakeIAOS{}
+	dryFake := &fakeIAOS{records: map[string][]map[string]any{"sales_order": {{"id": "so-uuid", "status": "confirmed"}}}}
 	dryRunner, _ := New(dryFake)
 	dry, err := dryRunner.Replay(context.Background(), story, Options{PackKey: pack.Manifest.PackKey, OrderID: "so-uuid", Tenant: pack.Manifest.TenantTemplate})
-	if err != nil || dryFake.simulations != 0 || dryFake.decomposes != 0 || countReplayAction(dry.Impacts, "simulation_ingress") != 3 || countReplayAction(dry.Impacts, "decompose_sales_order") != 1 || dry.Skipped != 18 {
+	if err != nil || dryFake.simulations != 0 || dryFake.decomposes != 0 || len(dryFake.businessCalls) != 0 || countReplayAction(dry.Impacts, "simulation_ingress") != 3 || countReplayAction(dry.Impacts, "scenario_business_event") != 6 || countReplayAction(dry.Impacts, "decompose_sales_order") != 1 || dry.Skipped != 12 {
 		t.Fatalf("dry=%#v simulations=%d decomposes=%d err=%v", dry, dryFake.simulations, dryFake.decomposes, err)
 	}
 
-	applyFake := &fakeIAOS{}
+	applyFake := &fakeIAOS{records: map[string][]map[string]any{"sales_order": {{"id": "so-uuid", "status": "confirmed"}}}}
 	applyRunner, _ := New(applyFake)
 	applied, err := applyRunner.Replay(context.Background(), story, Options{Apply: true, PackKey: pack.Manifest.PackKey, OrderID: "so-uuid", Tenant: pack.Manifest.TenantTemplate})
-	if err != nil || applyFake.simulations != 3 || applyFake.decomposes != 1 || applied.Triggered != 4 || applied.Skipped != 18 {
+	if err != nil || applyFake.simulations != 3 || len(applyFake.businessCalls) != 6 || applyFake.decomposes != 1 || applied.Triggered != 10 || applied.Skipped != 12 {
 		t.Fatalf("applied=%#v simulations=%d decomposes=%d err=%v", applied, applyFake.simulations, applyFake.decomposes, err)
 	}
 	want := []struct{ eventType, objectType, objectCode string }{
@@ -336,7 +356,7 @@ func countReplayAction(impacts []ReplayImpact, action string) int {
 }
 
 func TestReplayFailsClosedWhenSimulationResponseIsNotCommitted(t *testing.T) {
-	fake := &fakeIAOS{}
+	fake := &fakeIAOS{records: map[string][]map[string]any{"sales_order": {{"id": "so-uuid", "status": "confirmed"}}}}
 	fake.simulationResult.EventID = "evt-sim-1"
 	fake.simulationResult.BusinessObject.ID = "equipment-uuid"
 	runner, _ := New(fake)
@@ -351,8 +371,18 @@ func TestReplayFailsClosedWhenSimulationResponseIsNotCommitted(t *testing.T) {
 	}
 }
 
+func TestReplaySkipsOrderDecompositionAfterFulfillment(t *testing.T) {
+	fake := &fakeIAOS{records: map[string][]map[string]any{"sales_order": {{"id": "so-uuid", "status": "partially_shipped"}}}}
+	runner, _ := New(fake)
+	story := scenariopack.Story{Events: scenariopack.EventSequence{Events: []scenariopack.Event{{EventID: "evt-1", EventType: "o2d.order.confirmed", Payload: map[string]any{"order_no": "SO-1"}}}}}
+	summary, err := runner.Replay(context.Background(), story, Options{OrderID: "so-uuid", Apply: true})
+	if err != nil || summary.Triggered != 0 || summary.Skipped != 1 || fake.decomposes != 0 || summary.Impacts[0].Action != "already_fulfilled" {
+		t.Fatalf("summary=%#v err=%v", summary, err)
+	}
+}
+
 func TestReplayUsesScenarioApplyOrderID(t *testing.T) {
-	fake := &fakeIAOS{}
+	fake := &fakeIAOS{records: map[string][]map[string]any{"sales_order": {{"id": "so-uuid", "status": "confirmed"}}}}
 	runner, _ := New(fake)
 	story := scenariopack.Story{Events: scenariopack.EventSequence{Events: []scenariopack.Event{{EventID: "evt-1", EventType: "o2d.order.confirmed", Payload: map[string]any{"order_no": "SO-1"}}}}}
 	summary, err := runner.Replay(context.Background(), story, Options{OrderID: "so-uuid", Apply: true})

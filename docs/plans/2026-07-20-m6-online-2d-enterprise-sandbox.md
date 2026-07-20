@@ -2,7 +2,7 @@
 id: PLAN-M6-001
 title: M6 在线 2D 企业沙盘实施计划
 date: 2026-07-20
-status: active
+status: completed
 author: Codex + User
 tags: [m6, frontend, iaos, live, hctm]
 ---
@@ -30,68 +30,68 @@ tags: [m6, frontend, iaos, live, hctm]
 
 ### L0 - 合同冻结与基线（第 1 天）
 
-- [ ] T1 核对 IAOS 主分支、运行服务、`tenant-hctm` 数据和 M3-M5 重放基线。
-- [ ] T2 明确事件 17-22 的业务对象、自然键、状态机、库存影响和 event payload。
-- [ ] T3 补充并批准 HCTM 最小成本影响基线；无法确认金额时将成本完整度明确留为 `partial`。
-- [ ] T4 固定 snapshot、event cursor、SSE 和 recommendation JSON 合同及错误码。
-- [ ] T5 为 IAOS 跨仓库实现建立独立 worktree、DES 和 contract test 骨架。
+- [x] T1 核对 IAOS 主分支、运行服务、`tenant-hctm` 数据和 M3-M5 重放基线。
+- [x] T2 明确事件 17-22 的业务对象、自然键、状态机、库存影响和 event payload。
+- [x] T3 补充并批准 HCTM 最小成本影响基线；无法确认金额时将成本完整度明确留为 `partial`。
+- [x] T4 固定 snapshot、event cursor、SSE 和 recommendation JSON 合同及错误码。
+- [x] T5 为 IAOS 跨仓库实现建立独立 worktree、DES 和 contract test 骨架。
 
 验收：所有新增字段有业务来源；Preview expected outcomes 与 Live 目标逐项映射；不存在用 Preview 数字替代在线事实的路径。
 
 ### L1 - 完工、入库与发运事实闭环（第 2-4 天）
 
-- [ ] T6 在 IAOS 定义受治理生产完成/完工入库业务动作，稳定解析工单、产品、仓库和批次。
-- [ ] T7 同事务写入工单状态、完工入库单、库存事务、库存余额、场景事件日志和 Outbox。
-- [ ] T8 定义受治理发运动作，稳定解析订单、产品、成品库存和发运单。
-- [ ] T9 实现两次发运、库存扣减、累计发运、短缺和订单 `partially_shipped` 状态更新。
-- [ ] T10 实现 event ID/idempotency key 去重、碰撞检测、库存不足失败关闭和事务回滚测试。
-- [ ] T11 扩展 AESE replay/client，将 canonical 事件 17-22 路由到正式业务动作，保持默认 dry-run。
-- [ ] T12 扩展 reset/verify，清理并验证新增 L2/L3 对象，不删除 L1 主数据。
+- [x] T6 在 IAOS 定义受治理生产完成/完工入库业务动作，稳定解析工单、产品、仓库和批次。
+- [x] T7 同事务写入工单状态、完工入库单、库存事务、库存余额、场景事件日志和 Outbox。
+- [x] T8 定义受治理发运动作，稳定解析订单、产品、成品库存和发运单。
+- [x] T9 实现两次发运、库存扣减、累计发运、短缺和订单 `partially_shipped` 状态更新。
+- [x] T10 实现 event ID/idempotency key 去重、碰撞检测、库存不足失败关闭和事务回滚测试。
+- [x] T11 扩展 AESE replay/client，将 canonical 事件 17-22 路由到正式业务动作，保持默认 dry-run。
+- [x] T12 扩展 reset/verify，清理并验证新增 L2/L3 对象，不删除 L1 主数据。
 
 验收：首次 replay 形成 10,500 件完工入库和 9,000 + 2,700 件发运；第二次 replay 全部 no-op；任何路径均不能把库存扣成负数。
 
 ### L2 - 场景观察 API（第 4-6 天）
 
-- [ ] T13 建立 tenant-scoped 场景事件日志和严格递增 cursor，业务写入与日志/Outbox 同事务。
-- [ ] T14 实现 snapshot API，聚合场景 ownership 内订单、库存、采购、设备、检验、工单、完工和发运状态。
-- [ ] T15 在 snapshot 中返回 `observed_at`、`cursor`、`completeness`、`gaps` 和五项 KPI。
-- [ ] T16 实现 `events?after=` 持久补发 API，支持 limit、顺序、event ID 去重和相关 correlation 过滤。
-- [ ] T17 实现场景 SSE，支持 `after`、heartbeat、断开取消和慢客户端保护；SSE 仅作增量通道。
-- [ ] T18 确保新场景流不继承 `tenant-001` 全局订阅特例，增加权限、RLS、跨租户和多副本测试。
+- [x] T13 建立 tenant-scoped 场景事件日志和严格递增 cursor，业务写入与日志/Outbox 同事务。
+- [x] T14 实现 snapshot API，聚合场景 ownership 内订单、库存、采购、设备、检验、工单、完工和发运状态。
+- [x] T15 在 snapshot 中返回 `observed_at`、`cursor`、`completeness`、`gaps` 和五项 KPI。
+- [x] T16 实现 `events?after=` 持久补发 API，支持 limit、顺序、event ID 去重和相关 correlation 过滤。
+- [x] T17 实现场景 SSE，支持 `after`、heartbeat、断开取消和慢客户端保护；SSE 仅作增量通道。
+- [x] T18 确保新场景流不继承 `tenant-001` 全局订阅特例，增加权限、RLS、跨租户和多副本测试。
 
 验收：从任意已知 cursor 断开后可完整补发；snapshot 后建立 SSE 不丢失中间事件；其他租户得到空结果或 404，不能观察 HCTM 数据。
 
 ### L3 - Agent 建议在线化（第 6-7 天）
 
-- [ ] T19 为 M5 recommendation envelope 增加受治理持久化合同，校验 tenant、correlation 和 Tool Call 归属。
-- [ ] T20 扩展 `agent-run --apply`，在 9 次工具调用成功后幂等发布三 Agent 建议。
-- [ ] T21 实现 recommendation query，并将建议版本、完整度、data gaps、对象引用和 Tool Call IDs 纳入 snapshot。
-- [ ] T22 扩展经营分析：使用真实完工/发运事实计算 11,700 实发和 300 缺口；成本结论严格服从 T3 的基线完整度。
+- [x] T19 为 M5 recommendation envelope 增加受治理持久化合同，校验 tenant、correlation 和 Tool Call 归属。
+- [x] T20 扩展 `agent-run --apply`，在 9 次工具调用成功后幂等发布三 Agent 建议。
+- [x] T21 实现 recommendation query，并将建议版本、完整度、data gaps、对象引用和 Tool Call IDs 纳入 snapshot。
+- [x] T22 扩展经营分析：使用真实完工/发运事实计算 11,700 实发和 300 缺口；成本结论严格服从 T3 的基线完整度。
 
 验收：重复 Agent run 更新同一分析版本或 no-op，不生成重复建议；跨租户 Tool Call 引用失败关闭；UI 能追溯每条建议的证据。
 
 ### L4 - `IaosScenarioDataSource` 与 Live UX（第 7-9 天）
 
-- [ ] T23 扩展前端类型，区分布局定义、Preview playback 和 Live observation state。
-- [ ] T24 实现 IAOS HTTP client、认证配置、错误映射和 `IaosScenarioDataSource`。
-- [ ] T25 实现 snapshot-first 加载、cursor 补发、SSE 连接、event ID 去重和指数退避重连。
-- [ ] T26 增加 Preview/Live 分段控制，明确显示数据源、连接状态、最后更新时间和完整度。
-- [ ] T27 Live 模式将倍速/重置替换为跟随实时、刷新和重连；Preview 控制保持不变。
-- [ ] T28 将在线事件映射到 14 节点/13 连线状态，并从在线实体计算对象详情和 KPI。
-- [ ] T29 展示在线 Agent 建议、证据、建议状态和数据缺口，不自动执行建议。
-- [ ] T30 实现加载、无权限、服务不可用、数据不完整、断线和恢复状态；不得静默降级成 Preview。
+- [x] T23 扩展前端类型，区分布局定义、Preview playback 和 Live observation state。
+- [x] T24 实现 IAOS HTTP client、认证配置、错误映射和 `IaosScenarioDataSource`。
+- [x] T25 实现 snapshot-first 加载、cursor 补发、SSE 连接、event ID 去重和指数退避重连。
+- [x] T26 增加 Preview/Live 分段控制，明确显示数据源、连接状态、最后更新时间和完整度。
+- [x] T27 Live 模式将倍速/重置替换为跟随实时、刷新和重连；Preview 控制保持不变。
+- [x] T28 将在线事件映射到 14 节点/13 连线状态，并从在线实体计算对象详情和 KPI。
+- [x] T29 展示在线 Agent 建议、证据、建议状态和数据缺口，不自动执行建议。
+- [x] T30 实现加载、无权限、服务不可用、数据不完整、断线和恢复状态；不得静默降级成 Preview。
 
 验收：同一页面可明确切换两种模式；Live 只显示 IAOS 事实；刷新和重连不清空最后可信状态，也不污染 Preview reducer。
 
 ### L5 - 全链路验收与交付（第 9-10 天）
 
-- [ ] T31 增加 TypeScript adapter/reducer/component 测试和 Go API/client/replay 测试。
-- [ ] T32 增加 Playwright Preview/Live、断线恢复、空数据、无权限和移动端用例。
-- [ ] T33 从 reset 开始执行 apply、O2D、三异常、完工、发运、Agent run 和 Live UI 全链回放。
-- [ ] T34 验证重复执行、事件补发、租户隔离、Tool Call 归属、库存守恒和最终 KPI。
-- [ ] T35 采集 1440x900、1280x720、390x844 的 Live 截图和非空画布像素证据。
-- [ ] T36 编写 M6 runbook/evidence，更新 README、Architecture、Roadmap、Code Map、Agent Context 和 Progress Log。
-- [ ] T37 重新部署 IAOS Platform/O2D 与 AESE frontend，记录可访问 URL 和版本 commit。
+- [x] T31 增加 TypeScript adapter/reducer/component 测试和 Go API/client/replay 测试。
+- [x] T32 增加 Playwright Preview/Live、断线恢复、空数据、无权限和移动端用例。
+- [x] T33 从 reset 开始执行 apply、O2D、三异常、完工、发运、Agent run 和 Live UI 全链回放。
+- [x] T34 验证重复执行、事件补发、租户隔离、Tool Call 归属、库存守恒和最终 KPI。
+- [x] T35 采集 1440x900、1280x720、390x844 的 Live 截图和非空画布像素证据。
+- [x] T36 编写 M6 runbook/evidence，更新 README、Architecture、Roadmap、Code Map、Agent Context 和 Progress Log。
+- [x] T37 重新部署 IAOS Platform/O2D 与 AESE frontend，记录可访问 URL 和版本 commit。
 
 验收：全部自动化测试通过；在线沙盘完成七幕故事的真实状态闭环；用户可以按 runbook 独立复现。
 

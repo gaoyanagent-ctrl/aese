@@ -24,6 +24,7 @@ type IAOS interface {
 	DecomposeSalesOrder(context.Context, string) (iaosclient.DecomposeResult, error)
 	DecomposeSalesOrderTrace(context.Context, string, string, string) (iaosclient.DecomposeResult, error)
 	IngestSimulationEvent(context.Context, iaosclient.SimulationEventRequest) (iaosclient.SimulationEventResult, error)
+	IngestScenarioBusinessEvent(context.Context, string, string, iaosclient.ScenarioBusinessEventRequest) (iaosclient.ScenarioBusinessEventResult, error)
 }
 
 type Runner struct {
@@ -181,6 +182,14 @@ var simulationBusinessObjectTypes = map[string]string{
 	"qms.incoming_inspection.failed": "inspection_order",
 }
 
+var governedBusinessObjectTypes = map[string]string{
+	"proc.production_order.released": "production_order",
+	"proc.operation.started":         "operation_task",
+	"proc.operation.completed":       "operation_task",
+	"whs.finished_goods.received":    "inventory_transaction",
+	"o2d.shipment.dispatched":        "shipment",
+}
+
 // Replay translates supported canonical events to governed IAOS business and
 // simulation ingress endpoints. Unsupported events remain visible and are
 // never published directly to NATS.
@@ -189,6 +198,44 @@ func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Opti
 	summary := ReplaySummary{RunID: newRunID(), Mode: map[bool]string{true: "apply", false: "dry-run"}[opts.Apply], Target: sanitizedTarget(opts.Target), Tenant: opts.Tenant, Actor: opts.Actor, StoryKey: story.Ref.Key, StartedAt: started, Impacts: []ReplayImpact{}}
 	for _, event := range story.Events.Events {
 		impact := ReplayImpact{EventID: event.EventID, EventType: event.EventType, CorrelationID: event.Correlation(), Action: "unsupported"}
+		if objectType, supported := governedBusinessObjectTypes[event.EventType]; supported {
+			request, err := scenarioBusinessEventRequest(event, objectType, opts.PackKey, story.Ref.Key)
+			if err != nil {
+				impact.Error = err.Error()
+				summary.Failed++
+				summary.Impacts = append(summary.Impacts, impact)
+				summary.FinishedAt = r.now().UTC()
+				return summary, fmt.Errorf("event %s: %s", event.EventID, impact.Error)
+			}
+			impact.Action, impact.RecordID = "scenario_business_event", request.BusinessObject.Code
+			if opts.Apply {
+				result, err := r.client.IngestScenarioBusinessEvent(ctx, opts.PackKey, story.Ref.Key, request)
+				if err != nil {
+					impact.Error = err.Error()
+					summary.Failed++
+					summary.Impacts = append(summary.Impacts, impact)
+					summary.FinishedAt = r.now().UTC()
+					return summary, fmt.Errorf("event %s: %w", event.EventID, err)
+				}
+				if err := validateScenarioBusinessResult(request, result, opts.Tenant); err != nil {
+					impact.Error = err.Error()
+					summary.Failed++
+					summary.Impacts = append(summary.Impacts, impact)
+					summary.FinishedAt = r.now().UTC()
+					return summary, fmt.Errorf("event %s: %w", event.EventID, err)
+				}
+				impact.RecordID = result.BusinessObject.ID
+				if result.Duplicate {
+					impact.Action = "duplicate"
+					summary.Skipped++
+				} else {
+					impact.Applied = result.Committed
+					summary.Triggered++
+				}
+			}
+			summary.Impacts = append(summary.Impacts, impact)
+			continue
+		}
 		if objectType, supported := simulationBusinessObjectTypes[event.EventType]; supported {
 			request, err := simulationEventRequest(event, objectType, opts.PackKey, story.Ref.Key)
 			if err != nil {
@@ -244,19 +291,29 @@ func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Opti
 			return summary, fmt.Errorf("event %s: %s", event.EventID, impact.Error)
 		}
 		id := strings.TrimSpace(opts.OrderID)
-		if id == "" {
-			records, err := r.client.FindExact(ctx, "sales_order", map[string]any{"order_no": orderNo})
-			if err != nil || len(records) != 1 {
-				if err == nil {
-					err = fmt.Errorf("expected one sales_order for order_no %s, got %d", orderNo, len(records))
-				}
-				impact.Error = err.Error()
-				summary.Failed++
-				summary.Impacts = append(summary.Impacts, impact)
-				summary.FinishedAt = r.now().UTC()
-				return summary, fmt.Errorf("event %s: %w", event.EventID, err)
+		matchedStatus := ""
+		records, err := r.client.FindExact(ctx, "sales_order", map[string]any{"order_no": orderNo})
+		if err != nil || len(records) != 1 {
+			if err == nil {
+				err = fmt.Errorf("expected one sales_order for order_no %s, got %d", orderNo, len(records))
 			}
-			id, _ = records[0]["id"].(string)
+			impact.Error = err.Error()
+			summary.Failed++
+			summary.Impacts = append(summary.Impacts, impact)
+			summary.FinishedAt = r.now().UTC()
+			return summary, fmt.Errorf("event %s: %w", event.EventID, err)
+		}
+		matchedID, _ := records[0]["id"].(string)
+		matchedStatus, _ = records[0]["status"].(string)
+		if id == "" {
+			id = matchedID
+		} else if matchedID != "" && matchedID != id {
+			err := fmt.Errorf("order ID %s does not match %s", id, orderNo)
+			impact.Error = err.Error()
+			summary.Failed++
+			summary.Impacts = append(summary.Impacts, impact)
+			summary.FinishedAt = r.now().UTC()
+			return summary, fmt.Errorf("event %s: %w", event.EventID, err)
 		}
 		if id == "" {
 			impact.Error = "matched sales_order has no id"
@@ -266,6 +323,12 @@ func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Opti
 			return summary, fmt.Errorf("event %s: %s", event.EventID, impact.Error)
 		}
 		impact.Action, impact.RecordID = "decompose_sales_order", id
+		if matchedStatus == "partially_shipped" || matchedStatus == "shipped" || matchedStatus == "closed" {
+			impact.Action = "already_fulfilled"
+			summary.Skipped++
+			summary.Impacts = append(summary.Impacts, impact)
+			continue
+		}
 		if opts.Apply {
 			result, err := r.client.DecomposeSalesOrderTrace(ctx, id, event.Correlation(), event.Idempotency())
 			if err != nil {
@@ -287,6 +350,32 @@ func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Opti
 	}
 	summary.FinishedAt = r.now().UTC()
 	return summary, nil
+}
+
+func scenarioBusinessEventRequest(event scenariopack.Event, expectedObjectType, packKey, storyKey string) (iaosclient.ScenarioBusinessEventRequest, error) {
+	objectType := stringField(event.Metadata, "business_object_type")
+	objectCode := stringField(event.Metadata, "business_object_id")
+	if objectType != expectedObjectType || objectCode == "" {
+		return iaosclient.ScenarioBusinessEventRequest{}, fmt.Errorf("%s requires %s business object metadata", event.EventType, expectedObjectType)
+	}
+	return iaosclient.ScenarioBusinessEventRequest{
+		EventID: event.EventID, EventType: event.EventType, Source: "aese:" + packKey + "/" + storyKey,
+		OccurredAt: event.Timestamp, CorrelationID: event.Correlation(), CausationID: event.Causation(), IdempotencyKey: event.Idempotency(),
+		BusinessObject: iaosclient.ScenarioBusinessObject{Type: objectType, Code: objectCode}, Payload: event.Payload,
+	}, nil
+}
+
+func validateScenarioBusinessResult(request iaosclient.ScenarioBusinessEventRequest, result iaosclient.ScenarioBusinessEventResult, expectedTenant string) error {
+	if result.EventID != request.EventID || result.EventType != request.EventType || result.CorrelationID != request.CorrelationID || result.BusinessObject.Type != request.BusinessObject.Type || result.BusinessObject.Code != request.BusinessObject.Code || result.BusinessObject.ID == "" {
+		return fmt.Errorf("scenario business ingress returned mismatched or incomplete evidence")
+	}
+	if expectedTenant != "" && result.Subject != "iaos."+expectedTenant+"."+request.EventType {
+		return fmt.Errorf("scenario business ingress returned a different event subject")
+	}
+	if !result.Duplicate && (!result.Committed || result.Cursor <= 0) {
+		return fmt.Errorf("scenario business ingress did not commit a persistent event")
+	}
+	return nil
 }
 
 func simulationEventRequest(event scenariopack.Event, expectedObjectType, packKey, storyKey string) (iaosclient.SimulationEventRequest, error) {

@@ -158,3 +158,10 @@
 - 影响：M6 采用“快照为真、SSE 作增量提示、按持久 cursor 补齐”的架构。完工和发运走 IAOS 正式业务动作，不复用外生 simulation ingress；AESE 保留布局与视觉映射，通过 `IaosScenarioDataSource` 消费在线事实。成本金额无批准基线时继续标记 `partial`。
 - 验证：计划定义 8-10 个工作日的每日成果、业务不变量、断线恢复、跨租户、Agent 证据和三视口验收；当前通用 SSE 已确认无持久 cursor、缓冲满可丢事件，不被误选为 M6 恢复合同。本地 Markdown 相对链接无缺失，active plan 数量为 1，M6 任务为 T1-T37，`git diff --check` 通过。
 - 后续：从 L0/T1-T5 开始，冻结事件 17-22、成本完整度和 scenario observation API 合同，并在 IAOS 独立 worktree 建立 contract test。
+
+## 2026-07-20 - 完成 M6 在线 2D 企业沙盘
+
+- 变更：IAOS 新增事件 17-22 的受治理生产/完工入库/发运动作、库存 FIFO 扣减、持久场景游标、snapshot、SSE 和三 Agent 建议持久化；AESE replay/client/agent-run 接入正式合同，前端新增 Preview/Live、认证 HTTP、cursor 补发、SSE 去重重连、完整度和在线 KPI/建议展示。
+- 原因：让 2D 沙盘只用 IAOS 业务事实闭合 12,000 件订单故事，并在断线、重复执行和跨租户条件下保持可恢复、可审计。
+- 影响：M6 L0-L5/T1-T37 全部完成，当前没有 active plan。在线 KPI 为需求 12,000、累计可供/实发 11,700、期末成品 0、缺口 300；成本继续保留 `cost_actuals` partial gap，建议不自动执行。
+- 后续：真实成本、更多场景或通用 projection 需要另立计划，不倒灌进已完成的 M6。

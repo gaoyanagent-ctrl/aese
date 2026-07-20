@@ -2,7 +2,7 @@
 id: DES-004
 title: M6 在线 2D 企业沙盘架构
 date: 2026-07-20
-status: approved
+status: completed
 author: Codex + User
 tags: [m6, frontend, live, iaos, observation]
 ---

@@ -24,3 +24,4 @@ frontend/playwright-report/
 frontend/coverage/
 frontend/test-results/*
 !frontend/test-results/*-completed.png
+!frontend/test-results/actual-live-*.png

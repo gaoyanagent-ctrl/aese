@@ -332,7 +332,7 @@ M3“可执行 HCTM 场景包”已完成：
 - 通过 IAOS 受治理入口导入最小数据并触发 `o2d.order.confirmed` tracer。
 - 验证租户隔离、幂等执行、reset 和故事结果。
 
-M3V、M4 和 M5 已完成。当前执行 M6：补齐 IAOS 完工入库、两次发运和成本完整度合同，建立 snapshot/cursor/SSE 场景观察 API，并把现有 2D 沙盘升级为 Preview/Live 双模式。
+M3V、M4、M5 和 M6 已完成。IAOS 完工入库、两次发运、snapshot/cursor/SSE 与 Preview/Live 双模式已经闭环；成本实际因无批准基线继续明确为 partial。
 
 详细设计与任务见：
 

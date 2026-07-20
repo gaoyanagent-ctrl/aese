@@ -39,13 +39,14 @@ type Recommendation struct {
 }
 
 type RunSummary struct {
-	RunID         string           `json:"run_id"`
-	Mode          string           `json:"mode"`
-	PackKey       string           `json:"pack_key"`
-	StoryKey      string           `json:"story_key"`
-	CorrelationID string           `json:"correlation_id"`
-	ToolEvidence  []ToolEvidence   `json:"tool_evidence"`
-	Agents        []Recommendation `json:"agents"`
+	RunID         string                                   `json:"run_id"`
+	Mode          string                                   `json:"mode"`
+	PackKey       string                                   `json:"pack_key"`
+	StoryKey      string                                   `json:"story_key"`
+	CorrelationID string                                   `json:"correlation_id"`
+	ToolEvidence  []ToolEvidence                           `json:"tool_evidence"`
+	Agents        []Recommendation                         `json:"agents"`
+	Published     *iaosclient.PublishRecommendationsResult `json:"published,omitempty"`
 }
 
 type queryOutput struct {
@@ -108,11 +109,20 @@ func Run(ctx context.Context, client *iaosclient.Client, packKey, storyKey, corr
 	if err != nil {
 		return summary, err
 	}
-	business, err := buildBusiness(correlationID, collected, planning, quality)
+	snapshot, err := client.ScenarioSnapshot(ctx, packKey, storyKey)
+	if err != nil {
+		return summary, fmt.Errorf("load governed scenario snapshot: %w", err)
+	}
+	business, err := buildBusiness(correlationID, collected, planning, quality, &snapshot)
 	if err != nil {
 		return summary, err
 	}
 	summary.Agents = []Recommendation{planning, quality, business}
+	published, err := client.PublishScenarioRecommendations(ctx, packKey, storyKey, runID, correlationID, summary.Agents)
+	if err != nil {
+		return summary, fmt.Errorf("publish governed recommendations: %w", err)
+	}
+	summary.Published = &published
 	return summary, nil
 }
 
@@ -199,7 +209,7 @@ func buildQuality(correlationID string, c collectedContext) (Recommendation, err
 	}, nil
 }
 
-func buildBusiness(correlationID string, c collectedContext, planning, quality Recommendation) (Recommendation, error) {
+func buildBusiness(correlationID string, c collectedContext, planning, quality Recommendation, snapshot *iaosclient.ScenarioSnapshot) (Recommendation, error) {
 	order, err := exactlyOne(c.outputs["hctm.sales_order.read"].Records, "sales order")
 	if err != nil {
 		return Recommendation{}, err
@@ -209,6 +219,19 @@ func buildBusiness(correlationID string, c collectedContext, planning, quality R
 		if fact.Key == "demand_qty" {
 			demand = fmt.Sprint(fact.Value)
 		}
+	}
+	if snapshot != nil && snapshot.KPIs.CumulativeShipped.Value > 0 {
+		shipped := decimal(new(big.Rat).SetFloat64(snapshot.KPIs.CumulativeShipped.Value))
+		gap := decimal(new(big.Rat).SetFloat64(snapshot.KPIs.DeliveryGap.Value))
+		return Recommendation{
+			AgentKey: "business_analysis", CorrelationID: correlationID,
+			Summary:         fmt.Sprintf("订单 %s 的需求为 %s，受治理发运事实显示累计实发 %s、交付缺口 %s；完工与发运数量已可在线验证，但尚无实际成本事实，因此利润影响仍不能定量判断。", text(order["order_no"]), demand, shipped, gap),
+			Facts:           []Fact{{"demand_qty", demand, text(order["order_no"])}, {"shipped_qty", shipped, "governed scenario snapshot"}, {"delivery_gap_qty", gap, "governed scenario snapshot"}, {"cost_impact", "qualitative_only", "missing cost actuals"}},
+			Risks:           []string{"delivery_shortfall_confirmed", "procurement_cost_pressure", "overtime_cost_pressure", "quality_cost_pressure"},
+			Recommendations: []string{"对 300 件缺口发起补产或客户重承诺决策", "补齐加急采购、加班和检验实际成本后再计算利润影响"},
+			ObjectRefs:      []string{text(order["order_no"]), "SHIP-202607-0001", "SHIP-202607-0002", "INV-FG-202607-0001"}, ToolCallIDs: callIDs(c, requiredToolKeys()...),
+			Completeness: "partial", DataGaps: []string{"cost_actuals"}, Confidence: "high", Status: "suggested", RequiresHumanConfirmation: true,
+		}, nil
 	}
 	return Recommendation{
 		AgentKey: "business_analysis", CorrelationID: correlationID,

@@ -165,8 +165,8 @@ agent-tools.json
 - AESE 只读 2D 沙盘已实现：14 节点 A 线、七幕/22 事件、五项 KPI、对象详情和三类 Agent 建议均可确定性播放。
 - DES-048 的 M4 三类入口已贯通。M3 的订单 tracer 仍只依赖 IAOS 内生 `o2d.order.confirmed`；异常领域消费者和自动重排产不属于 M4。
 - M5 已有 `agent-setup` / `agent-run`、版本化 tool bundle、9 个 metadata 约束查询和 `internal/agenttrace` 三 Agent tracer。计划与质量结论可引用当前受治理业务状态；经营分析因缺少完工入库、发运和成本实际数据而明确返回 `partial`。
-- Preview 的 11,700 件累计实发和 300 件最终缺口不能反向写入在线 Agent 结论。要关闭经营分析数据缺口，IAOS 仍需受治理的完工入库、发运和成本事实合同。
-- M3V 静态预览器已完成；`ScenarioDataSource` 边界已验证，IAOS 在线数据源和正式 UI 集成留待 M6。
+- Live 的 11,700 件累计实发和 300 件最终缺口来自 IAOS 受治理完工、库存和发运事实；只有成本实际仍保持数据缺口。
+- M3V 静态预览器和 M6 `IaosScenarioDataSource` 均已完成；两种状态隔离，Live 故障不会静默降级为 Preview。
 
 ## 10. M6 在线观察架构
 

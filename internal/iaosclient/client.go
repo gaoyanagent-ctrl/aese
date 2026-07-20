@@ -231,6 +231,55 @@ type SimulationEventResult struct {
 	} `json:"transition"`
 }
 
+type ScenarioBusinessObject struct {
+	Type string `json:"type"`
+	Code string `json:"code"`
+}
+
+type ScenarioBusinessEventRequest struct {
+	EventID        string                 `json:"event_id"`
+	EventType      string                 `json:"event_type"`
+	Source         string                 `json:"source"`
+	OccurredAt     string                 `json:"occurred_at"`
+	CorrelationID  string                 `json:"correlation_id"`
+	CausationID    string                 `json:"causation_id,omitempty"`
+	IdempotencyKey string                 `json:"idempotency_key"`
+	BusinessObject ScenarioBusinessObject `json:"business_object"`
+	Payload        map[string]any         `json:"payload"`
+}
+
+type ScenarioBusinessEventResult struct {
+	EventID        string `json:"event_id"`
+	EventType      string `json:"event_type"`
+	Cursor         int64  `json:"cursor"`
+	Subject        string `json:"subject"`
+	CorrelationID  string `json:"correlation_id"`
+	Duplicate      bool   `json:"duplicate"`
+	Committed      bool   `json:"committed"`
+	BusinessObject struct {
+		Type string `json:"type"`
+		Code string `json:"code"`
+		ID   string `json:"id"`
+	} `json:"business_object"`
+	Transition struct {
+		From string `json:"from"`
+		To   string `json:"to"`
+	} `json:"transition"`
+}
+
+func (c *Client) IngestScenarioBusinessEvent(ctx context.Context, packKey, storyKey string, request ScenarioBusinessEventRequest) (ScenarioBusinessEventResult, error) {
+	var out ScenarioBusinessEventResult
+	if err := validateEntity(strings.ReplaceAll(packKey, "-", "_")); err != nil {
+		return out, fmt.Errorf("invalid scenario pack key")
+	}
+	if strings.TrimSpace(storyKey) == "" || strings.TrimSpace(request.EventID) == "" || strings.TrimSpace(request.EventType) == "" || strings.TrimSpace(request.IdempotencyKey) == "" {
+		return out, fmt.Errorf("scenario story, event_id, event_type and idempotency_key are required")
+	}
+	path := "api/v1/scenarios/" + url.PathEscape(packKey) + "/" + url.PathEscape(storyKey) + "/events"
+	err := c.requestHeaders(ctx, http.MethodPost, path, request, &out, map[string]string{"X-Correlation-ID": request.CorrelationID})
+	return out, err
+}
+
 // IngestSimulationEvent invokes DES-048. Tenant and actor remain owned by the
 // authenticated IAOS context; callers cannot provide a NATS subject.
 func (c *Client) IngestSimulationEvent(ctx context.Context, request SimulationEventRequest) (SimulationEventResult, error) {
@@ -395,6 +444,62 @@ func (c *Client) CallAITool(ctx context.Context, toolKey, correlationID, session
 func (c *Client) ResetScenario(ctx context.Context, request ScenarioResetRequest, correlationID string) (ScenarioSummary, error) {
 	var out ScenarioSummary
 	err := c.requestHeaders(ctx, http.MethodPost, "api/v1/scenarios/reset", request, &out, map[string]string{"X-Correlation-ID": correlationID})
+	return out, err
+}
+
+type ScenarioLiveMetric struct {
+	Value float64 `json:"value"`
+	Unit  string  `json:"unit"`
+}
+
+type ScenarioLiveKPIs struct {
+	OrderDemand         ScenarioLiveMetric `json:"order_demand"`
+	CumulativeAvailable ScenarioLiveMetric `json:"cumulative_available"`
+	CumulativeShipped   ScenarioLiveMetric `json:"cumulative_shipped"`
+	EndingFinishedGoods ScenarioLiveMetric `json:"ending_finished_goods"`
+	DeliveryGap         ScenarioLiveMetric `json:"delivery_gap"`
+}
+
+type ScenarioSnapshot struct {
+	SnapshotVersion string            `json:"snapshot_version"`
+	PackKey         string            `json:"pack_key"`
+	ScenarioKey     string            `json:"scenario_key"`
+	CorrelationID   string            `json:"correlation_id"`
+	ObservedAt      string            `json:"observed_at"`
+	Cursor          int64             `json:"cursor"`
+	Completeness    string            `json:"completeness"`
+	Gaps            []string          `json:"gaps"`
+	KPIs            ScenarioLiveKPIs  `json:"kpis"`
+	Entities        []map[string]any  `json:"entities"`
+	Events          []map[string]any  `json:"events"`
+	Recommendations []json.RawMessage `json:"recommendations"`
+}
+
+func (c *Client) ScenarioSnapshot(ctx context.Context, packKey, storyKey string) (ScenarioSnapshot, error) {
+	var out ScenarioSnapshot
+	if strings.TrimSpace(packKey) == "" || strings.TrimSpace(storyKey) == "" {
+		return out, fmt.Errorf("scenario pack and story are required")
+	}
+	path := "api/v1/scenarios/" + url.PathEscape(packKey) + "/" + url.PathEscape(storyKey) + "/snapshot"
+	err := c.request(ctx, http.MethodGet, path, nil, &out)
+	return out, err
+}
+
+type PublishRecommendationsResult struct {
+	RunID   string `json:"run_id"`
+	Created int    `json:"created"`
+	Updated int    `json:"updated"`
+	NoOp    int    `json:"no_op"`
+}
+
+func (c *Client) PublishScenarioRecommendations(ctx context.Context, packKey, storyKey, runID, correlationID string, recommendations any) (PublishRecommendationsResult, error) {
+	var out PublishRecommendationsResult
+	if strings.TrimSpace(runID) == "" || strings.TrimSpace(correlationID) == "" {
+		return out, fmt.Errorf("recommendation run_id and correlation_id are required")
+	}
+	path := "api/v1/scenarios/" + url.PathEscape(packKey) + "/" + url.PathEscape(storyKey) + "/recommendations"
+	body := map[string]any{"run_id": runID, "correlation_id": correlationID, "recommendations": recommendations}
+	err := c.requestHeaders(ctx, http.MethodPost, path, body, &out, map[string]string{"X-Correlation-ID": correlationID})
 	return out, err
 }
 

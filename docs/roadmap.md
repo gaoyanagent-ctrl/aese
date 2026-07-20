@@ -16,11 +16,11 @@
 | M3V 快速 2D 沙盘 | 七幕故事、22 事件、A 线画布、KPI 和 Agent 建议预览 | Completed | 前端、preview、18 unit/component tests、9 E2E、3 viewport screenshots |
 | M4 异常场景运行 | 延期、设备故障、来料不良进入 IAOS 运行链 | Completed | 三类 ingress、状态影响、事务 Outbox、租户/幂等及 canonical replay evidence |
 | M5 Agent MVP | 计划、质量、经营分析 Agent | Completed | 9 个受治理只读工具、三 Agent live tracer、跨租户与零业务写入证据 |
-| M6 在线 2D 企业沙盘 | IAOS 实时事件、库存、产线、异常和 Agent 运行结果 | Active | DES-004、PLAN-M6-001 |
+| M6 在线 2D 企业沙盘 | IAOS 实时事件、库存、产线、异常和 Agent 运行结果 | Completed | DES-004、PLAN-M6-001、M6 evidence |
 
 ## 2. 当前阶段
 
-M3、M3V、M4 和 M5 已完成。当前进入 M6：补齐完工入库、两次发运和最小成本影响事实，建立可恢复的场景 snapshot/cursor/SSE 合同，实现 `IaosScenarioDataSource` 和 Preview/Live 双模式。
+M3、M3V、M4、M5 和 M6 已完成。在线沙盘已形成受治理完工/入库/发运、snapshot/cursor/SSE、三 Agent 建议和 Preview/Live 双模式闭环；成本实际仍按事实保持 `partial`。
 
 M6 的最小成功标准：
 
@@ -52,12 +52,12 @@ M6 的最小成功标准：
 
 | Slice | 内容 | 状态 |
 | --- | --- | --- |
-| L0 | 合同冻结、成本完整度决策和基线 | Pending |
-| L1 | 完工、入库与两次发运事实闭环 | Pending |
-| L2 | snapshot、持久 cursor 和场景 SSE | Pending |
-| L3 | Agent 建议持久化与在线查询 | Pending |
-| L4 | `IaosScenarioDataSource` 和 Live UX | Pending |
-| L5 | 全链路、断线、跨租户和三视口验收 | Pending |
+| L0 | 合同冻结、成本完整度决策和基线 | Completed |
+| L1 | 完工、入库与两次发运事实闭环 | Completed |
+| L2 | snapshot、持久 cursor 和场景 SSE | Completed |
+| L3 | Agent 建议持久化与在线查询 | Completed |
+| L4 | `IaosScenarioDataSource` 和 Live UX | Completed |
+| L5 | 全链路、断线、跨租户和三视口验收 | Completed |
 
 ## 5. 风险与依赖
 
@@ -75,9 +75,9 @@ M6 的最小成功标准：
 - 完工和发运是内生业务动作，不能为了复用现有接口而错误接入 simulation ingress。
 - HCTM 尚无已批准的成本金额基线；在基线确认前，在线经营分析的成本部分必须保持 `partial`。
 
-## 6. 后续里程碑入口条件
+## 6. M6 完成证据
 
-完成 M6 前：
+M6 已满足：
 
 - 在线库存、完工、发运和订单状态满足 expected outcomes 与库存守恒。
 - snapshot 与 cursor 来自一致观察边界，断线补发和事件去重可复现。

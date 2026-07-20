@@ -47,3 +47,40 @@ test('opens business object details and explains all three Agent roles', async (
   await expect(page.getByText('经营分析 Agent')).toBeVisible();
   await expect(page.getByText('交付复盘')).toBeVisible();
 });
+
+test('renders governed Live facts, gaps, events and Agent evidence', async ({ page }, testInfo) => {
+  const observedAt = '2026-07-20T09:00:00Z';
+  const events = [
+    { cursor: 1, event_id: 'evt-release', event_type: 'proc.production_order.released', occurred_at: observedAt, correlation_id: 'corr-so-202607-0001', business_object_type: 'production_order', business_object_code: 'WO-202607-0001', payload: {} },
+    { cursor: 2, event_id: 'evt-ship', event_type: 'o2d.shipment.dispatched', occurred_at: observedAt, correlation_id: 'corr-so-202607-0001', business_object_type: 'shipment', business_object_code: 'SHIP-202607-0002', payload: {} },
+  ];
+  const snapshot = {
+    snapshot_version: '1.0.0', pack_key: 'hctm', scenario_key: 'order-expedite-01', observed_at: observedAt,
+    cursor: 2, completeness: 'partial', gaps: ['cost_actuals'],
+    kpis: {
+      order_demand: { value: 12000, unit: 'pcs' }, cumulative_available: { value: 11700, unit: 'pcs' },
+      cumulative_shipped: { value: 11700, unit: 'pcs' }, ending_finished_goods: { value: 0, unit: 'pcs' }, delivery_gap: { value: 300, unit: 'pcs' },
+    },
+    entities: [
+      { id: 'order-live', type: 'sales_order', business_code: 'SO-202607-0001', name: '客户订单', status: 'partially_shipped', attributes: { demand_qty: 12000, shipped_qty: 11700 } },
+      { id: 'equipment-live', type: 'equipment', business_code: 'LAS-WLD-02', name: '关键焊接设备', status: 'maintenance', attributes: {} },
+      { id: 'shipment-live', type: 'shipment', business_code: 'SHIP-202607-0002', name: '第二次发运', status: 'dispatched', attributes: { quantity: 2700 } },
+    ],
+    events,
+    recommendations: [{ agent_key: 'business_analysis', summary: '在线交付复盘', recommendations: ['保留 300 件缺口并由人工确认后续措施'], object_refs: ['SO-202607-0001'], tool_call_ids: ['00000000-0000-0000-0000-000000000001'], completeness: 'partial', data_gaps: ['cost_actuals'], confidence: '0.92', status: 'suggested', requires_human_confirmation: true }],
+  };
+  await page.route('**/api/v1/scenarios/hctm/order-expedite-01/snapshot', (route) => route.fulfill({ json: snapshot }));
+  await page.route('**/api/v1/scenarios/hctm/order-expedite-01/events?**', (route) => route.fulfill({ json: { items: [], next_cursor: 2, has_more: false } }));
+  await page.route('**/api/v1/scenarios/hctm/order-expedite-01/events/stream?**', (route) => route.fulfill({ contentType: 'text/event-stream', body: ': heartbeat\n\n' }));
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Live' }).click();
+  await expect(page.getByRole('heading', { name: '华辰苏州基地 · 在线企业沙盘' })).toBeVisible();
+  await expect(page.getByText('12,000 件')).toBeVisible();
+  await expect(page.getByText('11,700 件').first()).toBeVisible();
+  await expect(page.getByText('300 件')).toBeVisible();
+  await expect(page.getByText(/数据缺口：cost_actuals/)).toBeVisible();
+  if (testInfo.project.name === 'mobile-390') await page.getByRole('tab', { name: 'A 线画布' }).click();
+  await expect(page.locator('.factory-node')).toHaveCount(14);
+  await expect(page.locator('.factory-node').first()).toBeVisible();
+  await page.screenshot({ path: `test-results/live-${testInfo.project.name}.png` });
+});

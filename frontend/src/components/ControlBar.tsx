@@ -3,6 +3,8 @@ import {
   ChevronRight,
   Pause,
   Play,
+  Radio,
+  RefreshCw,
   RotateCcw,
 } from 'lucide-react';
 
@@ -18,6 +20,11 @@ interface ControlBarProps {
   onNext: () => void;
   onReset: () => void;
   onSpeedChange: (speed: 1 | 2 | 4) => void;
+  mode?: 'preview' | 'live';
+  onModeChange?: (mode: 'preview' | 'live') => void;
+  sourceStatus?: string;
+  onRefresh?: () => void;
+  onReconnect?: () => void;
 }
 
 export function ControlBar({
@@ -32,6 +39,11 @@ export function ControlBar({
   onNext,
   onReset,
   onSpeedChange,
+  mode = 'preview',
+  onModeChange,
+  sourceStatus,
+  onRefresh,
+  onReconnect,
 }: ControlBarProps) {
   return (
     <header className="control-bar">
@@ -44,12 +56,20 @@ export function ControlBar({
       </div>
 
       <div className="source-clock" aria-label="仿真状态">
-        <span className="source-pill"><span className="source-dot" />PREVIEW</span>
+        <div className="mode-switch" aria-label="数据模式">
+          <button className={mode === 'preview' ? 'active' : ''} onClick={() => onModeChange?.('preview')}>Preview</button>
+          <button className={mode === 'live' ? 'active' : ''} onClick={() => onModeChange?.('live')}>Live</button>
+        </div>
+        <span className={`source-pill ${mode === 'live' ? 'source-live' : ''}`}><span className="source-dot" />{mode === 'live' ? (sourceStatus ?? 'LIVE') : 'PREVIEW'}</span>
         <span className="clock-value">{currentTime}</span>
         <span className="step-value">事件 {step}/{totalSteps}</span>
       </div>
 
       <div className="playback-controls" aria-label="故事播放控制">
+        {mode === 'live' ? <>
+          <button className="play-button" onClick={onRefresh} aria-label="刷新在线快照"><RefreshCw aria-hidden="true" /><span>刷新</span></button>
+          <button className="icon-button" onClick={onReconnect} aria-label="重新连接在线事件"><Radio aria-hidden="true" /></button>
+        </> : <>
         <button className="icon-button" onClick={onPrevious} disabled={step === 0} aria-label="上一个事件">
           <ChevronLeft aria-hidden="true" />
         </button>
@@ -71,6 +91,7 @@ export function ControlBar({
         <button className="icon-button reset-button" onClick={onReset} disabled={step === 0} aria-label="重置故事">
           <RotateCcw aria-hidden="true" />
         </button>
+        </>}
       </div>
     </header>
   );

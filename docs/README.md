@@ -46,6 +46,8 @@
 | [HCTM M4 Simulation Ingress Evidence](reports/hctm-m4-simulation-ingress-evidence.md) | 三类异常入口、状态、幂等、跨租户和 Outbox 证据 | Completed |
 | [HCTM M5 Agent Tracer Runbook](runbooks/hctm-m5-governed-agent-tracers.md) | Tool setup、Agent run、重复和跨租户验收步骤 | Active |
 | [HCTM M5 Agent Tracer Evidence](reports/hctm-m5-agent-evidence.md) | 三 Agent 在线结果、零业务写入和调用审计证据 | Completed |
+| [HCTM M6 Online Sandbox Runbook](runbooks/hctm-m6-online-sandbox.md) | 在线事实、游标、SSE 和 Live UI 操作 | Active |
+| [HCTM M6 Online Sandbox Evidence](reports/hctm-m6-online-sandbox-evidence.md) | KPI、幂等、租户隔离和三视口证据 | Completed |
 | [Original Chat](ChatGPT_20260626.md) | 原始构思记录，仅供追溯 | Archive |
 
 ### 设计、决策和计划
@@ -57,12 +59,12 @@
 | DES-001 | [M3 可执行场景包与重放架构](designs/DES-001-m3-executable-scenario-package.md) | Completed |
 | DES-002 | [快速 2D 企业沙盘设计](designs/DES-002-fast-track-2d-enterprise-sandbox.md) | Completed |
 | DES-003 | [M5 受治理 Agent Tracer 设计](designs/DES-003-governed-agent-tracers.md) | Completed |
-| DES-004 | [M6 在线 2D 企业沙盘架构](designs/DES-004-online-2d-enterprise-sandbox.md) | Approved |
+| DES-004 | [M6 在线 2D 企业沙盘架构](designs/DES-004-online-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M3 | [M3 实施计划](plans/2026-07-19-m3-executable-scenario-package.md) | Completed |
 | PLAN-M3V | [快速 2D 企业沙盘实施计划](plans/2026-07-19-fast-track-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Completed |
 | PLAN-M5 | [M5 受治理 Agent MVP 实施计划](plans/2026-07-19-m5-governed-agent-mvp.md) | Completed |
-| PLAN-M6 | [M6 在线 2D 企业沙盘实施计划](plans/2026-07-20-m6-online-2d-enterprise-sandbox.md) | Active |
+| PLAN-M6 | [M6 在线 2D 企业沙盘实施计划](plans/2026-07-20-m6-online-2d-enterprise-sandbox.md) | Completed |
 
 ## 3. 命名与状态
 
