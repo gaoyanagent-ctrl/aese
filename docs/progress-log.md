@@ -172,3 +172,9 @@
 - 原因：远程用户虽然能访问 AESE 前端，但浏览器中的回环地址指向用户自己的机器，导致 Live snapshot `ERR_CONNECTION_REFUSED`；服务器端 Platform 实际健康且监听所有网卡。
 - 影响：用户只需访问前端端口，snapshot、cursor 和 SSE 均走同源代理；显式 `VITE_IAOS_BASE_URL` 仍可覆盖默认配置。
 - 后续：生产静态部署的反向代理同样需要把 `/api` 转发给 IAOS Platform；开发 token 仅用于本地测试。
+## 2026-07-20 - 修复 IAOS 华辰租户可见性与开发工作区切换
+
+- 变更：IAOS SaaS tenant lifecycle 现在把 `tenant_account` 原子投影到主界面使用的 `tenant` 目录，启动 bootstrap 幂等回填历史租户；新增受认证的 `dev-user` tenant token exchange，侧栏切换同时更新 JWT 和本地 tenant id。
+- 原因：`tenant-hctm` 只存在于控制面目录，导致 IAOS 主界面租户下拉不可见；原侧栏只改 `localStorage`，不能改变后端强制执行的 JWT tenant claim。
+- 影响：华辰租户可从 IAOS 平台工作区直接选择，切换后业务菜单、实体数据与 AESE Live 使用相同 `tenant-hctm` 边界；普通用户不能使用开发切换入口，租户状态仍按 active gate 检查。
+- 后续：生产身份体系应使用真实跨租户 membership/SSO，不依赖 dev-user token exchange；AESE 本地演示继续使用该受限开发入口。
