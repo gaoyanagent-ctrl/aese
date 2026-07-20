@@ -152,7 +152,7 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 
 ## 6. 当前状态
 
-截至 2026-07-19：
+截至 2026-07-20：
 
 - M0、M1 已完成。
 - M2 的业务与技术规格文档已完成：28 个对象、18 类事件、Seed 数据计划和第一条演示故事均有明确合同。
@@ -165,7 +165,9 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 - M5 已完成 Agent tracer 基础链：`agent-setup` 读取版本化 tool bundle，幂等准备最小 metadata 并创建/更新/启用 9 个低风险查询工具；`agent-run` 调用这些工具、保留 `call_id` 证据并确定性生成计划、质量和经营分析建议。两个命令均默认 dry-run，外部写入要求显式 `--apply`。
 - `/iaos/iaos-go` 已提供 DES-047 scenario apply/reset、原子幂等 O2D workflow、HCTM work_order/workflow fixture，以及 AI Tool `source_ref=entity.records` 的 metadata 约束查询：entity、字段、filter allowlist、排序和最大行数由服务端 tool metadata 固定，调用者只能提供 filter value 和 limit；查询同时受显式 tenant predicate 与 RLS 约束。
 - 现场上下文目前足以确认订单需求 12,000、成品库存 1,200、采购延期、设备维护、来检拒收 300 和 3 张 pending 工单，但 IAOS 尚无 canonical 完工入库、两次发运和实际成本记录。因此经营分析 Agent 必须返回 `completeness=partial`，不得声称在线已交付 11,700 或已确定 300 件缺口；这些数字当前只属于 Preview/expected outcomes。
-- M5 tracer 是 IAOS AI Tool Registry 上的受审计只读建议链，不是另建的 Agent Runtime，不调用真实 LLM，不执行推荐动作；下一步 M6 才实现 `IaosScenarioDataSource`，当前尚无 active plan。
+- M5 tracer 是 IAOS AI Tool Registry 上的受审计只读建议链，不是另建的 Agent Runtime，不调用真实 LLM，不执行推荐动作。
+- 当前唯一 active plan 是 `docs/plans/2026-07-20-m6-online-2d-enterprise-sandbox.md`：先补齐完工/入库/发运事实和持久场景观察合同，再实现 `IaosScenarioDataSource` 与 Preview/Live 双模式。
+- M6 不直接依赖当前通用 `/api/v1/events/stream` 恢复状态；该接口没有持久 cursor。设计见 `docs/designs/DES-004-online-2d-enterprise-sandbox.md`。
 
 ## 7. 后续 agent 必须维护的信息
 

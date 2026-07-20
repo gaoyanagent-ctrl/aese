@@ -150,3 +150,11 @@
 - 原因：让 Agent 基于 `tenant-hctm` 的在线业务状态生成可解释建议，并复用 IAOS 的权限、RLS、Tool Registry 和调用审计，而不是读取 Preview 或绕过平台另造运行时。
 - 影响：重复 setup 收敛为 9 个工具；重复 live run 不改变 24 条目标业务记录或 39 条 Outbox，只新增 9 条 Tool Call 和 36 条 milestone event；`tenant-other` 看不到 HCTM 工具。计划 Agent 会按当前库存报告 7,600 的物料缺口；质量和经营分析对缺失事实显式返回 `partial`，不虚构 1,700 合格放行、11,700 已发运或成本结果。
 - 后续：M6 只消费稳定 recommendation envelope 与 IAOS 在线状态；补齐完工入库、发运和实际成本受治理事实后，再扩展经营分析的最终交付和利润结论。
+
+## 2026-07-20 - M6 在线 2D 企业沙盘规划
+
+- 变更：新增 DES-004 和 PLAN-M6-001，将 M6 设为当前唯一 active plan；计划拆为 L0-L5、T1-T37，并同步 README、MVP Blueprint、Agent Context、Architecture、Roadmap、Code Map 和文档索引。
+- 原因：M3V 已有可用 2D Preview，M4/M5 已有在线异常与受治理 Agent tracer，但 IAOS 尚缺完工入库、两次发运、成本影响和可恢复场景事件合同，前端无法把 Preview 安全升级为 Live。
+- 影响：M6 采用“快照为真、SSE 作增量提示、按持久 cursor 补齐”的架构。完工和发运走 IAOS 正式业务动作，不复用外生 simulation ingress；AESE 保留布局与视觉映射，通过 `IaosScenarioDataSource` 消费在线事实。成本金额无批准基线时继续标记 `partial`。
+- 验证：计划定义 8-10 个工作日的每日成果、业务不变量、断线恢复、跨租户、Agent 证据和三视口验收；当前通用 SSE 已确认无持久 cursor、缓冲满可丢事件，不被误选为 M6 恢复合同。本地 Markdown 相对链接无缺失，active plan 数量为 1，M6 任务为 T1-T37，`git diff --check` 通过。
+- 后续：从 L0/T1-T5 开始，冻结事件 17-22、成本完整度和 scenario observation API 合同，并在 IAOS 独立 worktree 建立 contract test。

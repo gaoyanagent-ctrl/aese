@@ -54,8 +54,9 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M3 可执行 HCTM 场景包：完成；pack、Schema、CLI、受治理 apply/reset、O2D replay/verify 和幂等证据均已落地。
 - M3V 快速 2D 企业沙盘：完成；七幕/22 事件、A 线画布、KPI、对象详情和三类 Agent 建议已通过桌面与移动端验收。
 - M5 Agent MVP：完成；默认 dry-run 的 `agent-setup` / `agent-run`、9 个低风险只读 AI Tool bundle 和三 Agent 确定性 tracer 已通过 live、重复调用、零业务写入与跨租户验收。
+- M6 在线 2D 企业沙盘：当前 active；计划补齐完工/入库/发运事实、可恢复场景事件合同和 `IaosScenarioDataSource`。
 
-当前可直接运行静态场景驱动的 2D 企业沙盘。M4 三类异常已完成 IAOS 受治理入口、状态影响、事务 Outbox 和 canonical replay 验收；M5 tracer 能依据 IAOS 中的订单、库存、BOM、采购、设备、检验和工单事实生成计划、质量与经营分析建议。经营分析结果会对缺失的完工入库、发运和实际成本明确标记 `partial`，不会把 Preview 中的 11,700 件实发和 300 件缺口冒充在线事实。下一里程碑是尚未启动的 M6 在线沙盘，当前状态以 [Roadmap](docs/roadmap.md) 为准。
+当前可直接运行静态场景驱动的 2D 企业沙盘。M6 将采用“快照为真、SSE 作增量提示、按持久游标补齐”的在线架构；在 IAOS 未形成完工、发运和成本事实前，仍不会把 Preview 中的 11,700 件实发和 300 件缺口冒充在线结果。当前状态以 [Roadmap](docs/roadmap.md) 为准。
 
 ## M5 Agent tracer
 
@@ -87,6 +88,7 @@ npm run dev
 - [Code Map](docs/code-map.md)
 - [M3 实施计划](docs/plans/2026-07-19-m3-executable-scenario-package.md)
 - [快速 2D 企业沙盘实施计划](docs/plans/2026-07-19-fast-track-2d-enterprise-sandbox.md)
+- [M6 在线 2D 企业沙盘实施计划](docs/plans/2026-07-20-m6-online-2d-enterprise-sandbox.md)
 - [M3 本地运行手册](docs/runbooks/hctm-m3-local-run.md)
 - [M3V 2D 沙盘运行手册](docs/runbooks/hctm-m3v-2d-sandbox.md)
 - [M5 受治理 Agent Tracer 运行手册](docs/runbooks/hctm-m5-governed-agent-tracers.md)

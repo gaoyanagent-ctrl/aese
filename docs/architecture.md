@@ -167,3 +167,19 @@ agent-tools.json
 - M5 已有 `agent-setup` / `agent-run`、版本化 tool bundle、9 个 metadata 约束查询和 `internal/agenttrace` 三 Agent tracer。计划与质量结论可引用当前受治理业务状态；经营分析因缺少完工入库、发运和成本实际数据而明确返回 `partial`。
 - Preview 的 11,700 件累计实发和 300 件最终缺口不能反向写入在线 Agent 结论。要关闭经营分析数据缺口，IAOS 仍需受治理的完工入库、发运和成本事实合同。
 - M3V 静态预览器已完成；`ScenarioDataSource` 边界已验证，IAOS 在线数据源和正式 UI 集成留待 M6。
+
+## 10. M6 在线观察架构
+
+M6 采用 snapshot-first 模式：AESE 保留静态布局和视觉映射，IAOS 提供租户级运行事实、持久事件游标和建议证据。
+
+```text
+IAOS governed business action
+  -> business state + inventory transaction + scenario event log + Outbox (one transaction)
+  -> scenario snapshot / events?after=cursor / scenario SSE
+  -> IaosScenarioDataSource
+  -> existing 2D canvas / KPI / event feed / Agent panel
+```
+
+通用 `/api/v1/events/stream` 没有持久游标、断线补发和场景过滤，不作为在线沙盘的事实恢复合同。M6 的场景 SSE 只传递增量，客户端始终以一致性快照和持久 cursor query 恢复状态。
+
+完工、入库和发运属于 IAOS 内生业务动作，必须走 Capability/场景业务动作；simulation ingress 继续只承载受控外生异常。详细合同见 DES-004。

@@ -2,7 +2,7 @@
 
 本文件是 AESE 当前里程碑状态和下一步优先级的权威来源。
 
-最后更新：2026-07-19。
+最后更新：2026-07-20。
 
 ## 1. 里程碑状态
 
@@ -16,56 +16,48 @@
 | M3V 快速 2D 沙盘 | 七幕故事、22 事件、A 线画布、KPI 和 Agent 建议预览 | Completed | 前端、preview、18 unit/component tests、9 E2E、3 viewport screenshots |
 | M4 异常场景运行 | 延期、设备故障、来料不良进入 IAOS 运行链 | Completed | 三类 ingress、状态影响、事务 Outbox、租户/幂等及 canonical replay evidence |
 | M5 Agent MVP | 计划、质量、经营分析 Agent | Completed | 9 个受治理只读工具、三 Agent live tracer、跨租户与零业务写入证据 |
-| M6 在线 2D 企业沙盘 | IAOS 实时事件、库存、产线、异常和 Agent 运行结果 | Not started | - |
+| M6 在线 2D 企业沙盘 | IAOS 实时事件、库存、产线、异常和 Agent 运行结果 | Active | DES-004、PLAN-M6-001 |
 
 ## 2. 当前阶段
 
-M3、M3V、M4 和 M5 已完成。计划、质量和经营分析 Agent 已通过 IAOS AI Tool Registry 读取真实业务上下文、留下审计并输出可解释建议；缺少完工入库、发运和实际成本事实时，经营分析按合同返回 `partial`。下一里程碑是 M6 在线 `IaosScenarioDataSource`，但尚未建立 active plan。
+M3、M3V、M4 和 M5 已完成。当前进入 M6：补齐完工入库、两次发运和最小成本影响事实，建立可恢复的场景 snapshot/cursor/SSE 合同，实现 `IaosScenarioDataSource` 和 Preview/Live 双模式。
 
-M3V 的最小成功标准：
+M6 的最小成功标准：
 
-1. 3 到 4 个工作日内提供可访问的 React 2D 沙盘。
-2. 页面直接显示苏州制造基地电池冷却板 A 线，不设置落地页。
-3. 七幕故事和 22 个事件可播放、暂停、单步、倍速和重置。
-4. 画布、事件流、对象详情、五项 KPI 和三类 Agent 建议同步变化。
-5. 静态预览数据经过 adapter 提供，后续可替换为 IAOS API/SSE。
-6. 桌面与移动端自动化和截图验收通过。
+1. 在线状态只来自 IAOS 租户事实，不复用 Preview expected outcomes 冒充 Live。
+2. canonical 事件 17-22 形成幂等、事务化的完工、入库和发运记录。
+3. 场景事件可按持久 cursor 查询和补发，SSE 断线不丢失状态。
+4. Live 最终显示需求 12,000、实发 11,700、缺口 300 和 `partially_shipped`。
+5. 三 Agent 建议能追溯 correlation、业务对象和 IAOS Tool Call。
+6. Preview/Live、跨租户、断线恢复、桌面和移动端验收通过。
 
-M3 已完成的验收基线：
-
-1. HCTM 场景数据不再只存在于 Markdown，而是形成版本化 JSON pack。
-2. `aese validate` 能离线发现 schema、引用、数量、时间线和幂等错误。
-3. `aese inspect` 能输出对象数、事件数、依赖和故事摘要。
-4. 至少一个受控路径可把基础数据导入 IAOS，并触发 `o2d.order.confirmed`。
-5. 重复 apply/replay 不产生重复业务对象或重复事件副作用。
-6. 提供 API、数据库、事件流和演示故事验收证据。
-
-## 3. M3V 范围
+## 3. M6 范围
 
 包含：
 
-- React + TypeScript + Vite 前端。
-- 苏州基地 A 线 2D 工艺与物流画布。
-- 静态 `preview.json` 和确定性时间线 reducer。
-- 七幕/22 事件播放控制、事件流、对象详情、KPI 和 Agent 建议。
-- 桌面优先、移动端可用的响应式布局与自动化测试。
+- 事件 17-22 的 IAOS 完工、入库、发运和库存事实闭环。
+- tenant-scoped snapshot、持久 cursor event query、场景 SSE 和 recommendation query。
+- M5 recommendation envelope 的在线持久化与 Tool Call 证据关联。
+- `IaosScenarioDataSource`、Preview/Live 双模式、断线恢复和完整度展示。
+- 全链路回放、跨租户、桌面与移动端自动化验收。
 
 不包含：
 
-- IAOS 实时 API/SSE 数据源。
-- 真实 Agent 调用和建议执行。
-- 业务 CRUD、审批、权限和审计界面。
-- 3D 工厂或通用离散事件仿真引擎。
+- 第二场景、多工厂和多产品族。
+- 真实 LLM 自主 Agent 和建议自动执行。
+- 完整成本核算、总账和利润中心。
+- 3D 工厂、布局编辑器或通用离散事件仿真引擎。
 
-## 4. M3V 交付切片
+## 4. M6 交付切片
 
 | Slice | 内容 | 状态 |
 | --- | --- | --- |
-| V0 | 前端骨架、视图模型和 preview 数据 | Completed |
-| V1 | 2D 工厂画布和工作台布局 | Completed |
-| V2 | 时间线播放内核和视觉状态变化 | Completed |
-| V3 | 事件、KPI、对象详情和 Agent 建议 | Completed |
-| V4 | 响应式、自动化测试和运行说明 | Completed |
+| L0 | 合同冻结、成本完整度决策和基线 | Pending |
+| L1 | 完工、入库与两次发运事实闭环 | Pending |
+| L2 | snapshot、持久 cursor 和场景 SSE | Pending |
+| L3 | Agent 建议持久化与在线查询 | Pending |
+| L4 | `IaosScenarioDataSource` 和 Live UX | Pending |
+| L5 | 全链路、断线、跨租户和三视口验收 | Pending |
 
 ## 5. 风险与依赖
 
@@ -79,28 +71,16 @@ M3 已完成的验收基线：
 - M4 的显式 tenant predicates 已关闭当前入口越界路径，但 tenant-safe composite foreign key 和 metadata `version` 的平台级排序仍需后续 hardening。
 - 首版 2D 沙盘是确定性预览，不应被描述为 IAOS 实时运行结果；界面必须显示 Preview 数据源状态。
 - `preview.json` 只承载视图状态和 delta，不得复制 MRP、排产或 Agent 决策逻辑。
+- 当前通用 `/api/v1/events/stream` 无持久 cursor 且缓冲满会丢事件，只能作为监控通道，不能直接作为 M6 恢复合同。
+- 完工和发运是内生业务动作，不能为了复用现有接口而错误接入 simulation ingress。
+- HCTM 尚无已批准的成本金额基线；在基线确认前，在线经营分析的成本部分必须保持 `partial`。
 
 ## 6. 后续里程碑入口条件
 
-完成 M3V 前：
+完成 M6 前：
 
-- 22 个事件和七幕故事在桌面与移动端均可完整播放。
-- 最终 KPI 与 expected outcomes 一致。
-- `ScenarioDataSource` 隔离静态预览数据与 UI。
-- 自动化测试、截图验收和本地运行说明齐全。
-
-进入 M4 前：
-
-- M3 的 pack、validator、apply/replay 和 reset 均通过。
-- `o2d.order.confirmed` tracer 在 `tenant-hctm` 下可复现。
-- 事件关联、RLS 和幂等证据完整。
-
-进入 M5 前：
-
-- M4 三类异常均有结构化事件和可查询业务上下文。
-- Agent 所需工具通过 IAOS Capability / AI Tool Registry 暴露。
-
-进入 M6 在线沙盘前：
-
-- 业务链和 Agent 输出稳定。
-- 2D 沙盘的数据查询合同已经固定。
+- 在线库存、完工、发运和订单状态满足 expected outcomes 与库存守恒。
+- snapshot 与 cursor 来自一致观察边界，断线补发和事件去重可复现。
+- Preview/Live 数据源明示，错误时不静默混用。
+- Agent 建议、对象引用和 Tool Call 证据属于同一 tenant/correlation。
+- IAOS 与 AESE 两仓测试、部署、runbook 和 evidence 完整。

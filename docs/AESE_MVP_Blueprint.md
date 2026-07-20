@@ -332,7 +332,7 @@ M3“可执行 HCTM 场景包”已完成：
 - 通过 IAOS 受治理入口导入最小数据并触发 `o2d.order.confirmed` tracer。
 - 验证租户隔离、幂等执行、reset 和故事结果。
 
-当前先执行 M3V：在 3 到 4 个工作日内把现有场景数据转换为可播放的 2D 企业沙盘预览版。完成交互验证后，再进入 M4，基于 IAOS DES-048 接入供应商延期、设备故障和来料不良三类在线事件。
+M3V、M4 和 M5 已完成。当前执行 M6：补齐 IAOS 完工入库、两次发运和成本完整度合同，建立 snapshot/cursor/SSE 场景观察 API，并把现有 2D 沙盘升级为 Preview/Live 双模式。
 
 详细设计与任务见：
 
@@ -340,3 +340,5 @@ M3“可执行 HCTM 场景包”已完成：
 - `docs/plans/2026-07-19-m3-executable-scenario-package.md`
 - `docs/designs/DES-002-fast-track-2d-enterprise-sandbox.md`
 - `docs/plans/2026-07-19-fast-track-2d-enterprise-sandbox.md`
+- `docs/designs/DES-004-online-2d-enterprise-sandbox.md`
+- `docs/plans/2026-07-20-m6-online-2d-enterprise-sandbox.md`
