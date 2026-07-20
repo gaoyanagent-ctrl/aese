@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260720-atlas-layout-readability-v1",
+  "node_key": "shared.atlas",
+  "update_type": "test",
+  "summary": "加固 Atlas 图谱与工具栏可读性",
+  "detail": "根据真实截图将布局命令改为固定图标按钮，并提高初始图谱最小缩放。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "AESE Atlas 在桌面和移动内容区保持无重叠、可拖动和可读。",
+  "evidence_ref": "docs/designs/DES-006-system-atlas-aese-projection.md"
+}
