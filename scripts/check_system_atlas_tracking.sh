@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_root"
 
 base_ref="${1:-}"
 head_ref="${2:-HEAD}"
@@ -13,7 +15,7 @@ progress_changed=false
 manifests=()
 for path in "${changed[@]}"; do
   case "$path" in
-    cmd/*|internal/*|frontend/src/*|scenario-packs/*|docs/designs/*|docs/decisions/*|docs/plans/*)
+    cmd/*|internal/*|frontend/src/*|scenario-packs/*|docs/designs/*|docs/decisions/*|docs/plans/*|scripts/check_system_atlas_tracking.sh|scripts/sync_system_atlas_updates.sh|.github/workflows/system-atlas-governance.yml)
       substantive=true ;;
   esac
   [ "$path" = "docs/progress-log.md" ] && progress_changed=true

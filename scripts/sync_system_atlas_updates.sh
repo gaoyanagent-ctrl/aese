@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
+repo_root="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$repo_root"
 BASE_URL="${IAOS_BASE_URL:-http://127.0.0.1:8082}" TENANT_ID="${IAOS_TENANT_ID:-tenant-hctm}" TOKEN="${IAOS_TOKEN:-}" COMMIT_SHA="${ATLAS_COMMIT_SHA:-$(git rev-parse HEAD)}"
 if [ -z "$TOKEN" ]; then TOKEN="$(curl -fsS "$BASE_URL/api/v1/dev/token?tenant_id=$TENANT_ID&roles=admin" | jq -er '.token')"; fi
 count=0

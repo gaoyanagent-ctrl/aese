@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260720-atlas-script-root-v1",
+  "node_key": "shared.atlas",
+  "update_type": "test",
+  "summary": "固定 AESE Atlas 脚本仓库根目录",
+  "detail": "校验和同步脚本从自身路径解析 AESE 仓库根目录，绝对路径调用不会误读其他仓库声明。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "evidence_ref": "docs/progress-log.md"
+}
