@@ -207,3 +207,11 @@
 - 影响：M7 新增无业务数据库的 AESE 薄编排 API，复用现有 Go 内核并使用调用者 IAOS 身份；页面增加 preflight、初始化、七幕推进、运行到结束、Agent 分析、verify 和一次性确认复位。所有业务事实、权限和审计继续由 IAOS 持有。
 - 验证：计划定义 7-9 个工作日的每日成果、状态机、plan hash、cursor、幂等、并发、重启恢复、跨租户、CLI/UI 一致性和三视口验收；本地 Markdown 相对链接无缺失，active plan 数量为 1，M7 任务为 T1-T39，`git diff --check` 通过。
 - 后续：从 O0/T1-T6 开始，先把 CLI 编排提取为 application service，并冻结 pack 阶段编译和 run 状态机合同。
+
+## 2026-07-20 - 建立 IAOS + AESE System Atlas 双系统全景
+
+- 变更：IAOS 新增平台级 System Atlas 节点、关系和追加式进展数据库，建立 34 个未来完成体构件基线、权限 API 和进展登记脚本；IAOS 工作台新增双系统动态图谱。AESE 新增聚焦虚拟企业模型、场景、Agent、2D 沙盘、实验和经营评估的动态图谱，并复用同一 IAOS 数据源。
+- 原因：现有路线图和进展日志无法同时表达最终完整系统的组成、跨系统依赖、当前完成度和可追溯依据，用户与后续 Agent 难以形成一致全局认知。
+- 影响：用户可缩放、筛选和点击构件查看目标、现状、完成度、设计/代码依据与更新历史；后续实质进展除项目日志外还必须登记到 Atlas。全景属于产品治理控制面，不存储或替代 HCTM 仿真业务事实。
+- 验证：后端 package/API 单测、IAOS TypeScript 校验、AESE TypeScript 与 24 项前端测试通过；真实 PostgreSQL、生产构建和浏览器三视口验收待部署阶段完成。
+- 后续：部署后完成真实 PostgreSQL seed/API 验收和两端浏览器截图；随后按 M7 实施进展持续更新 `aese.operations`，并逐步补充历史 commit 的精细证据。

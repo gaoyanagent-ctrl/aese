@@ -62,6 +62,7 @@
 | DES-003 | [M5 受治理 Agent Tracer 设计](designs/DES-003-governed-agent-tracers.md) | Completed |
 | DES-004 | [M6 在线 2D 企业沙盘架构](designs/DES-004-online-2d-enterprise-sandbox.md) | Completed |
 | DES-005 | [M7 受治理场景运行控制台](designs/DES-005-governed-scenario-operations-console.md) | Approved |
+| DES-006 | [AESE System Atlas 双系统全景投影](designs/DES-006-system-atlas-aese-projection.md) | Completed |
 | PLAN-M3 | [M3 实施计划](plans/2026-07-19-m3-executable-scenario-package.md) | Completed |
 | PLAN-M3V | [快速 2D 企业沙盘实施计划](plans/2026-07-19-fast-track-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Completed |

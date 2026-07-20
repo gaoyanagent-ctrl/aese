@@ -18,10 +18,11 @@
 | M5 Agent MVP | 计划、质量、经营分析 Agent | Completed | 9 个受治理只读工具、三 Agent live tracer、跨租户与零业务写入证据 |
 | M6 在线 2D 企业沙盘 | IAOS 实时事件、库存、产线、异常和 Agent 运行结果 | Completed | DES-004、PLAN-M6-001、M6 evidence |
 | M7 受治理场景运行控制台 | 浏览器预检、初始化、逐幕运行、分析、验证和复位 | Active | ADR-003、DES-005、PLAN-M7-001 |
+| X1 System Atlas 全景治理 | 最终完成体、当前状态、依赖与进展历史 | Completed | DES-006、IAOS DES-049、双端动态图谱 |
 
 ## 2. 当前阶段
 
-M3、M3V、M4、M5 和 M6 已完成。当前进入 M7：为现有联动中心增加受治理场景运行控制，让业务用户不依赖 CLI 完成 preflight、initialize、七幕推进、Agent 分析、verify 和 reset。
+M3、M3V、M4、M5、M6 和跨里程碑的 X1 System Atlas 已完成。当前进入 M7：为现有联动中心增加受治理场景运行控制，让业务用户不依赖 CLI 完成 preflight、initialize、七幕推进、Agent 分析、verify 和 reset。未来完成体与每个构件的动态状态由 IAOS System Atlas 数据库统一提供。
 
 M7 的最小成功标准：
 

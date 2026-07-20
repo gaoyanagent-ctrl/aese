@@ -1,4 +1,4 @@
-import { AlertTriangle, LoaderCircle } from 'lucide-react';
+import { AlertTriangle, LoaderCircle, Map } from 'lucide-react';
 import { useEffect, useMemo, useState } from 'react';
 import previewJson from '../../scenario-packs/hctm/stories/order-expedite-01/preview.json';
 import { ControlBar } from './components/ControlBar';
@@ -12,6 +12,7 @@ import { usePlayback } from './playback';
 import { StaticScenarioDataSource } from './scenario';
 import type { SandboxScenario } from './scenario/types';
 import { LiveSandbox } from './LiveSandbox';
+import { SystemAtlas } from './components/SystemAtlas';
 
 const SCENARIO_KEY = 'order-expedite-01';
 const scenarioSource = new StaticScenarioDataSource({ [SCENARIO_KEY]: previewJson });
@@ -119,7 +120,7 @@ function Sandbox({ scenario, onModeChange, onOpenIntegration }: { scenario: Sand
 export default function App() {
   const [scenario, setScenario] = useState<SandboxScenario | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<'preview' | 'live'>('preview');
+  const [mode, setMode] = useState<'preview' | 'live' | 'atlas'>('preview');
   const [integrationOpen, setIntegrationOpen] = useState(false);
   const [connectionVersion, setConnectionVersion] = useState(0);
 
@@ -134,10 +135,12 @@ export default function App() {
   if (error) return <main className="error-state"><AlertTriangle aria-hidden="true" /><strong>场景无法加载</strong><p>{error}</p><p>请检查 preview.json 是否存在且包含七幕和 22 个事件。</p></main>;
   if (!scenario) return <main className="loading-state"><LoaderCircle aria-hidden="true" className="loading-spinner" /><strong>正在装载苏州基地场景…</strong></main>;
   const openIntegration = () => setIntegrationOpen(true);
+  if (mode === 'atlas') return <SystemAtlas onExit={() => setMode('preview')} />;
   return <>
     {mode === 'live'
       ? <LiveSandbox key={connectionVersion} layoutScenario={scenario} onModeChange={setMode} onOpenIntegration={openIntegration} />
       : <Sandbox scenario={scenario} onModeChange={setMode} onOpenIntegration={openIntegration} />}
+    <button className="aese-atlas-launch" onClick={() => setMode('atlas')}><Map aria-hidden="true"/><span>系统全景</span></button>
     <IntegrationConsole
       open={integrationOpen}
       onClose={() => setIntegrationOpen(false)}

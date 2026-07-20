@@ -14,6 +14,7 @@
 | 修改 M5 Agent tracer | DES-003、M5 completed plan、`internal/agenttrace/`、`scenario-packs/hctm/agent-tools.json` |
 | 维护 M6 在线沙盘 | DES-004、M6 completed plan、`frontend/src/scenario/`、IAOS scenario API |
 | 开始 M7 场景运行控制台 | ADR-003、DES-005、M7 active plan、现有 CLI application service |
+| 查看或维护双系统全景 | DES-006、`frontend/src/components/SystemAtlas.tsx`、IAOS System Atlas API |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
 | 修改事件名和 payload | `docs/HCTM_Event_Model.md` |
@@ -26,6 +27,7 @@
 | --- | --- | --- |
 | Agent 规则 | `AGENTS.md` | 工作流、边界、文档和测试规则 |
 | 项目入口 | `README.md` | 产品简介和文档入口 |
+| System Atlas 进展登记 | `scripts/record_system_atlas_update.sh` | 向 IAOS 追加设计、实现、测试、发布、决策或风险记录 |
 | 文档索引 | `docs/README.md` | 文档分类、状态和编号 |
 | 项目上下文 | `docs/agent-project-context.md` | Agent 快速入门 |
 | 架构 | `docs/architecture.md` | 仓库边界、数据流、安全和可重复性 |
@@ -159,7 +161,16 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | IAOS scenario run/permission | `/iaos/iaos-go/platform/internal/api/scenario*.go` |
 | M7 browser E2E | `frontend/e2e/` |
 
-## 10. 导航更新触发器
+## 10. System Atlas 视图
+
+| 能力 | 路径 |
+| --- | --- |
+| AESE 仿真完成体图谱 | `frontend/src/components/SystemAtlas.tsx`、`SystemAtlas.css` |
+| IAOS 数据合同 | `/iaos/iaos-go/platform/internal/systematlas/`、`/api/v1/system-atlas` |
+| 双系统视图设计 | `docs/designs/DES-006-system-atlas-aese-projection.md`、IAOS DES-049 |
+| 进展登记 | `scripts/record_system_atlas_update.sh` |
+
+## 11. 导航更新触发器
 
 以下改动必须更新本文件：
 
