@@ -185,3 +185,10 @@
 - 原因：销售订单虽有头和行数据，但 `/metadata/ui/sales_order` 缺失导致详情抽屉永久停留在加载态，订单头又未声明行关系；全局 `inventory_lot` 菜单被错误投影到只使用 `inventory` 的 HCTM 租户。
 - 影响：销售订单列表和明细可稳定查看，客户/产品引用显示业务标签；HCTM 不再展示会报错的“仓储物资”入口，库存继续通过“实物库存与库区”查看；工单、设备和库存页面沿用同一详情 fallback。
 - 后续：其他行业包若需要定制表单布局可继续注册 `/metadata/ui/:entity`，不注册时使用字段驱动 fallback；生产环境应逐步将通用核心菜单改为完整的 capability/metadata 可用性投影。
+
+## 2026-07-20 - 补齐 HCTM 客户引用元数据
+
+- 变更：HCTM Agent setup bundle 新增 `customer` Entity Schema，使销售订单的 `customer_id` 引用可以通过 IAOS options API 解析为客户名称。
+- 原因：销售订单已引用真实客户记录，但目标租户缺少 `customer` Schema，详情和列表加载客户选项时无法解析业务标签。
+- 影响：重新应用 setup 后，销售订单客户字段可显示“星河新能源汽车”等业务名称，不再依赖裸 UUID。
+- 后续：持续检查场景包所有 `reference` 字段都同时声明目标 Entity Schema。

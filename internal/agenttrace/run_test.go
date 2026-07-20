@@ -76,7 +76,7 @@ func TestLoadCanonicalAgentToolBundle(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(bundle.MetadataSchemas) != 5 || len(bundle.Tools) != 9 {
+	if len(bundle.MetadataSchemas) != 6 || len(bundle.Tools) != 9 {
 		t.Fatalf("unexpected bundle counts: schemas=%d tools=%d", len(bundle.MetadataSchemas), len(bundle.Tools))
 	}
 }
