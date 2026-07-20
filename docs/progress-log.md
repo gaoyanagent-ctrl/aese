@@ -165,3 +165,10 @@
 - 原因：让 2D 沙盘只用 IAOS 业务事实闭合 12,000 件订单故事，并在断线、重复执行和跨租户条件下保持可恢复、可审计。
 - 影响：M6 L0-L5/T1-T37 全部完成，当前没有 active plan。在线 KPI 为需求 12,000、累计可供/实发 11,700、期末成品 0、缺口 300；成本继续保留 `cost_actuals` partial gap，建议不自动执行。
 - 后续：真实成本、更多场景或通用 projection 需要另立计划，不倒灌进已完成的 M6。
+
+## 2026-07-20 - 修复远程浏览器 Live 回环地址
+
+- 变更：`IaosScenarioDataSource` 默认从浏览器同源 `/api` 读取 IAOS，Vite dev/preview 将 `/api` 代理至本机 Platform 8082；新增回归测试，禁止默认配置重新请求浏览器侧 `127.0.0.1:8082`。
+- 原因：远程用户虽然能访问 AESE 前端，但浏览器中的回环地址指向用户自己的机器，导致 Live snapshot `ERR_CONNECTION_REFUSED`；服务器端 Platform 实际健康且监听所有网卡。
+- 影响：用户只需访问前端端口，snapshot、cursor 和 SSE 均走同源代理；显式 `VITE_IAOS_BASE_URL` 仍可覆盖默认配置。
+- 后续：生产静态部署的反向代理同样需要把 `/api` 转发给 IAOS Platform；开发 token 仅用于本地测试。

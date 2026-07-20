@@ -25,6 +25,6 @@ npm install
 npm run dev
 ```
 
-浏览器控制台执行 `localStorage.setItem('iaos_token', '<JWT>')` 后刷新并切换 Live。生产环境必须由真实登录提供 JWT。Live 应显示需求 12,000、累计可供/实发 11,700、期末成品 0、缺口 300 和 `cost_actuals` gap；错误不会静默降级为 Preview。
+浏览器控制台执行 `localStorage.setItem('iaos_token', '<JWT>')` 后刷新并切换 Live。浏览器请求默认走前端同源 `/api`，Vite 将其代理到 Platform 8082，因此远程浏览器不应直接访问 `127.0.0.1:8082`。生产环境必须由真实登录提供 JWT，并在入口代理配置同样的 `/api` 转发。Live 应显示需求 12,000、累计可供/实发 11,700、期末成品 0、缺口 300 和 `cost_actuals` gap；错误不会静默降级为 Preview。
 
 自动化命令：AESE 根目录执行 `go test ./...`、`go vet ./...`；frontend 执行 `npm run typecheck`、`npm test`、`npm run lint`、`npm run build`、`npm run test:e2e`。

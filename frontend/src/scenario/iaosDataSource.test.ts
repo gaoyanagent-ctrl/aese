@@ -1,11 +1,19 @@
 import { describe, expect, it, vi } from 'vitest';
-import { IaosScenarioDataSource } from './iaosDataSource';
+import { IaosScenarioDataSource, liveDataSourceFromEnvironment } from './iaosDataSource';
 
 function source(fetcher: typeof fetch) {
   return new IaosScenarioDataSource({ baseUrl: 'http://iaos.test/', token: 'secret', tenantId: 'tenant-hctm', fetch: fetcher });
 }
 
 describe('IaosScenarioDataSource', () => {
+  it('uses the frontend origin by default so remote browsers do not call their own loopback', async () => {
+    localStorage.setItem('iaos_token', 'browser-token');
+    const fetchMock = vi.spyOn(globalThis, 'fetch').mockResolvedValue(new Response(JSON.stringify({ cursor: 1 }), { status: 200 }));
+    await liveDataSourceFromEnvironment().snapshot('hctm', 'order-expedite-01');
+    expect(fetchMock).toHaveBeenCalledWith('/api/v1/scenarios/hctm/order-expedite-01/snapshot', expect.anything());
+    fetchMock.mockRestore();
+  });
+
   it('loads an authenticated tenant snapshot', async () => {
     const fetcher = vi.fn(async (_input: RequestInfo | URL, init?: RequestInit) => {
       expect(init?.headers).toMatchObject({ Authorization: 'Bearer secret', 'X-Tenant-ID': 'tenant-hctm' });

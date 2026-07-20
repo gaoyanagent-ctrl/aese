@@ -67,7 +67,7 @@ export class IaosScenarioDataSource {
 
 export function liveDataSourceFromEnvironment() {
   return new IaosScenarioDataSource({
-    baseUrl: import.meta.env.VITE_IAOS_BASE_URL ?? 'http://127.0.0.1:8082',
+    baseUrl: import.meta.env.VITE_IAOS_BASE_URL ?? '',
     tenantId: import.meta.env.VITE_IAOS_TENANT_ID ?? 'tenant-hctm',
     token: localStorage.getItem('iaos_token') ?? import.meta.env.VITE_IAOS_TOKEN ?? 'dev-token',
   });
