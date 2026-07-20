@@ -55,8 +55,9 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M3V 快速 2D 企业沙盘：完成；七幕/22 事件、A 线画布、KPI、对象详情和三类 Agent 建议已通过桌面与移动端验收。
 - M5 Agent MVP：完成；默认 dry-run 的 `agent-setup` / `agent-run`、9 个低风险只读 AI Tool bundle 和三 Agent 确定性 tracer 已通过 live、重复调用、零业务写入与跨租户验收。
 - M6 在线 2D 企业沙盘：完成；受治理完工/入库/发运、snapshot/cursor/SSE、在线 Agent 建议和 Preview/Live 双模式已通过验收。
+- M7 受治理场景运行控制台：当前 active；目标是让业务用户从页面完成预检、初始化、逐幕运行、Agent 分析、验证和安全复位。
 
-当前同一页面可运行 Preview 或 IAOS Live 沙盘。Live 采用“快照为真、SSE 作增量提示、按持久游标补齐”，已由在线事实形成 11,700 件实发和 300 件缺口；未批准的成本金额继续显示为 `cost_actuals` 数据缺口。
+当前同一页面可运行 Preview 或 IAOS Live 沙盘。M7 将在现有联动中心加入场景运行控制，通过无业务数据库的 AESE 薄编排 API 调用 IAOS 受治理接口，避免继续依赖 CLI 或把写入逻辑复制到浏览器。
 
 ## M5 Agent tracer
 
@@ -89,6 +90,7 @@ npm run dev
 - [M3 实施计划](docs/plans/2026-07-19-m3-executable-scenario-package.md)
 - [快速 2D 企业沙盘实施计划](docs/plans/2026-07-19-fast-track-2d-enterprise-sandbox.md)
 - [M6 在线 2D 企业沙盘实施计划](docs/plans/2026-07-20-m6-online-2d-enterprise-sandbox.md)
+- [M7 受治理场景运行控制台实施计划](docs/plans/2026-07-20-m7-governed-scenario-operations-console.md)
 - [M3 本地运行手册](docs/runbooks/hctm-m3-local-run.md)
 - [M3V 2D 沙盘运行手册](docs/runbooks/hctm-m3v-2d-sandbox.md)
 - [M5 受治理 Agent Tracer 运行手册](docs/runbooks/hctm-m5-governed-agent-tracers.md)

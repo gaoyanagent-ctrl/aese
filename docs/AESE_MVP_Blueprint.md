@@ -314,6 +314,12 @@ ShipmentShortageDetected
 - 将已验证的 2D 交互接入 IAOS 实时事件、库存、产线状态和 Agent 运行结果。
 - 不做 3D，除非业务链路已经稳定。
 
+### M7 - 受治理场景运行控制台（当前）
+
+- 在浏览器完成预检、初始化、逐幕推进、Agent 分析、验证和复位。
+- 通过 AESE 无状态编排 API 复用 IAOS 权限、RLS、审计和业务动作。
+- 不在浏览器复制写入逻辑，不在 AESE 建立第二套业务数据库。
+
 ## 10. 关键风险
 
 - 范围膨胀：想一次覆盖集团、全流程、全角色、全可视化。
@@ -332,7 +338,7 @@ M3“可执行 HCTM 场景包”已完成：
 - 通过 IAOS 受治理入口导入最小数据并触发 `o2d.order.confirmed` tracer。
 - 验证租户隔离、幂等执行、reset 和故事结果。
 
-M3V、M4、M5 和 M6 已完成。IAOS 完工入库、两次发运、snapshot/cursor/SSE 与 Preview/Live 双模式已经闭环；成本实际因无批准基线继续明确为 partial。
+M3V、M4、M5 和 M6 已完成。当前执行 M7，把现有 CLI 场景编排转成可由业务用户安全操作的可视化运行控制台；参数化 A/B 仿真实验留到 M8。
 
 详细设计与任务见：
 
@@ -342,3 +348,5 @@ M3V、M4、M5 和 M6 已完成。IAOS 完工入库、两次发运、snapshot/cur
 - `docs/plans/2026-07-19-fast-track-2d-enterprise-sandbox.md`
 - `docs/designs/DES-004-online-2d-enterprise-sandbox.md`
 - `docs/plans/2026-07-20-m6-online-2d-enterprise-sandbox.md`
+- `docs/designs/DES-005-governed-scenario-operations-console.md`
+- `docs/plans/2026-07-20-m7-governed-scenario-operations-console.md`

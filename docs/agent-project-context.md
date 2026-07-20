@@ -166,8 +166,10 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 - `/iaos/iaos-go` 已提供 DES-047 scenario apply/reset、原子幂等 O2D workflow、HCTM work_order/workflow fixture，以及 AI Tool `source_ref=entity.records` 的 metadata 约束查询：entity、字段、filter allowlist、排序和最大行数由服务端 tool metadata 固定，调用者只能提供 filter value 和 limit；查询同时受显式 tenant predicate 与 RLS 约束。
 - M6 已补齐 canonical 完工入库和两次发运事实：在线需求 12,000、累计可供/实发 11,700、期末成品 0、缺口 300；实际成本仍无批准基线，因此经营分析只在成本维度保持 `partial`。
 - M5 tracer 是 IAOS AI Tool Registry 上的受审计只读建议链，不是另建的 Agent Runtime，不调用真实 LLM，不执行推荐动作。
-- M6 plan 已完成，当前没有 active plan。`IaosScenarioDataSource` 与 Preview/Live 双模式已落地。
+- M6 plan 已完成，`IaosScenarioDataSource` 与 Preview/Live 双模式已落地。
 - M6 不直接依赖当前通用 `/api/v1/events/stream` 恢复状态；该接口没有持久 cursor。设计见 `docs/designs/DES-004-online-2d-enterprise-sandbox.md`。
+- 当前唯一 active plan 是 M7 `docs/plans/2026-07-20-m7-governed-scenario-operations-console.md`：通过 AESE 无状态编排 API 和现有 IAOS 受治理接口，让业务用户在浏览器运行并复位场景。
+- M7 设计见 `docs/designs/DES-005-governed-scenario-operations-console.md`，架构边界由 ADR-003 固定；M7 不建设 AESE 业务数据库，也不允许浏览器直接调用 IAOS 写端点。
 
 ## 7. 后续 agent 必须维护的信息
 

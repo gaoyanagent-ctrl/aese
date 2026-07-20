@@ -199,3 +199,11 @@
 - 原因：原联调手册要求用户操作 Token、curl 和 CLI，不能满足业务用户直接观察配置与跨系统联动的需要。
 - 影响：本地演示用户无需浏览器控制台或命令行即可完成只读联动验收；失败状态提供原因和恢复入口，检查过程不重置场景、不写业务数据。
 - 后续：场景 reset/apply/replay 仍保持受治理写入边界；若要面向非开发身份开放可视化执行，需要为 AESE 增加有权限、可审计的服务端 orchestration API，而不是把写入逻辑复制到浏览器。
+
+## 2026-07-20 - M7 受治理场景运行控制台规划
+
+- 变更：新增 ADR-003、DES-005 和 PLAN-M7-001，将 M7 设为当前唯一 active plan；计划拆为 O0-O4、T1-T39，并同步 README、MVP Blueprint、Agent Context、Architecture、Roadmap、Code Map 和文档索引。
+- 原因：M6 和扩展功能已解决 Live 观察、租户切换、业务对象可见性和一键联动检查，但业务用户仍需 CLI 执行 reset/apply/replay/agent-run。浏览器直接调用 IAOS 写端点会造成权限、恢复和部分执行风险。
+- 影响：M7 新增无业务数据库的 AESE 薄编排 API，复用现有 Go 内核并使用调用者 IAOS 身份；页面增加 preflight、初始化、七幕推进、运行到结束、Agent 分析、verify 和一次性确认复位。所有业务事实、权限和审计继续由 IAOS 持有。
+- 验证：计划定义 7-9 个工作日的每日成果、状态机、plan hash、cursor、幂等、并发、重启恢复、跨租户、CLI/UI 一致性和三视口验收；本地 Markdown 相对链接无缺失，active plan 数量为 1，M7 任务为 T1-T39，`git diff --check` 通过。
+- 后续：从 O0/T1-T6 开始，先把 CLI 编排提取为 application service，并冻结 pack 阶段编译和 run 状态机合同。

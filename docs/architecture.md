@@ -183,3 +183,17 @@ IAOS governed business action
 通用 `/api/v1/events/stream` 没有持久游标、断线补发和场景过滤，不作为在线沙盘的事实恢复合同。M6 的场景 SSE 只传递增量，客户端始终以一致性快照和持久 cursor query 恢复状态。
 
 完工、入库和发运属于 IAOS 内生业务动作，必须走 Capability/场景业务动作；simulation ingress 继续只承载受控外生异常。详细合同见 DES-004。
+
+## 11. M7 场景运行控制面
+
+M7 在 AESE 增加无状态 orchestration API，把现有 CLI application service 暴露给浏览器。它负责 pack 加载、阶段编译和调用协调，不拥有业务数据、权限或运行事实。
+
+```text
+AESE UI
+  -> AESE orchestration API (plan/state machine/idempotency)
+  -> IAOS governed APIs (scenario/simulation/business action/AI Tool)
+  -> IAOS RLS/audit/Outbox/snapshot/cursor
+  -> AESE Live UI
+```
+
+运行状态由 IAOS run、snapshot、event 和 recommendation 重建；AESE 服务重启不能丢失或凭内存伪造阶段完成。浏览器只调用 AESE 控制 API 和 IAOS 只读观察 API，不直接调用 IAOS 写端点。详细边界见 ADR-003 和 DES-005。

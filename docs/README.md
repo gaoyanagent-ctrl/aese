@@ -12,7 +12,7 @@
 | 当前里程碑和优先级 | `docs/roadmap.md` |
 | 任务到文件导航 | `docs/code-map.md` |
 | 历史进展 | `docs/progress-log.md` |
-| 当前实施任务 | `docs/plans/2026-07-20-m6-online-2d-enterprise-sandbox.md` |
+| 当前实施任务 | `docs/plans/2026-07-20-m7-governed-scenario-operations-console.md` |
 
 若内容冲突，当前状态以 `docs/roadmap.md` 为准，长期架构决策以 ADR 为准。
 
@@ -56,15 +56,18 @@
 | --- | --- | --- |
 | ADR-001 | [AESE 与 IAOS 仓库边界](decisions/ADR-001-aese-iaos-repository-boundary.md) | Accepted |
 | ADR-002 | [AESE 只读 2D 场景预览界面](decisions/ADR-002-aese-2d-preview-ui.md) | Accepted |
+| ADR-003 | [AESE 无状态场景编排 API](decisions/ADR-003-thin-scenario-orchestration-api.md) | Accepted |
 | DES-001 | [M3 可执行场景包与重放架构](designs/DES-001-m3-executable-scenario-package.md) | Completed |
 | DES-002 | [快速 2D 企业沙盘设计](designs/DES-002-fast-track-2d-enterprise-sandbox.md) | Completed |
 | DES-003 | [M5 受治理 Agent Tracer 设计](designs/DES-003-governed-agent-tracers.md) | Completed |
 | DES-004 | [M6 在线 2D 企业沙盘架构](designs/DES-004-online-2d-enterprise-sandbox.md) | Completed |
+| DES-005 | [M7 受治理场景运行控制台](designs/DES-005-governed-scenario-operations-console.md) | Approved |
 | PLAN-M3 | [M3 实施计划](plans/2026-07-19-m3-executable-scenario-package.md) | Completed |
 | PLAN-M3V | [快速 2D 企业沙盘实施计划](plans/2026-07-19-fast-track-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Completed |
 | PLAN-M5 | [M5 受治理 Agent MVP 实施计划](plans/2026-07-19-m5-governed-agent-mvp.md) | Completed |
 | PLAN-M6 | [M6 在线 2D 企业沙盘实施计划](plans/2026-07-20-m6-online-2d-enterprise-sandbox.md) | Completed |
+| PLAN-M7 | [M7 受治理场景运行控制台实施计划](plans/2026-07-20-m7-governed-scenario-operations-console.md) | Active |
 
 ## 3. 命名与状态
 

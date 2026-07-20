@@ -13,6 +13,7 @@
 | 修改 M4 异常入口 | M4 completed plan、M4 evidence、`internal/iaosclient/`、`internal/replay/` |
 | 修改 M5 Agent tracer | DES-003、M5 completed plan、`internal/agenttrace/`、`scenario-packs/hctm/agent-tools.json` |
 | 维护 M6 在线沙盘 | DES-004、M6 completed plan、`frontend/src/scenario/`、IAOS scenario API |
+| 开始 M7 场景运行控制台 | ADR-003、DES-005、M7 active plan、现有 CLI application service |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
 | 修改事件名和 payload | `docs/HCTM_Event_Model.md` |
@@ -128,7 +129,7 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | Agent tracer 单元测试 | `internal/agenttrace/run_test.go` |
 | IAOS `entity.records` dispatcher | `/iaos/iaos-go/platform/internal/aitool/dispatcher_entity_records.go` |
 
-当前经营分析边界：在线工具可读订单、订单行、库存、BOM、采购、设备、检验和工单；完工入库、发运及成本实际仍没有受治理在线事实，所以 `business_analysis` 必须保留 `partial` / data gaps，不能复述 Preview 的 11,700/300 为在线结果。
+当前经营分析边界：M6 已补齐完工入库和发运在线事实，11,700 实发与 300 缺口可由 IAOS 证明；成本实际仍无批准基线，因此 `business_analysis` 只在 `cost_actuals` 维度保留 `partial`。
 
 ## 8. M6 计划路径
 
@@ -145,7 +146,20 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | IAOS snapshot/cursor/SSE | `/iaos/iaos-go/platform/internal/api/` |
 | M6 browser E2E | `frontend/e2e/sandbox.spec.ts`、`frontend/test-results/actual-live-*.png` |
 
-## 9. 导航更新触发器
+## 9. M7 计划路径
+
+| 能力 | 计划路径 |
+| --- | --- |
+| 无状态编排 API 决策 | `docs/decisions/ADR-003-thin-scenario-orchestration-api.md` |
+| M7 设计与 active plan | `docs/designs/DES-005-governed-scenario-operations-console.md`、`docs/plans/2026-07-20-m7-governed-scenario-operations-console.md` |
+| CLI/application service 拆分 | `cmd/aese/`、计划新增 `internal/application/` |
+| HTTP server 与 handlers | 计划新增 `cmd/aese-server/`、`internal/httpapi/` |
+| 前端场景运行状态 | 计划新增 `frontend/src/operations/` |
+| 联动中心运行视图 | `frontend/src/components/IntegrationConsole.tsx` |
+| IAOS scenario run/permission | `/iaos/iaos-go/platform/internal/api/scenario*.go` |
+| M7 browser E2E | `frontend/e2e/` |
+
+## 10. 导航更新触发器
 
 以下改动必须更新本文件：
 
