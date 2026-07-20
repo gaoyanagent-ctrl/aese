@@ -27,6 +27,28 @@ test('keeps primary controls within the viewport', async ({ page }) => {
   expect(overflow).toBe(false);
 });
 
+test('configures and verifies the IAOS link without technical setup', async ({ page }) => {
+  await page.route('**/api/v1/dev/token?**', (route) => route.fulfill({ json: { token: 'visual-hctm-token' } }));
+  await page.route('**/api/v1/profile', (route) => route.fulfill({ json: { tenant_id: 'tenant-hctm', tenant_name: '华辰热管理系统集团' } }));
+  await page.route('**/api/v1/scenarios/hctm/order-expedite-01/snapshot', (route) => route.fulfill({ json: { cursor: 12, completeness: 'partial', entities: [], events: [], recommendations: [], gaps: ['cost_actuals'], kpis: {} } }));
+  await page.route('**/api/v1/scenarios/hctm/order-expedite-01/events?**', (route) => route.fulfill({ json: { items: [], next_cursor: 12, has_more: false } }));
+  const totals: Record<string, number> = { sales_order: 1, work_order: 4, inventory: 6, equipment: 1 };
+  await page.route('**/api/v1/entities/*/records?**', (route) => {
+    const match = new URL(route.request().url()).pathname.match(/\/entities\/([^/]+)\/records/);
+    return route.fulfill({ json: { total: totals[match?.[1] ?? ''] ?? 0, data: [] } });
+  });
+
+  await page.goto('/');
+  await page.getByRole('button', { name: '打开 AESE 与 IAOS 联动中心' }).click();
+  await expect(page.getByRole('dialog', { name: '企业沙盘联动中心' })).toBeVisible();
+  await page.getByRole('button', { name: '一键连接并检查' }).click();
+  await expect(page.getByText('全部可用')).toBeVisible();
+  await expect(page.getByText('华辰热管理系统集团').last()).toBeVisible();
+  await expect(page.getByText('IAOS · 4 条')).toBeVisible();
+  await expect(page.getByText('Snapshot 与事件增量通道可用')).toBeVisible();
+  await expect(page.getByRole('button', { name: /进入 Live 沙盘/ })).toBeVisible();
+});
+
 test('opens business object details and explains all three Agent roles', async ({ page }, testInfo) => {
   await page.goto('/');
   if (testInfo.project.name === 'mobile-390') {

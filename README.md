@@ -77,7 +77,7 @@ npm install
 npm run dev
 ```
 
-访问 `http://localhost:4173/`。Preview 可直接使用；Live 需将 IAOS JWT 写入 `localStorage.iaos_token`，或构建时提供 `VITE_IAOS_TOKEN`。详细操作见 [M6 运行手册](docs/runbooks/hctm-m6-online-sandbox.md)。
+访问 `http://localhost:4173/`。点击顶栏“联动中心”，选择华辰租户与订单场景后执行“一键连接并检查”，页面会自动验证 IAOS 身份、快照、事件通道及销售订单/工单/库存/设备数据；通过后直接进入 Live，无需手工复制 JWT 或调用 API。环境变量方式仍保留给自动化部署。详细操作见 [M6 运行手册](docs/runbooks/hctm-m6-online-sandbox.md)。
 
 ## 文档入口
 

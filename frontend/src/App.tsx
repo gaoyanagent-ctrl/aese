@@ -7,6 +7,7 @@ import { EntityDrawer } from './components/EntityDrawer';
 import { FactoryCanvas } from './components/FactoryCanvas';
 import { InfoPanel } from './components/InfoPanel';
 import { KpiStrip } from './components/KpiStrip';
+import { IntegrationConsole } from './components/IntegrationConsole';
 import { usePlayback } from './playback';
 import { StaticScenarioDataSource } from './scenario';
 import type { SandboxScenario } from './scenario/types';
@@ -16,7 +17,7 @@ const SCENARIO_KEY = 'order-expedite-01';
 const scenarioSource = new StaticScenarioDataSource({ [SCENARIO_KEY]: previewJson });
 type MobileView = 'enterprise' | 'canvas' | 'events';
 
-function Sandbox({ scenario, onModeChange }: { scenario: SandboxScenario; onModeChange: (mode: 'preview' | 'live') => void }) {
+function Sandbox({ scenario, onModeChange, onOpenIntegration }: { scenario: SandboxScenario; onModeChange: (mode: 'preview' | 'live') => void; onOpenIntegration: () => void }) {
   const playback = usePlayback(scenario);
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -67,6 +68,7 @@ function Sandbox({ scenario, onModeChange }: { scenario: SandboxScenario; onMode
         onSpeedChange={playback.controls.setSpeed}
         mode="preview"
         onModeChange={onModeChange}
+        onOpenIntegration={onOpenIntegration}
       />
       <div className="mobile-tabs" role="tablist" aria-label="移动端沙盘区域">
         {([['enterprise', '企业'], ['canvas', 'A 线画布'], ['events', '事件 / Agent']] as const).map(([value, label]) => (
@@ -118,6 +120,8 @@ export default function App() {
   const [scenario, setScenario] = useState<SandboxScenario | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<'preview' | 'live'>('preview');
+  const [integrationOpen, setIntegrationOpen] = useState(false);
+  const [connectionVersion, setConnectionVersion] = useState(0);
 
   useEffect(() => {
     let active = true;
@@ -129,5 +133,15 @@ export default function App() {
 
   if (error) return <main className="error-state"><AlertTriangle aria-hidden="true" /><strong>场景无法加载</strong><p>{error}</p><p>请检查 preview.json 是否存在且包含七幕和 22 个事件。</p></main>;
   if (!scenario) return <main className="loading-state"><LoaderCircle aria-hidden="true" className="loading-spinner" /><strong>正在装载苏州基地场景…</strong></main>;
-  return mode === 'live' ? <LiveSandbox layoutScenario={scenario} onModeChange={setMode} /> : <Sandbox scenario={scenario} onModeChange={setMode} />;
+  const openIntegration = () => setIntegrationOpen(true);
+  return <>
+    {mode === 'live'
+      ? <LiveSandbox key={connectionVersion} layoutScenario={scenario} onModeChange={setMode} onOpenIntegration={openIntegration} />
+      : <Sandbox scenario={scenario} onModeChange={setMode} onOpenIntegration={openIntegration} />}
+    <IntegrationConsole
+      open={integrationOpen}
+      onClose={() => setIntegrationOpen(false)}
+      onConnected={() => { setConnectionVersion((version) => version + 1); setMode('live'); }}
+    />
+  </>;
 }

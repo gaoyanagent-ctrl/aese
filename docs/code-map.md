@@ -139,6 +139,7 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | 前端 Live 类型和 adapter | `frontend/src/scenario/` |
 | 前端连接/恢复状态 | `frontend/src/LiveSandbox.tsx`、`frontend/src/scenario/iaosDataSource.ts` |
 | Preview/Live 应用编排 | `frontend/src/App.tsx` |
+| 可视化 IAOS 联动中心 | `frontend/src/components/IntegrationConsole.tsx`、`frontend/src/integration/iaosIntegration.ts`；一键取得 HCTM 本地演示身份，检查 profile/snapshot/events 与销售订单、工单、库存、设备，持久化连接配置并跳入 Live |
 | AESE 完工/发运 replay client | `internal/iaosclient/`、`internal/replay/` |
 | IAOS 场景业务动作 | `/iaos/iaos-go/platform/internal/api/`、`/iaos/iaos-go/platform/internal/capability/` |
 | IAOS snapshot/cursor/SSE | `/iaos/iaos-go/platform/internal/api/` |

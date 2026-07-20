@@ -3,6 +3,7 @@ import {
   ChevronRight,
   Pause,
   Play,
+  PlugZap,
   Radio,
   RefreshCw,
   RotateCcw,
@@ -25,6 +26,7 @@ interface ControlBarProps {
   sourceStatus?: string;
   onRefresh?: () => void;
   onReconnect?: () => void;
+  onOpenIntegration?: () => void;
 }
 
 export function ControlBar({
@@ -44,6 +46,7 @@ export function ControlBar({
   sourceStatus,
   onRefresh,
   onReconnect,
+  onOpenIntegration,
 }: ControlBarProps) {
   return (
     <header className="control-bar">
@@ -66,6 +69,7 @@ export function ControlBar({
       </div>
 
       <div className="playback-controls" aria-label="故事播放控制">
+        <button className="integration-button" onClick={onOpenIntegration} aria-label="打开 AESE 与 IAOS 联动中心"><PlugZap aria-hidden="true" /><span>联动中心</span></button>
         {mode === 'live' ? <>
           <button className="play-button" onClick={onRefresh} aria-label="刷新在线快照"><RefreshCw aria-hidden="true" /><span>刷新</span></button>
           <button className="icon-button" onClick={onReconnect} aria-label="重新连接在线事件"><Radio aria-hidden="true" /></button>
