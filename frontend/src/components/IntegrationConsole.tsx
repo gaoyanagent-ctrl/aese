@@ -130,6 +130,14 @@ export function IntegrationConsole({ open, onClose, onConnected }: IntegrationCo
           {status === 'idle' && <div className="integration-empty"><Activity aria-hidden="true" /><strong>等待联动检查</strong><p>点击左侧按钮后，这里会显示业务对象和在线通道状态。</p></div>}
           {status === 'checking' && <div className="integration-loading" aria-live="polite">{['验证租户身份', '读取场景快照', '检查业务对象', '确认事件通道'].map((label, index) => <div key={label}><LoaderCircle className="loading-spinner" /><span>{label}</span><small>步骤 {index + 1}/4</small></div>)}</div>}
           {result && <>
+            <ol className="linkage-flow" aria-label="AESE 与 IAOS 联动流程">
+              {[
+                ['连接 IAOS', '租户身份有效'],
+                ['读取业务数据', `${Object.values(result.counts).reduce((sum, count) => sum + count, 0)} 条对象`],
+                ['同步场景事件', `${result.snapshot.events.length} 个事件`],
+                ['加载 Agent 建议', `${result.snapshot.recommendations.length} 条建议`],
+              ].map(([label, detail]) => <li key={label}><span><Check aria-hidden="true" /></span><div><strong>{label}</strong><small>{detail}</small></div></li>)}
+            </ol>
             <div className="integration-summary">
               <article><Database aria-hidden="true" /><span>IAOS 租户</span><strong>{result.tenantName}</strong></article>
               <article><Radio aria-hidden="true" /><span>场景游标</span><strong>{result.snapshot.cursor}</strong></article>
