@@ -1,0 +1,3 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://aese.local/world/v1/committed-outcome.schema.json","allOf":[{"$ref":"observation.schema.json#/$defs/envelope"},{"properties":{"kind":{"const":"committed_outcome"},"recorded_at":{"$ref":"common.schema.json#/$defs/rfc3339"}},"required":["recorded_at"]}]
+}

@@ -16,6 +16,10 @@ import (
 const usage = `Usage:
   aese validate <pack-dir> [--json]
   aese inspect <pack-dir> [--json]
+  aese world validate <world-dir>
+  aese world inspect <world-dir>
+  aese world run <world-dir> [--until <RFC3339>] [--apply --output <dir>]
+  aese world replay <world-dir> --log <event-log.json> [--apply --output <dir>]
 
 Online commands are available after an IAOS target is configured:
   aese apply <pack-dir> --target <url> [--apply]
@@ -50,6 +54,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return agentSetupCommand(args[1:], stdout, stderr)
 	case "agent-run":
 		return agentRunCommand(args[1:], stdout, stderr)
+	case "world":
+		return worldCommand(args[1:], stdout, stderr)
 	case "help", "-h", "--help":
 		fmt.Fprint(stdout, usage)
 		return 0

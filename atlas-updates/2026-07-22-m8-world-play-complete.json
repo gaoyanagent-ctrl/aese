@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m8-world-play-complete-v1",
+  "node_key": "aese.world",
+  "update_type": "implementation",
+  "summary": "完成 M8 AESE 2.0 foundation",
+  "detail": "交付三态 tracer、受治理 IAOS World Bridge、Genesis pack、M7 兼容 adapter 与 World Play 三态界面；cursor query 为恢复事实，SSE 仅为通知。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "F0-F5 已完成；M8 foundation 可离线重放并已通过两仓测试与本机部署验收。",
+  "evidence_ref": "docs/runbooks/aese-world-play.md",
+  "occurred_at": "2026-07-22T09:00:00Z"
+}

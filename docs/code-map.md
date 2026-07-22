@@ -14,6 +14,7 @@
 | 修改 M5 Agent tracer | DES-003、M5 completed plan、`internal/agenttrace/`、`scenario-packs/hctm/agent-tools.json` |
 | 维护 M6 在线沙盘 | DES-004、M6 completed plan、`frontend/src/scenario/`、IAOS scenario API |
 | 维护 M7 场景运行控制台 | ADR-003、DES-005、M7 completed plan、现有 CLI application service |
+| 设计或实现 AESE 2.0 World Runtime | ADR-004、DES-007、DES-009、M8 active plan；先读 `world-contracts/` 和 `internal/worldcontract/` |
 | 查看或维护双系统全景 | DES-006、`frontend/src/components/SystemAtlas.tsx`、IAOS System Atlas API |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
@@ -43,6 +44,10 @@
 | Seed 规格 | `docs/HCTM_Seed_Data_Plan.md` | 数据清单和 22 步时间线 |
 | 演示验收 | `docs/HCTM_Demo_Story_01_Order_Expedite.md` | 七幕演示 runbook |
 | M7 运行控制台 runbook | `docs/runbooks/hctm-m7-governed-scenario-operations-console.md` | 已完成的受治理场景控制台验收与对账入口 |
+| AESE 2.0 设计输入 | `docs/ChatGPT20260722-aese2.0.md` | 原始构思，仅作为输入；工程边界以 ADR-004/DES-007 为准 |
+| AESE 2.0 基础设计 | `docs/designs/DES-007-aese-2-foundation.md` | 三态、离散事件、IAOS 桥与 Genesis 迁移架构 |
+| World/IAOS 桥接合同 | `docs/designs/DES-008-world-iaos-bridge-contract.md` | observation/intent/committed outcome、journal/cursor、权限与失败恢复 |
+| M8 active plan | `docs/plans/2026-07-22-m8-aese-2-foundation.md` | 当前唯一 active 计划与跨仓交付门 |
 
 ## 3. M3 实现路径
 
@@ -86,6 +91,7 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | 订单分解入口 | `/iaos/iaos-go/platform/internal/api/router.go` | `POST /api/v1/entities/sales_order/:id/decompose`；commit `0260f28` 增加状态 CAS/no-op 与 trace metadata |
 | 场景 apply/reset | `/iaos/iaos-go/platform/internal/api/scenario.go` | `POST /api/v1/scenarios/apply|reset`；M3 allowlist、原子事务、自然键幂等、服务端 UUID resolve |
 | 异常事件入口 | `/iaos/iaos-go/platform/internal/api/simulation.go` | `POST /api/v1/simulation/events`；支持设备停机、供应延期和来检失败 |
+| M8 World Bridge（拟议） | `/iaos/iaos-go/platform/internal/api/` 新窄模块，实际文件待 IAOS 独立 worktree 确定 | DES-008 规定 observation ingress、tenant journal、cursor/SSE 和 Capability intent/outcome 原语；尚未实现 |
 | O2D workflow 幂等 | `/iaos/iaos-go/platform/pkg/workflow/` | `workflow_run` 去重，DAG/库存/工单/节点 Outbox 单一事务 |
 | Outbox 注册 | `/iaos/iaos-go/platform/internal/capability/generic_atomic.go` | `RegisterOutboxMessage` |
 | Capability 执行 | `/iaos/iaos-go/platform/internal/capability/` | 受治理业务动作入口 |
@@ -177,7 +183,37 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | 进展登记 | `scripts/record_system_atlas_update.sh` |
 | 声明式进展与 CI | `atlas-updates/`、`scripts/check_system_atlas_tracking.sh`、`scripts/sync_system_atlas_updates.sh`、`.github/workflows/system-atlas-governance.yml` |
 
-## 11. 导航更新触发器
+## 11. M8 拟议实现路径
+
+F0 合同入口已创建；F1-F5 目标路径仍须在实现时更新为实际入口：
+
+| 能力 | 目标路径 |
+| --- | --- |
+| World JSON Schema 与 fixture | `world-contracts/schemas/`、`world-contracts/fixtures/` |
+| Go 合同、strict parser、canonical hash | `internal/worldcontract/` |
+| World Store 连接边界 | `internal/worldstore/` |
+| PostgreSQL compose 与迁移 | `deploy/world-postgres/` |
+| World Store runbook | `docs/runbooks/aese-world-store.md` |
+| Genesis pack | `world-packs/hctm-genesis/` |
+| 三态 tracer / Knowledge | `internal/genesis/`、`internal/knowledge/` |
+| IAOS bridge adapter | `internal/bridge/iaos/` |
+| M7 World Event adapter | `internal/legacyprojection/` |
+| World Play UI | `frontend/src/components/world/`、`frontend/src/world/` |
+| World Play API | `internal/httpapi/server.go`（`/api/aese/v1/world/genesis`） |
+| 验收 runbook / 能力缺口 | `docs/runbooks/aese-world-play.md`、`docs/capability-gap-ledger.md` |
+| Atlas planned 投影 | `atlas/system-atlas-planned.json` |
+| World CLI（F1） | `cmd/aese/world.go`；`aese world validate|inspect|run|replay` |
+| 世界 run、状态投影、快照恢复 | `internal/world/` |
+| 虚拟时钟与推进 | `internal/simtime/` |
+| 世界事件稳定队列 | `internal/simevent/` |
+| 版本化纯函数规则 | `internal/rules/` |
+| F1 运行样例 | `world-contracts/runtime-example/` |
+| 角色认知与差异 | `internal/knowledge/` |
+| IAOS 双向桥 | `internal/bridge/iaos/` |
+| Genesis 世界包 | `world-packs/hctm-genesis/` |
+| World 前端 | `frontend/src/world/`、`frontend/src/components/world/` |
+
+## 12. 导航更新触发器
 
 以下改动必须更新本文件：
 

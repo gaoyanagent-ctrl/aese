@@ -12,7 +12,7 @@
 | 当前里程碑和优先级 | `docs/roadmap.md` |
 | 任务到文件导航 | `docs/code-map.md` |
 | 历史进展 | `docs/progress-log.md` |
-| 当前实施任务 | `docs/plans/2026-07-20-m7-governed-scenario-operations-console.md` |
+| 当前实施任务 | `docs/plans/2026-07-22-m8-aese-2-foundation.md` |
 
 若内容冲突，当前状态以 `docs/roadmap.md` 为准，长期架构决策以 ADR 为准。
 
@@ -50,7 +50,11 @@
 | [HCTM M6 Online Sandbox Evidence](reports/hctm-m6-online-sandbox-evidence.md) | KPI、幂等、租户隔离和三视口证据 | Completed |
 | [HCTM M7 Governed Scenario Operations Console Runbook](runbooks/hctm-m7-governed-scenario-operations-console.md) | 预检、初始化、七幕推进、分析、验证、复位与重启恢复验收清单 | Completed |
 | [HCTM M7 Governed Scenario Operations Console Evidence](reports/hctm-m7-governed-scenario-operations-console-evidence.md) | O3/O4 运行控制台联调、可恢复运行、权限边界与三视口证据 | Completed |
+| [AESE World F1 Runbook](runbooks/aese-world-f1.md) | 确定性内核 validate/inspect/run/replay、dry-run 和 artifact 合同 | Active |
+| [AESE World Play Runbook](runbooks/aese-world-play.md) | Genesis 三态界面、bridge、恢复与全链验收 | Completed |
+| [M8 Capability Gap Ledger](capability-gap-ledger.md) | World Bridge 企业活动、角色、权限和后续缺口 | Completed |
 | [Original Chat](ChatGPT_20260626.md) | 原始构思记录，仅供追溯 | Archive |
+| [AESE 2.0 原始设计构思](ChatGPT20260722-aese2.0.md) | 企业生命周期仿真方向的输入材料；以 DES-007/ADR-004 为工程化解释 | Draft |
 
 ### 设计、决策和计划
 
@@ -59,18 +63,23 @@
 | ADR-001 | [AESE 与 IAOS 仓库边界](decisions/ADR-001-aese-iaos-repository-boundary.md) | Accepted |
 | ADR-002 | [AESE 只读 2D 场景预览界面](decisions/ADR-002-aese-2d-preview-ui.md) | Accepted |
 | ADR-003 | [AESE 无状态场景编排 API](decisions/ADR-003-thin-scenario-orchestration-api.md) | Accepted |
+| ADR-004 | [AESE 仿真世界事实所有权](decisions/ADR-004-aese-world-state-ownership.md) | Accepted |
 | DES-001 | [M3 可执行场景包与重放架构](designs/DES-001-m3-executable-scenario-package.md) | Completed |
 | DES-002 | [快速 2D 企业沙盘设计](designs/DES-002-fast-track-2d-enterprise-sandbox.md) | Completed |
 | DES-003 | [M5 受治理 Agent Tracer 设计](designs/DES-003-governed-agent-tracers.md) | Completed |
 | DES-004 | [M6 在线 2D 企业沙盘架构](designs/DES-004-online-2d-enterprise-sandbox.md) | Completed |
 | DES-005 | [M7 受治理场景运行控制台](designs/DES-005-governed-scenario-operations-console.md) | Completed |
 | DES-006 | [AESE System Atlas 双系统全景投影](designs/DES-006-system-atlas-aese-projection.md) | Completed |
+| DES-007 | [AESE 2.0 企业生命周期仿真基础架构](designs/DES-007-aese-2-foundation.md) | Draft |
+| DES-008 | [AESE World 与 IAOS 三段式桥接合同](designs/DES-008-world-iaos-bridge-contract.md) | Approved |
+| DES-009 | [AESE World 三态术语、所有权与数据分类](designs/DES-009-world-contract-model.md) | Approved |
 | PLAN-M3 | [M3 实施计划](plans/2026-07-19-m3-executable-scenario-package.md) | Completed |
 | PLAN-M3V | [快速 2D 企业沙盘实施计划](plans/2026-07-19-fast-track-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Completed |
 | PLAN-M5 | [M5 受治理 Agent MVP 实施计划](plans/2026-07-19-m5-governed-agent-mvp.md) | Completed |
 | PLAN-M6 | [M6 在线 2D 企业沙盘实施计划](plans/2026-07-20-m6-online-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M7 | [M7 受治理场景运行控制台实施计划](plans/2026-07-20-m7-governed-scenario-operations-console.md) | Completed |
+| PLAN-M8 | [M8 AESE 2.0 三态世界与仿真内核实施计划](plans/2026-07-22-m8-aese-2-foundation.md) | Active |
 
 ## 3. 命名与状态
 

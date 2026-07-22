@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m8-world-iaos-bridge-contract-v1",
+  "node_key": "aese.world",
+  "update_type": "design",
+  "summary": "批准 World/IAOS observation-intent-outcome 桥接合同",
+  "detail": "DES-008 固定 observation、intent、committed_outcome 三段语义，选择 IAOS tenant journal + cursor query 作为恢复事实，SSE/Outbox 仅用于通知。合同定义严格 envelope、稳定引用、权限、input-hash 幂等、错误、乱序和跨仓交付顺序；AESE 只消费 committed/no-op outcome 计算世界后果。M8 G1-G5 已全部通过。",
+  "status_after": "designed",
+  "progress_after": 12,
+  "current_state": "M8 进入 F0 机器可读合同阶段；下一步实现 Schema、Go 类型、fixture、canonical hash 和 mock journal tests。",
+  "evidence_ref": "docs/designs/DES-008-world-iaos-bridge-contract.md",
+  "occurred_at": "2026-07-22T03:57:50Z"
+}

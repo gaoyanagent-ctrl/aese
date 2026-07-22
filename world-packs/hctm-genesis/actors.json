@@ -1,0 +1,1 @@
+{"schema_version":"1.0","actors":[{"ref":{"namespace":"hctm","type":"position","code":"EQUIPMENT-ENGINEER-SZ"},"permissions":["observe:assigned_equipment","intent:inspect_equipment"]},{"ref":{"namespace":"hctm","type":"position","code":"PRODUCTION-PLANNER-SZ"},"permissions":["observe:iaos_capacity","intent:request_reschedule"]}]}

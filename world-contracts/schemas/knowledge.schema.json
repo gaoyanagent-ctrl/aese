@@ -1,0 +1,5 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://aese.local/world/v1/knowledge.schema.json","type":"object","additionalProperties":false,
+  "required":["schema_version","knowledge_id","tenant_id","world_run_id","branch_id","actor_ref","fact_ref","observed_at","valid_at","source_ref","confidence","visibility_scope"],
+  "properties":{"schema_version":{"const":"1.0"},"knowledge_id":{"$ref":"common.schema.json#/$defs/id"},"tenant_id":{"$ref":"common.schema.json#/$defs/id"},"world_run_id":{"$ref":"common.schema.json#/$defs/id"},"branch_id":{"const":"main"},"actor_ref":{"$ref":"common.schema.json#/$defs/stable_ref"},"fact_ref":{"$ref":"common.schema.json#/$defs/stable_ref"},"observed_at":{"$ref":"common.schema.json#/$defs/rfc3339"},"valid_at":{"$ref":"common.schema.json#/$defs/rfc3339"},"source_ref":{"$ref":"common.schema.json#/$defs/id"},"confidence":{"allOf":[{"$ref":"common.schema.json#/$defs/decimal"},{"pattern":"^(0(\\.[0-9]+)?|1(\\.0+)?)$"}]},"visibility_scope":{"enum":["private","assigned_recipients","role","tenant"]},"supersedes":{"type":"string"}}
+}

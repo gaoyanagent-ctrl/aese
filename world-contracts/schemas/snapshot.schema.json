@@ -1,0 +1,5 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://aese.local/world/v1/snapshot.schema.json","type":"object","additionalProperties":false,
+  "required":["schema_version","snapshot_id","tenant_id","world_run_id","branch_id","through_sequence","sim_time","rules_version","state_hash","state","created_at"],
+  "properties":{"schema_version":{"const":"1.0"},"snapshot_id":{"$ref":"common.schema.json#/$defs/id"},"tenant_id":{"$ref":"common.schema.json#/$defs/id"},"world_run_id":{"$ref":"common.schema.json#/$defs/id"},"branch_id":{"const":"main"},"through_sequence":{"type":"integer","minimum":0},"sim_time":{"$ref":"common.schema.json#/$defs/rfc3339"},"rules_version":{"$ref":"common.schema.json#/$defs/id"},"state_hash":{"$ref":"common.schema.json#/$defs/hash"},"state":{"type":"object"},"created_at":{"$ref":"common.schema.json#/$defs/rfc3339"}}
+}

@@ -1,0 +1,5 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://aese.local/world/v1/discrepancy.schema.json","type":"object","additionalProperties":false,
+  "required":["schema_version","discrepancy_id","tenant_id","world_run_id","branch_id","subject_ref","kind","world_fact_ref","status","detected_at","correlation_id"],
+  "properties":{"schema_version":{"const":"1.0"},"discrepancy_id":{"$ref":"common.schema.json#/$defs/id"},"tenant_id":{"$ref":"common.schema.json#/$defs/id"},"world_run_id":{"$ref":"common.schema.json#/$defs/id"},"branch_id":{"const":"main"},"subject_ref":{"$ref":"common.schema.json#/$defs/stable_ref"},"kind":{"enum":["world_vs_iaos","world_vs_knowledge","iaos_vs_knowledge"]},"world_fact_ref":{"$ref":"common.schema.json#/$defs/id"},"iaos_record_ref":{"type":"string"},"knowledge_ref":{"type":"string"},"status":{"enum":["open","investigating","closed"]},"detected_at":{"$ref":"common.schema.json#/$defs/rfc3339"},"closed_at":{"$ref":"common.schema.json#/$defs/rfc3339"},"correlation_id":{"$ref":"common.schema.json#/$defs/id"}}
+}

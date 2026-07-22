@@ -1,0 +1,4 @@
+export type StableRef = { namespace: string; type: string; code: string };
+export type Knowledge = { knowledge_id: string; actor_ref: StableRef; observed_at: string; valid_at: string; source_ref: string; confidence: string; visibility_scope: string };
+export type WorldFrame = { step: number; sim_time: string; title: string; world: { code: string; condition: string; vibration: string; unit: string; available_capacity: string }; iaos: { equipment_code: string; registered_status: string; maintenance_order?: string; cursor: number }; knowledge: Knowledge[]; discrepancy: { discrepancy_id: string; kind: string; status: 'open'|'investigating'|'closed'; world_fact_ref: string; iaos_record_ref?: string; knowledge_ref?: string }; causation_id: string };
+export type GenesisTrace = { schema_version: string; world_run_id: string; timezone: string; actor_ref: StableRef; frames: WorldFrame[] };

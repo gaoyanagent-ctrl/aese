@@ -14,7 +14,8 @@ AESE 不拥有 ERP/MES 运行时，也不复制 IAOS 的安全和治理能力。
 | 场景 manifest、seed、事件 fixture | Own | Import/consume |
 | JSON Schema 与离线校验 | Own | Contract-test |
 | 演示时间线和期望输出 | Own | Execute/render |
-| 数据库与 RLS | No | Own |
+| 企业业务数据库与 RLS | No | Own |
+| 独立仿真事实 PostgreSQL | Own（不含业务台账） | No（只通过合同集成） |
 | Metadata / Dynamic Entity runtime | No | Own |
 | Outbox + NATS | No | Own |
 | Capability / Process / Decision | No | Own |
@@ -197,3 +198,24 @@ AESE UI
 ```
 
 运行状态由 IAOS run、snapshot、event 和 recommendation 重建；AESE 服务重启不能丢失或凭内存伪造阶段完成。浏览器只调用 AESE 控制 API 和 IAOS 只读观察 API，不直接调用 IAOS 写端点。详细边界见 ADR-003 和 DES-005。
+
+## 12. AESE 2.0 演进边界
+
+M8 已把 AESE 从纯场景内容/编排层扩展为最小企业生命周期仿真运行时；状态所有权以 accepted ADR-004 为边界：
+
+```text
+AESE World State
+  -> 客观空间、资源、时间、物理/经济结果
+
+IAOS Business State
+  -> 企业登记、流程、权限、Capability、审计和 Outbox
+
+Actor Knowledge State
+  -> 特定人员/Agent 已观察、相信和可访问的信息
+```
+
+该边界允许 AESE 使用独立 PostgreSQL 保存仿真事件日志和快照，但不允许复制 IAOS 订单、库存、设备台账、流程、权限或业务数据库。F1 已实现不依赖墙钟的虚拟时钟、稳定事件队列、版本化纯 reducer、事件日志、state hash、快照恢复和离线 replay；PostgreSQL 持久接线仍后置。三态仅通过版本化 observation/intent/outcome 合同、稳定引用、租户、correlation 和幂等键关联；任何正式 IAOS 写入继续走受治理 API。
+
+现有 M7 无状态编排控制面保持独立并作为兼容基线，不直接承担持续 World Runtime。详细方案和实施门见 DES-007、ADR-004 与 PLAN-M8-001。
+
+World/IAOS 桥采用 DES-008 的持久 journal + cursor 模式：AESE 提交 actor-scoped observation；人员或 Agent 通过 IAOS Capability/Process 形成 intent；只有 IAOS 事务已提交或确定 no-op 的 committed outcome 才能驱动 AESE world consequence。SSE/Outbox 用于通知，断线恢复始终读取 journal，不依赖 webhook 或 direct NATS。

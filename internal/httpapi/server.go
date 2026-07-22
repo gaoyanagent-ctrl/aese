@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/industrial-ai/iaos-aese/internal/application"
+	"github.com/industrial-ai/iaos-aese/internal/genesis"
 	"github.com/industrial-ai/iaos-aese/internal/iaosclient"
 	"github.com/industrial-ai/iaos-aese/internal/legacyprojection"
 	"github.com/industrial-ai/iaos-aese/internal/replay"
@@ -46,17 +47,17 @@ type Server struct {
 }
 
 type actionCache struct {
-	HttpStatus     int       `json:"status"`
-	Action         string    `json:"action"`
-	Idempotency    string    `json:"idempotency_key"`
-	ErrorCode      string    `json:"error_code,omitempty"`
-	Error          string    `json:"error,omitempty"`
-	ErrorRetryable bool      `json:"retryable,omitempty"`
-	RequiredPermission string `json:"required_permission,omitempty"`
-	Outcome        any       `json:"outcome,omitempty"`
-	RunStatus      string    `json:"run_status"`
-	Cursor         int64     `json:"cursor"`
-	UpdatedAt      time.Time `json:"updated_at"`
+	HttpStatus         int       `json:"status"`
+	Action             string    `json:"action"`
+	Idempotency        string    `json:"idempotency_key"`
+	ErrorCode          string    `json:"error_code,omitempty"`
+	Error              string    `json:"error,omitempty"`
+	ErrorRetryable     bool      `json:"retryable,omitempty"`
+	RequiredPermission string    `json:"required_permission,omitempty"`
+	Outcome            any       `json:"outcome,omitempty"`
+	RunStatus          string    `json:"run_status"`
+	Cursor             int64     `json:"cursor"`
+	UpdatedAt          time.Time `json:"updated_at"`
 }
 
 type runRecord struct {
@@ -104,12 +105,12 @@ type runActionRequest struct {
 }
 
 type errorResponse struct {
-	Error      string `json:"error"`
-	Code       string `json:"code"`
-	Retryable  bool   `json:"retryable,omitempty"`
-	RunID      string `json:"run_id,omitempty"`
-	RunVersion string `json:"run_version,omitempty"`
-	Status     string `json:"status,omitempty"`
+	Error              string `json:"error"`
+	Code               string `json:"code"`
+	Retryable          bool   `json:"retryable,omitempty"`
+	RunID              string `json:"run_id,omitempty"`
+	RunVersion         string `json:"run_version,omitempty"`
+	Status             string `json:"status,omitempty"`
 	RequiredPermission string `json:"required_permission,omitempty"`
 }
 
@@ -142,10 +143,10 @@ type actionResponse struct {
 }
 
 type apiError struct {
-	statusCode int
-	code       string
-	message    string
-	retryable  bool
+	statusCode         int
+	code               string
+	message            string
+	retryable          bool
 	requiredPermission string
 }
 
@@ -232,6 +233,7 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/runs/:run_id/verify",
 			"/api/aese/v1/runs/:run_id/reset-plan",
 			"/api/aese/v1/runs/:run_id/reset",
+			"/api/aese/v1/world/genesis",
 		},
 	})
 }
@@ -256,6 +258,18 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch rest[0] {
+	case "world":
+		if len(rest) != 2 || rest[1] != "genesis" || r.Method != http.MethodGet {
+			s.writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "method not allowed", false, "", "")
+			return
+		}
+		trace := genesis.BuildTrace()
+		if err := genesis.ValidateTrace(trace); err != nil {
+			s.writeError(w, http.StatusInternalServerError, "genesis_invalid", err.Error(), false, "", "")
+			return
+		}
+		s.writeJSON(w, http.StatusOK, trace)
+		return
 	case "scenarios":
 		if r.Method != http.MethodGet {
 			s.writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "method not allowed", false, "", "")
@@ -601,22 +615,22 @@ func (s *Server) handleRunAction(ctx context.Context, w http.ResponseWriter, r *
 		s.writeError(w, http.StatusBadRequest, "idempotency_required", "idempotency key is required for write actions", true, run.RunID, runVersion(run))
 		return
 	}
-		cacheKey := runActionCacheKey(action, idempotency)
-		if cacheKey != "" {
-			if cached, ok := run.ActionCache[cacheKey]; ok {
-				runCopy := *run
-				if cached.HttpStatus >= 400 {
-					s.mu.Unlock()
-					if cached.ErrorCode != "" {
-						s.writeError(w, cached.HttpStatus, cached.ErrorCode, cached.Error, cached.ErrorRetryable, run.RunID, runVersion(run), cached.RequiredPermission)
-						return
-					}
-					s.writeError(w, cached.HttpStatus, "action_failed", "previous action execution failed", false, run.RunID, runVersion(run))
+	cacheKey := runActionCacheKey(action, idempotency)
+	if cacheKey != "" {
+		if cached, ok := run.ActionCache[cacheKey]; ok {
+			runCopy := *run
+			if cached.HttpStatus >= 400 {
+				s.mu.Unlock()
+				if cached.ErrorCode != "" {
+					s.writeError(w, cached.HttpStatus, cached.ErrorCode, cached.Error, cached.ErrorRetryable, run.RunID, runVersion(run), cached.RequiredPermission)
 					return
 				}
-				response := toRunResponse(&runCopy, cached.Outcome)
-				response.Plan = run.Plan
-				s.mu.Unlock()
+				s.writeError(w, cached.HttpStatus, "action_failed", "previous action execution failed", false, run.RunID, runVersion(run))
+				return
+			}
+			response := toRunResponse(&runCopy, cached.Outcome)
+			response.Plan = run.Plan
+			s.mu.Unlock()
 			s.writeJSON(w, cached.HttpStatus, actionResponse{Run: response, Action: action})
 			return
 		}
@@ -686,18 +700,18 @@ func (s *Server) handleRunAction(ctx context.Context, w http.ResponseWriter, r *
 		run.Retryable = runErr.retryable
 		run.UpdatedAt = time.Now().UTC()
 		if cacheKey != "" {
-				run.ActionCache[cacheKey] = actionCache{
-					HttpStatus:     httpStatus,
-					Action:         action,
-					Idempotency:    idempotency,
-					ErrorCode:      runErr.code,
-					Error:          runErr.message,
-					ErrorRetryable: runErr.retryable,
-					RequiredPermission: runErr.requiredPermission,
-					UpdatedAt:      run.UpdatedAt,
-					RunStatus:      string(run.Status),
-					Cursor:         run.Cursor,
-				}
+			run.ActionCache[cacheKey] = actionCache{
+				HttpStatus:         httpStatus,
+				Action:             action,
+				Idempotency:        idempotency,
+				ErrorCode:          runErr.code,
+				Error:              runErr.message,
+				ErrorRetryable:     runErr.retryable,
+				RequiredPermission: runErr.requiredPermission,
+				UpdatedAt:          run.UpdatedAt,
+				RunStatus:          string(run.Status),
+				Cursor:             run.Cursor,
+			}
 		}
 		s.mu.Unlock()
 		s.writeError(w, httpStatus, runErr.code, runErr.message, runErr.retryable, run.RunID, runVersion(run), runErr.requiredPermission)
@@ -804,12 +818,12 @@ func (s *Server) refreshRunFromFacts(ctx context.Context, run *runRecord, client
 			}
 			observed := queryResp.Items
 			for _, event := range observed {
-			if event.Cursor <= baseCursor {
-				continue
-			}
-			if strings.TrimSpace(run.Plan.Correlation) != "" && event.CorrelationID != run.Plan.Correlation {
-				continue
-			}
+				if event.Cursor <= baseCursor {
+					continue
+				}
+				if strings.TrimSpace(run.Plan.Correlation) != "" && event.CorrelationID != run.Plan.Correlation {
+					continue
+				}
 				events = append(events, event)
 				if event.Cursor > cursor {
 					cursor = event.Cursor
@@ -964,8 +978,8 @@ func (s *Server) executeAdvance(ctx context.Context, client *iaosclient.Client, 
 	newStory := story
 	newStory.Events.Events = events
 	summary, replayErr := replayEvents(ctx, client, newStory, run, actor, apply)
-		if replayErr != nil {
-			return nil, mapIAOSError(replayErr, string(application.RunActionAdvance))
+	if replayErr != nil {
+		return nil, mapIAOSError(replayErr, string(application.RunActionAdvance))
 	}
 	run.CurrentAct++
 	transition, transErr := application.NextStatus(run.Status, application.RunActionAdvance, application.RunTransitionContext{CurrentAct: run.CurrentAct - 1, TotalActs: run.Plan.ActCount})
@@ -999,8 +1013,8 @@ func (s *Server) executeRunToEnd(ctx context.Context, client *iaosclient.Client,
 	newStory := story
 	newStory.Events.Events = events
 	summary, replayErr := replayEvents(ctx, client, newStory, run, actor, apply)
-		if replayErr != nil {
-			return nil, mapIAOSError(replayErr, string(application.RunActionRunToEnd))
+	if replayErr != nil {
+		return nil, mapIAOSError(replayErr, string(application.RunActionRunToEnd))
 	}
 	run.CurrentAct = run.Plan.ActCount
 	run.Status = application.RunStatusAwaitingAnalysis
@@ -1048,8 +1062,8 @@ func (s *Server) executeResetPlan(ctx context.Context, client *iaosclient.Client
 		return nil, &apiError{statusCode: http.StatusConflict, code: "invalid_state", message: transErr.Error(), retryable: true}
 	}
 	summary, err := application.ResetScenario(ctx, client, pack, run.ScenarioKey, run.RunID, false)
-		if err != nil {
-			return nil, mapIAOSError(err, string(application.RunActionResetPlan))
+	if err != nil {
+		return nil, mapIAOSError(err, string(application.RunActionResetPlan))
 	}
 	token, tokenErr := resetToken()
 	if tokenErr != nil {
@@ -1077,8 +1091,8 @@ func (s *Server) executeReset(ctx context.Context, client *iaosclient.Client, pa
 		return nil, &apiError{statusCode: http.StatusForbidden, code: "reset_confirmation_mismatch", message: "reset confirmation token mismatch", retryable: false}
 	}
 	summary, err := application.ResetScenario(ctx, client, pack, run.ScenarioKey, run.RunID, apply)
-		if err != nil {
-			return nil, mapIAOSError(err, string(application.RunActionReset))
+	if err != nil {
+		return nil, mapIAOSError(err, string(application.RunActionReset))
 	}
 	if apply {
 		transition, transErr := application.NextStatus(run.Status, application.RunActionReset, application.RunTransitionContext{})
@@ -1502,6 +1516,6 @@ func (s *Server) writeError(w http.ResponseWriter, status int, code string, mess
 		Status:             strconv.Itoa(status),
 		RunID:              runID,
 		RunVersion:         runVersion,
-		RequiredPermission:  permission,
+		RequiredPermission: permission,
 	})
 }

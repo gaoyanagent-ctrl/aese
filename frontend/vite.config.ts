@@ -2,6 +2,10 @@ import { defineConfig } from 'vitest/config';
 import react from '@vitejs/plugin-react';
 
 const iaosProxy = {
+  '/api/aese': {
+    target: 'http://127.0.0.1:8090',
+    changeOrigin: false,
+  },
   '/api': {
     target: 'http://127.0.0.1:8082',
     changeOrigin: false,

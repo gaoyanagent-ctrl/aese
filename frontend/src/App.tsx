@@ -14,12 +14,13 @@ import { StaticScenarioDataSource } from './scenario';
 import type { SandboxScenario } from './scenario/types';
 import { LiveSandbox } from './LiveSandbox';
 import { SystemAtlas, type AtlasEntryRef } from './components/SystemAtlas';
+import { WorldPlay } from './components/world/WorldPlay';
 
 const SCENARIO_KEY = 'order-expedite-01';
 const scenarioSource = new StaticScenarioDataSource({ [SCENARIO_KEY]: previewJson });
 type MobileView = 'enterprise' | 'canvas' | 'events';
 
-function Sandbox({ scenario, onModeChange, onOpenIntegration, onOpenAtlas }: { scenario: SandboxScenario; onModeChange: (mode: 'preview' | 'live') => void; onOpenIntegration: () => void; onOpenAtlas: () => void }) {
+function Sandbox({ scenario, onModeChange, onOpenIntegration, onOpenAtlas, onOpenWorld }: { scenario: SandboxScenario; onModeChange: (mode: 'preview' | 'live') => void; onOpenIntegration: () => void; onOpenAtlas: () => void; onOpenWorld: () => void }) {
   const playback = usePlayback(scenario);
   const [selectedEntityId, setSelectedEntityId] = useState<string | null>(null);
   const [selectedNodeId, setSelectedNodeId] = useState<string | null>(null);
@@ -72,6 +73,7 @@ function Sandbox({ scenario, onModeChange, onOpenIntegration, onOpenAtlas }: { s
         onModeChange={onModeChange}
         onOpenIntegration={onOpenIntegration}
         onOpenAtlas={onOpenAtlas}
+        onOpenWorld={onOpenWorld}
       />
       <div className="mobile-tabs" role="tablist" aria-label="移动端沙盘区域">
         {([['enterprise', '企业'], ['canvas', 'A 线画布'], ['events', '事件 / Agent']] as const).map(([value, label]) => (
@@ -122,12 +124,12 @@ function Sandbox({ scenario, onModeChange, onOpenIntegration, onOpenAtlas }: { s
 export default function App() {
   const [scenario, setScenario] = useState<SandboxScenario | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<'preview' | 'live' | 'atlas'>('preview');
+  const [mode, setMode] = useState<'preview' | 'live' | 'atlas' | 'world'>('preview');
   const [integrationOpen, setIntegrationOpen] = useState(false);
   const [connectionVersion, setConnectionVersion] = useState(0);
   const [runContext, setRunContext] = useState<OrchestrationRunContext | null>(() => getStoredRunContext());
 
-  const navigate = (target: 'preview' | 'live' | 'atlas') => {
+  const navigate = (target: 'preview' | 'live' | 'atlas' | 'world') => {
     setMode(target);
     window.location.hash = target === 'preview' ? 'sandbox' : target;
   };
@@ -137,6 +139,7 @@ export default function App() {
       const target = window.location.hash.replace(/^#/, '');
       if (target === 'atlas') setMode('atlas');
       if (target === 'live') setMode('live');
+      if (target === 'world') setMode('world');
       if (target === 'sandbox') setMode('preview');
       if (target === 'integration') { setMode('preview'); setIntegrationOpen(true); }
     };
@@ -162,6 +165,7 @@ export default function App() {
     navigate(target === 'live' ? 'live' : target === 'atlas' ? 'atlas' : 'preview');
   };
   if (mode === 'atlas') return <SystemAtlas onExit={() => navigate('preview')} onNavigate={navigateAtlasEntry} />;
+  if (mode === 'world') return <WorldPlay onExit={() => navigate('preview')} />;
   return <>
     {mode === 'live'
       ? <LiveSandbox
@@ -172,7 +176,7 @@ export default function App() {
           onOpenIntegration={openIntegration}
           onOpenAtlas={() => navigate('atlas')}
         />
-      : <Sandbox scenario={scenario} onModeChange={navigate} onOpenIntegration={openIntegration} onOpenAtlas={() => navigate('atlas')} />}
+      : <Sandbox scenario={scenario} onModeChange={navigate} onOpenIntegration={openIntegration} onOpenAtlas={() => navigate('atlas')} onOpenWorld={() => navigate('world')} />}
     <IntegrationConsole
       open={integrationOpen}
       onClose={() => setIntegrationOpen(false)}

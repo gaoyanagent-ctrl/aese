@@ -504,3 +504,59 @@
 - 影响：业务用户可在浏览器受治理完成 22 事件、三 Agent、验证与一次性确认复位；最终单 run 产生 9 次成功 Tool Call、18 条 UI/CLI 对称 Outbox，两个执行面均删除 15 个 L2 对象并保留 12 个 L1 对象。当前没有 active plan。
 - 验证：17 条离线业务断言与 2 条 IAOS 在线断言通过；M6 KPI 为需求 12,000、实发 11,700、缺口 300；`go test ./...`、`go vet ./...`、29 项 Vitest、24 项三视口 Playwright、ESLint、TypeScript/Vite production build、Atlas tracking、JSON、Markdown 链接和 diff check 通过。AESE 8090/4173 与 IAOS 8082/3000 健康可达，PostgreSQL/NATS 正常。完整产物位于 `artifacts/m7-acceptance/20260722-05/`。
 - 后续：M8 参数化仿真实验必须另立 active plan；生产身份应替换本地 dev token，成本维度在批准基线前继续保持 `partial`。
+
+## 2026-07-22 - AESE 2.0 改造计划与 M8 架构决策门建立
+
+- 变更：评审 `docs/ChatGPT20260722-aese2.0.md`，新增 ADR-004、DES-007 和唯一 active 的 PLAN-M8-001；将企业生命周期方向工程化为 World / IAOS / Actor Knowledge 三态、Go 离散事件内核、受治理双向桥和 Project Genesis 路线，并同步 README、Agent Context、Architecture、文档索引、Roadmap 与 Code Map。
+- 原因：原始构思正确指出现有 AESE 仍以预编排业务故事为核心，但其“AESE 负责客观世界”与现有无状态场景层边界、Spring Boot 示例及原 M8 A/B 实验优先级存在冲突，需要先建立可批准、可分期和可回归的系统改造计划。
+- 影响：M8 从参数化实验调整为 AESE 2.0 基础里程碑，当前只进入规划与决策门；ADR-004 获批前不实施生产级 World Store 或 IAOS 持久化变更。M7 场景包、CLI、Preview/Live 和控制台继续作为兼容基线。
+- 验证：`git diff --check`、active plan 唯一性、System Atlas tracking、全部场景/Atlas JSON 解析和受影响 Markdown 本地链接检查通过；未修改代码或 IAOS 仓库，因此未运行产品测试。
+- 后续：与用户确认 ADR-004 的状态所有权、World Store、Actor Knowledge 和最小经济守恒四项决策，再执行 F0 合同与 IAOS gap audit。
+
+## 2026-07-22 - ADR-004 三态所有权与 World Store 决策获批
+
+- 变更：将 ADR-004 转为 accepted，确认 AESE 拥有可持久化仿真事实、World Store 使用独立 PostgreSQL database/账号/迁移边界、Actor Knowledge 首版只保存结构化认知，并将经济守恒限定为现金、承诺支出和应收回款；同步 PLAN-M8-001 的 G1/G2/G3/G5、Architecture、Roadmap、Agent Context 和文档索引。
+- 原因：用户接受三态所有权、独立存储和最小经济守恒；对 Actor Knowledge 的首版边界采用可确定性重放、审计和权限控制的结构化方案，避免自由文本长期记忆成为权威状态。
+- 影响：M8 可进入 AESE 本地 World Store 和合同原型工作；在 G4 observation/intent/committed_outcome 合同冻结前，仍不得修改 IAOS 主分支或部署生产双向桥。
+- 验证：`git diff --check`、决策状态、active plan 唯一性、全部场景/Atlas JSON 解析、受影响 Markdown 本地链接和 System Atlas tracking 均通过；未修改产品代码或 IAOS 仓库。
+- 后续：执行 F0 T3-T6，优先完成三态所有权矩阵、PostgreSQL 运行合同、bridge envelope 和 IAOS gap audit。
+
+## 2026-07-22 - G4 World/IAOS 三段式桥接合同获批
+
+- 变更：新增 approved DES-008，固定 observation、intent、committed_outcome 的公共 envelope、strict payload、权限、幂等、错误和跨仓顺序；选择 IAOS tenant journal + cursor query 作为恢复事实，SSE/Outbox 只用于通知。同步 PLAN-M8-001 完成 G4/T5/T6，并更新 README、Architecture、Agent Context、文档索引、Roadmap 与 Code Map。
+- 原因：用户授权由架构设计决定 G4。现有 IAOS simulation ingress 会同时改变业务状态、scenario event 仅支持固定 HCTM story，但已有 tenant、RLS、input hash、committed record refs、Outbox 和 cursor 模式可复用；新合同需保持这些优点并分离“看见事实”“提出行动”“事务已提交”。
+- 影响：M8 G1-G5 全部通过，可进入 F0 机器可读 Schema/Go 类型和 contract tests。AESE 只根据 committed/no-op outcome 计算世界后果，不根据 intent、HTTP 超时、回滚结果、webhook 或 direct NATS 猜测状态。
+- 验证：对照 AESE `internal/iaosclient` 与 IAOS scenario、simulation、Capability execution result、eventdef 当前合同完成只读 gap audit；`git diff --check`、文档 ID、active plan 唯一性、全部场景/Atlas JSON、受影响 Markdown 链接和 System Atlas tracking 均通过。未修改 IAOS 仓库。
+- 后续：执行 T3/T4/T7，提交 bridge JSON Schema、fixture、Go 类型、canonical hash 与 mock journal contract tests，再进入 IAOS 独立 worktree。
+
+## 2026-07-22 - M8 F0 机器合同与 World Store 边界完成
+
+- 变更：完成 PLAN-M8-001 T3/T4/T7；新增三态术语、对象所有权和数据分类，八类 World/Bridge JSON Schema、Go strict parser、canonical SHA-256、fixture/测试，独立 PostgreSQL database/账号/迁移/连接/本地启动/备份合同，以及五个 planned System Atlas 节点和依赖声明。
+- 原因：在进入确定性内核和 IAOS 独立 worktree 前冻结稳定的状态、事件、认知、差异和桥接语义，避免后续 reducer 与双向桥发生 Schema 漂移。
+- 影响：M8 F0 转为 Completed，F1 成为下一切片；未实现完整仿真内核，未修改 IAOS、M7 pack、CLI 或 Preview/Live 行为，也未引入 direct NATS/webhook-only 路径。
+- 验证：`go test ./...`、`go vet ./...`、八组 fixture 的 JSON Schema Draft 2020-12 校验、全部新增 JSON 解析、Compose 配置、临时 PostgreSQL 17 的实际 up migration 与 RLS 未绑定拒绝/绑定可写测试、`git diff --check`、Markdown 本地链接和 System Atlas tracking 均通过；临时容器与卷已清理。
+- 后续：按 F1 T8-T12 实现纯函数 reducer、虚拟时钟、稳定事件排序、快照/重放和默认 dry-run 命令；F1 前不启动 F2/F3 实现。
+
+## 2026-07-22 - M8 F1 确定性离散事件内核完成
+
+- 变更：完成 PLAN-M8-001 T8-T12；新增虚拟时钟、稳定优先队列、版本化纯函数 reducer、World engine、event log/state hash、snapshot 恢复和严格 replay，并在现有 CLI 增加默认 dry-run 的 `aese world validate|inspect|run|replay`；仅显式 `--apply --output` 写 artifact。
+- 原因：先建立可证明重放一致性的最小内核，再扩展设备、人员和 Actor Knowledge 业务模型，避免业务 tracer 掩盖时序与确定性错误。
+- 影响：F1 转为 Completed，F2 成为下一切片；当前规则仅包含通用 `state.set.v1` 测试 reducer，不宣称 Genesis 业务规则或 KPI 完成。未连接 PostgreSQL/IAOS，未修改 M7 pack、旧 CLI 命令或 Preview/Live。
+- 验证：同一输入 100 次日志 hash 一致；覆盖秒/年时间尺度、相同时间 priority/event ID tie-break、重复 ID/幂等键、因果倒序、未知 rules/payload、时间倒退、损坏快照和恢复 sequence；CLI dry-run/apply/replay、全仓 Go test/vet、JSON/链接/Atlas tracking 与 diff check 均通过。
+- 后续：执行 F2 T13-T17，围绕 `LAS-WLD-02` 建立设备实际状态、角色有限认知、只读 IAOS 投影和 discrepancy 生命周期，不提前实现 IAOS 写桥。
+
+## 2026-07-22 - M8 AESE 2.0 foundation 完成
+
+- 变更：完成 PLAN-M8-001 F2-F5；交付 `LAS-WLD-02` World/IAOS/Knowledge 三态 tracer、actor-scoped Knowledge、Genesis world pack、M7 22 事件兼容 adapter、受治理 IAOS observation/intent/committed outcome journal/cursor/SSE、World Play 三态界面和能力缺口台账。IAOS 改动保持在独立 `feat/m8-world-bridge` worktree，revision 为 `e661d9a`。
+- 原因：在 F0 合同与 F1 确定性内核冻结后一次完成剩余闭环，同时保持 AESE 不直写 IAOS、通知不替代 cursor 事实和 M7 路径零改写。
+- 影响：非研发用户可通过 World 模式观察偏差、推进/复位虚拟时间并查看发现到关闭的因果链；IAOS journal 强制 tenant RLS、权限、幂等和 journal+Outbox 原子提交。人类与 Agent 共用同一 intent/outcome 权限合同，不存在旁路。
+- 验证：AESE `go test ./...`、Genesis validate/dry-run、30 项 Vitest、TypeScript/build、World Play 三视口 Playwright 通过；IAOS 全部四个 Go module 测试、bridge SQL mock、Atlas/Code Map 检查通过，后端已从独立 worktree 部署至 8082，健康检查通过，实际 PostgreSQL 表确认 `ENABLE/FORCE RLS` 与 tenant policy。M7 代码路径未修改。
+- 后续：M8 已完成；通用 EAM 编排和 Project Genesis 更长生命周期属于后续新里程碑，需另立唯一 active plan。
+
+## 2026-07-22 - M8 Atlas 同步待补登记
+
+- 变更：在 IAOS 8082 健康且 M8 bridge 已部署后执行 `scripts/sync_system_atlas_updates.sh`。
+- 原因：按治理要求将六个 M8 声明幂等登记到 System Atlas。
+- 影响：同步端点返回 `404 system atlas node not found`；本地声明、证据与 tracking 校验均完整，产品代码和 M8 运行能力不受影响。
+- 验证：dev token 获取成功，`POST /api/v1/system-atlas/updates` 可达并明确返回缺少 `aese.world` 节点，而非网络或鉴权失败。
+- 后续：IAOS Atlas seed 注册 `atlas/system-atlas-planned.json` 的五个节点后，重跑同步脚本补登记；不得用历史补录脚本绕过缺失节点。

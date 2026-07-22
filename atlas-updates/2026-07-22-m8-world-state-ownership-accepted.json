@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m8-world-state-ownership-accepted-v1",
+  "node_key": "aese.world",
+  "update_type": "decision",
+  "summary": "ADR-004 三态所有权与独立 World Store 获批",
+  "detail": "确认 AESE 拥有可持久化仿真事实，World Store 使用独立 PostgreSQL database、账号和迁移边界；IAOS 继续唯一拥有企业管理事实。Actor Knowledge 首版只保存结构化事实引用、时间、来源、置信度和可见范围，不保存自由文本长期记忆。M8 经济守恒限定为现金、承诺支出和应收回款，IAOS 双向桥仍受 G4 合同门约束。",
+  "status_after": "designed",
+  "progress_after": 8,
+  "current_state": "ADR-004 accepted；M8 进入 F0 合同与本地 World Store 设计，等待 observation/intent/committed_outcome G4 冻结。",
+  "evidence_ref": "docs/decisions/ADR-004-aese-world-state-ownership.md",
+  "occurred_at": "2026-07-22T03:52:19Z"
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m8-f1-deterministic-kernel-v1",
+  "node_key": "aese.world",
+  "update_type": "implementation",
+  "summary": "完成 M8 F1 确定性离散事件内核",
+  "detail": "实现纯函数 reducer、虚拟时钟、稳定事件队列、因果与幂等校验、事件日志、state hash、快照恢复、离线 replay，以及默认 dry-run 的 aese world validate/inspect/run/replay。未连接 IAOS 或启动 F2 tracer。",
+  "status_after": "building",
+  "progress_after": 30,
+  "current_state": "F0 与 F1 完成；F2 三态设备偏差 tracer 为下一切片。",
+  "evidence_ref": "docs/runbooks/aese-world-f1.md",
+  "occurred_at": "2026-07-22T07:00:00Z"
+}

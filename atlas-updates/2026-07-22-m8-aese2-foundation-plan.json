@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m8-aese2-foundation-plan-v1",
+  "node_key": "aese.world",
+  "update_type": "design",
+  "summary": "建立 AESE 2.0 三态世界与仿真内核改造计划",
+  "detail": "新增 draft ADR-004、draft DES-007 和 active PLAN-M8-001，将原始企业生命周期构思收敛为 World/IAOS/Actor Knowledge 三态、Go 确定性离散事件内核、受治理 observation/intent/outcome 桥和 Project Genesis 分期路线。M8 当前只进入架构决策门，M7 保持兼容基线，尚未实现 World Store 或 IAOS 生产变更。",
+  "status_after": "designed",
+  "progress_after": 5,
+  "current_state": "M8 F0 规划进行中；等待 ADR-004 状态所有权、World Store、Actor Knowledge 和最小经济守恒决策。",
+  "evidence_ref": "docs/plans/2026-07-22-m8-aese-2-foundation.md",
+  "occurred_at": "2026-07-22T03:49:06Z"
+}

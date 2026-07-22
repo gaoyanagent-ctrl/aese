@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m8-f0-machine-contracts-v1",
+  "node_key": "aese.world",
+  "update_type": "implementation",
+  "summary": "完成 M8 F0 World 机器合同与独立存储边界",
+  "detail": "新增八类 strict JSON Schema、Go 类型、canonical SHA-256、fixture/测试，以及独立 PostgreSQL database、账号、迁移、本地启动和备份合同；未实现仿真内核或修改 IAOS。",
+  "status_after": "designed",
+  "progress_after": 15,
+  "current_state": "F0 合同冻结完成；F1-F5 保持 planned。",
+  "evidence_ref": "docs/designs/DES-009-world-contract-model.md",
+  "occurred_at": "2026-07-22T06:00:00Z"
+}

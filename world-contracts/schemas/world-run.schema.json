@@ -1,0 +1,5 @@
+{
+  "$schema":"https://json-schema.org/draft/2020-12/schema","$id":"https://aese.local/world/v1/world-run.schema.json","type":"object","additionalProperties":false,
+  "required":["schema_version","world_run_id","tenant_id","world_pack_key","world_pack_version","rules_version","branch_id","timezone","seed","status","sim_time","created_at"],
+  "properties":{"schema_version":{"const":"1.0"},"world_run_id":{"$ref":"common.schema.json#/$defs/id"},"tenant_id":{"$ref":"common.schema.json#/$defs/id"},"world_pack_key":{"$ref":"common.schema.json#/$defs/id"},"world_pack_version":{"$ref":"common.schema.json#/$defs/id"},"rules_version":{"$ref":"common.schema.json#/$defs/id"},"branch_id":{"const":"main"},"timezone":{"const":"Asia/Shanghai"},"seed":{"type":"string","pattern":"^[0-9]+$"},"status":{"enum":["created","running","paused","completed","failed"]},"sim_time":{"$ref":"common.schema.json#/$defs/rfc3339"},"created_at":{"$ref":"common.schema.json#/$defs/rfc3339"}}
+}
