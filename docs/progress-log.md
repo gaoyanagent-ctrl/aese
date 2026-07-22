@@ -560,3 +560,11 @@
 - 影响：同步端点返回 `404 system atlas node not found`；本地声明、证据与 tracking 校验均完整，产品代码和 M8 运行能力不受影响。
 - 验证：dev token 获取成功，`POST /api/v1/system-atlas/updates` 可达并明确返回缺少 `aese.world` 节点，而非网络或鉴权失败。
 - 后续：IAOS Atlas seed 注册 `atlas/system-atlas-planned.json` 的五个节点后，重跑同步脚本补登记；不得用历史补录脚本绕过缺失节点。
+
+## 2026-07-22 - M8 Atlas 同步补登记完成
+
+- 变更：IAOS seed 注册 `aese.world` 五节点族与 `iaos.world-bridge`，重新部署 8082，并通过受治理 update API 同步 AESE 31 条及 IAOS 11 条声明；同步脚本改为按 `occurred_at` 排序。
+- 原因：解除先前 `system atlas node not found`，并防止首次批量同步按文件名应用导致状态回退。
+- 影响：M8 World、Time、Knowledge、Genesis、AESE/IAOS Bridge 均在 Atlas 可见；历史声明保持不可变，最终状态使用新 update key 校正。
+- 验证：数据库查询确认六个节点均为 `completed/100`，M8 六条原始 update key、AESE 校正记录与 IAOS bridge 完成记录均存在；两仓同步脚本重复执行成功。
+- 后续：无。

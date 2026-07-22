@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m8-atlas-reconciled-v1",
+  "node_key": "aese.world",
+  "update_type": "status",
+  "summary": "校正 M8 Atlas 最终状态",
+  "detail": "IAOS 已注册 AESE World 节点族；历史声明已同步，并用新的不可变 update key 将 aese.world 校正为 M8 完成状态。同步脚本按 occurred_at 排序，避免未来批量首次同步发生状态回退。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "M8 F0-F5 已完成，World、Genesis、Knowledge、Time 与 IAOS Bridge 节点均已登记。",
+  "evidence_ref": "docs/runbooks/aese-world-play.md",
+  "occurred_at": "2026-07-22T09:32:00Z"
+}
