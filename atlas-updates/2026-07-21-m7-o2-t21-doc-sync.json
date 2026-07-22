@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o2-t21-doc-sync-v1",
+  "node_key": "aese.operations",
+  "update_type": "status",
+  "summary": "M7 O2/T21：文档治理与关闭证据同步",
+  "detail": "AESE 侧完成 T21 的闭环动作：标记 T21 为完成，补齐计划/路线图/Code Map/README/runbook 映射，新增 M7 运行控制台 runbook 草案并记录本次进展，形成 runbook 与文档状态可追溯节点。",
+  "status_after": "completed",
+  "progress_after": 95,
+  "current_state": "M7 计划 O2 已在 AESE 侧完成文档与状态同步；跨 IAOS 仓库权限/合同/部署并发收敛仍待独立 worktree 合并。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

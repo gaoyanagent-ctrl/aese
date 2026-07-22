@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o4-t35-t36-script-v1",
+  "node_key": "aese.operations",
+  "update_type": "status",
+  "summary": "M7 O4：补充 T35/T36 复现脚本与输出清单",
+  "detail": "新增 scripts/m7-runbook-evidence-collect.sh（健康检查、plan 拉取、run 生命周期动作与 CLI replay/verify/reset 对账产物脚本），并在 runbook/evidence 中补充脚本入口、文件清单和 no-op/事件序列对账规则。当前仍阻塞于 IAOS 与 DB/Outbox/Tool Call 实际数据回填。",
+  "status_after": "blocked",
+  "progress_after": 93,
+  "current_state": "T35/T36 具备可复现脚本；T39 仍待两仓部署与健康/commit 证据。",
+  "evidence_ref": "docs/reports/hctm-m7-governed-scenario-operations-console-evidence.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

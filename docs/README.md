@@ -48,6 +48,8 @@
 | [HCTM M5 Agent Tracer Evidence](reports/hctm-m5-agent-evidence.md) | 三 Agent 在线结果、零业务写入和调用审计证据 | Completed |
 | [HCTM M6 Online Sandbox Runbook](runbooks/hctm-m6-online-sandbox.md) | 在线事实、游标、SSE 和 Live UI 操作 | Active |
 | [HCTM M6 Online Sandbox Evidence](reports/hctm-m6-online-sandbox-evidence.md) | KPI、幂等、租户隔离和三视口证据 | Completed |
+| [HCTM M7 Governed Scenario Operations Console Runbook](runbooks/hctm-m7-governed-scenario-operations-console.md) | 预检、初始化、七幕推进、分析、验证、复位与重启恢复验收清单 | Completed |
+| [HCTM M7 Governed Scenario Operations Console Evidence](reports/hctm-m7-governed-scenario-operations-console-evidence.md) | O3/O4 运行控制台联调、可恢复运行、权限边界与三视口证据 | Completed |
 | [Original Chat](ChatGPT_20260626.md) | 原始构思记录，仅供追溯 | Archive |
 
 ### 设计、决策和计划
@@ -61,14 +63,14 @@
 | DES-002 | [快速 2D 企业沙盘设计](designs/DES-002-fast-track-2d-enterprise-sandbox.md) | Completed |
 | DES-003 | [M5 受治理 Agent Tracer 设计](designs/DES-003-governed-agent-tracers.md) | Completed |
 | DES-004 | [M6 在线 2D 企业沙盘架构](designs/DES-004-online-2d-enterprise-sandbox.md) | Completed |
-| DES-005 | [M7 受治理场景运行控制台](designs/DES-005-governed-scenario-operations-console.md) | Approved |
+| DES-005 | [M7 受治理场景运行控制台](designs/DES-005-governed-scenario-operations-console.md) | Completed |
 | DES-006 | [AESE System Atlas 双系统全景投影](designs/DES-006-system-atlas-aese-projection.md) | Completed |
 | PLAN-M3 | [M3 实施计划](plans/2026-07-19-m3-executable-scenario-package.md) | Completed |
 | PLAN-M3V | [快速 2D 企业沙盘实施计划](plans/2026-07-19-fast-track-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Completed |
 | PLAN-M5 | [M5 受治理 Agent MVP 实施计划](plans/2026-07-19-m5-governed-agent-mvp.md) | Completed |
 | PLAN-M6 | [M6 在线 2D 企业沙盘实施计划](plans/2026-07-20-m6-online-2d-enterprise-sandbox.md) | Completed |
-| PLAN-M7 | [M7 受治理场景运行控制台实施计划](plans/2026-07-20-m7-governed-scenario-operations-console.md) | Active |
+| PLAN-M7 | [M7 受治理场景运行控制台实施计划](plans/2026-07-20-m7-governed-scenario-operations-console.md) | Completed |
 
 ## 3. 命名与状态
 

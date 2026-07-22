@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o1-sensitive-redaction-v1",
+  "node_key": "aese.operations",
+  "update_type": "implementation",
+  "summary": "M7 O1：补齐前端错误消息敏感字段脱敏",
+  "detail": "在 IAOS 前端数据源与联动 integration 层统一增加 Bearer token 掩码逻辑，禁止失败响应中的调用 token 在 UI 与控制台回显中泄露。",
+  "status_after": "building",
+  "progress_after": 66,
+  "current_state": "完成 T15 的敏感字段脱敏子项，仍保留 T15 的同源代理收敛与服务重启恢复测试未闭环。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

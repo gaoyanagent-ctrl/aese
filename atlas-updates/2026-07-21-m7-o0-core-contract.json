@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o0-core-contract-v1",
+  "node_key": "aese.operations",
+  "update_type": "implementation",
+  "summary": "M7 O0：完成 application service 拆分与 T4 实现",
+  "detail": "将 apply/replay/verify/reset/agent-setup/agent-run 的核心编排逻辑抽入 internal/application，CLI 保持参数解析与输出；补齐 plan hash 与状态机编译一致性，确保 story correlation_id 引用正确。",
+  "status_after": "building",
+  "progress_after": 28,
+  "current_state": "M7 O0 已关闭 T2/T3/T4/T5/T6，run 状态机、plan hash 与 application 运行内核可在 cmd/aese 与后续 http handler 复用。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

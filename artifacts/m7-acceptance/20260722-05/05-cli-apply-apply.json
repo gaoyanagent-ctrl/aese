@@ -1,0 +1,654 @@
+{
+  "mapping_warnings": [
+    {
+      "source_entity": "customer",
+      "natural_key": {
+        "customer_code": "CUST-SGNEV"
+      },
+      "dropped_fields": [
+        "default_ship_to",
+        "delivery_mode",
+        "payment_terms",
+        "priority",
+        "seed_version",
+        "status",
+        "tenant_id"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "material",
+      "natural_key": {
+        "material_code": "HCTM-BCP-A01"
+      },
+      "dropped_fields": [
+        "customer_material_no",
+        "default_plant_code",
+        "lot_control",
+        "material_type",
+        "safety_stock_qty",
+        "seed_version",
+        "serial_control",
+        "status",
+        "tenant_id",
+        "uom"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "material",
+      "natural_key": {
+        "material_code": "AL-PLATE-6061-T6"
+      },
+      "dropped_fields": [
+        "default_plant_code",
+        "lot_control",
+        "material_type",
+        "safety_stock_qty",
+        "seed_version",
+        "serial_control",
+        "status",
+        "tenant_id",
+        "uom"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "material",
+      "natural_key": {
+        "material_code": "SEAL-RING-A01"
+      },
+      "dropped_fields": [
+        "default_plant_code",
+        "lot_control",
+        "material_type",
+        "safety_stock_qty",
+        "seed_version",
+        "serial_control",
+        "status",
+        "tenant_id",
+        "uom"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "material",
+      "natural_key": {
+        "material_code": "FITTING-A01"
+      },
+      "dropped_fields": [
+        "default_plant_code",
+        "lot_control",
+        "material_type",
+        "safety_stock_qty",
+        "seed_version",
+        "serial_control",
+        "status",
+        "tenant_id",
+        "uom"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "material",
+      "natural_key": {
+        "material_code": "PKG-BOX-A01"
+      },
+      "dropped_fields": [
+        "default_plant_code",
+        "lot_control",
+        "material_type",
+        "safety_stock_qty",
+        "seed_version",
+        "serial_control",
+        "status",
+        "tenant_id",
+        "uom"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "material",
+      "natural_key": {
+        "material_code": "LBL-TRACE-A01"
+      },
+      "dropped_fields": [
+        "default_plant_code",
+        "lot_control",
+        "material_type",
+        "safety_stock_qty",
+        "seed_version",
+        "serial_control",
+        "status",
+        "tenant_id",
+        "uom"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "bom",
+      "natural_key": {
+        "bom_code": "BOM-HCTM-BCP-A01-V1",
+        "component_material_code": "AL-PLATE-6061-T6"
+      },
+      "dropped_fields": [
+        "bom_code",
+        "effective_from",
+        "scrap_rate",
+        "seed_version",
+        "status",
+        "tenant_id",
+        "uom"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "bom",
+      "natural_key": {
+        "bom_code": "BOM-HCTM-BCP-A01-V1",
+        "component_material_code": "SEAL-RING-A01"
+      },
+      "dropped_fields": [
+        "bom_code",
+        "effective_from",
+        "scrap_rate",
+        "seed_version",
+        "status",
+        "tenant_id",
+        "uom"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "bom",
+      "natural_key": {
+        "bom_code": "BOM-HCTM-BCP-A01-V1",
+        "component_material_code": "FITTING-A01"
+      },
+      "dropped_fields": [
+        "bom_code",
+        "effective_from",
+        "scrap_rate",
+        "seed_version",
+        "status",
+        "tenant_id",
+        "uom"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "bom",
+      "natural_key": {
+        "bom_code": "BOM-HCTM-BCP-A01-V1",
+        "component_material_code": "PKG-BOX-A01"
+      },
+      "dropped_fields": [
+        "bom_code",
+        "effective_from",
+        "scrap_rate",
+        "seed_version",
+        "status",
+        "tenant_id",
+        "uom"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "bom",
+      "natural_key": {
+        "bom_code": "BOM-HCTM-BCP-A01-V1",
+        "component_material_code": "LBL-TRACE-A01"
+      },
+      "dropped_fields": [
+        "bom_code",
+        "effective_from",
+        "scrap_rate",
+        "seed_version",
+        "status",
+        "tenant_id",
+        "uom"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "inventory_transaction",
+      "natural_key": {
+        "transaction_no": "INV-OPEN-0001"
+      },
+      "dropped_fields": [
+        "direction",
+        "location_code",
+        "plant_code",
+        "quantity",
+        "scenario",
+        "seed_version",
+        "source_object_no",
+        "source_object_type",
+        "status",
+        "tenant_id",
+        "transaction_no",
+        "transaction_type"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "inventory_transaction",
+      "natural_key": {
+        "transaction_no": "INV-OPEN-0002"
+      },
+      "dropped_fields": [
+        "direction",
+        "location_code",
+        "plant_code",
+        "quantity",
+        "scenario",
+        "seed_version",
+        "source_object_no",
+        "source_object_type",
+        "status",
+        "tenant_id",
+        "transaction_no",
+        "transaction_type"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "inventory_transaction",
+      "natural_key": {
+        "transaction_no": "INV-OPEN-0003"
+      },
+      "dropped_fields": [
+        "direction",
+        "location_code",
+        "plant_code",
+        "quantity",
+        "scenario",
+        "seed_version",
+        "source_object_no",
+        "source_object_type",
+        "status",
+        "tenant_id",
+        "transaction_no",
+        "transaction_type"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "inventory_transaction",
+      "natural_key": {
+        "transaction_no": "INV-OPEN-0004"
+      },
+      "dropped_fields": [
+        "direction",
+        "location_code",
+        "plant_code",
+        "quantity",
+        "scenario",
+        "seed_version",
+        "source_object_no",
+        "source_object_type",
+        "status",
+        "tenant_id",
+        "transaction_no",
+        "transaction_type"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "inventory_transaction",
+      "natural_key": {
+        "transaction_no": "INV-OPEN-0005"
+      },
+      "dropped_fields": [
+        "direction",
+        "location_code",
+        "plant_code",
+        "quantity",
+        "scenario",
+        "seed_version",
+        "source_object_no",
+        "source_object_type",
+        "status",
+        "tenant_id",
+        "transaction_no",
+        "transaction_type"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "purchase_order",
+      "natural_key": {
+        "po_no": "PO-202607-0001"
+      },
+      "dropped_fields": [
+        "legal_entity_code",
+        "plant_code",
+        "scenario",
+        "seed_version",
+        "tenant_id"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "purchase_order",
+      "natural_key": {
+        "po_no": "PO-202607-0002"
+      },
+      "dropped_fields": [
+        "legal_entity_code",
+        "plant_code",
+        "scenario",
+        "seed_version",
+        "tenant_id"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "inspection_order",
+      "natural_key": {
+        "inspection_no": "IQC-202607-0002"
+      },
+      "dropped_fields": [
+        "scenario",
+        "seed_version",
+        "tenant_id"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "sales_order",
+      "natural_key": {
+        "order_no": "SO-202607-0001"
+      },
+      "dropped_fields": [
+        "legal_entity_code",
+        "priority",
+        "scenario",
+        "seed_version",
+        "status",
+        "tenant_id"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    },
+    {
+      "source_entity": "sales_order",
+      "natural_key": {
+        "order_no": "SO-202607-0001-ADD1"
+      },
+      "dropped_fields": [
+        "legal_entity_code",
+        "original_order_no",
+        "priority",
+        "scenario",
+        "seed_version",
+        "status",
+        "tenant_id"
+      ],
+      "message": "fields are not represented by the IAOS scenario apply contract"
+    }
+  ],
+  "summary": {
+    "pack_key": "hctm",
+    "pack_version": "0.1.0",
+    "scenario_key": "order-expedite-01",
+    "run_id": "m7-acceptance-20260722-05-cli-apply",
+    "tenant_id": "tenant-hctm",
+    "dry_run": false,
+    "committed": true,
+    "input_hash": "63004cbe70bf728a38651efd8b8edc1c7804128c9a95479fa13661bd46730125",
+    "correlation_id": "corr-so-202607-0001",
+    "inserted": 9,
+    "updated": 0,
+    "no_op": 12,
+    "conflicts": 0,
+    "unsupported": 0,
+    "results": [
+      {
+        "index": 0,
+        "type": "customer",
+        "entity": "customer",
+        "code": "CUST-SGNEV",
+        "action": "no_op",
+        "object_id": "2783ca0f-e33b-4dd3-9026-533ede553c09",
+        "natural_key": {
+          "code": "CUST-SGNEV"
+        }
+      },
+      {
+        "index": 1,
+        "type": "material",
+        "entity": "product",
+        "code": "HCTM-BCP-A01",
+        "action": "no_op",
+        "object_id": "5810dd70-6c95-4dae-bb3f-82609e2e6d3b",
+        "natural_key": {
+          "code": "HCTM-BCP-A01"
+        }
+      },
+      {
+        "index": 2,
+        "type": "material",
+        "entity": "product",
+        "code": "AL-PLATE-6061-T6",
+        "action": "no_op",
+        "object_id": "8ab89bdd-fefd-4748-8f4e-21dbd6b33927",
+        "natural_key": {
+          "code": "AL-PLATE-6061-T6"
+        }
+      },
+      {
+        "index": 3,
+        "type": "material",
+        "entity": "product",
+        "code": "SEAL-RING-A01",
+        "action": "no_op",
+        "object_id": "3ecd2e2e-d80a-49b0-a9ca-394b454756f7",
+        "natural_key": {
+          "code": "SEAL-RING-A01"
+        }
+      },
+      {
+        "index": 4,
+        "type": "material",
+        "entity": "product",
+        "code": "FITTING-A01",
+        "action": "no_op",
+        "object_id": "3933791f-dd05-40a0-8321-bf62a96eb1a1",
+        "natural_key": {
+          "code": "FITTING-A01"
+        }
+      },
+      {
+        "index": 5,
+        "type": "material",
+        "entity": "product",
+        "code": "PKG-BOX-A01",
+        "action": "no_op",
+        "object_id": "5b0b56a0-7eb4-431d-9cfe-6bdb6e60e996",
+        "natural_key": {
+          "code": "PKG-BOX-A01"
+        }
+      },
+      {
+        "index": 6,
+        "type": "material",
+        "entity": "product",
+        "code": "LBL-TRACE-A01",
+        "action": "no_op",
+        "object_id": "dc0564ff-d439-484c-aeec-66c8ce4c0fb3",
+        "natural_key": {
+          "code": "LBL-TRACE-A01"
+        }
+      },
+      {
+        "index": 7,
+        "type": "bom",
+        "entity": "bom",
+        "code": "HCTM-BCP-A01-\u003eAL-PLATE-6061-T6",
+        "action": "no_op",
+        "object_id": "3183de5a-5fa8-4926-96a3-873b51cfa489",
+        "natural_key": {
+          "component_material_code": "AL-PLATE-6061-T6",
+          "parent_material_code": "HCTM-BCP-A01"
+        }
+      },
+      {
+        "index": 8,
+        "type": "bom",
+        "entity": "bom",
+        "code": "HCTM-BCP-A01-\u003eSEAL-RING-A01",
+        "action": "no_op",
+        "object_id": "dd8ab5be-01fc-44e4-be8b-86f9343c47b6",
+        "natural_key": {
+          "component_material_code": "SEAL-RING-A01",
+          "parent_material_code": "HCTM-BCP-A01"
+        }
+      },
+      {
+        "index": 9,
+        "type": "bom",
+        "entity": "bom",
+        "code": "HCTM-BCP-A01-\u003eFITTING-A01",
+        "action": "no_op",
+        "object_id": "237ff274-fd65-44f6-b836-22de3407779b",
+        "natural_key": {
+          "component_material_code": "FITTING-A01",
+          "parent_material_code": "HCTM-BCP-A01"
+        }
+      },
+      {
+        "index": 10,
+        "type": "bom",
+        "entity": "bom",
+        "code": "HCTM-BCP-A01-\u003ePKG-BOX-A01",
+        "action": "no_op",
+        "object_id": "fc488c5a-adc7-4df7-8915-f52c0ad70cd9",
+        "natural_key": {
+          "component_material_code": "PKG-BOX-A01",
+          "parent_material_code": "HCTM-BCP-A01"
+        }
+      },
+      {
+        "index": 11,
+        "type": "bom",
+        "entity": "bom",
+        "code": "HCTM-BCP-A01-\u003eLBL-TRACE-A01",
+        "action": "no_op",
+        "object_id": "b8cda1c4-8a48-449d-a0ae-1c61d4479aea",
+        "natural_key": {
+          "component_material_code": "LBL-TRACE-A01",
+          "parent_material_code": "HCTM-BCP-A01"
+        }
+      },
+      {
+        "index": 12,
+        "type": "inventory",
+        "entity": "inventory",
+        "code": "HCTM-BCP-A01@WH-SZ-FG#FG-OPEN-20260701",
+        "action": "insert",
+        "object_id": "f63cce86-e72c-45b9-bd10-b53c1f0a06e8",
+        "natural_key": {
+          "batch_no": "FG-OPEN-20260701",
+          "material_code": "HCTM-BCP-A01",
+          "warehouse_name": "WH-SZ-FG"
+        }
+      },
+      {
+        "index": 13,
+        "type": "inventory",
+        "entity": "inventory",
+        "code": "AL-PLATE-6061-T6@WH-SZ-RM#AL-OPEN-20260701",
+        "action": "insert",
+        "object_id": "70ffceb2-ac3d-4bf5-a824-5c446b32e705",
+        "natural_key": {
+          "batch_no": "AL-OPEN-20260701",
+          "material_code": "AL-PLATE-6061-T6",
+          "warehouse_name": "WH-SZ-RM"
+        }
+      },
+      {
+        "index": 14,
+        "type": "inventory",
+        "entity": "inventory",
+        "code": "SEAL-RING-A01@WH-SZ-RM#SEAL-OPEN-20260701",
+        "action": "insert",
+        "object_id": "a70045ef-2bfe-4bc7-9348-5c552a28cba6",
+        "natural_key": {
+          "batch_no": "SEAL-OPEN-20260701",
+          "material_code": "SEAL-RING-A01",
+          "warehouse_name": "WH-SZ-RM"
+        }
+      },
+      {
+        "index": 15,
+        "type": "inventory",
+        "entity": "inventory",
+        "code": "FITTING-A01@WH-SZ-RM#FIT-OPEN-20260701",
+        "action": "insert",
+        "object_id": "e0905a0b-9431-4ed9-aaea-a4ba40d82554",
+        "natural_key": {
+          "batch_no": "FIT-OPEN-20260701",
+          "material_code": "FITTING-A01",
+          "warehouse_name": "WH-SZ-RM"
+        }
+      },
+      {
+        "index": 16,
+        "type": "inventory",
+        "entity": "inventory",
+        "code": "PKG-BOX-A01@WH-SZ-RM#PKG-OPEN-20260701",
+        "action": "insert",
+        "object_id": "c0e4e040-32af-411c-aacc-9ac573233f35",
+        "natural_key": {
+          "batch_no": "PKG-OPEN-20260701",
+          "material_code": "PKG-BOX-A01",
+          "warehouse_name": "WH-SZ-RM"
+        }
+      },
+      {
+        "index": 17,
+        "type": "purchase_order",
+        "entity": "purchase_order",
+        "code": "PO-202607-0001",
+        "action": "insert",
+        "object_id": "2b4d5d6e-db08-4192-bc10-844a4798e35b",
+        "natural_key": {
+          "po_no": "PO-202607-0001"
+        }
+      },
+      {
+        "index": 18,
+        "type": "purchase_order",
+        "entity": "purchase_order",
+        "code": "PO-202607-0002",
+        "action": "insert",
+        "object_id": "f09b2059-2409-4a95-9fa9-fdf5da69e973",
+        "natural_key": {
+          "po_no": "PO-202607-0002"
+        }
+      },
+      {
+        "index": 19,
+        "type": "inspection_order",
+        "entity": "inspection_order",
+        "code": "IQC-202607-0002",
+        "action": "insert",
+        "object_id": "d3d74acc-a6fb-4a1f-afa1-396b262e8aac",
+        "natural_key": {
+          "inspection_no": "IQC-202607-0002"
+        }
+      },
+      {
+        "index": 20,
+        "type": "sales_order",
+        "entity": "sales_order",
+        "code": "SO-202607-0001",
+        "action": "insert",
+        "object_id": "3f604a58-612f-4c43-af48-ef41dd8a7fb6",
+        "natural_key": {
+          "order_no": "SO-202607-0001"
+        }
+      }
+    ]
+  }
+}

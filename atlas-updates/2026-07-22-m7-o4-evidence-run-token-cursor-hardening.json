@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m7-o4-evidence-run-token-cursor-hardening-v1",
+  "node_key": "aese.operations",
+  "update_type": "release",
+  "summary": "M7 O4：修正 runbook 对账链路中的 expected_cursor 与 token 会话约束",
+  "detail": "补齐 M7 runbook 与 evidence 收口：采集脚本发送 expected_cursor 为数值，避免与 runActionRequest 反序列化冲突；并明确同一 run 期间复用 IAOS token，不在每次动作重新请求 /dev/token，降低 token_mismatch 风险。",
+  "status_after": "blocked",
+  "progress_after": 93,
+  "current_state": "T35/T36/T39 仍需 IAOS DB/Outbox/Tool Call 与两仓部署健康闭环；本轮主要补齐 run 对账链路可复现性与证据模板稳定性。",
+  "evidence_ref": "docs/runbooks/hctm-m7-governed-scenario-operations-console.md",
+  "occurred_at": "2026-07-22T00:00:00Z"
+}

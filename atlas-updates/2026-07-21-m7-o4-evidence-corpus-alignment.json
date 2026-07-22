@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o4-evidence-corpus-alignment-v1",
+  "node_key": "aese.operations",
+  "update_type": "status",
+  "summary": "M7 O4：收口 T36 证据脚本与 runbook 产物口径",
+  "detail": "修复 scripts/m7-runbook-evidence-collect.sh 的 Idempotency-Key header 传参逻辑，补齐 run_action payload 中 expected_cursor/run_version 组装鲁棒性；同步 runbook/evidence 的 evidence 输出目录与文件名为实际脚本产物（00-plan/01-run-create/...）。当前仍阻塞于 IAOS/DB/两仓部署联调证据。",
+  "status_after": "blocked",
+  "progress_after": 94,
+  "current_state": "脚本已可执行且输出口径稳定；T35/T36/T39 结项仍等待 IAOS/DB/Outbox/Tool Call 与两仓健康与部署 commit 的外部核验数据。",
+  "evidence_ref": "docs/reports/hctm-m7-governed-scenario-operations-console-evidence.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o2-concurrency-v1",
+  "node_key": "aese.operations",
+  "update_type": "test",
+  "summary": "M7 O2：补充 thin orchestration 并发与过期游标回归用例",
+  "detail": "在 internal/httpapi 增加 T19/T20 前置测试：同租户同场景仍有可写 run 时返回 409，再加上已完成 run 可继续新建场景；新增 expected_cursor 过期时返回 cursor_mismatch，防止动作在客户端状态回退时误执行。并同步更新 roadmap 与进度记录。",
+  "status_after": "building",
+  "progress_after": 70,
+  "current_state": "O2 进入 In Progress，run 并发约束与 cursor 并发保护测试已补齐，T19 标记完成，T20 进入前置验证阶段。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

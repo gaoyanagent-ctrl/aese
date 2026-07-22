@@ -8,6 +8,7 @@ import { EnterpriseNav } from './components/EnterpriseNav';
 import { EntityDrawer } from './components/EntityDrawer';
 import { FactoryCanvas } from './components/FactoryCanvas';
 import { InfoPanel } from './components/InfoPanel';
+import type { OrchestrationRunContext } from './integration/iaosIntegration';
 
 type Connection = 'connecting' | 'connected' | 'reconnecting' | 'disconnected';
 type MobileView = 'enterprise' | 'canvas' | 'events';
@@ -68,7 +69,19 @@ function entityForNode(nodeId: string, entities: IaosScenarioEntity[]) {
   return entities.find(matchers[nodeId] ?? (() => false));
 }
 
-export function LiveSandbox({ layoutScenario, onModeChange, onOpenIntegration, onOpenAtlas }: { layoutScenario: SandboxScenario; onModeChange: (mode: 'preview' | 'live') => void; onOpenIntegration: () => void; onOpenAtlas: () => void }) {
+export function LiveSandbox({
+  layoutScenario,
+  runContext,
+  onModeChange,
+  onOpenIntegration,
+  onOpenAtlas,
+}: {
+  layoutScenario: SandboxScenario;
+  runContext?: OrchestrationRunContext | null;
+  onModeChange: (mode: 'preview' | 'live') => void;
+  onOpenIntegration: () => void;
+  onOpenAtlas: () => void;
+}) {
   const source = useMemo(() => liveDataSourceFromEnvironment(), []);
   const [snapshot, setSnapshot] = useState<IaosScenarioSnapshot | null>(null);
   const [connection, setConnection] = useState<Connection>('connecting');
@@ -146,12 +159,38 @@ export function LiveSandbox({ layoutScenario, onModeChange, onOpenIntegration, o
     ['订单需求', snapshot.kpis.order_demand], ['累计可供', snapshot.kpis.cumulative_available],
     ['累计实发', snapshot.kpis.cumulative_shipped], ['期末成品', snapshot.kpis.ending_finished_goods], ['交付缺口', snapshot.kpis.delivery_gap],
   ] as const;
+  const activeRunContext = runContext ? {
+    runId: runContext.runId.slice(0, 10),
+    status: runContext.status,
+    stage: runContext.totalActs ? `${runContext.currentAct}/${runContext.totalActs}` : '',
+    planHash: runContext.planHash.slice(0, 10),
+    version: runContext.runVersion.slice(0, 8),
+  } : null;
 
   return <div className="app-shell live-shell">
     <ControlBar scenarioName="华辰苏州基地 · 在线企业沙盘" currentTime={new Date(snapshot.observed_at).toLocaleString('zh-CN', { hour12: false })}
-      step={events.length} totalSteps={events.length} playing={false} speed={1} onTogglePlay={() => {}} onPrevious={() => {}} onNext={() => {}} onReset={() => {}} onSpeedChange={() => {}}
+      step={events.length}
+      totalSteps={events.length}
+      playing={false}
+      speed={1}
+      onTogglePlay={() => {}}
+      onPrevious={() => {}}
+      onNext={() => {}}
+      onReset={() => {}}
+      onSpeedChange={() => {}}
       mode="live" onModeChange={onModeChange} sourceStatus={statusLabel} onRefresh={() => { void refresh().catch(() => undefined); }} onReconnect={() => setGeneration((v) => v + 1)} onOpenIntegration={onOpenIntegration} onOpenAtlas={onOpenAtlas} />
-    <div className="live-integrity" role="status"><span>IAOS · tenant-hctm</span><span>游标 {snapshot.cursor}</span><span>最后更新 {new Date(snapshot.observed_at).toLocaleTimeString('zh-CN')}</span><span>完整度 {snapshot.completeness}</span>{snapshot.gaps.length > 0 && <strong>数据缺口：{snapshot.gaps.join('、')}</strong>}</div>
+    <div className="live-integrity" role="status">
+      <span>IAOS · tenant-hctm</span>
+      <span>游标 {snapshot.cursor}</span>
+      {activeRunContext && <span>运行 {activeRunContext.runId}…</span>}
+      {activeRunContext && <span>状态 {activeRunContext.status}</span>}
+      {activeRunContext && <span>阶段 {activeRunContext.stage}</span>}
+      {activeRunContext && <span>版本 {activeRunContext.version}</span>}
+      <span>plan {activeRunContext ? activeRunContext.planHash : '...'}…</span>
+      <span>最后更新 {new Date(snapshot.observed_at).toLocaleTimeString('zh-CN')}</span>
+      <span>完整度 {snapshot.completeness}</span>
+      {snapshot.gaps.length > 0 && <strong>数据缺口：{snapshot.gaps.join('、')}</strong>}
+    </div>
     <div className="mobile-tabs" role="tablist">{([['enterprise', '企业'], ['canvas', 'A 线画布'], ['events', '事件 / Agent']] as const).map(([value, label]) => <button key={value} role="tab" aria-selected={mobileView === value} className={mobileView === value ? 'active' : ''} onClick={() => setMobileView(value)}>{label}</button>)}</div>
     <main className="workspace">
       <div className={mobileView === 'enterprise' ? 'mobile-view-active enterprise-nav-wrapper' : 'enterprise-nav-wrapper'}><EnterpriseNav selectedId={selectedNodeId} onSelect={(id) => setSelectedNodeId(nodes.find((node) => node.businessCode === id)?.id ?? null)} /></div>

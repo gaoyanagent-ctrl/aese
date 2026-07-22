@@ -55,9 +55,9 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M3V 快速 2D 企业沙盘：完成；七幕/22 事件、A 线画布、KPI、对象详情和三类 Agent 建议已通过桌面与移动端验收。
 - M5 Agent MVP：完成；默认 dry-run 的 `agent-setup` / `agent-run`、9 个低风险只读 AI Tool bundle 和三 Agent 确定性 tracer 已通过 live、重复调用、零业务写入与跨租户验收。
 - M6 在线 2D 企业沙盘：完成；受治理完工/入库/发运、snapshot/cursor/SSE、在线 Agent 建议和 Preview/Live 双模式已通过验收。
-- M7 受治理场景运行控制台：当前 active；目标是让业务用户从页面完成预检、初始化、逐幕运行、Agent 分析、验证和安全复位。
+- M7 受治理场景运行控制台：完成；业务用户可从页面完成预检、初始化、逐幕运行、Agent 分析、验证和安全复位，CLI/UI 与 IAOS 审计副作用已完成对账。
 
-当前同一页面可运行 Preview 或 IAOS Live 沙盘。M7 将在现有联动中心加入场景运行控制，通过无业务数据库的 AESE 薄编排 API 调用 IAOS 受治理接口，避免继续依赖 CLI 或把写入逻辑复制到浏览器。
+当前同一页面可运行 Preview 或 IAOS Live 沙盘，并可在联动中心通过无业务数据库的 AESE 薄编排 API 受治理运行和复位场景；浏览器不直接调用 IAOS 写接口。
 
 ## M5 Agent tracer
 

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o4-runbook-e2e-v1",
+  "node_key": "aese.operations",
+  "update_type": "test",
+  "summary": "M7 O4：补齐 Playwright/UI 验收与恢复闭环",
+  "detail": "新增 AESE 端到端 Playwright 覆盖：联动场景 run 全链路（preflight→initialize→run-to-end→analyze→verify→reset）与刷新恢复路径，补充并发点击防护与权限错误可见化场景。同时补充 run context 持久化与 orchestration 请求负载的前端单测，更新 runbook/evidence 与实施计划条目。",
+  "status_after": "validating",
+  "progress_after": 86,
+  "current_state": "T31、T32、T33 完成；T34 权限/租户细化、T35/T36 副作用对账与 T37/T39 部署收尾仍在外部依赖回填。",
+  "evidence_ref": "docs/plans/2026-07-20-m7-governed-scenario-operations-console.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

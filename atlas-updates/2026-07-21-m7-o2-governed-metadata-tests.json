@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o2-governed-metadata-tests-v1",
+  "node_key": "aese.operations",
+  "update_type": "test",
+  "summary": "M7 O2：补齐治理恢复元信息回归测试",
+  "detail": "新增两类闭环测试：1) httpapi advance 并发幂等断言清理；2) replay 治理路径回归，验证 apply 时每个受治理 impact 具备 cursor、operation_ref、correlation_id、committed 与 no_op 字段，覆盖 duplicate/no-op 与 committed 场景。同步更新 M7 计划标记 T16/T18 完成。",
+  "status_after": "building",
+  "progress_after": 92,
+  "current_state": "M7 O2 T16/T18 的恢复语义回归测试已补齐，run 恢复与治理动作可追踪元信息测试通过预期；O2 其余任务持续推进。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

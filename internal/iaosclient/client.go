@@ -69,6 +69,15 @@ type Field struct {
 	Required bool   `json:"required"`
 }
 
+type ProfileResponse struct {
+	Username    string    `json:"username"`
+	DisplayName string    `json:"display_name"`
+	AvatarURL   string    `json:"avatar_url"`
+	TenantID    string    `json:"tenant_id"`
+	TenantName  string    `json:"tenant_name"`
+	CreatedAt   time.Time `json:"created_at"`
+}
+
 type Schema struct {
 	Entity          string  `json:"entity"`
 	Version         string  `json:"version"`
@@ -88,6 +97,13 @@ func (c *Client) Schema(ctx context.Context, entity string) (Schema, error) {
 		return out, err
 	}
 	err := c.request(ctx, http.MethodGet, "api/v1/metadata/schema/"+url.PathEscape(entity), nil, &out)
+	return out, err
+}
+
+// Profile returns caller identity and tenant context without exposing any raw tenant IDs.
+func (c *Client) Profile(ctx context.Context) (ProfileResponse, error) {
+	var out ProfileResponse
+	err := c.request(ctx, http.MethodGet, "api/v1/profile", nil, &out)
 	return out, err
 }
 
@@ -196,6 +212,9 @@ type DecomposeResult struct {
 	Decomposing  bool   `json:"decomposing"`
 	SalesOrderID string `json:"sales_order_id"`
 	OrderNo      string `json:"order_no"`
+	Cursor       int64  `json:"cursor"`
+	OperationRef string `json:"operation_ref"`
+	Committed    bool   `json:"committed"`
 }
 
 type SimulationBusinessObject struct {
@@ -217,8 +236,10 @@ type SimulationEventRequest struct {
 type SimulationEventResult struct {
 	EventID        string `json:"event_id"`
 	Subject        string `json:"subject"`
+	OperationRef   string `json:"operation_ref"`
 	CorrelationID  string `json:"correlation_id"`
 	Duplicate      bool   `json:"duplicate"`
+	Cursor         int64  `json:"cursor"`
 	Committed      bool   `json:"committed"`
 	BusinessObject struct {
 		Type string `json:"type"`
@@ -256,6 +277,7 @@ type ScenarioBusinessEventResult struct {
 	CorrelationID  string `json:"correlation_id"`
 	Duplicate      bool   `json:"duplicate"`
 	Committed      bool   `json:"committed"`
+	OperationRef   string `json:"operation_ref"`
 	BusinessObject struct {
 		Type string `json:"type"`
 		Code string `json:"code"`
@@ -460,6 +482,24 @@ type ScenarioLiveKPIs struct {
 	DeliveryGap         ScenarioLiveMetric `json:"delivery_gap"`
 }
 
+type ScenarioObservedEvent struct {
+	Cursor        int64           `json:"cursor"`
+	EventID       string          `json:"event_id"`
+	EventType     string          `json:"event_type"`
+	OccurredAt    time.Time       `json:"occurred_at"`
+	CorrelationID string          `json:"correlation_id"`
+	CausationID   string          `json:"causation_id,omitempty"`
+	BusinessType  string          `json:"business_object_type"`
+	BusinessCode  string          `json:"business_object_code"`
+	Payload       json.RawMessage `json:"payload"`
+}
+
+type ScenarioEventsResponse struct {
+	Items      []ScenarioObservedEvent `json:"items"`
+	NextCursor int64                  `json:"next_cursor"`
+	HasMore    bool                   `json:"has_more"`
+}
+
 type ScenarioSnapshot struct {
 	SnapshotVersion string            `json:"snapshot_version"`
 	PackKey         string            `json:"pack_key"`
@@ -481,6 +521,43 @@ func (c *Client) ScenarioSnapshot(ctx context.Context, packKey, storyKey string)
 		return out, fmt.Errorf("scenario pack and story are required")
 	}
 	path := "api/v1/scenarios/" + url.PathEscape(packKey) + "/" + url.PathEscape(storyKey) + "/snapshot"
+	err := c.request(ctx, http.MethodGet, path, nil, &out)
+	return out, err
+}
+
+func (c *Client) ScenarioEvents(ctx context.Context, packKey, storyKey string, after int64, limit int, correlationID string) (ScenarioEventsResponse, error) {
+	var out ScenarioEventsResponse
+	if strings.TrimSpace(packKey) == "" || strings.TrimSpace(storyKey) == "" {
+		return out, fmt.Errorf("scenario pack and story are required")
+	}
+	query := url.Values{}
+	if after > 0 {
+		query.Set("after", strconv.FormatInt(after, 10))
+	}
+	if limit > 0 {
+		query.Set("limit", strconv.Itoa(limit))
+	}
+	if strings.TrimSpace(correlationID) != "" {
+		query.Set("correlation_id", correlationID)
+	}
+	path := "api/v1/scenarios/" + url.PathEscape(packKey) + "/" + url.PathEscape(storyKey) + "/events"
+	if len(query) > 0 {
+		path += "?" + query.Encode()
+	}
+	err := c.request(ctx, http.MethodGet, path, nil, &out)
+	return out, err
+}
+
+type ScenarioRecommendationsResponse struct {
+	Items []json.RawMessage `json:"items"`
+}
+
+func (c *Client) ScenarioRecommendations(ctx context.Context, packKey, storyKey string) (ScenarioRecommendationsResponse, error) {
+	var out ScenarioRecommendationsResponse
+	if strings.TrimSpace(packKey) == "" || strings.TrimSpace(storyKey) == "" {
+		return out, fmt.Errorf("scenario pack and story are required")
+	}
+	path := "api/v1/scenarios/" + url.PathEscape(packKey) + "/" + url.PathEscape(storyKey) + "/recommendations"
 	err := c.request(ctx, http.MethodGet, path, nil, &out)
 	return out, err
 }
@@ -542,6 +619,11 @@ type APIError struct {
 	Path       string
 	StatusCode int
 	Message    string
+	ErrorCode  string
+	// RequiredPermission mirrors common IAOS permission error payloads, when
+	// present, so orchestration handlers can return precise read/execute/reset
+	// remediation hints instead of only a generic forbidden code.
+	RequiredPermission string
 }
 
 func (e *APIError) Error() string {
@@ -598,12 +680,31 @@ func (c *Client) requestHeaders(ctx context.Context, method, path string, body a
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		message := strings.TrimSpace(string(data))
 		var envelope struct {
-			Error string `json:"error"`
+			Error             string `json:"error"`
+			Message           string `json:"message"`
+			ErrorCode         string `json:"error_code"`
+			Code              string `json:"code"`
+			RequiredPermission string `json:"required_permission"`
+			Permission        string `json:"permission"`
+			PermissionResource string `json:"permission_resource"`
 		}
 		if json.Unmarshal(data, &envelope) == nil && envelope.Error != "" {
-			message = envelope.Error
+			if envelope.Message != "" {
+				message = envelope.Message
+			} else {
+				message = envelope.Error
+			}
 		}
-		return &APIError{Method: method, Path: endpoint.EscapedPath(), StatusCode: resp.StatusCode, Message: message}
+		requiredPermission := firstNonEmpty(envelope.RequiredPermission, envelope.Permission, envelope.PermissionResource)
+		errorCode := firstNonEmpty(envelope.ErrorCode, envelope.Code)
+		return &APIError{
+			Method:             method,
+			Path:               endpoint.EscapedPath(),
+			StatusCode:         resp.StatusCode,
+			Message:            message,
+			ErrorCode:          errorCode,
+			RequiredPermission:  requiredPermission,
+		}
 	}
 	if out == nil || len(bytes.TrimSpace(data)) == 0 {
 		return nil
@@ -656,6 +757,15 @@ func recordMatches(record, match map[string]any) bool {
 		}
 	}
 	return true
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if strings.TrimSpace(value) != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 func equivalentJSON(a, b any) bool {

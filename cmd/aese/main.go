@@ -7,13 +7,8 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"strings"
-	"time"
 
-	"github.com/industrial-ai/iaos-aese/internal/agenttrace"
-	"github.com/industrial-ai/iaos-aese/internal/iaosclient"
-	"github.com/industrial-ai/iaos-aese/internal/legacyprojection"
-	"github.com/industrial-ai/iaos-aese/internal/replay"
+	"github.com/industrial-ai/iaos-aese/internal/application"
 	"github.com/industrial-ai/iaos-aese/internal/scenariopack"
 	"github.com/industrial-ai/iaos-aese/internal/validate"
 )
@@ -208,18 +203,6 @@ func parseOnline(name string, args []string, stderr io.Writer, withStory, withAp
 	return pack, values, 0
 }
 
-func runnerFor(values onlineFlags) (*replay.Runner, error) {
-	client, err := iaosclient.New(iaosclient.Config{BaseURL: values.target, Token: values.token, TenantID: values.tenant})
-	if err != nil {
-		return nil, err
-	}
-	return replay.New(client)
-}
-
-func options(values onlineFlags) replay.Options {
-	return replay.Options{Apply: values.apply, Target: values.target, Tenant: values.tenant, Actor: values.actor, OrderID: values.orderID, Entities: entityAllowlist(values.entities)}
-}
-
 func applyCommand(args []string, stdout, stderr io.Writer) int {
 	pack, values, code := parseOnline("apply", args, stderr, true, true)
 	if code != 0 {
@@ -229,19 +212,20 @@ func applyCommand(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, "--story is required")
 		return 2
 	}
-	projection, err := legacyprojection.Project(pack, legacyprojection.Options{StoryKey: values.story, RunID: effectiveRunID(values.runID, "apply"), DryRun: !values.apply})
-	if err != nil {
-		fmt.Fprintln(stderr, err)
-		return 1
-	}
-	client, err := clientFor(values)
+	client, err := application.NewIAOSClient(application.ClientConfig{BaseURL: values.target, Token: values.token, TenantID: values.tenant})
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 2
 	}
-	story, _ := findStory(pack, values.story)
-	summary, runErr := client.ApplyScenario(context.Background(), projection.Request, story.Events.CorrelationID)
-	_ = writeJSON(stdout, map[string]any{"summary": summary, "mapping_warnings": projection.Warnings})
+	summary, warnings, runErr := application.ApplyScenario(
+		context.Background(),
+		client,
+		pack,
+		values.story,
+		application.EffectiveRunID(values.runID, "apply"),
+		values.apply,
+	)
+	_ = writeJSON(stdout, map[string]any{"summary": summary, "mapping_warnings": warnings})
 	if runErr != nil {
 		fmt.Fprintln(stderr, runErr)
 		return 1
@@ -254,19 +238,26 @@ func replayCommand(args []string, stdout, stderr io.Writer) int {
 	if code != 0 {
 		return code
 	}
-	story, err := findStory(pack, values.story)
+	client, err := application.NewIAOSClient(application.ClientConfig{BaseURL: values.target, Token: values.token, TenantID: values.tenant})
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 2
 	}
-	runner, err := runnerFor(values)
-	if err != nil {
-		fmt.Fprintln(stderr, err)
-		return 2
-	}
-	replayOptions := options(values)
-	replayOptions.PackKey = pack.Manifest.PackKey
-	summary, runErr := runner.Replay(context.Background(), story, replayOptions)
+	summary, runErr := application.ReplayScenario(
+		context.Background(),
+		client,
+		pack,
+		values.story,
+		application.ReplayOptions{
+			Apply:    values.apply,
+			Target:   values.target,
+			Tenant:   values.tenant,
+			Actor:    values.actor,
+			PackKey:  pack.Manifest.PackKey,
+			OrderID:  values.orderID,
+			Entities: application.ParseEntityAllowlist(values.entities),
+		},
+	)
 	_ = writeJSON(stdout, summary)
 	if runErr != nil {
 		fmt.Fprintln(stderr, runErr)
@@ -280,7 +271,7 @@ func verifyCommand(args []string, stdout, stderr io.Writer) int {
 	if code != 0 {
 		return code
 	}
-	story, err := findStory(pack, values.story)
+	story, err := application.FindStory(pack, values.story)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 2
@@ -289,20 +280,22 @@ func verifyCommand(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintln(stderr, "story has no iaos_assertions for online verification")
 		return 1
 	}
-	assertions := make([]replay.Assertion, 0, len(story.Expected.IAOSAssertions))
-	for _, a := range story.Expected.IAOSAssertions {
-		op := a.Operator
-		if op == "" {
-			op = a.Type
-		}
-		assertions = append(assertions, replay.Assertion{Key: a.Key, Entity: a.Entity, Match: a.Match, Field: a.Field, Operator: op, Expected: a.Expected})
-	}
-	runner, err := runnerFor(values)
+	client, err := application.NewIAOSClient(application.ClientConfig{BaseURL: values.target, Token: values.token, TenantID: values.tenant})
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 2
 	}
-	summary, runErr := runner.Verify(context.Background(), assertions, options(values))
+	summary, runErr := application.VerifyScenario(
+		context.Background(),
+		client,
+		pack,
+		values.story,
+		application.VerifyOptions{
+			Target: values.target,
+			Tenant: values.tenant,
+			Actor:  values.actor,
+		},
+	)
 	_ = writeJSON(stdout, summary)
 	if runErr != nil {
 		fmt.Fprintln(stderr, runErr)
@@ -316,18 +309,19 @@ func resetCommand(args []string, stdout, stderr io.Writer) int {
 	if code != 0 {
 		return code
 	}
-	story, err := findStory(pack, values.story)
+	client, err := application.NewIAOSClient(application.ClientConfig{BaseURL: values.target, Token: values.token, TenantID: values.tenant})
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 2
 	}
-	client, err := clientFor(values)
-	if err != nil {
-		fmt.Fprintln(stderr, err)
-		return 2
-	}
-	req := iaosclient.ScenarioResetRequest{PackKey: pack.Manifest.PackKey, PackVersion: pack.Manifest.PackVersion, ScenarioKey: values.story, RunID: effectiveRunID(values.runID, "reset"), DryRun: !values.apply}
-	summary, runErr := client.ResetScenario(context.Background(), req, story.Events.CorrelationID)
+	summary, runErr := application.ResetScenario(
+		context.Background(),
+		client,
+		pack,
+		values.story,
+		application.EffectiveRunID(values.runID, "reset"),
+		values.apply,
+	)
 	_ = writeJSON(stdout, summary)
 	if runErr != nil {
 		fmt.Fprintln(stderr, runErr)
@@ -341,21 +335,12 @@ func agentSetupCommand(args []string, stdout, stderr io.Writer) int {
 	if code != 0 {
 		return code
 	}
-	bundle, err := agenttrace.LoadBundle(pack.Root)
-	if err != nil {
-		fmt.Fprintln(stderr, err)
-		return 1
-	}
-	if err := bundle.ValidatePack(pack.Manifest.PackKey); err != nil {
-		fmt.Fprintln(stderr, err)
-		return 1
-	}
-	client, err := clientFor(values)
+	client, err := application.NewIAOSClient(application.ClientConfig{BaseURL: values.target, Token: values.token, TenantID: values.tenant})
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 2
 	}
-	summary, err := agenttrace.Setup(context.Background(), client, bundle, values.apply)
+	summary, err := application.SetupAgents(context.Background(), client, pack, values.apply)
 	_ = writeJSON(stdout, summary)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
@@ -369,66 +354,16 @@ func agentRunCommand(args []string, stdout, stderr io.Writer) int {
 	if code != 0 {
 		return code
 	}
-	bundle, err := agenttrace.LoadBundle(pack.Root)
-	if err != nil {
-		fmt.Fprintln(stderr, err)
-		return 1
-	}
-	if err := bundle.ValidatePack(pack.Manifest.PackKey); err != nil {
-		fmt.Fprintln(stderr, err)
-		return 1
-	}
-	story, err := findStory(pack, values.story)
+	client, err := application.NewIAOSClient(application.ClientConfig{BaseURL: values.target, Token: values.token, TenantID: values.tenant})
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 2
 	}
-	runID := effectiveRunID(values.runID, "agent")
-	client, err := clientFor(values)
-	if err != nil {
-		fmt.Fprintln(stderr, err)
-		return 2
-	}
-	summary, err := agenttrace.Run(context.Background(), client, pack.Manifest.PackKey, values.story, story.Events.CorrelationID, runID, values.apply)
+	summary, err := application.RunAgents(context.Background(), client, pack, values.story, application.EffectiveRunID(values.runID, "agent"), values.apply)
 	_ = writeJSON(stdout, summary)
 	if err != nil {
 		fmt.Fprintln(stderr, err)
 		return 1
 	}
 	return 0
-}
-
-func clientFor(values onlineFlags) (*iaosclient.Client, error) {
-	return iaosclient.New(iaosclient.Config{BaseURL: values.target, Token: values.token, TenantID: values.tenant})
-}
-
-func effectiveRunID(value, prefix string) string {
-	if strings.TrimSpace(value) != "" {
-		return value
-	}
-	return fmt.Sprintf("hctm-%s-%d", prefix, time.Now().UTC().UnixNano())
-}
-
-func findStory(pack *scenariopack.Pack, key string) (scenariopack.Story, error) {
-	if key == "" {
-		return scenariopack.Story{}, fmt.Errorf("--story is required")
-	}
-	for _, story := range pack.Stories {
-		if story.Ref.Key == key || story.Initial.StoryKey == key {
-			return story, nil
-		}
-	}
-	return scenariopack.Story{}, fmt.Errorf("story %q not found", key)
-}
-func entityAllowlist(raw string) map[string]bool {
-	if strings.TrimSpace(raw) == "" {
-		return nil
-	}
-	out := map[string]bool{}
-	for _, part := range strings.Split(raw, ",") {
-		if value := strings.TrimSpace(part); value != "" {
-			out[value] = true
-		}
-	}
-	return out
 }

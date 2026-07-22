@@ -13,7 +13,7 @@
 | 修改 M4 异常入口 | M4 completed plan、M4 evidence、`internal/iaosclient/`、`internal/replay/` |
 | 修改 M5 Agent tracer | DES-003、M5 completed plan、`internal/agenttrace/`、`scenario-packs/hctm/agent-tools.json` |
 | 维护 M6 在线沙盘 | DES-004、M6 completed plan、`frontend/src/scenario/`、IAOS scenario API |
-| 开始 M7 场景运行控制台 | ADR-003、DES-005、M7 active plan、现有 CLI application service |
+| 维护 M7 场景运行控制台 | ADR-003、DES-005、M7 completed plan、现有 CLI application service |
 | 查看或维护双系统全景 | DES-006、`frontend/src/components/SystemAtlas.tsx`、IAOS System Atlas API |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
@@ -34,12 +34,15 @@
 | 路线图 | `docs/roadmap.md` | M0-M6 当前状态 |
 | 代码导航 | `docs/code-map.md` | 本文件 |
 | 历史记录 | `docs/progress-log.md` | 只追加进展日志 |
+| 薄编排服务入口 | `cmd/aese-server/main.go` | M7 run orchestration HTTP 服务启动入口 |
+| M7 API 实现 | `internal/httpapi/server.go` | 场景运行编排 API 路由与处理器 |
 | MVP 范围 | `docs/AESE_MVP_Blueprint.md` | 产品和业务边界 |
 | 华辰蓝图 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` | 集团、工厂、产线、产品 |
 | 主数据合同 | `docs/HCTM_Master_Data_Model.md` | 28 个对象 |
 | 事件合同 | `docs/HCTM_Event_Model.md` | 18 类事件 |
 | Seed 规格 | `docs/HCTM_Seed_Data_Plan.md` | 数据清单和 22 步时间线 |
 | 演示验收 | `docs/HCTM_Demo_Story_01_Order_Expedite.md` | 七幕演示 runbook |
+| M7 运行控制台 runbook | `docs/runbooks/hctm-m7-governed-scenario-operations-console.md` | 已完成的受治理场景控制台验收与对账入口 |
 
 ## 3. M3 实现路径
 
@@ -153,13 +156,15 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | 能力 | 计划路径 |
 | --- | --- |
 | 无状态编排 API 决策 | `docs/decisions/ADR-003-thin-scenario-orchestration-api.md` |
-| M7 设计与 active plan | `docs/designs/DES-005-governed-scenario-operations-console.md`、`docs/plans/2026-07-20-m7-governed-scenario-operations-console.md` |
-| CLI/application service 拆分 | `cmd/aese/`、计划新增 `internal/application/` |
-| HTTP server 与 handlers | 计划新增 `cmd/aese-server/`、`internal/httpapi/` |
-| 前端场景运行状态 | 计划新增 `frontend/src/operations/` |
+| M7 设计与 completed plan | `docs/designs/DES-005-governed-scenario-operations-console.md`、`docs/plans/2026-07-20-m7-governed-scenario-operations-console.md` |
+| CLI/application service 拆分 | `cmd/aese/`、`internal/application/` |
+| HTTP server 与 handlers | `cmd/aese-server/main.go`、`internal/httpapi/server.go` |
+| 前端场景运行状态 | `frontend/src/integration/iaosIntegration.ts`、`frontend/src/components/IntegrationConsole.tsx` |
 | 联动中心运行视图 | `frontend/src/components/IntegrationConsole.tsx` |
+| M7 运行控制台 runbook | `docs/runbooks/hctm-m7-governed-scenario-operations-console.md` |
 | IAOS scenario run/permission | `/iaos/iaos-go/platform/internal/api/scenario*.go` |
 | M7 browser E2E | `frontend/e2e/` |
+| M7 O4 证据采集 | `scripts/m7-runbook-evidence-collect.sh`、`artifacts/m7-acceptance/` |
 
 ## 10. System Atlas 视图
 

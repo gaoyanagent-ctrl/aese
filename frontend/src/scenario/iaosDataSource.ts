@@ -18,6 +18,9 @@ export class IaosScenarioDataSource {
     this.baseUrl = options.baseUrl.replace(/\/$/, '');
     this.fetcher = options.fetch ?? globalThis.fetch.bind(globalThis);
   }
+  private static sanitizeErrorMessage(value: string): string {
+    return value.replace(/\b(?:Bearer|BEARER|bearer)\s+[A-Za-z0-9._~+/=:-]+/g, '[REDACTED]');
+  }
   private headers(accept = 'application/json'): HeadersInit {
     return { Accept: accept, Authorization: `Bearer ${this.options.token}`, 'X-Tenant-ID': this.options.tenantId };
   }
@@ -61,7 +64,7 @@ export class IaosScenarioDataSource {
       const body = await response.json() as { error?: string; message?: string };
       message = body.message ?? body.error ?? message;
     } catch { /* non-JSON response */ }
-    return new IaosScenarioError(message, response.status);
+    return new IaosScenarioError(IaosScenarioDataSource.sanitizeErrorMessage(message), response.status);
   }
 }
 

@@ -1,0 +1,22 @@
+{
+  "run_id": "run-2329a1471787787d",
+  "target": "http://127.0.0.1:8082",
+  "tenant": "tenant-hctm",
+  "started_at": "2026-07-22T02:09:45.620053015Z",
+  "finished_at": "2026-07-22T02:09:45.623001587Z",
+  "passed": 0,
+  "failed": 2,
+  "assertions": [
+    {
+      "key": "o2d_work_order_exists",
+      "passed": false,
+      "actual": false
+    },
+    {
+      "key": "o2d_work_order_count",
+      "passed": false,
+      "actual": 0,
+      "expected": 3
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o4-t34-t37-test-v1",
+  "node_key": "aese.operations",
+  "update_type": "test",
+  "summary": "M7 O4：补齐 T34 与 T37 回归闭环",
+  "detail": "新增重置 token 过期场景回归测试（reset_confirmation_invalid），并补充受控控制台三视口布局/截图回归路径，覆盖 1440x900、1280x720、390x844 的前端验收覆盖与界面溢出检查。",
+  "status_after": "validating",
+  "progress_after": 90,
+  "current_state": "T31/T32/T33 与计划内前端/文档闭环已稳定；T34（权限/租户/过期 token）与 T37（三视口截图）已补齐，T35/T36/T39 持续等待 IAOS 联调与部署补齐。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

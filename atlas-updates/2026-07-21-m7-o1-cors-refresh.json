@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o1-cors-refresh-v1",
+  "node_key": "aese.operations",
+  "update_type": "implementation",
+  "summary": "M7 O1：补齐 thin orchestration 的跨域与恢复过滤边界",
+  "detail": "在 httpapi ServeHTTP 增加 OPTIONS 与 Access-Control 头（预检支持）；run 恢复过滤只接收当前 plan correlation 的事件，避免历史事件污染 currentAct/status 推断。",
+  "status_after": "building",
+  "progress_after": 64,
+  "current_state": "T15 进入部分完成阶段（CORS 已就绪）；继续补齐同源代理与敏感字段脱敏以关闭 T15。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

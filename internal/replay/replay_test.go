@@ -90,6 +90,32 @@ func (f *fakeIAOS) IngestSimulationEvent(_ context.Context, request iaosclient.S
 	return result, nil
 }
 
+type stagedFakeIAOS struct {
+	*fakeIAOS
+	scenarioBusinessResults []iaosclient.ScenarioBusinessEventResult
+	simulationResults       []iaosclient.SimulationEventResult
+	scenarioBusinessIndex   int
+	simulationIndex         int
+}
+
+func (f *stagedFakeIAOS) IngestScenarioBusinessEvent(_ context.Context, pack, story string, request iaosclient.ScenarioBusinessEventRequest) (iaosclient.ScenarioBusinessEventResult, error) {
+	if f.scenarioBusinessIndex < len(f.scenarioBusinessResults) {
+		result := f.scenarioBusinessResults[f.scenarioBusinessIndex]
+		f.scenarioBusinessIndex++
+		return result, nil
+	}
+	return f.fakeIAOS.IngestScenarioBusinessEvent(context.Background(), pack, story, request)
+}
+
+func (f *stagedFakeIAOS) IngestSimulationEvent(_ context.Context, request iaosclient.SimulationEventRequest) (iaosclient.SimulationEventResult, error) {
+	if f.simulationIndex < len(f.simulationResults) {
+		result := f.simulationResults[f.simulationIndex]
+		f.simulationIndex++
+		return result, nil
+	}
+	return f.fakeIAOS.IngestSimulationEvent(context.Background(), request)
+}
+
 func TestApplyRecordSetsDryRunNeverWrites(t *testing.T) {
 	fake := &fakeIAOS{plans: map[string]iaosclient.UpsertPlan{"CUST-1": {Action: iaosclient.ActionCreate, NaturalKey: map[string]any{"customer_code": "CUST-1"}}}}
 	runner, _ := New(fake)
@@ -207,6 +233,94 @@ func TestReplaySimulationDryRunPlansAllGovernedEventsWithoutWrites(t *testing.T)
 		if impact.Action != "simulation_ingress" {
 			t.Fatalf("impact=%#v", impact)
 		}
+	}
+}
+
+func TestReplayImpactIncludesRecoveryMetadataForGovernedActions(t *testing.T) {
+	businessObject := func(objectType, code, id string) struct {
+		Type string `json:"type"`
+		Code string `json:"code"`
+		ID   string `json:"id"`
+	} {
+		return struct {
+			Type string `json:"type"`
+			Code string `json:"code"`
+			ID   string `json:"id"`
+		}{Type: objectType, Code: code, ID: id}
+	}
+	fake := &stagedFakeIAOS{
+		fakeIAOS: &fakeIAOS{},
+		scenarioBusinessResults: []iaosclient.ScenarioBusinessEventResult{
+			{
+				EventID:       "evt-wo",
+				EventType:     "proc.production_order.released",
+				Subject:       "iaos.tenant-hctm.proc.production_order.released",
+				CorrelationID: "corr-m7-o2",
+				BusinessObject: businessObject("production_order", "PO-202607-0001", "po-uuid"),
+				Cursor:       401,
+				OperationRef: "op-release-202607-0001",
+				Committed:    true,
+			},
+		},
+		simulationResults: []iaosclient.SimulationEventResult{
+			{
+				EventID:        "evt-delay",
+				Subject:        "iaos.tenant-hctm.o2d.supplier_delivery.delayed",
+				CorrelationID:  "corr-m7-o2",
+				Duplicate:      true,
+				Cursor:         402,
+				OperationRef:   "op-delay-dup",
+				Committed:      false,
+				BusinessObject: businessObject("purchase_order", "PO-202607-0001", "po-uuid"),
+			},
+			{
+				EventID:        "evt-down",
+				Subject:        "iaos.tenant-hctm.eam.machine.down",
+				CorrelationID:  "corr-m7-o2",
+				Cursor:         403,
+				OperationRef:   "op-down-202607-0001",
+				Committed:      true,
+				BusinessObject: businessObject("equipment", "LAS-WLD-02", "eq-uuid"),
+			},
+		},
+	}
+	runner, _ := New(fake)
+	story := scenariopack.Story{Ref: scenariopack.StoryRef{Key: "order-expedite-01"}, Events: scenariopack.EventSequence{Events: []scenariopack.Event{
+		{EventID: "evt-wo", EventType: "proc.production_order.released", Metadata: map[string]any{"business_object_type": "production_order", "business_object_id": "PO-202607-0001", "idempotency_key": "release-1", "correlation_id": "corr-m7-o2"}},
+		{EventID: "evt-delay", EventType: "o2d.supplier_delivery.delayed", Metadata: map[string]any{"business_object_type": "purchase_order", "business_object_id": "PO-202607-0001", "idempotency_key": "delay-1", "correlation_id": "corr-m7-o2"}},
+		{EventID: "evt-down", EventType: "eam.machine.down", Metadata: map[string]any{"business_object_type": "equipment", "business_object_id": "LAS-WLD-02", "idempotency_key": "down-1", "correlation_id": "corr-m7-o2"}},
+	}}}
+
+	summary, err := runner.Replay(context.Background(), story, Options{Apply: true, PackKey: "hctm", Tenant: "tenant-hctm"})
+	if err != nil || summary.Triggered != 2 || summary.Skipped != 1 || summary.Failed != 0 || len(summary.Impacts) != 3 {
+		t.Fatalf("summary=%#v err=%v", summary, err)
+	}
+
+	releaseImpact := summary.Impacts[0]
+	if releaseImpact.Action != "scenario_business_event" || releaseImpact.RecordID != "po-uuid" || releaseImpact.OperationRef != "op-release-202607-0001" {
+		t.Fatalf("unexpected release impact=%#v", releaseImpact)
+	}
+	if releaseImpact.CorrelationID != "corr-m7-o2" || releaseImpact.Cursor != 401 || !releaseImpact.Committed {
+		t.Fatalf("release impact should carry recovery metadata: %#v", releaseImpact)
+	}
+	if releaseImpact.NoOp {
+		t.Fatal("release impact should not be marked no-op")
+	}
+
+	delayImpact := summary.Impacts[1]
+	if delayImpact.Action != "duplicate" || !delayImpact.NoOp || delayImpact.Cursor != 402 || delayImpact.Committed {
+		t.Fatalf("delay impact should be duplicate with metadata: %#v", delayImpact)
+	}
+	if delayImpact.CorrelationID != "corr-m7-o2" || delayImpact.OperationRef != "op-delay-dup" {
+		t.Fatalf("delay impact metadata=%#v", delayImpact)
+	}
+
+	downImpact := summary.Impacts[2]
+	if downImpact.Action != "simulation_ingress" || downImpact.NoOp || downImpact.Cursor != 403 || !downImpact.Committed {
+		t.Fatalf("down impact should be committed simulation ingress: %#v", downImpact)
+	}
+	if downImpact.CorrelationID != "corr-m7-o2" || downImpact.OperationRef != "op-down-202607-0001" {
+		t.Fatalf("down impact metadata=%#v", downImpact)
 	}
 }
 

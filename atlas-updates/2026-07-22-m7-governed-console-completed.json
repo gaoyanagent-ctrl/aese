@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m7-governed-console-completed-v1",
+  "node_key": "aese.operations",
+  "update_type": "release",
+  "summary": "M7 受治理场景运行控制台完成",
+  "detail": "完成 O0-O4 与 T1-T39。clean reset 全链验证 22 个事件、三 Agent、17 条离线业务断言、2 条 IAOS 在线断言和 M6 KPI；CLI/UI apply、replay、verify、reset 一致，单 run 审计新增 9 次成功 Tool Call 和两套对称 O2D Outbox 副作用；修复服务重启后的增量幕位恢复和同 tick 双击门闩，并通过 Go、29 项 Vitest、24 项三视口 Playwright、生产构建与治理检查；AESE 与 IAOS 本机部署健康通过。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "M7 已完成，业务用户可通过联动中心受治理运行、验证和安全复位 HCTM order-expedite-01；当前无 active plan。",
+  "evidence_ref": "docs/reports/hctm-m7-governed-scenario-operations-console-evidence.md",
+  "occurred_at": "2026-07-22T02:10:00Z"
+}

@@ -157,7 +157,11 @@ type ReplayImpact struct {
 	CorrelationID string `json:"correlation_id,omitempty"`
 	Action        string `json:"action"`
 	RecordID      string `json:"record_id,omitempty"`
+	OperationRef  string `json:"operation_ref,omitempty"`
+	Cursor        int64  `json:"cursor"`
 	Applied       bool   `json:"applied"`
+	NoOp          bool   `json:"no_op"`
+	Committed     bool   `json:"committed"`
 	Error         string `json:"error,omitempty"`
 }
 
@@ -208,6 +212,7 @@ func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Opti
 				return summary, fmt.Errorf("event %s: %s", event.EventID, impact.Error)
 			}
 			impact.Action, impact.RecordID = "scenario_business_event", request.BusinessObject.Code
+			impact.OperationRef = event.EventID
 			if opts.Apply {
 				result, err := r.client.IngestScenarioBusinessEvent(ctx, opts.PackKey, story.Ref.Key, request)
 				if err != nil {
@@ -225,13 +230,19 @@ func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Opti
 					return summary, fmt.Errorf("event %s: %w", event.EventID, err)
 				}
 				impact.RecordID = result.BusinessObject.ID
+				impact.OperationRef = firstNonEmpty(result.OperationRef, result.EventID)
+				impact.Cursor = result.Cursor
+				impact.Committed = result.Committed
 				if result.Duplicate {
 					impact.Action = "duplicate"
 					summary.Skipped++
+					impact.NoOp = true
 				} else {
 					impact.Applied = result.Committed
 					summary.Triggered++
 				}
+			} else {
+				impact.NoOp = true
 			}
 			summary.Impacts = append(summary.Impacts, impact)
 			continue
@@ -246,6 +257,7 @@ func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Opti
 				return summary, fmt.Errorf("event %s: %s", event.EventID, impact.Error)
 			}
 			impact.Action, impact.RecordID = "simulation_ingress", request.BusinessObject.Code
+			impact.OperationRef = event.EventID
 			if opts.Apply {
 				result, err := r.client.IngestSimulationEvent(ctx, request)
 				if err != nil {
@@ -263,13 +275,19 @@ func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Opti
 					return summary, fmt.Errorf("event %s: %w", event.EventID, err)
 				}
 				impact.RecordID = result.BusinessObject.ID
+				impact.OperationRef = firstNonEmpty(result.OperationRef, result.EventID)
+				impact.Cursor = result.Cursor
+				impact.Committed = result.Committed
 				if result.Duplicate {
 					impact.Action = "duplicate"
 					summary.Skipped++
+					impact.NoOp = true
 				} else {
 					impact.Applied = result.Committed
 					summary.Triggered++
 				}
+			} else {
+				impact.NoOp = true
 			}
 			summary.Impacts = append(summary.Impacts, impact)
 			continue
@@ -325,6 +343,7 @@ func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Opti
 		impact.Action, impact.RecordID = "decompose_sales_order", id
 		if matchedStatus == "partially_shipped" || matchedStatus == "shipped" || matchedStatus == "closed" {
 			impact.Action = "already_fulfilled"
+			impact.NoOp = true
 			summary.Skipped++
 			summary.Impacts = append(summary.Impacts, impact)
 			continue
@@ -340,11 +359,21 @@ func (r *Runner) Replay(ctx context.Context, story scenariopack.Story, opts Opti
 			}
 			if result.Decomposing {
 				impact.Applied = true
+				impact.Committed = result.Committed
+				impact.Cursor = result.Cursor
+				impact.OperationRef = firstNonEmpty(result.OperationRef, id)
+				impact.NoOp = !result.Committed
 				summary.Triggered++
 			} else {
 				impact.Action = result.Status
+				impact.Committed = result.Committed
+				impact.OperationRef = firstNonEmpty(result.OperationRef, id)
+				impact.Cursor = result.Cursor
+				impact.NoOp = true
 				summary.Skipped++
 			}
+		} else {
+			impact.NoOp = true
 		}
 		summary.Impacts = append(summary.Impacts, impact)
 	}
@@ -553,6 +582,15 @@ func naturalKey(fields []string, record map[string]any) map[string]any {
 func stringField(values map[string]any, key string) string {
 	value, _ := values[key].(string)
 	return value
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if strings.TrimSpace(value) != "" {
+			return strings.TrimSpace(value)
+		}
+	}
+	return ""
 }
 
 func number(value any) (float64, bool) {

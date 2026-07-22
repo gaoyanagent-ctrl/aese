@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o3-console-ui-v1",
+  "node_key": "aese.operations",
+  "update_type": "implementation",
+  "summary": "M7 O3：完成联动中心运行视图关键交互与恢复闭环",
+  "detail": "联动中心前端实现了运行场景视图下的 run 创建/恢复、preflight、初始化、逐幕推进、run-to-end、analyze、verify、reset-plan/reset、状态机 stepper 与运行日志展示，并修复了前序实现中的编译与闭包顺序问题。",
+  "status_after": "building",
+  "progress_after": 58,
+  "current_state": "O3 核心交互已可运行，T22-T29 在实施层面前置完成，T30（可访问性/移动端细节）与 O4 验收测试仍待补齐。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

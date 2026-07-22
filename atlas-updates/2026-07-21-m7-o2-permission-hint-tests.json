@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o2-permission-hint-v1",
+  "node_key": "aese.operations",
+  "update_type": "test",
+  "summary": "M7 O2：补齐权限失败 required_permission 回归",
+  "detail": "在 internal/httpapi 的 run create/status/action 权限不足路径增加测试断言，验证 read/write/reset 场景分别返回 scenario.run.read、scenario.run.execute 与 scenario.run.reset。该闭环用于前端权限引导与最小恢复动作引导。",
+  "status_after": "building",
+  "progress_after": 78,
+  "current_state": "M7 O2 权限资源提示完成，T17 与 T20 标记完成；进入 T16/T21 的 IAOS 状态恢复与跨仓同步阶段。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

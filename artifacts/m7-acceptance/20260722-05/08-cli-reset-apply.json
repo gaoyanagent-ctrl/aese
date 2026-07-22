@@ -1,0 +1,197 @@
+{
+  "pack_key": "hctm",
+  "pack_version": "0.1.0",
+  "scenario_key": "order-expedite-01",
+  "run_id": "m7-acceptance-20260722-05-cli-reset",
+  "tenant_id": "tenant-hctm",
+  "dry_run": false,
+  "committed": true,
+  "input_hash": "c75ccffc760a469f6a9cdb092faf650504464c2c2ebd0700ee90b0e023df4957",
+  "correlation_id": "corr-so-202607-0001",
+  "inserted": 0,
+  "updated": 0,
+  "no_op": 0,
+  "conflicts": 0,
+  "unsupported": 0,
+  "deleted": 15,
+  "preserved_l1": 12,
+  "results": [
+    {
+      "index": 0,
+      "type": "shipment",
+      "entity": "shipment",
+      "code": "",
+      "action": "delete",
+      "object_id": "8d45325a-e2c1-4b57-bcfa-e2f63356eaa1",
+      "natural_key": {
+        "shipment_no": "SHIP-202607-0002"
+      }
+    },
+    {
+      "index": 1,
+      "type": "shipment",
+      "entity": "shipment",
+      "code": "",
+      "action": "delete",
+      "object_id": "35e92514-ffe0-4641-9721-709fdce86199",
+      "natural_key": {
+        "shipment_no": "SHIP-202607-0001"
+      }
+    },
+    {
+      "index": 2,
+      "type": "scenario_operation_task",
+      "entity": "scenario_operation_task",
+      "code": "",
+      "action": "delete",
+      "object_id": "2fddd0b8-7999-4529-b211-848f3ad45b0c",
+      "natural_key": {
+        "task_no": "OPT-202607-0001-030"
+      }
+    },
+    {
+      "index": 3,
+      "type": "finished_goods_receipt",
+      "entity": "finished_goods_receipt",
+      "code": "",
+      "action": "delete",
+      "object_id": "5ade50b0-3898-41ca-934a-fefab6b231f5",
+      "natural_key": {
+        "transaction_no": "INV-FG-202607-0001"
+      }
+    },
+    {
+      "index": 4,
+      "type": "inspection_order",
+      "entity": "inspection_order",
+      "code": "",
+      "action": "delete",
+      "object_id": "d3d74acc-a6fb-4a1f-afa1-396b262e8aac",
+      "natural_key": {
+        "inspection_no": "IQC-202607-0002"
+      }
+    },
+    {
+      "index": 5,
+      "type": "work_order",
+      "entity": "work_order",
+      "code": "",
+      "action": "delete",
+      "object_id": "f17d6bbd-6357-4e73-bfaf-8b969669f794",
+      "natural_key": {
+        "wo_no": "WO-202607-0001"
+      }
+    },
+    {
+      "index": 6,
+      "type": "purchase_order",
+      "entity": "purchase_order",
+      "code": "",
+      "action": "delete",
+      "object_id": "f09b2059-2409-4a95-9fa9-fdf5da69e973",
+      "natural_key": {
+        "po_no": "PO-202607-0002"
+      }
+    },
+    {
+      "index": 7,
+      "type": "purchase_order",
+      "entity": "purchase_order",
+      "code": "",
+      "action": "delete",
+      "object_id": "2b4d5d6e-db08-4192-bc10-844a4798e35b",
+      "natural_key": {
+        "po_no": "PO-202607-0001"
+      }
+    },
+    {
+      "index": 8,
+      "type": "sales_order",
+      "entity": "sales_order",
+      "code": "",
+      "action": "delete",
+      "object_id": "3f604a58-612f-4c43-af48-ef41dd8a7fb6",
+      "natural_key": {
+        "order_no": "SO-202607-0001"
+      }
+    },
+    {
+      "index": 9,
+      "type": "inventory",
+      "entity": "inventory",
+      "code": "",
+      "action": "delete",
+      "object_id": "c0e4e040-32af-411c-aacc-9ac573233f35",
+      "natural_key": {
+        "batch_no": "PKG-OPEN-20260701",
+        "material_code": "PKG-BOX-A01",
+        "warehouse_name": "WH-SZ-RM"
+      }
+    },
+    {
+      "index": 10,
+      "type": "inventory",
+      "entity": "inventory",
+      "code": "",
+      "action": "delete",
+      "object_id": "f63cce86-e72c-45b9-bd10-b53c1f0a06e8",
+      "natural_key": {
+        "batch_no": "FG-OPEN-20260701",
+        "material_code": "HCTM-BCP-A01",
+        "warehouse_name": "WH-SZ-FG"
+      }
+    },
+    {
+      "index": 11,
+      "type": "inventory",
+      "entity": "inventory",
+      "code": "",
+      "action": "delete",
+      "object_id": "9c5b2b2a-1bf1-421e-b6f4-df97eb1f459d",
+      "natural_key": {
+        "batch_no": "FG-20260717-01",
+        "material_code": "HCTM-BCP-A01",
+        "warehouse_name": "WH-SZ-FG"
+      }
+    },
+    {
+      "index": 12,
+      "type": "inventory",
+      "entity": "inventory",
+      "code": "",
+      "action": "delete",
+      "object_id": "a70045ef-2bfe-4bc7-9348-5c552a28cba6",
+      "natural_key": {
+        "batch_no": "SEAL-OPEN-20260701",
+        "material_code": "SEAL-RING-A01",
+        "warehouse_name": "WH-SZ-RM"
+      }
+    },
+    {
+      "index": 13,
+      "type": "inventory",
+      "entity": "inventory",
+      "code": "",
+      "action": "delete",
+      "object_id": "70ffceb2-ac3d-4bf5-a824-5c446b32e705",
+      "natural_key": {
+        "batch_no": "AL-OPEN-20260701",
+        "material_code": "AL-PLATE-6061-T6",
+        "warehouse_name": "WH-SZ-RM"
+      }
+    },
+    {
+      "index": 14,
+      "type": "inventory",
+      "entity": "inventory",
+      "code": "",
+      "action": "delete",
+      "object_id": "e0905a0b-9431-4ed9-aaea-a4ba40d82554",
+      "natural_key": {
+        "batch_no": "FIT-OPEN-20260701",
+        "material_code": "FITTING-A01",
+        "warehouse_name": "WH-SZ-RM"
+      }
+    }
+  ]
+}

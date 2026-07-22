@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o1-httpapi-hotfix-v1",
+  "node_key": "aese.operations",
+  "update_type": "implementation",
+  "summary": "M7 O1：修复薄编排 API 的 analyze 与 preflight 合同缺陷",
+  "detail": "在 internal/httpapi 中修正 preflight 返回体字段引用，避免不存在的 schema.Required；修正 analyze 执行时传入 pack 上下文，防止 scenario pack required 错误；同步 aese-server 与 API 入口路径映射。",
+  "status_after": "building",
+  "progress_after": 40,
+  "current_state": "aese-server 启动入口与 HTTP handler 已接入，thin orchestration API 已支持 preflight/initialize/advance/run-to-end/analyze/verify/reset-plan/reset 路由；继续补齐幂等与恢复测试。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

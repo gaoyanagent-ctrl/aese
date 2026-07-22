@@ -8,6 +8,7 @@ import { FactoryCanvas } from './components/FactoryCanvas';
 import { InfoPanel } from './components/InfoPanel';
 import { KpiStrip } from './components/KpiStrip';
 import { IntegrationConsole } from './components/IntegrationConsole';
+import { getStoredRunContext, type OrchestrationRunContext } from './integration/iaosIntegration';
 import { usePlayback } from './playback';
 import { StaticScenarioDataSource } from './scenario';
 import type { SandboxScenario } from './scenario/types';
@@ -124,6 +125,7 @@ export default function App() {
   const [mode, setMode] = useState<'preview' | 'live' | 'atlas'>('preview');
   const [integrationOpen, setIntegrationOpen] = useState(false);
   const [connectionVersion, setConnectionVersion] = useState(0);
+  const [runContext, setRunContext] = useState<OrchestrationRunContext | null>(() => getStoredRunContext());
 
   const navigate = (target: 'preview' | 'live' | 'atlas') => {
     setMode(target);
@@ -162,12 +164,20 @@ export default function App() {
   if (mode === 'atlas') return <SystemAtlas onExit={() => navigate('preview')} onNavigate={navigateAtlasEntry} />;
   return <>
     {mode === 'live'
-      ? <LiveSandbox key={connectionVersion} layoutScenario={scenario} onModeChange={navigate} onOpenIntegration={openIntegration} onOpenAtlas={() => navigate('atlas')} />
+      ? <LiveSandbox
+          key={connectionVersion}
+          layoutScenario={scenario}
+          runContext={runContext}
+          onModeChange={navigate}
+          onOpenIntegration={openIntegration}
+          onOpenAtlas={() => navigate('atlas')}
+        />
       : <Sandbox scenario={scenario} onModeChange={navigate} onOpenIntegration={openIntegration} onOpenAtlas={() => navigate('atlas')} />}
     <IntegrationConsole
       open={integrationOpen}
       onClose={() => setIntegrationOpen(false)}
       onConnected={() => { setConnectionVersion((version) => version + 1); setMode('live'); }}
+      onRunContextChange={setRunContext}
     />
   </>;
 }

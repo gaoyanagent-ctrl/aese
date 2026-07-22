@@ -1,0 +1,11 @@
+run_id=m7-acceptance-20260722-05
+tenant=tenant-hctm
+pack=hctm
+story=order-expedite-01
+ui_apply=1
+cli_apply=1
+dry_run=0
+plan_hash=4c416f16ab4ce80b340695969b9150d99e3b0e419d59cd93f19ff192d12befce
+run_version=1784686184881358055
+run_cursor=42
+cli_artifacts=artifacts/m7-acceptance/20260722-05

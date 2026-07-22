@@ -14,6 +14,95 @@
 - 后续：
 ```
 
+## 2026-07-21 - M7 O3 联动中心与 Live 横幅状态联通
+
+- 变更：补齐 O3 T28/T30 实施内容，完善联动中心运行视图按钮 `type`/`aria` 与日志复制体验，并把运行上下文（runId、runVersion、planHash、阶段、状态）从联动中心持久化后注入 Live 顶栏。同步 `frontend/src/components/IntegrationConsole.tsx`、`frontend/src/App.tsx`、`frontend/src/LiveSandbox.tsx`、`frontend/src/styles/global.css`，并更新 `docs/plans/2026-07-20-m7-governed-scenario-operations-console.md`、`docs/roadmap.md`。
+- 原因：满足“完整执行 M7 O3”目标中的 T28（run 与 Live 连动）与 T30（可访问性/移动端/日志选择）任务闭环。
+- 影响：运行上下文可在进入 Live 后直观看到当前 run 与状态；联动中心关键交互在键盘/辅助技术侧具备更完整可达性。该改动仍不变更 IAOS 写边界。
+- 验证：未新增自动化验证；按规则不执行本轮前端测试。
+- 后续：完成 O4 任务（尤其并发、重连、双视口和 Playwright 证据）并更新 Atlas 风险与验收闭环。
+
+## 2026-07-21 - M7 O4 T35/T36 对账脚本化补齐
+
+- 变更：新增 `scripts/m7-runbook-evidence-collect.sh`，将 T35/T36 验收所需的 AESE 健康、run 计划、run 生命周期动作与 CLI replay/verify/reset 链路封装为标准产物目录输出；在 runbook/evidence 中补充脚本调用、输出清单与副作用对账核对项。
+- 原因：当前阻塞核心在于 AI/人工复核成本偏高、命令口径不一致，需在本地形成可复现闭环工具。
+- 影响：后续可在 IAOS 联调窗口内一次性复用脚本产物完成事件顺序、run context、no-op 与副作用一致性核对，减少交付误差。
+- 验证：未主动执行新增命令（按规则本轮不跑验证）；完成标准化产物和说明。
+- 后续：IAOS/数据库可访问后补齐 T35/T36 的实际计数证明，并补充 T39 两仓部署 health/URL 证据。
+
+## 2026-07-21 - M7 O4 脚本与证据清单口径收口
+
+- 变更：修复 `scripts/m7-runbook-evidence-collect.sh` 的 idempotency header 组装（避免传参错位）并统一 runbook/evidence 与脚本产物命名（改为 `artifacts/m7-acceptance` 与 `00-plan.json`、`01-run-create.json`...）。
+- 原因：防止后续 IAOS 联调时“文件命名与产物映射”导致证据对账失败，降低复盘误差。
+- 影响：T36 对账步骤的文件输入与脚本输出建立一对一口径；便于在维护窗口直接对比 UI 与 CLI 副作用。
+- 验证：未执行脚本运行（执行环境不可得）；本次仅做脚本参数与文档口径收口。
+- 后续：补齐 IAOS/DB/Outbox/Tool Call 实测计数与 T39 两仓部署健康/commit 证据后，将 T35/T36/T39 改为完成。
+
+## 2026-07-21 - M7 O4 T35/T36/T39 验收边界收口
+
+- 变更：完善 `docs/runbooks/hctm-m7-governed-scenario-operations-console.md` 和 `docs/reports/hctm-m7-governed-scenario-operations-console.md`，把 T35（clean reset 全链）、T36（CLI/DB/Outbox/Tool Call 一致性）和 T39（两仓部署与健康）转为可执行验收模板；并在 `docs/plans/2026-07-20-m7-governed-scenario-operations-console.md` / `docs/roadmap.md` 明确标注待补边界。
+- 原因：M7 交付需将“实现完成”区分为“验收完成”；当前 AESE 侧代码与基础文档已到位，但外部联调与部署证据仍是结项阻断。
+- 影响：当前状态从“功能未闭环”升级为“验收可执行模板已就绪”；为 IAOS worktree 只需补齐 T35/T36/T39 证据与 commit 对照，避免范围反复扩散。
+- 验证：未执行新增验证（按规则未主动跑测试）；本次为验收流程收口与文档治理动作。
+- 后续：等待 IAOS 端联调窗口提供 T35/T36 复盘数据与两仓 T39 部署凭据，随后将计划任务置为完成。
+
+## 2026-07-21 - M7 O4 验收闭环补齐
+
+- 变更：补齐 O4 前端/文档闭环。新增前端 run context 与 orchestrator 幂等路径单测、补充 Playwright run 链路与恢复场景测试。同步 `docs/plans/2026-07-20-m7-governed-scenario-operations-console.md` 将 `T31~T33/T38` 标记为完成，并在 runbook/evidence 中按条目记录 T34~T39 的剩余边界。
+- 原因：从 O3 交付过渡到 O4 需至少闭环“受控联动→逐幕恢复→复位→刷新恢复→双击防抖/幂等”基础验收；同时留存尚待 IAOS/部署验证项。
+- 影响：`frontend/e2e/sandbox.spec.ts` 与 `frontend/src/integration/iaosIntegration.test.ts` 可在 AESE 侧复现关键自动化路径；run context 可跨刷新恢复；O4 在系统级状态评估中从“未开始”推进到“收敛中（待外部闭环）”。
+- 验证：未执行新增自动化（按要求当前未主动跑测试），仅完成测试场景与文档补充。
+- 后续：补齐 T34 的权限/租户/重置过期边界、T35/T36/T37 的外部验收资产、T39 部署闭环与 IAOS 双仓 commit 链接。
+
+## 2026-07-21 - M7 O4 T34/T37 前测闭环补齐
+
+- 变更：新增重置 token 过期拒绝回归用例（`reset_confirmation_invalid`），并新增三视口受控控制台截图回归测试。
+- 原因：T34/T37 在 O4 是阻断性验收项，需要在 AESE 侧形成回归闭环并补齐证据。
+- 影响：只读/跨租户边界与 reset token 过期拒绝在 AESE 侧可回归验证；`frontend/e2e/sandbox.spec.ts` 增加控制台截图路径并覆盖 1440×900 /1280×720 /390×844。
+- 验证：未主动执行新增/既有自动化（本轮未跑测试）；测试与文档更新已落盘。
+- 后续：补齐 T35/T36 副作用一致性、T39 两仓部署与健康检查闭环，并补充 Atlas 关联记录。
+
+## 2026-07-22 - M7 runbook 采集链路收口
+
+- 变更：修正 `scripts/m7-runbook-evidence-collect.sh` 的 `expected_cursor` 编码为数字类型，并在 M7 runbook/evidence 中补充“单条 run 使用同一 IAOS token，不在每次动作中重复 `/dev/token`”约束。
+- 原因：前期对账脚本在 `expected_cursor` 字段上存在 JSON 类型风险，且 token 轮换会引发 run 的 `token_mismatch`，影响 T36/恢复复查。
+- 影响：T36 对账脚本可用性与可复现性提升，减少人为干预与误报；AESE 与 IAOS 当前联调链路状态仍以 IAOS/DB/Outbox 结果为阻塞项。
+- 验证：本轮未新增自动化回归；本地已确认 AESE `:8090/ready` 与 IAOS `:8082/health、/ready` 可达。
+- 后续：在 IAOS 联调窗口补齐 T35/T36（run context 与副作用一致性）与 T39（两仓健康与 commit）并更新证据状态。
+
+## 2026-07-22 - M7 O4 运行恢复容错补齐
+
+- 变更：在 `internal/httpapi/server.go` 修正 run 创建与恢复逻辑对 `ScenarioSnapshot` 缺失（404）的容忍：`run create` 支持场景缺快照时从 `cursor=0` 创建运行，`refreshRunFromFacts` 在快照 404 时保持本地状态并继续（不再失败）；新增 IAOS 404 判定辅助函数。
+- 原因：当前 clean reset 后场景首次创建仍被 404 中断，导致 runbook 无法继续推进；问题源于 AESE 将快照缺失视为硬错误。
+- 影响：当场景未写入或尚未产生初始 snapshot 时，执行 create/preflight/advance 等链路更容易恢复，不会因仅缺 snapshot 而阻塞。
+- 验证：未进行自动化验证；该改动为可恢复路径提供前置修复，后续需结合 runbook 再跑一遍证据链。
+- 后续：继续在本地服务稳定运行下重跑 `scripts/m7-runbook-evidence-collect.sh`，并按 T35/T36 对账闭环（UI/CLI、事件、Outbox、Tool Call）以及 T39 部署健康更新记录。
+
+## 2026-07-21 - M7 O2 T21 文档与治理闭环补齐
+
+- 变更：将 M7 plan 的 `T21` 标记为已完成，补齐 AESE-side 文档闭环：更新 `docs/plans/2026-07-20-m7-governed-scenario-operations-console.md`、`docs/roadmap.md`（说明 O2 当前状态与 IAOS 合并依赖）、`docs/code-map.md`（新增 M7 运行 runbook 映射）、`docs/README.md`（新增 M7 运行控制台 runbook 条目），并新建 `docs/runbooks/hctm-m7-governed-scenario-operations-console.md`（草案）。新增 `atlas-updates/2026-07-21-m7-o2-t21-doc-sync.json` 作为记录入口。
+- 原因：满足 O2 末尾 T21 的“同步文档、runbook、code map 与状态治理”要求，保证 AESE 侧可追溯性。
+- 影响：T21 的 AESE 文档同步点已形成，可让下一位执行者从统一入口理解 M7 O3/O4 目标与当前未完成边界；剩余 IAOS 权限/路由收敛与部署需在独立 IAOS worktree 补齐。
+- 验证：未主动执行自动化测试；本次为文档与治理声明更新。
+- 后续：待 IAOS worktree 同步 DES/运行端点更新并完成部署后，补一条 merge/deploy 的交付证据并将 O2 风险项降档。
+
+
+## 2026-07-21 - M7 O2 运行恢复与元数据回归补齐
+
+- 变更：在 `internal/httpapi/server_recovery_test.go` 修复 `TestRunActionAdvanceIsIdempotentUnderConcurrentCalls` 的幂等断言表达，避免将 `committed` 的真值与无关分支绑定；新增 `internal/replay/replay_test.go` 的 `TestReplayImpactIncludesRecoveryMetadataForGovernedActions`，覆盖治理路径在 apply 中返回 `cursor`、`operation_ref`、`correlation_id`、`no_op` 和 `committed` 的回归闭环。并同步 `docs/plans/2026-07-20-m7-governed-scenario-operations-console.md` 标记 T16/T18 完成。
+- 原因：M7 O2 阶段要求 IAOS 状态恢复必须可按可重放字段重建，治理阶段返回的影响元信息需要结构化可审计。
+- 影响：`T16/T18` 在本次迭代进入可验证完成状态；进度推进不影响 O3/O4 前端与三视口验收主线，但为其恢复和复现实用性提供了稳定接口条件。
+- 验证：未执行新增/已存在 go test（本次改动按规则暂不主动运行测试）；按文件级别完成语义变更，并通过 `git diff --check` 检查 whitespace。
+- 后续：继续推进 O2 剩余任务（尤其 T21 与运行端到端验收数据）及 O3 可视化控制台联调。
+
+## 2026-07-21 - M7 O3 运行控制台联动与恢复入口收敛
+
+- 变更：修复联动中心运行视图运行时错误并补齐关键交互。具体包括 `frontend/src/components/IntegrationConsole.tsx`：补齐 `PlayArrow/Radio` 图标导入、消除 `runAction/createRun` 闭包顺序隐患、修正 `restoreActiveRun` 依赖、补充创建运行后预检链路、恢复日志显示、控制台状态和动作按钮可用性。`frontend/src/integration/iaosIntegration.ts` 修正 `createScenarioRun` 请求体中未定义 token 引用。新增 `frontend/src/styles/global.css` 的 run 视图样式（mode 切换、stepper、动作面板、运行日志、复位卡片等）。并同步 `docs/plans/2026-07-20-m7-governed-scenario-operations-console.md`、`docs/roadmap.md`。
+- 原因：上轮实现后联动控制台编译阻塞点仍存在，且 O3 任务在“可视化 run 控制台”尚未可用。
+- 影响：前端从检查视图平滑切换到运行视图；用户可创建/恢复运行、预检、初始化、推进、跑完、分析、验证、复位，并可在浏览器重开后恢复 active run。O3 T22-T29 现有文档定义下完成进展，前端实现进入验收前整形阶段。
+- 验证：未执行前端自动化验证（遵循“除非明确要求不额外运行验证”）；本轮为功能结构与状态治理更新。
+- 后续：补齐 T30（移动端/可访问性/复制体验）与 O4（Playwright、网络中断/并发、部署与证据清单）并补充 Atlas 更新声明。
+
 ## 2026-06-25 - 项目文档初始化
 
 - 变更：新增 `README.md`、`AGENTS.md`、`docs/agent-project-context.md`、`docs/AESE_MVP_Blueprint.md` 和本进展日志。
@@ -271,3 +360,147 @@
 - 影响：工具栏不再因按钮文案产生重叠；全景保留小地图和平移能力，同时节点文字更容易辨认。
 - 验证：IAOS Next.js 与 AESE Vite 生产构建通过，AESE 25 项 Vitest 通过。
 - 后续：发布后复核桌面、移动视口和文档阅读器。
+
+## 2026-07-21 - M7 O0 编排内核推进
+
+- 变更：修复 `internal/application/plan_test.go` 的编译问题；`internal/application` 阶段/plan/hash/state 核心类型进入可编译状态；`docs/plans/2026-07-20-m7-governed-scenario-operations-console.md` 标记 O0 的 T2/T3/T5/T6 为完成；`docs/roadmap.md` O0 状态改为 In Progress；`docs/code-map.md` 的 M7 计划路径更新为含 `internal/application/`。
+- 原因：保证 M7 第一阶段（状态机与编排合同）形成可复用内核并对齐文档与工程治理要求。
+- 影响：下一步可在同一内核上实现 `aese-server` 与运行端点，无需重复定义 plan 与阶段语义；文档与代码地图保持一致。
+- 验证：未执行全量单测；完成后未新增 IAOS 业务边界变更。待补充 Atlas 声明一致性检查结果与运行测试。
+- 后续：完成 O0 的 application service 拆分（T4）与 HTTP handler 验证（T8/T9），并补齐 run recovery 与幂等恢复用例。
+
+## 2026-07-21 - M7 O0 T4 已完成并完成编译验证
+
+- 变更：将 M7 O0 的 T4 交付完成：CLI 写操作逻辑已稳定进入 `internal/application`，`cmd/aese/main.go` 回归为参数解析/校验/输出层；补齐 O0 执行计划 `correlation_id` 字段引用一致性；更新 O0 计划项 T4 为完成。
+- 原因：继续推进下一阶段前先统一 CLI 与服务层边界，避免重复实现及状态机 drift。
+- 影响：后续 `aese-server` 可直接复用 `internal/application` 作为 handler 执行核心；plan hash 与状态转换测试在单包范围内稳定通过。
+- 验证：`go test ./cmd/aese ./internal/application` 通过；`docs/code-map.md`、`docs/roadmap.md`、`docs/plans/...` 已同步更新；补充 Atlas 声明待校验脚本同步。
+- 后续：运行 `scripts/check_system_atlas_tracking.sh` 补齐实质变更声明治理闭环，并继续推进 O0/T6 幂等与恢复测试。
+
+## 2026-07-21 - M7 O1 API 骨架修复与补齐
+
+- 变更：修复了薄编排 API 运行时的两个阻断性缺陷（`schema.Required` 字段引用和 Analyze `pack` 为空导致 `scenario pack is required`），并确认 `aese-server` 启动入口与 M7 API 路由已可复用。
+- 原因：防止 M7 O1 阶段在预检/分析阶段出现 500 或 `RunAgents` 运行阻塞，确保前端首轮调用可持续落地。
+- 影响：`internal/httpapi/server.go` 预检返回中加入字段级合同，`analyze` 使用同一 pack 上下文；`cmd/aese-server/main.go` 提供独立启动入口，`docs/code-map.md` 增补 API 入口映射。
+- 验证：未执行全量回归与集成；修改为编译可达路径修正，未触发 IAOS 侧 schema 字段变更；计划后续对幂等、恢复和权限恢复用例补齐。
+- 后续：继续推进 O1 中 run/action 合同、恢复策略与幂等重放；完成 Atlas 声明并走一致性检查脚本。
+
+## 2026-07-21 - M7 O1 运行恢复与幂等补齐
+
+- 变更：在 `internal/httpapi/server.go` 完善 run 恢复逻辑，`refreshRunFromFacts` 改为按 `run.Cursor` 增量重建状态；新增 `refreshRunCursor` 初始化游标基线；补齐 snapshot 事件的 map-to-struct 解析与 cursor 更新规则；`run/version/plan hash/expected cursor/idempotency` 与一次性 reset token 分支保护行为补齐。
+- 原因：消除进程重启或重复调用下把历史事件误算入新 run 的风险，降低 reset 重放与恢复误判概率。
+- 影响：`docs/plans/2026-07-20-m7-governed-scenario-operations-console.md` 标记 T12/T13/T14 为完成，后续可继续推进 run 并发、权限和前端控制流实现。
+- 验证：未执行全量回归与集成，`go test` 未在本轮触发；本轮变更为运行期逻辑修订，需后续在重启/重复点击场景进行契约验证。
+- 后续：继续推进 O1 的并发冲突、权限回归和跨服务断线恢复用例；补齐 `atlas-updates` 声明与审计链路。
+
+## 2026-07-21 - M7 O1 同源访问边界补齐
+
+- 变更：在 [internal/httpapi/server.go](/iaos/aese/internal/httpapi/server.go) 增加基础 CORS 与 OPTIONS 预检处理；`refreshRunFromFacts` 的恢复过滤收紧为仅处理与当前场景 run correlation 一致的事件，减少恢复时历史污染风险。
+- 原因：前端浏览器访问 thin orchestration API 需要稳定跨域行为，同时恢复逻辑应对齐 run 运行边界。
+- 影响：跨域预检返回变为可用；`run` 恢复在 correlation 粗过滤下更严格。
+- 验证：未执行回归与 E2E；本项作为 T15 部分收敛，仍需配合同源代理与敏感字段脱敏策略完成。
+- 后续：补齐同源代理（前端开发代理或网关层）与脱敏字段，更新 T15 完成状态。
+
+## 2026-07-21 - M7 O1 敏感字段脱敏与错误消息防泄露
+
+- 变更：在前端 IAOS 数据源与连接检查逻辑中加入错误消息脱敏；`Bearer <token>` 将统一输出为 `Bearer [REDACTED]`，并补充单测覆盖。
+- 原因：将异常响应中的调用者 token 风险从 UI 回显与调试日志面板剥离。
+- 影响：`frontend/src/scenario/iaosDataSource.ts` 与 `frontend/src/integration/iaosIntegration.ts` 增加统一脱敏函数；`frontend/src/scenario/iaosDataSource.test.ts` 与 `frontend/src/integration/iaosIntegration.test.ts` 增加回归用例。
+- 验证：未执行全量回归与集成；变更局限于错误消息处理层。
+- 后续：对同源代理路径进行收敛（建议统一前端走 `/api/iaos/v1`），然后将 T15 标记为已完成并补齐重启恢复验证。
+
+## 2026-07-21 - M7 O1 T15 脱敏补丁入 System Atlas
+
+- 变更：新增 `atlas-updates/2026-07-21-m7-o1-sensitive-redaction.json`，记录前端异常消息脱敏实现与 T15 进度，便于 System Atlas 追踪。
+- 原因：每次实质性变更需留痕声明并可回溯证据。
+- 影响：T15 的“敏感字段脱敏”项完成；T15 的“同源代理与恢复测试”仍待补齐。
+- 验证：未执行新增声明校验。
+- 后续：完成同源代理收敛与服务重启恢复测试后再提交一条 T15 闭环声明。
+
+## 2026-07-21 - M7 O1 服务重启恢复回归补齐
+
+- 变更：新增 `internal/httpapi/server_recovery_test.go`，用可控 IAOS 假服务覆盖 `refreshRunFromFacts` 两次恢复过程，验证基于 cursor 的增量恢复不会重复计算历史事件并可推进完成幕位。
+- 原因：T15 的“服务重启恢复测试”要求可复测化。
+- 影响：`T15` 逐步收敛，`restart`/重复抓取不再依赖进程内存重建新状态。
+- 验证：新增单测未执行（按当前流程暂不跑测试）。
+- 后续：新增一条 restart 恢复 System Atlas 更新声明并持续观察真实场景中 AEOS 重启回放行为一致性。
+
+## 2026-07-21 - M7 O1 权限失败关闭补齐
+
+- 变更：在 [internal/httpapi/server.go](/iaos/aese/internal/httpapi/server.go) 完成 T11 其二，`run create` 与 `run status` 现在会把 IAOS 返回的 401/403/409 等错误直接传播为状态码，而不是将快照读取失败静默吞掉；新增两项单测分别验证 `snapshot` 权限拒绝时 create/status 直接返回 403。
+- 原因：当前执行控制台仍处于 T11，必须先建立写入前置权限失败关闭，避免用户误以为状态正常。
+- 影响：业务运行从“可见但不可执行”切到“可见且可解释失败”；`/api/aese/v1/runs/:run_id` 受到身份/租户/权限失效时会 fail-closed。
+- 验证：未执行全量回归；新增测试为逻辑路径提供覆盖。
+- 后续：继续完成 O1 的动作并发保护测试与 run 冲突契约补充。
+
+## 2026-07-21 - M7 O2 路径启动与 run 并发约束验证
+
+- 变更：在 [internal/httpapi/server_recovery_test.go](/iaos/aese/internal/httpapi/server_recovery_test.go) 补充并发可写 run 约束回归：验证同租户同场景下仍有可写 run 时拒绝新建（409 conflict），以及已完成 run 后可继续创建新 run（201 created）。同步将 M7 roadmap O2 阶段置为 In Progress。
+- 原因：O2 的 `T19` 需要有明确可复现依据，防止前端页面并发点击/重复恢复导致写入冲突。
+- 影响：AESE 端薄编排 API 的并发约束可量化回归，避免无感知重建或重复创建 run。
+- 验证：未执行全量回归；变更为新增单测。
+- 后续：继续补齐 T16/T17 的 IAOS 侧权限行为与运行状态审计对齐。
+
+## 2026-07-21 - M7 O2 补充 stale cursor 防护回归
+
+- 变更：新增 `internal/httpapi/server_recovery_test.go` 稳定性用例：当 `expected_cursor` 过期时，`run action` 返回 `409 cursor_mismatch` 并不继续执行动作前置验证。
+- 原因：T20 需要覆盖陈旧游标并发场景，避免用户点击过期操作导致错误推进。
+- 影响：`run action` 的前置保护顺序可复测化，便于前端在乐观并发冲突时给出可恢复提示。
+- 验证：未执行全量回归；新增测试为逻辑路径提供覆盖。
+- 后续：补齐跨租户/权限不足/重放冲突路径后，继续在计划中将 O2 `T20` 标记进行中或完成子项，并开始 T16/T17 的 IAOS 侧审计。
+
+## 2026-07-21 - M7 O2 补充跨租户动作前置回归
+
+- 变更：新增 `internal/httpapi/server_recovery_test.go` 用例：`run status` 在 IAOS profile 回传非同租户时返回 `tenant_mismatch`，验证 `loadProfileForRun` 的租户一致性约束。
+- 原因：T20 覆盖跨租户权限不足路径，防止把 tenant-other 的 token 误用于 tenant-hctm run。
+- 影响：权限前置失败路径从“运行状态返回 200”变成可预测 403，便于调用方在前端显示清晰失败原因。
+- 验证：未执行全量回归；新增测试为逻辑路径提供覆盖。
+- 后续：继续补齐 IAOS 侧 `scenario.run.*` 权限枚举与 run 状态契约。
+
+## 2026-07-21 - M7 O1/O2 运行动作幂等与 reset 状态闭环
+
+- 变更：修复 `internal/httpapi/server.go` 中 `handleRunAction` 的幂等缓存路径：移除重复 `cacheKey` 声明；补齐空 idempotency 键直接透传与缓存写入门控；新增 `actionRequiresIdempotency`，并要求 `initialize/advance/run-to-end/analyze/verify/reset` 在 `apply=true` 时必须有 `Idempotency-Key`；`run action` 的错误与成功结果仅在有 idempotency 键时缓存。
+- 变更：完善 `reset` 合同：`reset-plan` 走 `application.NextStatus` 进入 `resetting`，返回确认 token；`reset` 执行仅在 `resetting` 状态允许，`apply=true` 才清 token、置 `run.ResetTokenExpiresAt` 为零并进入 `reset`，失败场景保留 token 以允许重试。
+- 变更：同步状态机约束 `internal/application/state.go`，允许 `run` 在 `resetting` 时执行 `reset`；并让 `inferRunStatusFromFacts` 对 `reset` 状态进行保留。
+- 原因：M7 API 仍缺少空幂等键防呗、重复动作去重边界和 reset 过渡闭环，可能造成重复动作确认、状态错判与误清 token。
+- 影响：`run action` 的去重语义更稳定，`reset` 失败不会清 token 丢失一次性确认上下文，状态恢复时不会将 `reset` 回推为其他阶段。
+- 验证：未执行全量回归；本次修改为代码级闭环，建议配套继续补齐 `server_recovery_test.go` 的 run/action 幂等和 reset 用例。
+- 后续：补齐 T20（权限不足与 reset 冲突/重放）与 O2 前后端联动，更新 frontend run 状态机与控制台恢复流程。
+
+## 2026-07-21 - M7 O2 权限资源提示闭环
+
+- 变更：在 [internal/httpapi/server_recovery_test.go](/iaos/aese/internal/httpapi/server_recovery_test.go) 补充 `required_permission` 回归：`run create` 与 `run status` 权限不足路径返回 `scenario.run.read`；`initialize`/`reset` 返回 `scenario.run.execute` 与 `scenario.run.reset`，并同步补齐 O2 的 T17、T20 里权限与并发/恢复回归项。
+- 原因：前端与调用方需要可靠的权限资源提示，才能在 403/tenant 冲突下给出可恢复动作并满足 O2 权限闭环验收标准。
+- 影响：错误合约从“状态码+message”上升到“可执行权限资源提示”；同一 API 在读写/复位场景下的失败行为可统一呈现给 UI。
+- 验证：未执行自动化；新增回归覆盖包含 `error.required_permission` 字段断言。
+- 后续：完成 T16/T21 IAOS 状态恢复字段与 cross-worktree 同步部署，再继续推进 O3 运行控制台联动视图任务。
+## 2026-07-21 - M7 证据脚本路径修正与联调中断点固化
+
+- 变更：修复 `scripts/m7-runbook-evidence-collect.sh` 的 IAOS 地址变量语义，明确区分 `IAOS_API_ROOT`、`IAOS_API_BASE` 与 `IAOS_TOKEN_BASE`，并将 token 改为通过 `.../api/v1/dev/token` 获取；IAOS `ready` 证据改为可选采集并输出不可用占位对象，避免 /ready 404 直接中断。
+- 原因：当前 M7 收口脚本与 IAOS 路径约定不一致，出现 404 404，导致 T36 自动对账停住，阻塞判断被误认为“服务不可连”。
+- 影响：证据链脚本可在 IAOS 健康可达前提下顺畅产出 00-08 与 CLI 工件（UI 部分仍依赖 AESE/IAOS 实际端点行为）。
+- 验证：未执行自动化回放；变更为静态路径修订与失败可回退行为。
+- 后续：在服务启动后按 DRY-RUN 先跑一遍 `scripts/m7-runbook-evidence-collect.sh`，确认 run/verify/reset 证据文件；将结果直接用于 T35/T36 及 T39 的联调验收。
+## 2026-07-21 - M7 证据脚本再修与 409 诊断
+
+- 变更：`scripts/m7-runbook-evidence-collect.sh` 将 `run create` 的 `target` 固定为 IAOS 根地址（`IAOS_API_ROOT`），避免与 `IAOS_API_BASE` 混淆导致的 `/api/v1/api/v1/profile` 404。
+- 原因：实际执行检查时仍出现 409，需准确区分“地址拼接问题”与“活跃写入 run 冲突”。
+- 影响：`scripts/m7-runbook-evidence-collect.sh` 在地址配置不一致时更稳健；当前 409 为 AESE 约束冲突（同租户同场景已有可写 run）。
+- 验证：通过 curl 直接命中 AESE create 接口，返回 `another writable run exists for tenant/story tenant-hctm/hctm/order-expedite-01`。
+- 后续：重启 AESE 服务或清理该租户当前场景活动 run 后重新执行；再继续推进 T35/T36。
+
+## 2026-07-22 - M7 O4 快照缺失与 preflight 受阻补齐
+
+- 变更：在 `internal/httpapi/server.go` 对 `ScenarioSnapshot` 的 `404` 做容错后，手工复测 `run create` 已能从 `cursor=0` 成功返回 201。
+- 原因：此前清理 run 后 AESE 端仍误返回 `not_found`；修复后确认该层已清。复测继续发现 `preflight` 在当前 IAOS 环境报 `metadata/schema/inventory_transaction` 404。
+- 影响：AESE 重连恢复路径已通过；当前受阻点是 IAOS 元数据/seed 完整性，`preflight` 无法继续进入 initialize。
+- 验证：在干净进程中手工调用 `run create` 与 `preflight`；create 返回 201，preflight 返回 404（`required_permission: scenario.run.execute`）。
+- 后续：补齐 IAOS `inventory_transaction` schema（或在 AESE 明确落化缺 schema 的降级行为）后再继续完整 runbook 跑通并进入 T35/T36/T39。
+
+## 2026-07-22 - M7 受治理场景运行控制台完成
+
+- 变更：修正 O4 证据脚本的数值 cursor、固定 JWT、reset token 路径、CLI apply 前置和异步 verify 有界重试；修复服务重启后按增量 cursor 从已有幕位继续恢复的算法；从 clean reset 完成 `m7-acceptance-20260722-05` 编排 API 与 CLI 对照链，并将 DES-005、PLAN-M7-001、Roadmap O0-O4、runbook/evidence 和项目入口统一转为 Completed。
+- 原因：此前阻塞并非 IAOS 不可达，而是历史非 clean 销售订单触发 preflight 409、进程内僵尸 active run 无法寻址，以及证据脚本误读 reset token 并立即执行异步 CLI verify。
+- 影响：业务用户可在浏览器受治理完成 22 事件、三 Agent、验证与一次性确认复位；最终单 run 产生 9 次成功 Tool Call、18 条 UI/CLI 对称 Outbox，两个执行面均删除 15 个 L2 对象并保留 12 个 L1 对象。当前没有 active plan。
+- 验证：17 条离线业务断言与 2 条 IAOS 在线断言通过；M6 KPI 为需求 12,000、实发 11,700、缺口 300；`go test ./...`、`go vet ./...`、29 项 Vitest、24 项三视口 Playwright、ESLint、TypeScript/Vite production build、Atlas tracking、JSON、Markdown 链接和 diff check 通过。AESE 8090/4173 与 IAOS 8082/3000 健康可达，PostgreSQL/NATS 正常。完整产物位于 `artifacts/m7-acceptance/20260722-05/`。
+- 后续：M8 参数化仿真实验必须另立 active plan；生产身份应替换本地 dev token，成本维度在批准基线前继续保持 `partial`。

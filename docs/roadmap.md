@@ -2,7 +2,7 @@
 
 本文件是 AESE 当前里程碑状态和下一步优先级的权威来源。
 
-最后更新：2026-07-20。
+最后更新：2026-07-22。
 
 ## 1. 里程碑状态
 
@@ -17,12 +17,14 @@
 | M4 异常场景运行 | 延期、设备故障、来料不良进入 IAOS 运行链 | Completed | 三类 ingress、状态影响、事务 Outbox、租户/幂等及 canonical replay evidence |
 | M5 Agent MVP | 计划、质量、经营分析 Agent | Completed | 9 个受治理只读工具、三 Agent live tracer、跨租户与零业务写入证据 |
 | M6 在线 2D 企业沙盘 | IAOS 实时事件、库存、产线、异常和 Agent 运行结果 | Completed | DES-004、PLAN-M6-001、M6 evidence |
-| M7 受治理场景运行控制台 | 浏览器预检、初始化、逐幕运行、分析、验证和复位 | Active | ADR-003、DES-005、PLAN-M7-001 |
+| M7 受治理场景运行控制台 | 浏览器预检、初始化、逐幕运行、分析、验证和复位 | Completed | ADR-003、DES-005、PLAN-M7-001、M7 evidence |
 | X1 System Atlas 全景治理 | 最终完成体、当前状态、依赖与进展历史 | Completed | DES-006、IAOS DES-049、双端动态图谱 |
 
 ## 2. 当前阶段
 
-M3、M3V、M4、M5、M6 和跨里程碑的 X1 System Atlas 已完成。当前进入 M7：为现有联动中心增加受治理场景运行控制，让业务用户不依赖 CLI 完成 preflight、initialize、七幕推进、Agent 分析、verify 和 reset。未来完成体与每个构件的动态状态由 IAOS System Atlas 数据库统一提供。
+M3、M3V、M4、M5、M6、M7 和跨里程碑的 X1 System Atlas 已完成。联动中心已支持联动检查与受治理场景运行，不依赖 CLI 完成 preflight、initialize、七幕推进、Agent 分析、verify 与 reset。未来完成体与每个构件的动态状态由 IAOS System Atlas 数据库统一提供。
+
+M7 O0-O4 已完成。最终 `m7-acceptance-20260722-05` 从 clean reset 跑通编排 API 与 CLI 对照链：22 个事件、三 Agent、17 条离线业务断言、2 条在线 IAOS 断言和 M6 KPI 均通过；单 run 产生 9 次成功 Tool Call 与两套一致的 O2D Outbox 副作用，UI/CLI 均安全复位。AESE 8090/4173 与 IAOS 8082/3000 的本机部署和健康检查已记录在 M7 evidence。当前没有 active plan。
 
 M7 的最小成功标准：
 
@@ -54,11 +56,11 @@ M7 的最小成功标准：
 
 | Slice | 内容 | 状态 |
 | --- | --- | --- |
-| O0 | 状态机、阶段合同和编排内核重构 | Pending |
-| O1 | AESE 薄编排 API | Pending |
-| O2 | IAOS 运行记录、权限和并发补强 | Pending |
-| O3 | 可视化场景运行控制台 | Pending |
-| O4 | 全链路、恢复、安全和三视口验收 | Pending |
+| O0 | 状态机、阶段合同和编排内核重构 | Completed |
+| O1 | AESE 薄编排 API | Completed |
+| O2 | IAOS 运行记录、权限和并发补强 | Completed |
+| O3 | 可视化场景运行控制台 | Completed |
+| O4 | 全链路、恢复、安全和三视口验收 | Completed |
 
 ## 5. 风险与依赖
 

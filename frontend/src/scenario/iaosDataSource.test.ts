@@ -28,6 +28,11 @@ describe('IaosScenarioDataSource', () => {
     await expect(source(fetcher).snapshot('hctm', 'order-expedite-01')).rejects.toMatchObject({ status: 403, message: 'scenario.read permission required' });
   });
 
+  it('redacts bearer token in snapshot error messages', async () => {
+    const fetcher = vi.fn(async () => new Response(JSON.stringify({ error: 'downstream rejected Authorization Bearer deadbeef.invalid.token' }), { status: 401 })) as unknown as typeof fetch;
+    await expect(source(fetcher).snapshot('hctm', 'order-expedite-01')).rejects.toMatchObject({ message: 'downstream rejected Authorization [REDACTED]' });
+  });
+
   it('parses SSE frames and preserves the persistent cursor', async () => {
     const encoder = new TextEncoder();
     const body = new ReadableStream({ start(controller) { controller.enqueue(encoder.encode(': heartbeat\n\nid: 7\nevent: scenario\ndata: {"cursor":7,"event_id":"evt-7"}\n\n')); controller.close(); } });

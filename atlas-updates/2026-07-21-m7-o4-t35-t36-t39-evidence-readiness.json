@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o4-t35-t36-t39-evidence-readiness-v1",
+  "node_key": "aese.operations",
+  "update_type": "release",
+  "summary": "M7 O4：完成 T35/T36/T39 可执行验收模板，记录待补闭环边界",
+  "detail": "完善 M7 runbook 与 evidence，补齐 clean reset 全链路、CLI 与 UI 副作用一致性、两仓部署与健康检查的核对项与证据目录。AESE 侧实现与前端测试基础已具备；当前阻塞为 IAOS 联调与部署凭据未落地，因此该更新仅标记为待补齐验证状态。",
+  "status_after": "blocked",
+  "progress_after": 92,
+  "current_state": "T35/T36 需 IAOS/DB/Outbox/Tool Call 联调确认；T39 需两仓上线 URL 与 /health /ready /snapshot 证明。runbook/evidence 已具备可复验表单与留痕路径。",
+  "evidence_ref": "docs/reports/hctm-m7-governed-scenario-operations-console-evidence.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

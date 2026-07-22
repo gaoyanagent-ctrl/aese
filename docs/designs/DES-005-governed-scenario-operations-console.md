@@ -2,7 +2,7 @@
 id: DES-005
 title: M7 受治理场景运行控制台
 date: 2026-07-20
-status: approved
+status: completed
 author: Codex + User
 tags: [m7, orchestration, frontend, iaos, scenario-run]
 ---

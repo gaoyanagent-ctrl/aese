@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o1-recovery-cursor-v1",
+  "node_key": "aese.operations",
+  "update_type": "implementation",
+  "summary": "M7 O1：补齐 run 恢复与游标增量合同",
+  "detail": "在 internal/httpapi 补充 run cursor 基线初始化与 run 事实恢复逻辑：新增 refreshRunCursor；refreshRunFromFacts 改为按 run.Cursor 增量拉取 scenario events，并支持从 snapshot map 事件反序列化；status 推导不再依赖旧的内存状态。",
+  "status_after": "building",
+  "progress_after": 58,
+  "current_state": "T12/T13/T14 已完成，run 查询与动作后都会尝试基于 snapshot/events/recommendations 重建事实状态；计划继续推进并发/权限与前端联动阶段。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o1-restart-recovery-v1",
+  "node_key": "aese.operations",
+  "update_type": "test",
+  "summary": "M7 O1：新增服务重启恢复增量恢复单测",
+  "detail": "为 `internal/httpapi` 的 run 恢复逻辑添加回归测试，构造 IAOS 假服务模拟多阶段 snapshot/events 响应，验证重建 run 时基于 cursor 的增量加载不会重复计入历史事件，并可推进 completed acts。",
+  "status_after": "building",
+  "progress_after": 67,
+  "current_state": "完成 T15 的恢复测试覆盖；其余项（同源代理、CORS 与脱敏）在此前已完成，计划当前可进入 T15 全部闭环状态的收尾更新。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

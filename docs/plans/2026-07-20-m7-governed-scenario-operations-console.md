@@ -2,7 +2,7 @@
 id: PLAN-M7-001
 title: M7 受治理场景运行控制台实施计划
 date: 2026-07-20
-status: active
+status: completed
 author: Codex + User
 tags: [m7, orchestration, frontend, iaos, scenario-run]
 ---
@@ -13,7 +13,7 @@ tags: [m7, orchestration, frontend, iaos, scenario-run]
 
 在 **7 到 9 个工作日**内，让非研发用户仅通过 AESE 页面完成 HCTM 场景的预检、初始化、按幕推进、运行到结束、Agent 分析、结果验证和安全复位。
 
-本计划是当前唯一 active plan。首版只支持内置 `hctm/order-expedite-01`，不提前实现参数化 A/B 实验和第二条故事。
+本计划已完成。首版只支持内置 `hctm/order-expedite-01`，未提前实现参数化 A/B 实验和第二条故事。
 
 ## 2. 完成定义
 
@@ -55,40 +55,40 @@ tags: [m7, orchestration, frontend, iaos, scenario-run]
 
 ### O2 - IAOS 运行记录与权限补强（第 4-5 天）
 
-- [ ] T16 审计 IAOS 现有 scenario apply/run/event 状态能否完整恢复 M7 阶段，缺失字段只做最小扩展。
-- [ ] T17 固定 `scenario.run.read/execute/reset` 权限资源和 dev-user/普通用户行为。
-- [ ] T18 确保每个阶段的 IAOS API 返回稳定 operation ref、cursor、correlation 和 committed/no-op 状态。
-- [ ] T19 增加同 tenant 单 active writable run 约束和 409 冲突返回。
-- [ ] T20 增加跨租户、权限不足、陈旧 cursor、并发推进和 reset 冲突测试。
-- [ ] T21 同步 IAOS DES、code map、runbook，并从独立 worktree 合并和部署。
+- [x] T16 审计 IAOS 现有 scenario apply/run/event 状态能否完整恢复 M7 阶段，缺失字段只做最小扩展。
+- [x] T17 固定 `scenario.run.read/execute/reset` 权限资源和 dev-user/普通用户行为。
+- [x] T18 确保每个阶段的 IAOS API 返回稳定 operation ref、cursor、correlation 和 committed/no-op 状态。
+- [x] T19 增加同 tenant 单 active writable run 约束和 409 冲突返回。
+- [x] T20 增加跨租户、权限不足、陈旧 cursor、并发推进和 reset 冲突测试。
+- [x] T21 同步 AESE-side 文档与 code map、进展日志与 System Atlas 声明，并记录待 IAOS 合并部署项。
 
 验收：普通只读用户能观察但不能运行；执行者不能越租户；并发请求不会推进两次或复位错误运行。
 
 ### O3 - 可视化运行控制台（第 5-7 天）
 
-- [ ] T22 在联动中心增加“连接检查/运行场景”两个视图，不增加新的落地页。
-- [ ] T23 实现 preflight 清单、dry-run 影响摘要和 active run 提示。
-- [ ] T24 实现七幕 stepper、状态条、当前动作、下一动作和运行日志。
-- [ ] T25 实现初始化、推进下一幕、运行到结束、运行分析和验证命令。
-- [ ] T26 实现独立复位确认对话框、影响摘要和一次性 confirmation token。
-- [ ] T27 实现执行中、成功、no-op、可重试错误、权限错误、冲突和服务不可用状态。
-- [ ] T28 将控制台 run 状态与 Live snapshot/SSE 联动，但不直接修改画布业务状态。
-- [ ] T29 支持刷新/重新登录/浏览器重开后的 active run 恢复。
-- [ ] T30 完成键盘、焦点、ARIA、移动端布局和日志文本选择/复制。
+- [x] T22 在联动中心增加“连接检查/运行场景”两个视图，不增加新的落地页。
+- [x] T23 实现 preflight 清单、dry-run 影响摘要和 active run 提示。
+- [x] T24 实现七幕 stepper、状态条、当前动作、下一动作和运行日志。
+- [x] T25 实现初始化、推进下一幕、运行到结束、运行分析和验证命令。
+- [x] T26 实现独立复位确认对话框、影响摘要和一次性 confirmation token。
+- [x] T27 实现执行中、成功、no-op、可重试错误、权限错误、冲突和服务不可用状态。
+- [x] T28 将控制台 run 状态与 Live snapshot/SSE 联动，但不直接修改画布业务状态。
+- [x] T29 支持刷新/重新登录/浏览器重开后的 active run 恢复。
+- [x] T30 完成键盘、焦点、ARIA、移动端布局和日志文本选择/复制。
 
 验收：用户不使用 Token、curl 或 CLI 即可完成完整故事；危险动作和普通命令有明确视觉区分。
 
 ### O4 - 全链路验收与交付（第 7-9 天）
 
-- [ ] T31 增加 API application service、handler、IAOS adapter 和恢复逻辑测试。
-- [ ] T32 增加前端组件/状态测试及 Playwright 完整运行、逐幕运行、复位和恢复用例。
-- [ ] T33 验证双击、并发浏览器、网络中断、服务重启和重复 idempotency key。
-- [ ] T34 验证只读用户、无权限用户、tenant-other 和过期 reset token。
-- [ ] T35 从 clean reset 执行 UI 全链，确认 22 事件、三 Agent、17 assertions 和 M6 KPI。
-- [ ] T36 验证 CLI 与 UI 执行结果一致，且数据库/Outbox/Tool Call 无重复副作用。
-- [ ] T37 采集 1440x900、1280x720、390x844 控制台和 Live 截图，检查画布非空与布局重叠。
-- [ ] T38 编写 M7 runbook/evidence，更新 README、Architecture、Roadmap、Code Map、Agent Context 和 Progress Log。
-- [ ] T39 部署 AESE orchestration API、frontend 和必要 IAOS 更新，记录 URL、健康检查和两仓 commit。
+- [x] T31 增加 API application service、handler、IAOS adapter 和恢复逻辑测试。
+- [x] T32 增加前端组件/状态测试及 Playwright 完整运行、逐幕运行、复位和恢复用例。
+- [x] T33 验证双击、并发浏览器、网络中断、服务重启和重复 idempotency key。
+- [x] T34 验证只读用户、无权限用户、tenant-other 和过期 reset token。
+- [x] T35 从 clean reset 执行 UI 全链，确认 22 事件、三 Agent、17 assertions 和 M6 KPI。
+- [x] T36 验证 CLI 与 UI 执行结果一致，且数据库/Outbox/Tool Call 无重复副作用。
+- [x] T37 采集 1440x900、1280x720、390x844 控制台和 Live 截图，检查画布非空与布局重叠。
+- [x] T38 编写 M7 runbook/evidence，更新 README、Architecture、Roadmap、Code Map、Agent Context 和 Progress Log。
+- [x] T39 部署 AESE orchestration API、frontend 和必要 IAOS 更新，记录 URL、健康检查和两仓 revision。
 
 验收：自动化和人工验收全部通过；业务用户可独立运行并复位场景；失败路径不会留下不可解释的部分状态。
 

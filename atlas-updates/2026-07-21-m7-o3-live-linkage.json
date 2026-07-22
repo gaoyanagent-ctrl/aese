@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o3-live-linkage-v1",
+  "node_key": "aese.operations",
+  "update_type": "implementation",
+  "summary": "M7 O3：完成 run 与 Live 横幅联动",
+  "detail": "联动中心运行流程补齐剩余无障碍细节（按钮 type/aria、日志复制按钮语义）后，增加 run 上下文透传与展示，确保预检/推进/复位后的当前 run 信息在 Live 页横幅可见。同步 plan/roadmap/progress 文档并形成 O3 闭环记录。",
+  "status_after": "completed",
+  "progress_after": 72,
+  "current_state": "M7 O3 核心交付完成，Live 横幅可识别当前运行 id、状态、阶段与版本，T28/T30 已收口；O4 三视口验收与并发/网络压测仍在运行。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}

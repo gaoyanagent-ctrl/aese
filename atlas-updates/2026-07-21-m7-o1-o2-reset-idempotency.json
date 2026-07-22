@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260721-m7-o1-o2-reset-idempotency-v1",
+  "node_key": "aese.operations",
+  "update_type": "implementation",
+  "summary": "M7 API：补齐 run action 幂等前置与 reset 状态闭环",
+  "detail": "在 internal/httpapi/server.go 补丁重构 run action 幂等链路：移除重复 runActionCache key 变量、禁止空 idempotency 的 action cache 缓存命中与写入、增加 actionRequiresIdempotency 并要求写动作在 apply=true 时携带 Idempotency-Key。补充 reset 状态机闭环：reset-plan 执行状态迁移进入 resetting 并返回一次性 token；reset 仅在 resetting 状态允许执行，apply=true 成功后进入 reset 并清 token/过期时间，失败保留 token 以便重试。更新 internal/application/state.go，使 resetting 可执行 reset 并避免 reset 状态被事实恢复推进。",
+  "status_after": "building",
+  "progress_after": 74,
+  "current_state": "M7 O1/O2 后端幂等与重置闭环已补齐，接下来继续补齐权限/并发/reset 冲突测试与前端控制台运行态联动。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-21T00:00:00Z"
+}
