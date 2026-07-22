@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-atlas-auth-recovery-v1",
+  "node_key": "aese.world",
+  "update_type": "implementation",
+  "summary": "修复 Atlas 过期身份自动恢复",
+  "detail": "System Atlas 请求遇到缓存 IAOS token 返回 401 时，清除旧 token、获取新的本地演示身份并仅重试一次；桌面与移动真实代理链均验证成功。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "AESE Atlas 可从过期浏览器身份自动恢复并加载已同步的 M8 节点。",
+  "evidence_ref": "frontend/e2e/atlas-auth.spec.ts",
+  "occurred_at": "2026-07-22T09:40:00Z"
+}

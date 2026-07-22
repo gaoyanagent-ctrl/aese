@@ -155,9 +155,9 @@ function Card({ data, selected }: NodeProps<Node<AtlasNode>>) {
 }
 const nodeTypes = { atlas: Card };
 
-async function atlasToken() {
+async function atlasToken(forceRefresh = false) {
   const existing = localStorage.getItem("iaos_token");
-  if (existing) return existing;
+  if (existing && !forceRefresh) return existing;
   const tenant = localStorage.getItem("aese_iaos_tenant_id") ?? "tenant-hctm";
   const response = await fetch(
     `/api/v1/dev/token?tenant_id=${encodeURIComponent(tenant)}&roles=admin`,
@@ -167,6 +167,18 @@ async function atlasToken() {
   if (!body.token) throw new Error("IAOS 未返回可用身份");
   localStorage.setItem("iaos_token", body.token);
   return body.token;
+}
+
+export async function atlasFetch(input: RequestInfo | URL, init: RequestInit = {}) {
+  const request = async (token: string) => {
+    const headers = new Headers(init.headers);
+    headers.set("Authorization", `Bearer ${token}`);
+    return fetch(input, { ...init, headers });
+  };
+  const response = await request(await atlasToken());
+  if (response.status !== 401) return response;
+  localStorage.removeItem("iaos_token");
+  return request(await atlasToken(true));
 }
 
 function autoLayout(nodes: AtlasNode[], edges: AtlasEdge[]): Node<AtlasNode>[] {
@@ -256,10 +268,7 @@ export function SystemAtlas({
     setLoading(true);
     setError("");
     try {
-      const token = await atlasToken();
-      const response = await fetch("/api/v1/system-atlas?view=aese", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await atlasFetch("/api/v1/system-atlas?view=aese");
       if (!response.ok) {
         const body = await response.json().catch(() => ({}));
         throw new Error(body.error ?? `HTTP ${response.status}`);
@@ -396,10 +405,8 @@ export function SystemAtlas({
       setDocumentLoading(ref);
       setError("");
       try {
-        const token = await atlasToken();
-        const response = await fetch(
+        const response = await atlasFetch(
           `/api/v1/system-atlas/document?node_key=${encodeURIComponent(selected.key)}&ref=${encodeURIComponent(ref)}`,
-          { headers: { Authorization: `Bearer ${token}` } },
         );
         const body = await response.json();
         if (!response.ok)

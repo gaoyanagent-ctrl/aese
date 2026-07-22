@@ -568,3 +568,11 @@
 - 影响：M8 World、Time、Knowledge、Genesis、AESE/IAOS Bridge 均在 Atlas 可见；历史声明保持不可变，最终状态使用新 update key 校正。
 - 验证：数据库查询确认六个节点均为 `completed/100`，M8 六条原始 update key、AESE 校正记录与 IAOS bridge 完成记录均存在；两仓同步脚本重复执行成功。
 - 后续：无。
+
+## 2026-07-22 - Atlas 401 自动恢复
+
+- 变更：System Atlas 的 IAOS 请求在缓存 token 返回 401 时自动清除旧身份、获取新 dev token 并重试一次；同一恢复逻辑覆盖图谱与文档下钻。
+- 原因：浏览器 `localStorage.iaos_token` 可能来自旧会话；原实现只判断 token 是否存在，导致 `/#atlas` 永久停在 Unauthorized。
+- 影响：用户无需手动清理 localStorage 或先进入联动中心；非 401 错误不重试，避免隐藏权限与服务错误。
+- 验证：新增 Vitest 回归覆盖 `stale -> 401 -> refresh -> 200`；生产构建和类型检查通过；在实际 4173/8082 代理链注入失效 token，桌面 1440/1280 与移动 390 三项 Playwright 全部通过。
+- 后续：无。
