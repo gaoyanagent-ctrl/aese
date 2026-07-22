@@ -17,7 +17,8 @@
 | 维护 AESE 2.0 World Runtime | ADR-004、DES-007、DES-009、M8 completed plan；先读 `world-contracts/` 和 `internal/worldcontract/` |
 | 维护 M9 企业成立与治理 | DES-010、PLAN-M9-001、M9 evidence；先读 `internal/incorporation/`、`world-packs/hctm-genesis/campaigns/incorporation/` 与 World Bridge |
 | 维护 M10 工厂选址与设施建设 | DES-011、PLAN-M10-001、M10 evidence；先读 `internal/plantbuild/`、Plant Build campaign 与 IAOS DES-052 |
-| 实现 M11 生产能力建设 | DES-012、PLAN-M11-001、DES-008；先读 M10 terminal contract、`internal/plantbuild/`、`internal/rules/` 与 World Bridge |
+| 维护 M11 生产能力建设 | DES-012、PLAN-M11-001、M11 evidence；先读 `internal/capabilitybuild/`、Capability Build campaign 与 IAOS DES-053 |
+| 实现 M12 产品工业化与量产批准 | DES-013、PLAN-M12-001、DES-008；先读 M11 terminal contract、旧 HCTM BOM/routing fixture 与 World Bridge |
 | 查看或维护双系统全景 | DES-006、`frontend/src/components/SystemAtlas.tsx`、IAOS System Atlas API |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
@@ -54,6 +55,7 @@
 | M9 completed plan | `docs/plans/2026-07-22-m9-genesis-incorporation.md` | 已完成的企业成立、治理、资本和预算基线 |
 | M10 completed plan | `docs/plans/2026-07-22-m10-genesis-plant-build.md` | 已完成的场址、设施、项目、公用工程和验收基线 |
 | M11 completed plan | `docs/plans/2026-07-22-m11-genesis-production-capability-build.md` | C0-C6 跨仓交付与验收记录 |
+| M12 completed plan | `docs/plans/2026-07-22-m12-genesis-product-industrialization.md` | D0-D7 跨仓交付与验收记录 |
 
 ## 3. M3 实现路径
 
@@ -264,7 +266,22 @@ M9 I0-I5 的当前入口如下：
 | IAOS 资金/采购/资产/组织/资格治理 | `/iaos/iaos-go-m11-capability/platform/internal/api/plant_governance.go`；DES-053；revision `789b925` |
 | M11 runbook/evidence | `docs/runbooks/genesis-capability-build.md`、`docs/reports/m11-genesis-production-capability-evidence.md` |
 
-## 15. 导航更新触发器
+## 15. M12 已实现路径
+
+| 能力 | 路径 |
+| --- | --- |
+| M12 设计与 completed plan | `docs/designs/DES-013-genesis-product-industrialization.md`、`docs/plans/2026-07-22-m12-genesis-product-industrialization.md` |
+| 产品工业化领域与 tracer | `internal/industrialization/` |
+| RFQ/APQP/试制/PPAP 机器合同 | `world-contracts/schemas/industrialization-campaign.schema.json`、对应 fixture |
+| Industrialization campaign | `world-packs/hctm-genesis/campaigns/industrialization/` |
+| 旧 HCTM compatibility | `scenario-packs/hctm/master-data/materials.json`、`scenario-packs/hctm/master-data/manufacturing.json` |
+| IAOS bridge adapter | `internal/bridge/iaos/` |
+| World Play 工业化视图 | `frontend/src/components/world/IndustrializationPlay.tsx`、`frontend/src/world/industrialization.ts`、`/#world-industrialization` |
+| Industrialization API | `internal/httpapi/server.go`（`GET /api/aese/v1/world/industrialization`） |
+| IAOS 客户项目/工程/APQP/质量/PPAP 治理 | `/iaos/iaos-go-m12-industrialization/platform/internal/api/plant_governance.go`；DES-054；revision `50a46e2` |
+| M12 runbook/evidence | `docs/runbooks/genesis-industrialization.md`、`docs/reports/m12-genesis-industrialization-evidence.md` |
+
+## 16. 导航更新触发器
 
 以下改动必须更新本文件：
 

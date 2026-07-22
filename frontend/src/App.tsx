@@ -21,6 +21,7 @@ import { WorldPlay } from "./components/world/WorldPlay";
 import { IncorporationPlay } from "./components/world/IncorporationPlay";
 import { PlantBuildPlay } from "./components/world/PlantBuildPlay";
 import { CapabilityBuildPlay } from "./components/world/CapabilityBuildPlay";
+import { IndustrializationPlay } from "./components/world/IndustrializationPlay";
 
 const SCENARIO_KEY = "order-expedite-01";
 const scenarioSource = new StaticScenarioDataSource({
@@ -228,6 +229,7 @@ export default function App() {
     | "world-incorporation"
     | "world-plant-build"
     | "world-capability-build"
+    | "world-industrialization"
   >("preview");
   const [integrationOpen, setIntegrationOpen] = useState(false);
   const [connectionVersion, setConnectionVersion] = useState(0);
@@ -243,7 +245,8 @@ export default function App() {
       | "world"
       | "world-incorporation"
       | "world-plant-build"
-      | "world-capability-build",
+      | "world-capability-build"
+      | "world-industrialization",
   ) => {
     setMode(target);
     window.location.hash = target === "preview" ? "sandbox" : target;
@@ -259,6 +262,8 @@ export default function App() {
       if (target === "world-plant-build") setMode("world-plant-build");
       if (target === "world-capability-build")
         setMode("world-capability-build");
+      if (target === "world-industrialization")
+        setMode("world-industrialization");
       if (target === "sandbox") setMode("preview");
       if (target === "integration") {
         setMode("preview");
@@ -327,6 +332,12 @@ export default function App() {
     return <PlantBuildPlay onExit={() => navigate("world-incorporation")} />;
   if (mode === "world-capability-build")
     return <CapabilityBuildPlay onExit={() => navigate("world-plant-build")} />;
+  if (mode === "world-industrialization")
+    return (
+      <IndustrializationPlay
+        onExit={() => navigate("world-capability-build")}
+      />
+    );
   return (
     <>
       {mode === "live" ? (

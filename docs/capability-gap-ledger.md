@@ -36,3 +36,7 @@
 ## M11 生产能力治理
 
 `genesis.capability.fund/procure/accept`、`genesis.workforce.plan/hire/qualify` 与 `genesis.capability.payment.approve` 已交付。设备接受和人员资格强制引用 World evidence；候选隐私、职责隔离、预算/现金、验收付款、RLS、幂等与并发失败关闭。通用 SRM/HRIS/LMS/EAM、薪酬、固定资产会计及 M12 产品工业化仍为后续缺口。
+
+## M12 产品工业化治理
+
+`genesis.industrialization.quote/design/process/trial/quality/ppap/release` 已交付。质量、PPAP 与放行强制引用 World/customer evidence；版本篡改、伪造测量/客户决定、未批准试制和重复放行失败关闭。完整 CRM/CPQ/PLM/QMS/SRM 与 M13 正式 O2D/财务闭环仍为后续缺口。

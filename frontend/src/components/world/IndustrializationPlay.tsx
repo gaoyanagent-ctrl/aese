@@ -1,27 +1,27 @@
 import {
   ArrowLeft,
   BadgeCheck,
-  Factory,
+  ClipboardCheck,
   Pause,
   Play,
   RotateCcw,
   StepForward,
-  Users,
+  Wrench,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
-  loadCapabilityBuild,
-  type CapabilityTrace,
-} from "../../world/capabilityBuild";
+  loadIndustrialization,
+  type IndustrializationTrace,
+} from "../../world/industrialization";
 import "./WorldPlay.css";
-export function CapabilityBuildPlay({ onExit }: { onExit: () => void }) {
-  const [t, setT] = useState<CapabilityTrace | null>(null),
+export function IndustrializationPlay({ onExit }: { onExit: () => void }) {
+  const [t, setT] = useState<IndustrializationTrace | null>(null),
     [s, setS] = useState(0),
     [play, setPlay] = useState(false),
     [err, setErr] = useState("");
   useEffect(() => {
     const c = new AbortController();
-    loadCapabilityBuild(c.signal)
+    loadIndustrialization(c.signal)
       .then(setT)
       .catch((e) => {
         if (e.name !== "AbortError") setErr(String(e));
@@ -39,7 +39,7 @@ export function CapabilityBuildPlay({ onExit }: { onExit: () => void }) {
           }
           return v + 1;
         }),
-      700,
+      650,
     );
     return () => clearInterval(id);
   }, [play, t]);
@@ -49,18 +49,18 @@ export function CapabilityBuildPlay({ onExit }: { onExit: () => void }) {
         {err}
       </main>
     );
-  if (!t) return <main className="world-loading">正在加载生产能力世界…</main>;
+  if (!t) return <main className="world-loading">正在加载产品工业化世界…</main>;
   const f = t.frames[s];
   return (
     <div className="world-play">
       <header className="world-toolbar">
         <button className="world-back" onClick={onExit}>
           <ArrowLeft />
-          工厂建设
+          能力建设
         </button>
         <div>
-          <span>PROJECT GENESIS · CAPABILITY BUILD</span>
-          <h1>A 线设备、团队与资格建设</h1>
+          <span>PROJECT GENESIS · INDUSTRIALIZATION</span>
+          <h1>HCTM-BCP-A01 产品工业化</h1>
         </div>
         <div className="world-clock">
           <small>虚拟时间 · Asia/Shanghai</small>
@@ -79,20 +79,9 @@ export function CapabilityBuildPlay({ onExit }: { onExit: () => void }) {
           <StepForward />
           单步
         </button>
-        <button
-          onClick={() => {
-            setPlay(false);
-            setS(0);
-          }}
-        >
+        <button onClick={() => setS(0)}>
           <RotateCcw />
           复位
-        </button>
-        <button
-          onClick={() => (window.location.hash = "world-industrialization")}
-        >
-          <Factory />
-          产品工业化 Campaign
         </button>
         <span>
           {s + 1}/{t.frames.length} · {f.phase}
@@ -101,10 +90,10 @@ export function CapabilityBuildPlay({ onExit }: { onExit: () => void }) {
       <main className="world-main">
         <section className="world-status">
           <span
-            className={`world-state-badge ${f.industrialization_eligible ? "closed" : "active"}`}
+            className={`world-state-badge ${f.serial_production_eligible ? "closed" : "active"}`}
           >
-            {f.industrialization_eligible ? <BadgeCheck /> : <Factory />}
-            {f.industrialization_eligible ? "M12 eligible" : f.phase}
+            {f.serial_production_eligible ? <BadgeCheck /> : <Wrench />}
+            {f.serial_production_eligible ? "M13 eligible" : f.phase}
           </span>
           <h2>{f.title}</h2>
           <p>
@@ -115,56 +104,60 @@ export function CapabilityBuildPlay({ onExit }: { onExit: () => void }) {
         <section className="three-state-grid">
           <article>
             <header>
-              <Factory />
-              设备与实验室 <small>World owns ability</small>
+              <ClipboardCheck />
+              APQP / PPAP
             </header>
             <dl>
-              {f.equipment.length ? (
-                f.equipment.map((x) => (
-                  <div key={x.code}>
-                    <dt>{x.code}</dt>
-                    <dd>
-                      {x.status}
-                      <small>{x.zone}</small>
-                    </dd>
-                  </div>
-                ))
-              ) : (
-                <div>
-                  <dt>设备</dt>
-                  <dd>尚未形成实际能力</dd>
-                </div>
-              )}
-            </dl>
-          </article>
-          <article>
-            <header>
-              <Users />
-              人员与技能 <small>privacy scoped</small>
-            </header>
-            <dl>
-              <div>
-                <dt>实际到岗资格</dt>
-                <dd>{f.workers.length} / 10</dd>
-              </div>
-              <div>
-                <dt>角色认知</dt>
-                <dd>{f.knowledge.length} 条</dd>
-              </div>
-            </dl>
-          </article>
-          <article>
-            <header>
-              <BadgeCheck />
-              联合资格门 <small>IAOS governance</small>
-            </header>
-            <dl>
-              {Object.entries(f.gate).map(([k, v]) => (
+              {Object.entries(f.apqp_gates).map(([k, v]) => (
                 <div key={k}>
                   <dt>{k}</dt>
                   <dd>{v ? "通过" : "阻塞"}</dd>
                 </div>
               ))}
+              <div>
+                <dt>PPAP</dt>
+                <dd>{f.ppap_status}</dd>
+              </div>
+            </dl>
+          </article>
+          <article>
+            <header>
+              <Wrench />
+              试制与质量 <small>World owns</small>
+            </header>
+            <dl>
+              {f.trials.map((x) => (
+                <div key={x.code}>
+                  <dt>{x.code}</dt>
+                  <dd>
+                    rev {x.revision} · Cpk {x.Cpk}
+                    <small>
+                      良率 {x.Yield}% · 泄漏 {x.leak_failures}
+                    </small>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+          <article>
+            <header>
+              <BadgeCheck />
+              发布与兼容
+            </header>
+            <dl>
+              {f.releases.map((x) => (
+                <div key={x.code}>
+                  <dt>{x.code}</dt>
+                  <dd>
+                    rev {x.revision}
+                    <small>{x.hash.slice(0, 12)}</small>
+                  </dd>
+                </div>
+              ))}
+              <div>
+                <dt>旧 HCTM</dt>
+                <dd>{f.compatibility}</dd>
+              </div>
             </dl>
           </article>
         </section>

@@ -60,6 +60,7 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M9 Project Genesis 企业成立与治理：Completed；成立、登记、开户、资本、三岗位、mandate、预算与 `plant_project_eligible` 已通过两仓和三视口验收。
 - M10 Project Genesis 工厂选址与设施建设：Completed；场址决策、设施世界、IAOS 治理、Plant Build Play 与 `capability_build_eligible` 已验收。
 - M11 Project Genesis 生产能力建设：Completed；设备、人员、技能、班次、资金与治理联合门已输出 `industrialization_eligible`。
+- M12 Project Genesis 产品工业化与量产批准：Completed；RFQ、版本、APQP、两轮试制、PPAP 与治理门已输出 `serial_production_eligible`。
 
 当前同一页面可运行 Preview 或 IAOS Live 沙盘，并可在联动中心通过无业务数据库的 AESE 薄编排 API 受治理运行和复位场景；浏览器不直接调用 IAOS 写接口。
 
@@ -108,6 +109,10 @@ npm run dev
 - [M11 Project Genesis 生产能力建设实施计划](docs/plans/2026-07-22-m11-genesis-production-capability-build.md)
 - [M11 Capability Build 运行手册](docs/runbooks/genesis-capability-build.md)
 - [M11 Capability Build 验收证据](docs/reports/m11-genesis-production-capability-evidence.md)
+- [M12 Project Genesis 产品工业化与量产批准设计](docs/designs/DES-013-genesis-product-industrialization.md)
+- [M12 Project Genesis 产品工业化与量产批准实施计划](docs/plans/2026-07-22-m12-genesis-product-industrialization.md)
+- [M12 Industrialization 运行手册](docs/runbooks/genesis-industrialization.md)
+- [M12 Industrialization 验收证据](docs/reports/m12-genesis-industrialization-evidence.md)
 - [M3 本地运行手册](docs/runbooks/hctm-m3-local-run.md)
 - [M3V 2D 沙盘运行手册](docs/runbooks/hctm-m3v-2d-sandbox.md)
 - [M5 受治理 Agent Tracer 运行手册](docs/runbooks/hctm-m5-governed-agent-tracers.md)

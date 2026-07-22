@@ -274,3 +274,22 @@ Project Director / CEO / CFO / Procurement / HR / Equipment / Quality
 实际资本到账、设备制造/运输/安装/调试、候选接受/到岗和技能掌握属于 AESE World State；预算、订单/租赁、资产、编制、招聘、员工、培训、认证和班次记录属于 IAOS；角色只通过权限和 observation 获得 Actor Knowledge。IAOS 状态或虚拟时间不能直接创造现金、设备能力或人员技能。
 
 M11 复用 M10 空间与 utility 约束，并显式保留设施尾款、工资准备金和现金缓冲。它只建立冷却板产品族的通用能力需求，不发布正式产品 BOM/routing，也不执行 APQP、试生产、PPAP 或 SOP；这些属于 M12。详细边界见 DES-012 和 PLAN-M11-001。
+
+## 16. M12 产品工业化与量产批准纵向架构
+
+M12 消费 M11 的 `industrialization_eligible=true`，建立客户项目、产品/工艺发布、试制验证与客户 PPAP 闭环，但不把报价、工程记录或 PPAP 提交误当成客户批准和现实产品能力：
+
+```text
+Sales / Project / Product / Process / Quality / Procurement / Plant / CFO
+  -> IAOS RFQ, quotation, project, revision, APQP, quality and release governance
+  -> committed outcome + journal + Outbox
+  -> AESE customer, supplier, tooling, material and physical trial strategies
+  -> actual nomination, material, build, measurement, defect and PPAP decision
+  -> actor-scoped observation + discrepancy + engineering-change intent
+  -> governed retest, PPAP registration and production release
+  -> serial_production_eligible
+```
+
+客户实际 RFQ/定点/PPAP 决定、供应商/材料真实能力和试制/测量结果属于 AESE World State；报价、客户项目、产品/BOM/routing revision、APQP、问题/变更、PPAP package 和生产放行记录属于 IAOS；角色只通过权限与 observation 获得 Actor Knowledge。IAOS 状态、UI 或虚拟时间不能直接改写测量值、Cpk、客户决定或物理试制结果。
+
+现有 `scenario-packs/hctm` 中的 `HCTM-BCP-A01`、BOM 和 routing 是 M3/O2D 兼容 fixture，不是 Genesis 已完成工业化的历史事实。M12 在独立 campaign 中生成 release manifest/hash，M13 只有在版本兼容检查通过后才能投影到旧 O2D 对象。正式订单、批量量产、交付、开票和回款属于 M13。详细边界见 DES-013 和 PLAN-M12-001。
