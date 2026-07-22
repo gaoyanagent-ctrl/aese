@@ -59,6 +59,7 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M8 AESE 2.0 基础：Completed；F0-F5 已交付机器合同、确定性内核、三态 tracer、受治理 IAOS bridge、Genesis pack 与 World Play。
 - M9 Project Genesis 企业成立与治理：Completed；成立、登记、开户、资本、三岗位、mandate、预算与 `plant_project_eligible` 已通过两仓和三视口验收。
 - M10 Project Genesis 工厂选址与设施建设：Completed；场址决策、设施世界、IAOS 治理、Plant Build Play 与 `capability_build_eligible` 已验收。
+- M11 Project Genesis 生产能力建设：Completed；设备、人员、技能、班次、资金与治理联合门已输出 `industrialization_eligible`。
 
 当前同一页面可运行 Preview 或 IAOS Live 沙盘，并可在联动中心通过无业务数据库的 AESE 薄编排 API 受治理运行和复位场景；浏览器不直接调用 IAOS 写接口。
 
@@ -103,6 +104,10 @@ npm run dev
 - [M10 Project Genesis 工厂选址与设施建设实施计划](docs/plans/2026-07-22-m10-genesis-plant-build.md)
 - [M10 Genesis Plant Build 运行手册](docs/runbooks/genesis-plant-build.md)
 - [M10 Genesis Plant Build 验收证据](docs/reports/m10-genesis-plant-build-evidence.md)
+- [M11 Project Genesis 生产能力建设设计](docs/designs/DES-012-genesis-production-capability-build.md)
+- [M11 Project Genesis 生产能力建设实施计划](docs/plans/2026-07-22-m11-genesis-production-capability-build.md)
+- [M11 Capability Build 运行手册](docs/runbooks/genesis-capability-build.md)
+- [M11 Capability Build 验收证据](docs/reports/m11-genesis-production-capability-evidence.md)
 - [M3 本地运行手册](docs/runbooks/hctm-m3-local-run.md)
 - [M3V 2D 沙盘运行手册](docs/runbooks/hctm-m3v-2d-sandbox.md)
 - [M5 受治理 Agent Tracer 运行手册](docs/runbooks/hctm-m5-governed-agent-tracers.md)

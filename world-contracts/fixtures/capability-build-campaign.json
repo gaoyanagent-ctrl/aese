@@ -1,0 +1,1 @@
+{"schema_version":"1.0","campaign":"capability-build","world_run_id":"world-run-genesis-capability-build-001","timezone":"Asia/Shanghai","policy_version":"capability-build-policy-v1","m10_terminal_hash":"sha256:m10-plant-build-terminal","options":[{"code":"ACQ-PURCHASE"},{"code":"ACQ-LEASE-MIX"},{"code":"ACQ-VENDOR-CREDIT"}],"frames":[{},{},{},{},{},{},{},{},{},{}]}

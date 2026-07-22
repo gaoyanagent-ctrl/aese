@@ -16,7 +16,8 @@
 | 维护 M7 场景运行控制台 | ADR-003、DES-005、M7 completed plan、现有 CLI application service |
 | 维护 AESE 2.0 World Runtime | ADR-004、DES-007、DES-009、M8 completed plan；先读 `world-contracts/` 和 `internal/worldcontract/` |
 | 维护 M9 企业成立与治理 | DES-010、PLAN-M9-001、M9 evidence；先读 `internal/incorporation/`、`world-packs/hctm-genesis/campaigns/incorporation/` 与 World Bridge |
-| 实现 M10 工厂选址与设施建设 | DES-011、PLAN-M10-001、DES-008；先读 M9 terminal contract、`internal/genesis/`、`internal/rules/` 与 World Bridge |
+| 维护 M10 工厂选址与设施建设 | DES-011、PLAN-M10-001、M10 evidence；先读 `internal/plantbuild/`、Plant Build campaign 与 IAOS DES-052 |
+| 实现 M11 生产能力建设 | DES-012、PLAN-M11-001、DES-008；先读 M10 terminal contract、`internal/plantbuild/`、`internal/rules/` 与 World Bridge |
 | 查看或维护双系统全景 | DES-006、`frontend/src/components/SystemAtlas.tsx`、IAOS System Atlas API |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
@@ -51,7 +52,8 @@
 | World/IAOS 桥接合同 | `docs/designs/DES-008-world-iaos-bridge-contract.md` | observation/intent/committed outcome、journal/cursor、权限与失败恢复 |
 | M8 completed plan | `docs/plans/2026-07-22-m8-aese-2-foundation.md` | 已完成的三态世界、内核、bridge、pack 和 World Play 基线 |
 | M9 completed plan | `docs/plans/2026-07-22-m9-genesis-incorporation.md` | 已完成的企业成立、治理、资本和预算基线 |
-| M10 active plan | `docs/plans/2026-07-22-m10-genesis-plant-build.md` | 当前唯一 active 计划与 P0-P5 跨仓交付门 |
+| M10 completed plan | `docs/plans/2026-07-22-m10-genesis-plant-build.md` | 已完成的场址、设施、项目、公用工程和验收基线 |
+| M11 completed plan | `docs/plans/2026-07-22-m11-genesis-production-capability-build.md` | C0-C6 跨仓交付与验收记录 |
 
 ## 3. M3 实现路径
 
@@ -248,7 +250,21 @@ M9 I0-I5 的当前入口如下：
 | IAOS 投资与项目治理 | `/iaos/iaos-go-m10-plant/platform/internal/api/plant_governance.go`；DES-052；revision `23be02a` |
 | M10 runbook / evidence | `docs/runbooks/genesis-plant-build.md`、`docs/reports/m10-genesis-plant-build-evidence.md` |
 
-## 14. 导航更新触发器
+## 14. M11 已实现路径
+
+| 能力 | 路径 |
+| --- | --- |
+| M11 设计与 completed plan | `docs/designs/DES-012-genesis-production-capability-build.md`、`docs/plans/2026-07-22-m11-genesis-production-capability-build.md` |
+| 生产能力领域与 tracer | `internal/capabilitybuild/` |
+| 设备/人员/资格机器合同 | `world-contracts/schemas/capability-build-campaign.schema.json`、对应 fixture |
+| Capability Build campaign | `world-packs/hctm-genesis/campaigns/capability-build/` |
+| IAOS bridge adapter | `internal/bridge/iaos/` |
+| World Play 能力建设视图 | `frontend/src/components/world/CapabilityBuildPlay.tsx`、`frontend/src/world/capabilityBuild.ts`、`/#world-capability-build` |
+| Capability Build API | `internal/httpapi/server.go`（`GET /api/aese/v1/world/capability-build`） |
+| IAOS 资金/采购/资产/组织/资格治理 | `/iaos/iaos-go-m11-capability/platform/internal/api/plant_governance.go`；DES-053；revision `789b925` |
+| M11 runbook/evidence | `docs/runbooks/genesis-capability-build.md`、`docs/reports/m11-genesis-production-capability-evidence.md` |
+
+## 15. 导航更新触发器
 
 以下改动必须更新本文件：
 

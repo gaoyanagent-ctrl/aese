@@ -32,3 +32,7 @@
 | 付款批准 | CFO/独立审批人 | `genesis.payment.approve` | 预算、现金、里程碑验收与禁止自批 |
 
 通用项目管理、合同管理、总账、EAM、BIM 和 M11 设备/人员能力仍为明确缺口，不由 M10 最小 allowlist 伪装覆盖。
+
+## M11 生产能力治理
+
+`genesis.capability.fund/procure/accept`、`genesis.workforce.plan/hire/qualify` 与 `genesis.capability.payment.approve` 已交付。设备接受和人员资格强制引用 World evidence；候选隐私、职责隔离、预算/现金、验收付款、RLS、幂等与并发失败关闭。通用 SRM/HRIS/LMS/EAM、薪酬、固定资产会计及 M12 产品工业化仍为后续缺口。

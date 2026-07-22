@@ -255,3 +255,22 @@ Project Director / CEO / CFO
 候选场地、实际占用、公用工程容量、现场施工和检查结果属于 AESE World State；选址评估、投资决议、租赁合同、项目/WBS、变更、付款和验收记录属于 IAOS；角色只通过 observation 获得其可见的 Actor Knowledge。计划到期或 IAOS 中把里程碑标为完成，都不能单独推进实际工程状态。
 
 M10 只建立区域、城市、园区、场地、建筑、楼层和功能区的最小空间层级，不建设 BIM、3D 或布局编辑器。设施验收后仅输出 M11 的能力建设资格；生产设备、检测仪器、招聘培训和投产准备仍由 M11 负责。详细边界见 DES-011 和 PLAN-M10-001。
+
+## 15. M11 生产能力建设纵向架构
+
+M11 消费 M10 的 `capability_build_eligible=true`，把已验收设施转化为“可进入产品工业化”的通用设备与人员能力，但不把资产卡、员工档案或培训记录误当作现实能力：
+
+```text
+Project Director / CEO / CFO / Procurement / HR / Equipment / Quality
+  -> IAOS capital, budget, procurement, asset, org and qualification governance
+  -> committed outcome + journal + Outbox
+  -> AESE investor/bank, supplier, logistics, labour-market and training strategies
+  -> actual cash, delivery, installation, commissioning, onboarding and learning
+  -> actor-scoped observation + discrepancy + remediation intent
+  -> governed equipment/person qualification and joint capability acceptance
+  -> industrialization_eligible
+```
+
+实际资本到账、设备制造/运输/安装/调试、候选接受/到岗和技能掌握属于 AESE World State；预算、订单/租赁、资产、编制、招聘、员工、培训、认证和班次记录属于 IAOS；角色只通过权限和 observation 获得 Actor Knowledge。IAOS 状态或虚拟时间不能直接创造现金、设备能力或人员技能。
+
+M11 复用 M10 空间与 utility 约束，并显式保留设施尾款、工资准备金和现金缓冲。它只建立冷却板产品族的通用能力需求，不发布正式产品 BOM/routing，也不执行 APQP、试生产、PPAP 或 SOP；这些属于 M12。详细边界见 DES-012 和 PLAN-M11-001。

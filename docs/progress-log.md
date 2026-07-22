@@ -616,3 +616,19 @@
 - 影响：`hctm-genesis` 升级为 0.3.0，终态输出 `capability_build_eligible=true`；生产设备、检测仪器、招聘培训与投产仍未实现。M7/M8/M9 的 pack、CLI 和 Preview/Live 行为未改写。
 - 验证：AESE 全量 Go test/vet、pack validate、100 次 hash、snapshot/失败门、34 项 Vitest、TypeScript 和生产构建通过；IAOS 四个 Go module test/vet、Code Map/Atlas tracking、真实 201/duplicate/未验收付款拒绝和 8082 部署通过；Plant Build 三视口 Playwright 与最终 Atlas 同步记录在 M10 evidence。
 - 后续：M10 已完成，当前无 active 主计划；M11 必须另立计划并只消费机器终态，不从 UI 推断生产能力。
+
+## 2026-07-22 - M11 Genesis 生产能力建设完成
+
+- 变更：完成 PLAN-M11-001 C0-C6/T1-T42；交付资金、三种 acquisition option、七项设备/实验室、十人核心团队、技能/班次联合 gate、检漏校准漂移整改 tracer、Capability Build API/UI。IAOS 独立 revision `789b925` 提供资金、采购、接受、编制、招聘、资格和付款治理。
+- 原因：把 M10 设施资格推进为经过资金、实际设备能力、人员到岗、实操资格、安全和治理门的 M12 机器入口。
+- 影响：`hctm-genesis@0.4.0` 终态输出 `industrialization_eligible=true`；不包含产品 BOM/routing、APQP、试产、PPAP 或 SOP。
+- 验证：两仓 Go test/vet、100 次 hash、Schema/pack、前端 unit/typecheck/build、三视口 Playwright、真实 API/部署与 Atlas 同步通过。
+- 后续：当前无 active 主计划；M12 必须另立计划并消费机器终态。
+
+## 2026-07-22 - M11 生产能力建设计划启动
+
+- 变更：新增 approved DES-012 和唯一 active 的 PLAN-M11-001，将 M11 拆为 C0-C6：机器合同、资金与受治理采购、AESE 设备世界、AESE 人员世界、IAOS 采购/资产/组织/资格治理、Capability Build Play 和全链验收；同步 README、Agent Context、Architecture、文档索引、Roadmap、Code Map 和 System Atlas 声明。
+- 原因：M10 已输出 `capability_build_eligible=true`，但设施验收不等于拥有设备、实验室、仓储、人员和岗位技能；同时 closing cash 只有 10,000,000 CNY，必须先建立真实资金来源和预算约束。
+- 影响：M11 成为当前唯一 active plan，目标终态固定为 `industrialization_eligible=true`。M11 显式处理剩余资本实缴、采购/租赁、设施尾款、工资准备金、设备调试和团队资格，但不进入产品/BOM/工艺、APQP、试生产、PPAP 或 SOP。
+- 验证：`git diff --check`、DES/PLAN ID 唯一性、active plan 唯一性、全部 Atlas/World/场景 JSON 解析、受影响 Markdown 本地链接和 `scripts/check_system_atlas_tracking.sh` 均通过；本轮只修改设计与计划文档，未运行产品测试。工作区既有测试修改、截图变化和验收产物均未触碰。
+- 后续：执行 C0 T1-T7，关闭 G4-G7 的能力/设备、人员、资金和 IAOS gap 基线，再允许独立 IAOS worktree 开发。

@@ -20,6 +20,7 @@ import { SystemAtlas, type AtlasEntryRef } from "./components/SystemAtlas";
 import { WorldPlay } from "./components/world/WorldPlay";
 import { IncorporationPlay } from "./components/world/IncorporationPlay";
 import { PlantBuildPlay } from "./components/world/PlantBuildPlay";
+import { CapabilityBuildPlay } from "./components/world/CapabilityBuildPlay";
 
 const SCENARIO_KEY = "order-expedite-01";
 const scenarioSource = new StaticScenarioDataSource({
@@ -226,6 +227,7 @@ export default function App() {
     | "world"
     | "world-incorporation"
     | "world-plant-build"
+    | "world-capability-build"
   >("preview");
   const [integrationOpen, setIntegrationOpen] = useState(false);
   const [connectionVersion, setConnectionVersion] = useState(0);
@@ -240,7 +242,8 @@ export default function App() {
       | "atlas"
       | "world"
       | "world-incorporation"
-      | "world-plant-build",
+      | "world-plant-build"
+      | "world-capability-build",
   ) => {
     setMode(target);
     window.location.hash = target === "preview" ? "sandbox" : target;
@@ -254,6 +257,8 @@ export default function App() {
       if (target === "world") setMode("world");
       if (target === "world-incorporation") setMode("world-incorporation");
       if (target === "world-plant-build") setMode("world-plant-build");
+      if (target === "world-capability-build")
+        setMode("world-capability-build");
       if (target === "sandbox") setMode("preview");
       if (target === "integration") {
         setMode("preview");
@@ -320,6 +325,8 @@ export default function App() {
     return <IncorporationPlay onExit={() => navigate("world")} />;
   if (mode === "world-plant-build")
     return <PlantBuildPlay onExit={() => navigate("world-incorporation")} />;
+  if (mode === "world-capability-build")
+    return <CapabilityBuildPlay onExit={() => navigate("world-plant-build")} />;
   return (
     <>
       {mode === "live" ? (

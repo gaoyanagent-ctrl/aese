@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/industrial-ai/iaos-aese/internal/application"
+	"github.com/industrial-ai/iaos-aese/internal/capabilitybuild"
 	"github.com/industrial-ai/iaos-aese/internal/genesis"
 	"github.com/industrial-ai/iaos-aese/internal/iaosclient"
 	"github.com/industrial-ai/iaos-aese/internal/incorporation"
@@ -238,6 +239,7 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/world/genesis",
 			"/api/aese/v1/world/incorporation",
 			"/api/aese/v1/world/plant-build",
+			"/api/aese/v1/world/capability-build",
 		},
 	})
 }
@@ -280,6 +282,15 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			trace := plantbuild.BuildTrace()
 			if err := plantbuild.Validate(trace); err != nil {
 				s.writeError(w, http.StatusInternalServerError, "plant_build_invalid", err.Error(), false, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, trace)
+			return
+		}
+		if rest[1] == "capability-build" {
+			trace := capabilitybuild.BuildTrace()
+			if err := capabilitybuild.Validate(trace); err != nil {
+				s.writeError(w, http.StatusInternalServerError, "capability_build_invalid", err.Error(), false, "", "")
 				return
 			}
 			s.writeJSON(w, http.StatusOK, trace)

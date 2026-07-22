@@ -98,6 +98,12 @@ export function PlantBuildPlay({ onExit }: { onExit: () => void }) {
           <RotateCcw />
           复位
         </button>
+        <button
+          onClick={() => (window.location.hash = "world-capability-build")}
+        >
+          <Factory />
+          生产能力 Campaign
+        </button>
         <span>
           {s + 1}/{t.frames.length} · {f.phase}
         </span>
