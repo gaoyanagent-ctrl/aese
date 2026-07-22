@@ -50,7 +50,7 @@ func BuildTrace() Trace {
 	degraded := EquipmentState{"LAS-WLD-02", "degraded", "7.20", "mm/s", "0.70"}
 	critical := EquipmentState{"LAS-WLD-02", "critical", "8.10", "mm/s", "0.00"}
 	iaosNormal := IAOSProjection{"LAS-WLD-02", "normal", "", 40}
-	unknown := Frame{0, "2026-07-08T10:15:00+08:00", "世界已退化，系统与角色尚未知", degraded, iaosNormal, nil, base, "world-event-vibration-rise-01"}
+	unknown := Frame{0, "2026-07-08T10:15:00+08:00", "世界已退化，系统与角色尚未知", degraded, iaosNormal, []worldcontract.Knowledge{}, base, "world-event-vibration-rise-01"}
 	k := worldcontract.Knowledge{SchemaVersion: "1.0", KnowledgeID: "knowledge-engineer-vibration-001", TenantID: "tenant-hctm", WorldRunID: "world-run-genesis-001", BranchID: "main", ActorRef: actor, FactRef: worldcontract.StableRef{Namespace: "hctm", Type: "world_event", Code: "world-event-vibration-rise-01"}, ObservedAt: "2026-07-08T10:16:00+08:00", ValidAt: "2026-07-08T10:15:00+08:00", SourceRef: "sensor:VIB-LAS-WLD-02-01", Confidence: "0.95", VisibilityScope: "assigned_recipients"}
 	investigating := base
 	investigating.Status = "investigating"

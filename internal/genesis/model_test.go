@@ -1,10 +1,16 @@
 package genesis
 
-import "testing"
+import (
+	"bytes"
+	"testing"
+)
 
 func TestTraceAndConservation(t *testing.T) {
 	if err := ValidateTrace(BuildTrace()); err != nil {
 		t.Fatal(err)
+	}
+	if bytes.Contains(JSON(), []byte(`"knowledge":null`)) {
+		t.Fatal("knowledge must use an empty JSON array, not null")
 	}
 	if err := ValidateConservation(Conservation{Opening: "100.00", Inbound: "20.00", Consumed: "70.00", Loss: "5.00", Closing: "45.00"}); err != nil {
 		t.Fatal(err)

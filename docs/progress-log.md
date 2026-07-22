@@ -576,3 +576,11 @@
 - 影响：用户无需手动清理 localStorage 或先进入联动中心；非 401 错误不重试，避免隐藏权限与服务错误。
 - 验证：新增 Vitest 回归覆盖 `stale -> 401 -> refresh -> 200`；生产构建和类型检查通过；在实际 4173/8082 代理链注入失效 token，桌面 1440/1280 与移动 390 三项 Playwright 全部通过。
 - 后续：无。
+
+## 2026-07-22 - World Play null Knowledge 白屏修复
+
+- 变更：Genesis 首帧 Knowledge 从 Go nil slice 改为非 nil 空集合，确保 JSON 输出 `[]`；前端 World API 边界兼容归一化历史 `null`，并新增真实服务 E2E。
+- 原因：`/#world` 首帧角色尚未知时 API 返回 `knowledge:null`，组件读取 `.length` 触发运行时异常并白屏。
+- 影响：角色未知仍以明确空态呈现，不授予额外 World State；新旧 API 响应均不会导致页面崩溃。
+- 验证：修复前 Go 与 Vitest 回归均稳定失败；修复后全量 Go test/vet、32 项 Vitest、TypeScript、production build 通过。8090 API 实际返回 array，4173 的桌面 1440/1280 与移动 390 三项 live Playwright 均无 page error。
+- 后续：无。

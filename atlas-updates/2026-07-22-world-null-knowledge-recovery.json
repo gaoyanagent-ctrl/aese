@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-world-null-knowledge-recovery-v1",
+  "node_key": "aese.world",
+  "update_type": "implementation",
+  "summary": "修复 World Play 首帧空认知白屏",
+  "detail": "Genesis API 将未知角色认知编码为 JSON 空数组，前端 API 边界同时兼容历史 nullable knowledge；真实 8090/4173 链路三视口无 page error。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "World Play 可展示角色未知首帧并完整推进 LAS-WLD-02 偏差闭环。",
+  "evidence_ref": "frontend/e2e/world-live.spec.ts",
+  "occurred_at": "2026-07-22T09:56:00Z"
+}
