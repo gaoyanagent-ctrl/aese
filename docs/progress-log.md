@@ -680,3 +680,19 @@
 - 影响：`hctm-genesis@0.7.0` 输出 `strategy_evidence_ready=true`；所有 run 的 production writes 为零，推荐状态固定为 proposed_not_applied。当前无 active 主计划。
 - 验证：共同随机数配对、命名流独立、100 次 evidence hash、60 个唯一 branch/run、严格 schema/CLI dry-run、Go test/vet、前端 unit/typecheck/build、三视口 Playwright、IAOS tenant/RLS/idempotency/journal/Outbox 与真实 API 重复提交通过。
 - 后续：任何策略投放必须另立计划并经过独立 IAOS intent/审批；不得直接消费 M14 推荐修改正式 Policy、订单、预算、采购、排产或现金。
+
+## 2026-07-22 - M15 受治理策略发布与经营试点计划启动
+
+- 变更：新增 approved DES-016 和唯一 active 的 PLAN-M15-001，将 M15 拆为 R0-R7：决策/发布/安全合同、Evidence Review、StrategyRelease 编译、零写入 shadow、canonical pilot、guardrail/回滚/补偿、IAOS 采纳治理和 Strategy Control Room；同步 README、Agent Context、Architecture、文档索引、Roadmap、Code Map 和 System Atlas 声明。
+- 原因：M14 已形成完整但不可自动投放的策略证据，下一步必须证明组织能够在不跳过审议、不伪造回滚、不隐藏风险的前提下把 evidence 转化为有限行动并诚实关闭决策。
+- 影响：M15 成为当前唯一 active 主计划，机器终态固定为 `strategy_change_cycle_closed=true`，disposition 可以是 adopted、rejected 或 rolled_back。shadow 必须零业务写入；pilot 只在批准 scope/window 内生效；回滚只停止未来动作，既成后果进入 commitment/compensation 链。
+- 验证：`git diff --check`、DES/PLAN ID 唯一性、active plan 唯一性、T1-T69 连续唯一、全部 Atlas/World/场景 JSON 解析、受影响 Markdown 本地链接和 `scripts/check_system_atlas_tracking.sh` 均通过；本轮只修改设计与计划文档，未运行产品测试。工作区既有测试修改、截图删除和验收产物均未触碰。
+- 后续：执行 R0 T1-T9，先关闭 G4-G8 的 candidate/release、shadow/pilot、guardrail/rollback 和 IAOS gap 基线，再允许 Policy 激活或 canonical pilot 开发。
+
+## 2026-07-22 - M15 受治理策略发布与经营试点完成
+
+- 变更：完成 PLAN-M15-001 R0-R7/T1-T69；交付 immutable StrategyRelease、semantic diff、独立审议、4 周零写入 shadow、4 周 canonical pilot、guardrail、kill switch、rollback、commitment/compensation、Control Room 和 IAOS 治理。
+- 原因：把 M14 模拟证据安全推进到可拒绝、可暂停、可回滚且不删除历史的真实决策闭环。
+- 影响：`hctm-genesis@0.8.0` 输出 `strategy_change_cycle_closed=true`；adopted 与 rolled_back 都是合法终态，pilot 不被宣称为统计因果证明。当前无 active 主计划。
+- 验证：两条路径 100 次 hash、shadow 零写入、exact release、职责分离、真实 IAOS 201/duplicate、Go/Schema/前端/三视口、Atlas 与服务部署通过。
+- 后续：M16 必须依据 disposition 另立计划；M15 不授权真实生产租户或无人审批投放。

@@ -178,6 +178,7 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 - DES-013 与 PLAN-M12-001 已完成。`hctm-genesis@0.5.0` 覆盖 RFQ/报价/定点、产品/BOM/工艺版本、供应/工装/物料、APQP、两轮试制、质量整改和 PPAP，输出 M13 可消费的 `serial_production_eligible`；IAOS revision `50a46e2`。正式 O2D、交付、开票和回款不在 M12。
 - DES-014 与 PLAN-M13-001 已完成。`hctm-genesis@0.6.0` 从零可销售库存完成首张订单、MRP、采购生产、三批接受、开票/应收、银行回款、实际成本和项目毛利，输出 `first_commercial_cycle_closed`；IAOS revision `067bbb4`，Project Genesis M9-M13 主纵向场景完成。
 - DES-015 与 PLAN-M14-001 已完成。`hctm-genesis@0.7.0` 从 M13 checkpoint 创建隔离 World 分支，以版本化参数、策略、PRNG/seed set 和共同随机数完成 60-run 多周期实验；`strategy_evidence_ready=true` 仅代表证据完整，不代表策略已批准或可自动投放。当前无 active 主计划。
+- DES-016 与 PLAN-M15-001 已完成。`hctm-genesis@0.8.0` 将 M14 candidate 绑定为 StrategyRelease，完成独立审批、零写入 shadow、有限 canonical pilot、guardrail、rollback 和 compensation；adopted 与 injected rolled_back 路径均输出 `strategy_change_cycle_closed=true`。当前无 active 主计划。
 
 ## 7. 后续 agent 必须维护的信息
 

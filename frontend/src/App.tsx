@@ -24,6 +24,7 @@ import { CapabilityBuildPlay } from "./components/world/CapabilityBuildPlay";
 import { IndustrializationPlay } from "./components/world/IndustrializationPlay";
 import { FirstDeliveryPlay } from "./components/world/FirstDeliveryPlay";
 import { ScenarioLab } from "./components/world/ScenarioLab";
+import { StrategyControlRoom } from "./components/world/StrategyControlRoom";
 
 const SCENARIO_KEY = "order-expedite-01";
 const scenarioSource = new StaticScenarioDataSource({
@@ -234,6 +235,7 @@ export default function App() {
     | "world-industrialization"
     | "world-first-delivery"
     | "world-experiments"
+    | "world-strategy-control"
   >("preview");
   const [integrationOpen, setIntegrationOpen] = useState(false);
   const [connectionVersion, setConnectionVersion] = useState(0);
@@ -252,7 +254,8 @@ export default function App() {
       | "world-capability-build"
       | "world-industrialization"
       | "world-first-delivery"
-      | "world-experiments",
+      | "world-experiments"
+      | "world-strategy-control",
   ) => {
     setMode(target);
     window.location.hash = target === "preview" ? "sandbox" : target;
@@ -272,6 +275,7 @@ export default function App() {
         setMode("world-industrialization");
       if (target === "world-first-delivery") setMode("world-first-delivery");
       if (target === "world-experiments") setMode("world-experiments");
+      if (target === "world-strategy-control") setMode("world-strategy-control");
       if (target === "sandbox") setMode("preview");
       if (target === "integration") {
         setMode("preview");
@@ -352,6 +356,8 @@ export default function App() {
     );
   if (mode === "world-experiments")
     return <ScenarioLab onExit={() => navigate("world-first-delivery")} />;
+  if (mode === "world-strategy-control")
+    return <StrategyControlRoom onExit={() => navigate("world-experiments")} />;
   return (
     <>
       {mode === "live" ? (

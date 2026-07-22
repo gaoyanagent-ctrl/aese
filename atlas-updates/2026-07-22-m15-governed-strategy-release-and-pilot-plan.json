@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m15-governed-strategy-release-and-pilot-plan-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "启动 M15 受治理策略发布与经营试点计划",
+  "detail": "新增 approved DES-016 和 active PLAN-M15-001，将 M14 evidence 经独立审议、StrategyRelease、零写入 shadow、有限 canonical pilot、guardrail、rollback/compensation 和 AdoptionDecision 推进；完成允许 adopted、rejected 或 rolled_back，不强迫策略采纳。",
+  "status_after": "building",
+  "progress_after": 90,
+  "current_state": "M15 R0 决策、发布和安全机器合同进行中；G4-G8 尚待冻结。",
+  "evidence_ref": "docs/plans/2026-07-22-m15-governed-strategy-release-and-pilot.md",
+  "occurred_at": "2026-07-22T19:50:00Z"
+}

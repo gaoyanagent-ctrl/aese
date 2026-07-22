@@ -27,6 +27,7 @@ import (
 	"github.com/industrial-ai/iaos-aese/internal/plantbuild"
 	"github.com/industrial-ai/iaos-aese/internal/replay"
 	"github.com/industrial-ai/iaos-aese/internal/scenariopack"
+	"github.com/industrial-ai/iaos-aese/internal/strategyrelease"
 )
 
 const (
@@ -246,6 +247,7 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/world/industrialization",
 			"/api/aese/v1/world/first-delivery",
 			"/api/aese/v1/world/experiments",
+			"/api/aese/v1/world/strategy-control",
 		},
 	})
 }
@@ -327,6 +329,15 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			s.writeJSON(w, http.StatusOK, evidence)
+			return
+		}
+		if rest[1] == "strategy-control" {
+			trace := strategyrelease.BuildTrace()
+			if err := strategyrelease.Validate(trace); err != nil {
+				s.writeError(w, http.StatusInternalServerError, "strategy_invalid", err.Error(), false, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, trace)
 			return
 		}
 		if rest[1] != "genesis" {

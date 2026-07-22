@@ -331,3 +331,23 @@ Approved Genesis checkpoint + experiment definition
 AESE 拥有 checkpoint fork、branch/run、随机流、外生事件、World consequence、artifact 和实验 KPI；IAOS 只拥有实验申请/审批、访问权限、证据接收、推荐与后续业务决策；Actor Knowledge 继续按角色权限投影。分支不创建正式 IAOS 订单、库存、发票或现金，父 checkpoint 和兄弟分支不可变。
 
 随机性必须是版本化输入：固定 PRNG 和命名 stream，同一 scenario profile/seed 的各策略使用共同随机数并做 paired comparison。默认展示硬约束、KPI 分布和 Pareto 前沿，不以单次运行、平均值或未批准权重宣称最优。只有 run 清单完整、hash 可复验、约束计算完成且无未解释失败时输出 `strategy_evidence_ready=true`。详细边界见 DES-015 和 PLAN-M14-001。
+
+## 19. M15 受治理策略发布与经营试点架构
+
+M15 在 M14 “只形成证据、不自动投放”的边界之后增加独立 decision-to-action 控制面：
+
+```text
+M14 EvidenceBundle + Pareto candidate
+  -> evidence verify + independent ChangeRequest review
+  -> immutable StrategyRelease + semantic diff + SafetyEnvelope
+  -> zero-write shadow on canonical observations
+  -> separate pilot approval
+  -> bounded canonical operating cycle through IAOS governed actions
+  -> World consequence + guardrail/drift monitoring
+  -> adopt | reject | pause/rollback + compensation
+  -> strategy_change_cycle_closed
+```
+
+IAOS 拥有 ChangeRequest、StrategyRelease、审批、Policy/Capability、incident、rollback、compensation 和 AdoptionDecision；AESE World 拥有 canonical pilot 时间、外生事件、物理/经济后果和 guardrail observation；Actor Knowledge 继续按当时权限和 observation 投影。shadow 只能计算 candidate decision，不能提交 intent 或预占资源。pilot 中每个业务动作必须由 IAOS committed outcome 驱动，IAOS release 状态不能直接创造库存、产能、交付或现金。
+
+回滚只停止 candidate release 对未来决策生效并恢复 prior release，不删除已经提交的采购、生产、库存、发运、发票或现金事实；遗留影响进入 open-commitment ledger 和受治理 compensating action。M15 不用单个 pilot 宣称因果改善，终态允许 `adopted`、`rejected` 或 `rolled_back`，只有过程、breach 和 commitment 全部对账后才输出 `strategy_change_cycle_closed=true`。详细边界见 DES-016 和 PLAN-M15-001。
