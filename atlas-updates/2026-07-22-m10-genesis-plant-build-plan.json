@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m10-genesis-plant-build-plan-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "启动 M10 Genesis 工厂选址与设施建设计划",
+  "detail": "新增 approved DES-011 和 active PLAN-M10-001，消费 M9 plant_project_eligible，按场址与项目合同、受约束选址、AESE 设施世界、IAOS 投资项目治理、Plant Build Play 和全链验收六个切片推进。目标在现金、预算、工期、空间、公用工程和外部资源约束下形成 capability_build_eligible，且不提前进入 M11 的设备、人员和投产能力。",
+  "status_after": "building",
+  "progress_after": 35,
+  "current_state": "M10 P0 场址、空间与项目机器合同进行中；G4 候选/预算/工期基线和 G5 IAOS gap audit 尚待完成。",
+  "evidence_ref": "docs/plans/2026-07-22-m10-genesis-plant-build.md",
+  "occurred_at": "2026-07-22T11:05:00Z"
+}

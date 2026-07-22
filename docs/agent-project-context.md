@@ -172,7 +172,8 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 - M7 设计见 `docs/designs/DES-005-governed-scenario-operations-console.md`，架构边界由 ADR-003 固定；M7 不建设 AESE 业务数据库，也不允许浏览器直接调用 IAOS 写端点。
 - 2026-07-22 已启动 M8：DES-007 和 PLAN-M8-001 把 AESE 2.0 收敛为 World / IAOS / Actor Knowledge 三态、确定性离散事件内核和 Project Genesis 纵向 Campaign。ADR-004 已 accepted，World Store 固定为独立 PostgreSQL，Actor Knowledge 首版只保存结构化认知；DES-008 已批准 observation/intent/committed outcome 与 journal/cursor 桥接合同，G1-G5 全部通过。
 - M8 F0-F5 已完成：机器合同、确定性内核、三态设备 tracer、独立 IAOS World Bridge、Genesis pack、M7 adapter 与 World Play 均有实现和验收证据。M8 不废弃 M7；现有 `order-expedite-01`、CLI、Preview/Live 和受治理控制台仍是兼容基线。
-- PLAN-M9-001 已完成，当前没有 active 主实施计划。`hctm-genesis@0.2.0` 可从投资人出资推进到登记、开户/资本到账、CEO/CFO/项目负责人任命、预算批准，并输出 M10 可消费的 `plant_project_eligible`。
+- PLAN-M9-001 已完成。`hctm-genesis@0.2.0` 可从投资人出资推进到登记、开户/资本到账、CEO/CFO/项目负责人任命、预算批准，并输出 M10 可消费的 `plant_project_eligible`。
+- DES-011 与 PLAN-M10-001 已完成。`hctm-genesis@0.3.0` 从 M9 机器资格推进候选评估、受治理选址与投资决策、场地控制、设施改造、公用工程延期重排和验收，输出 M11 可消费的 `capability_build_eligible`；IAOS revision 为 `23be02a`，设备采购、仪器和人员能力仍属于 M11。
 
 ## 7. 后续 agent 必须维护的信息
 

@@ -169,7 +169,9 @@ async function atlasToken(forceRefresh = false) {
   return body.token;
 }
 
-export async function atlasFetch(input: RequestInfo | URL, init: RequestInit = {}) {
+const atlasRequests = new Map<string, Promise<Response>>();
+
+async function performAtlasFetch(input: RequestInfo | URL, init: RequestInit) {
   const request = async (token: string) => {
     const headers = new Headers(init.headers);
     headers.set("Authorization", `Bearer ${token}`);
@@ -179,6 +181,24 @@ export async function atlasFetch(input: RequestInfo | URL, init: RequestInit = {
   if (response.status !== 401) return response;
   localStorage.removeItem("iaos_token");
   return request(await atlasToken(true));
+}
+
+export async function atlasFetch(
+  input: RequestInfo | URL,
+  init: RequestInit = {},
+) {
+  if (init.method && init.method !== "GET")
+    return performAtlasFetch(input, init);
+  const key = typeof input === "string" ? input : input.toString();
+  const existing = atlasRequests.get(key);
+  if (existing) return (await existing).clone();
+  const pending = performAtlasFetch(input, init);
+  atlasRequests.set(key, pending);
+  try {
+    return (await pending).clone();
+  } finally {
+    atlasRequests.delete(key);
+  }
 }
 
 function autoLayout(nodes: AtlasNode[], edges: AtlasEdge[]): Node<AtlasNode>[] {
@@ -507,14 +527,14 @@ export function SystemAtlas({
             ))}
           </select>
         </label>
-      <button
-        className="aese-atlas-layout"
-        onClick={applyLayout}
-        aria-label="恢复自动布局"
-        title="恢复自动布局"
-      >
-        <LayoutGrid />
-      </button>
+        <button
+          className="aese-atlas-layout"
+          onClick={applyLayout}
+          aria-label="恢复自动布局"
+          title="恢复自动布局"
+        >
+          <LayoutGrid />
+        </button>
         <span>
           拖动节点可调整 ·{" "}
           {data?.summary.last_updated_at

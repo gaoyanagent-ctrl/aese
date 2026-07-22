@@ -21,3 +21,14 @@
 | 核验资本/批准预算 | CFO/独立审批人 | `genesis.budget.approve` | 禁止自批、失效 mandate 失败关闭 |
 
 真实监管、银行、完整法人主数据和总账仍不在 M9；外部结果由 AESE 确定性策略产生。
+
+## M10 工厂投资与项目治理
+
+| 企业活动 | 角色 | IAOS 权限 | 实现 |
+| --- | --- | --- | --- |
+| 场址评估/批准 | 项目负责人、CEO/CFO | `genesis.site.evaluate/approve` | 三候选硬约束与受治理批准 |
+| 项目执行/重排 | 项目负责人、审批人 | `genesis.project.execute/rebaseline` | expected version、幂等与 committed outcome |
+| 项目/设施接受 | 验收人与项目审批人 | `genesis.project.accept` | 引用 World 验收证据，不直接改现场进度 |
+| 付款批准 | CFO/独立审批人 | `genesis.payment.approve` | 预算、现金、里程碑验收与禁止自批 |
+
+通用项目管理、合同管理、总账、EAM、BIM 和 M11 设备/人员能力仍为明确缺口，不由 M10 最小 allowlist 伪装覆盖。

@@ -20,6 +20,7 @@ import (
 	"github.com/industrial-ai/iaos-aese/internal/iaosclient"
 	"github.com/industrial-ai/iaos-aese/internal/incorporation"
 	"github.com/industrial-ai/iaos-aese/internal/legacyprojection"
+	"github.com/industrial-ai/iaos-aese/internal/plantbuild"
 	"github.com/industrial-ai/iaos-aese/internal/replay"
 	"github.com/industrial-ai/iaos-aese/internal/scenariopack"
 )
@@ -236,6 +237,7 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/runs/:run_id/reset",
 			"/api/aese/v1/world/genesis",
 			"/api/aese/v1/world/incorporation",
+			"/api/aese/v1/world/plant-build",
 		},
 	})
 }
@@ -269,6 +271,15 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			trace := incorporation.BuildTrace()
 			if err := incorporation.Validate(trace); err != nil {
 				s.writeError(w, http.StatusInternalServerError, "incorporation_invalid", err.Error(), false, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, trace)
+			return
+		}
+		if rest[1] == "plant-build" {
+			trace := plantbuild.BuildTrace()
+			if err := plantbuild.Validate(trace); err != nil {
+				s.writeError(w, http.StatusInternalServerError, "plant_build_invalid", err.Error(), false, "", "")
 				return
 			}
 			s.writeJSON(w, http.StatusOK, trace)

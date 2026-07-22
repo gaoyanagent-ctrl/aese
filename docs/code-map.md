@@ -15,7 +15,8 @@
 | 维护 M6 在线沙盘 | DES-004、M6 completed plan、`frontend/src/scenario/`、IAOS scenario API |
 | 维护 M7 场景运行控制台 | ADR-003、DES-005、M7 completed plan、现有 CLI application service |
 | 维护 AESE 2.0 World Runtime | ADR-004、DES-007、DES-009、M8 completed plan；先读 `world-contracts/` 和 `internal/worldcontract/` |
-| 实现 M9 企业成立与治理 | DES-010、PLAN-M9-001、DES-008；先读 `internal/genesis/`、`world-packs/hctm-genesis/` 与 World Bridge |
+| 维护 M9 企业成立与治理 | DES-010、PLAN-M9-001、M9 evidence；先读 `internal/incorporation/`、`world-packs/hctm-genesis/campaigns/incorporation/` 与 World Bridge |
+| 实现 M10 工厂选址与设施建设 | DES-011、PLAN-M10-001、DES-008；先读 M9 terminal contract、`internal/genesis/`、`internal/rules/` 与 World Bridge |
 | 查看或维护双系统全景 | DES-006、`frontend/src/components/SystemAtlas.tsx`、IAOS System Atlas API |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
@@ -33,7 +34,7 @@
 | 文档索引 | `docs/README.md` | 文档分类、状态和编号 |
 | 项目上下文 | `docs/agent-project-context.md` | Agent 快速入门 |
 | 架构 | `docs/architecture.md` | 仓库边界、数据流、安全和可重复性 |
-| 路线图 | `docs/roadmap.md` | M0-M6 当前状态 |
+| 路线图 | `docs/roadmap.md` | 里程碑状态与当前唯一 active plan |
 | 代码导航 | `docs/code-map.md` | 本文件 |
 | 历史记录 | `docs/progress-log.md` | 只追加进展日志 |
 | 薄编排服务入口 | `cmd/aese-server/main.go` | M7 run orchestration HTTP 服务启动入口 |
@@ -49,7 +50,8 @@
 | AESE 2.0 基础设计 | `docs/designs/DES-007-aese-2-foundation.md` | 三态、离散事件、IAOS 桥与 Genesis 迁移架构 |
 | World/IAOS 桥接合同 | `docs/designs/DES-008-world-iaos-bridge-contract.md` | observation/intent/committed outcome、journal/cursor、权限与失败恢复 |
 | M8 completed plan | `docs/plans/2026-07-22-m8-aese-2-foundation.md` | 已完成的三态世界、内核、bridge、pack 和 World Play 基线 |
-| M9 active plan | `docs/plans/2026-07-22-m9-genesis-incorporation.md` | 当前唯一 active 计划与 I0-I5 跨仓交付门 |
+| M9 completed plan | `docs/plans/2026-07-22-m9-genesis-incorporation.md` | 已完成的企业成立、治理、资本和预算基线 |
+| M10 active plan | `docs/plans/2026-07-22-m10-genesis-plant-build.md` | 当前唯一 active 计划与 P0-P5 跨仓交付门 |
 
 ## 3. M3 实现路径
 
@@ -232,7 +234,21 @@ M9 I0-I5 的当前入口如下：
 | IAOS 法人/治理能力 | `/iaos/iaos-go-m9-genesis/platform/internal/api/genesis_governance.go`；DES-051；revision `edcb915` |
 | M9 runbook / evidence | `docs/runbooks/genesis-incorporation.md`、`docs/reports/m9-genesis-incorporation-evidence.md` |
 
-## 13. 导航更新触发器
+## 13. M10 已实现路径
+
+| 能力 | 路径 |
+| --- | --- |
+| M10 设计与 completed plan | `docs/designs/DES-011-genesis-plant-build.md`、`docs/plans/2026-07-22-m10-genesis-plant-build.md` |
+| 场址、空间、项目模型与 tracer | `internal/plantbuild/` |
+| 场址/空间/项目机器合同 | `world-contracts/schemas/plant-build-campaign.schema.json`、对应 fixture |
+| Plant Build campaign | `world-packs/hctm-genesis/campaigns/plant-build/` |
+| IAOS bridge adapter | `internal/bridge/iaos/` |
+| World Play 工厂建设视图 | `frontend/src/components/world/PlantBuildPlay.tsx`、`frontend/src/world/plantBuild.ts`、`/#world-plant-build` |
+| Plant Build API | `internal/httpapi/server.go`（`GET /api/aese/v1/world/plant-build`） |
+| IAOS 投资与项目治理 | `/iaos/iaos-go-m10-plant/platform/internal/api/plant_governance.go`；DES-052；revision `23be02a` |
+| M10 runbook / evidence | `docs/runbooks/genesis-plant-build.md`、`docs/reports/m10-genesis-plant-build-evidence.md` |
+
+## 14. 导航更新触发器
 
 以下改动必须更新本文件：
 

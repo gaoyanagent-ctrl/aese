@@ -600,3 +600,19 @@
 - 影响：角色未知仍以明确空态呈现，不授予额外 World State；新旧 API 响应均不会导致页面崩溃。
 - 验证：修复前 Go 与 Vitest 回归均稳定失败；修复后全量 Go test/vet、32 项 Vitest、TypeScript、production build 通过。8090 API 实际返回 array，4173 的桌面 1440/1280 与移动 390 三项 live Playwright 均无 page error。
 - 后续：无。
+
+## 2026-07-22 - M10 工厂选址与设施建设计划启动
+
+- 变更：新增 approved DES-011 和唯一 active 的 PLAN-M10-001，将 M10 拆为 P0-P5：机器合同、受约束选址、AESE 设施世界、IAOS 投资与项目治理、统一角色与 Plant Build Play、全链验收；同步 README、Agent Context、Architecture、文档索引、Roadmap、Code Map 和 System Atlas 声明。
+- 原因：M9 已输出 `plant_project_eligible=true`，下一步需要在真实现金、预算、工期、空间、公用工程和外部资源约束下取得场地控制并完成设施验收，为 M11 建设生产能力提供机器资格。
+- 影响：M10 成为当前唯一 active plan，目标终态固定为 `capability_build_eligible=true`。首版比较绿地自建、租赁标准厂房改造和定制代建，但不预设评分赢家；生产设备、检测仪器、人员和投产门仍属于 M11。
+- 验证：`git diff --check`、DES/PLAN ID 唯一性、active plan 唯一性、全部 Atlas/World/场景 JSON 解析、受影响 Markdown 本地链接和 `scripts/check_system_atlas_tracking.sh` 均通过；本轮只修改设计与计划文档，未运行产品测试。工作区既有测试修改、截图删除和验收产物均未触碰。
+- 后续：执行 P0 T1-T6，先关闭 G4 候选/预算/工期基线与 G5 IAOS gap audit，再允许独立 IAOS worktree 开发。
+
+## 2026-07-22 - M10 Genesis 工厂选址与设施建设完成
+
+- 变更：完成 PLAN-M10-001 G4/G5 与 P0-P5/T1-T36；交付三个虚构候选的硬约束和解释评分、10 帧确定性设施项目世界、七节点空间模型、WBS/公用工程/资金守恒、utility delay Knowledge/rebaseline tracer、Plant Build API 与三态 UI。IAOS 独立 worktree revision `23be02a` 交付六类投资/项目/付款治理权限，业务记录、committed outcome journal 与 Outbox 同事务。
+- 原因：将 M9 的 `plant_project_eligible` 推进为经过场址、预算、现金、工程、公用工程、消防/EHS、验收和治理门的真实设施载体，为 M11 提供机器可验证入口。
+- 影响：`hctm-genesis` 升级为 0.3.0，终态输出 `capability_build_eligible=true`；生产设备、检测仪器、招聘培训与投产仍未实现。M7/M8/M9 的 pack、CLI 和 Preview/Live 行为未改写。
+- 验证：AESE 全量 Go test/vet、pack validate、100 次 hash、snapshot/失败门、34 项 Vitest、TypeScript 和生产构建通过；IAOS 四个 Go module test/vet、Code Map/Atlas tracking、真实 201/duplicate/未验收付款拒绝和 8082 部署通过；Plant Build 三视口 Playwright 与最终 Atlas 同步记录在 M10 evidence。
+- 后续：M10 已完成，当前无 active 主计划；M11 必须另立计划并只消费机器终态，不从 UI 推断生产能力。

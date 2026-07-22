@@ -236,3 +236,22 @@ Founder / CEO / CFO human or deterministic role policy
 ```
 
 虚构监管机构和银行属于 AESE 外部世界策略，不是 IAOS 用户。法人档案、治理决议、组织岗位、资本记录和预算审批属于 IAOS；登记生效、账户实际开立、资金实际到账和岗位实际接受属于 World State。详细边界见 DES-010 和 PLAN-M9-001。
+
+## 14. M10 工厂选址与设施建设纵向架构
+
+M10 消费 M9 的 `plant_project_eligible=true`，继续复用同一 World Runtime、三态模型和 IAOS Bridge。它不把 IAOS 项目记录误当成现实建设进度：
+
+```text
+Project Director / CEO / CFO
+  -> IAOS site, investment, contract, project and payment governance
+  -> committed outcome + journal + Outbox
+  -> AESE contractor, landlord and utility-provider world strategies
+  -> actual site control, construction, delay and inspection consequence
+  -> actor-scoped observation + discrepancy + rebaseline intent
+  -> governed acceptance
+  -> capability_build_eligible
+```
+
+候选场地、实际占用、公用工程容量、现场施工和检查结果属于 AESE World State；选址评估、投资决议、租赁合同、项目/WBS、变更、付款和验收记录属于 IAOS；角色只通过 observation 获得其可见的 Actor Knowledge。计划到期或 IAOS 中把里程碑标为完成，都不能单独推进实际工程状态。
+
+M10 只建立区域、城市、园区、场地、建筑、楼层和功能区的最小空间层级，不建设 BIM、3D 或布局编辑器。设施验收后仅输出 M11 的能力建设资格；生产设备、检测仪器、招聘培训和投产准备仍由 M11 负责。详细边界见 DES-011 和 PLAN-M10-001。

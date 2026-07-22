@@ -109,6 +109,10 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
           <RotateCcw />
           复位
         </button>
+        <button onClick={() => (window.location.hash = "world-plant-build")}>
+          <Building2 />
+          工厂建设 Campaign
+        </button>
         <span>
           阶段 {step + 1}/{trace.frames.length} · {f.phase}
         </span>
