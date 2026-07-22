@@ -40,3 +40,7 @@
 ## M12 产品工业化治理
 
 `genesis.industrialization.quote/design/process/trial/quality/ppap/release` 已交付。质量、PPAP 与放行强制引用 World/customer evidence；版本篡改、伪造测量/客户决定、未批准试制和重复放行失败关闭。完整 CRM/CPQ/PLM/QMS/SRM 与 M13 正式 O2D/财务闭环仍为后续缺口。
+
+## M13 首次商业交付治理
+
+`genesis.delivery.order/plan/procure/produce/ship/accept/invoice/collect/cost/close` 已交付。客户接受、银行到账、实际成本和周期关闭强制引用 World evidence。完整总账、税务、售后、坏账和 M14 多周期实验仍为后续缺口。

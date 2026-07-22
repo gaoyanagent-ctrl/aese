@@ -293,3 +293,22 @@ Sales / Project / Product / Process / Quality / Procurement / Plant / CFO
 客户实际 RFQ/定点/PPAP 决定、供应商/材料真实能力和试制/测量结果属于 AESE World State；报价、客户项目、产品/BOM/routing revision、APQP、问题/变更、PPAP package 和生产放行记录属于 IAOS；角色只通过权限与 observation 获得 Actor Knowledge。IAOS 状态、UI 或虚拟时间不能直接改写测量值、Cpk、客户决定或物理试制结果。
 
 现有 `scenario-packs/hctm` 中的 `HCTM-BCP-A01`、BOM 和 routing 是 M3/O2D 兼容 fixture，不是 Genesis 已完成工业化的历史事实。M12 在独立 campaign 中生成 release manifest/hash，M13 只有在版本兼容检查通过后才能投影到旧 O2D 对象。正式订单、批量量产、交付、开票和回款属于 M13。详细边界见 DES-013 和 PLAN-M12-001。
+
+## 17. M13 第一次完整商业交付纵向架构
+
+M13 消费 M12 的 `serial_production_eligible=true`，复用 IAOS O2D 运行能力完成首张正式订单到现金和实际毛利的闭环，但不把订单、发票或收款记录误当作客户需求、物理交付或银行到账：
+
+```text
+Sales / Planning / Procurement / Production / Quality / Logistics / Finance
+  -> IAOS order, MRP, supply, production, inventory, shipment and finance governance
+  -> committed outcome + journal + Outbox
+  -> AESE customer, supplier, equipment, transport and bank world strategies
+  -> actual demand, material, output, delivery, acceptance and cash consequence
+  -> actor-scoped observation + 300-unit discrepancy + recovery intent
+  -> governed invoice, AR, settlement, actual-cost and margin close
+  -> first_commercial_cycle_closed
+```
+
+客户正式需求/变更/接受/付款行为、供应/设备/运输现实、实际生产资源消耗和银行到账属于 AESE World State；订单、采购、工单、库存、发运、发票、应收、收款核销、成本和项目损益记录属于 IAOS；角色只通过权限和 observation 获得 Actor Knowledge。发运不等于客户接受，发票不等于现金，毛利不等于现金余额。
+
+M13 从 M12 release manifest 编译 Genesis-specific O2D 输入，期初可销售成品为零，并使用新交易/correlation code；旧 M3/M7 pack 继续作为回归 fixture，不能贡献库存或既成事件。M13 关闭 M9-M13 主纵向场景，长期多周期与参数化实验属于 M14。详细边界见 DES-014 和 PLAN-M13-001。

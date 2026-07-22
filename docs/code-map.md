@@ -18,7 +18,8 @@
 | 维护 M9 企业成立与治理 | DES-010、PLAN-M9-001、M9 evidence；先读 `internal/incorporation/`、`world-packs/hctm-genesis/campaigns/incorporation/` 与 World Bridge |
 | 维护 M10 工厂选址与设施建设 | DES-011、PLAN-M10-001、M10 evidence；先读 `internal/plantbuild/`、Plant Build campaign 与 IAOS DES-052 |
 | 维护 M11 生产能力建设 | DES-012、PLAN-M11-001、M11 evidence；先读 `internal/capabilitybuild/`、Capability Build campaign 与 IAOS DES-053 |
-| 实现 M12 产品工业化与量产批准 | DES-013、PLAN-M12-001、DES-008；先读 M11 terminal contract、旧 HCTM BOM/routing fixture 与 World Bridge |
+| 维护 M12 产品工业化与量产批准 | DES-013、PLAN-M12-001、M12 evidence；先读 `internal/industrialization/`、Industrialization campaign 与 IAOS DES-054 |
+| 实现 M13 第一次完整商业交付 | DES-014、PLAN-M13-001、DES-008；先读 M12 terminal/release manifest、现有 O2D/M6/M7 能力与 World Bridge |
 | 查看或维护双系统全景 | DES-006、`frontend/src/components/SystemAtlas.tsx`、IAOS System Atlas API |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
@@ -56,6 +57,7 @@
 | M10 completed plan | `docs/plans/2026-07-22-m10-genesis-plant-build.md` | 已完成的场址、设施、项目、公用工程和验收基线 |
 | M11 completed plan | `docs/plans/2026-07-22-m11-genesis-production-capability-build.md` | C0-C6 跨仓交付与验收记录 |
 | M12 completed plan | `docs/plans/2026-07-22-m12-genesis-product-industrialization.md` | D0-D7 跨仓交付与验收记录 |
+| M13 completed plan | `docs/plans/2026-07-22-m13-genesis-first-commercial-delivery.md` | E0-E8 跨仓交付与 Genesis 收口记录 |
 
 ## 3. M3 实现路径
 
@@ -281,7 +283,22 @@ M9 I0-I5 的当前入口如下：
 | IAOS 客户项目/工程/APQP/质量/PPAP 治理 | `/iaos/iaos-go-m12-industrialization/platform/internal/api/plant_governance.go`；DES-054；revision `50a46e2` |
 | M12 runbook/evidence | `docs/runbooks/genesis-industrialization.md`、`docs/reports/m12-genesis-industrialization-evidence.md` |
 
-## 16. 导航更新触发器
+## 16. M13 已实现路径
+
+| 能力 | 路径 |
+| --- | --- |
+| M13 设计与 completed plan | `docs/designs/DES-014-genesis-first-commercial-delivery.md`、`docs/plans/2026-07-22-m13-genesis-first-commercial-delivery.md` |
+| 第一次商业交付领域与 tracer | `internal/firstdelivery/` |
+| O2D/发票/现金/成本机器合同 | `world-contracts/schemas/first-delivery-campaign.schema.json`、对应 fixture |
+| First Delivery campaign | `world-packs/hctm-genesis/campaigns/first-delivery/` |
+| Genesis O2D compatibility | `scenario-packs/hctm/`、`internal/legacyprojection/`、`internal/replay/` |
+| IAOS bridge adapter | `internal/bridge/iaos/` |
+| World Play 首次交付视图 | `frontend/src/components/world/FirstDeliveryPlay.tsx`、`frontend/src/world/firstDelivery.ts`、`/#world-first-delivery` |
+| First Delivery API | `internal/httpapi/server.go`（`GET /api/aese/v1/world/first-delivery`） |
+| IAOS O2D/发票/应收/收款/实际成本治理 | `/iaos/iaos-go-m13-delivery/platform/internal/api/plant_governance.go`；DES-055；revision `067bbb4` |
+| M13/Genesis evidence | `docs/reports/m13-genesis-first-commercial-delivery-evidence.md`、`docs/reports/project-genesis-m9-m13-e2e.md` |
+
+## 17. 导航更新触发器
 
 以下改动必须更新本文件：
 

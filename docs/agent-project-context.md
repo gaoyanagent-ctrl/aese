@@ -176,6 +176,7 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 - DES-011 与 PLAN-M10-001 已完成。`hctm-genesis@0.3.0` 从 M9 机器资格推进候选评估、受治理选址与投资决策、场地控制、设施改造、公用工程延期重排和验收，输出 M11 可消费的 `capability_build_eligible`；IAOS revision 为 `23be02a`，设备采购、仪器和人员能力仍属于 M11。
 - DES-012 与 PLAN-M11-001 已完成。`hctm-genesis@0.4.0` 覆盖资金补足、设备/实验室/仓储能力、核心团队招聘培训和一班制资格，输出 M12 可消费的 `industrialization_eligible`；IAOS revision `789b925`。产品/BOM/工艺、APQP、试生产、PPAP 和 SOP 不在 M11。
 - DES-013 与 PLAN-M12-001 已完成。`hctm-genesis@0.5.0` 覆盖 RFQ/报价/定点、产品/BOM/工艺版本、供应/工装/物料、APQP、两轮试制、质量整改和 PPAP，输出 M13 可消费的 `serial_production_eligible`；IAOS revision `50a46e2`。正式 O2D、交付、开票和回款不在 M12。
+- DES-014 与 PLAN-M13-001 已完成。`hctm-genesis@0.6.0` 从零可销售库存完成首张订单、MRP、采购生产、三批接受、开票/应收、银行回款、实际成本和项目毛利，输出 `first_commercial_cycle_closed`；IAOS revision `067bbb4`，Project Genesis M9-M13 主纵向场景完成。
 
 ## 7. 后续 agent 必须维护的信息
 

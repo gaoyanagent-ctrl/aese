@@ -1,32 +1,39 @@
 import {
   ArrowLeft,
   BadgeCheck,
-  ClipboardCheck,
+  Banknote,
+  PackageCheck,
   Pause,
   Play,
   RotateCcw,
   StepForward,
-  Wrench,
+  Truck,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import {
-  loadIndustrialization,
-  type IndustrializationTrace,
-} from "../../world/industrialization";
+  loadFirstDelivery,
+  type FirstDeliveryTrace,
+} from "../../world/firstDelivery";
 import "./WorldPlay.css";
-export function IndustrializationPlay({ onExit }: { onExit: () => void }) {
-  const [t, setT] = useState<IndustrializationTrace | null>(null),
+const c = (v: string) =>
+  new Intl.NumberFormat("zh-CN", {
+    style: "currency",
+    currency: "CNY",
+    maximumFractionDigits: 0,
+  }).format(Number(v));
+export function FirstDeliveryPlay({ onExit }: { onExit: () => void }) {
+  const [t, setT] = useState<FirstDeliveryTrace | null>(null),
     [s, setS] = useState(0),
     [play, setPlay] = useState(false),
     [err, setErr] = useState("");
   useEffect(() => {
-    const c = new AbortController();
-    loadIndustrialization(c.signal)
+    const x = new AbortController();
+    loadFirstDelivery(x.signal)
       .then(setT)
       .catch((e) => {
         if (e.name !== "AbortError") setErr(String(e));
       });
-    return () => c.abort();
+    return () => x.abort();
   }, []);
   useEffect(() => {
     if (!play || !t) return;
@@ -39,31 +46,26 @@ export function IndustrializationPlay({ onExit }: { onExit: () => void }) {
           }
           return v + 1;
         }),
-      650,
+      600,
     );
     return () => clearInterval(id);
   }, [play, t]);
-  if (err)
-    return (
-      <main className="world-error" role="alert">
-        {err}
-      </main>
-    );
-  if (!t) return <main className="world-loading">正在加载产品工业化世界…</main>;
+  if (err) return <main className="world-error">{err}</main>;
+  if (!t) return <main className="world-loading">正在加载首次商业交付…</main>;
   const f = t.frames[s];
   return (
     <div className="world-play">
       <header className="world-toolbar">
         <button className="world-back" onClick={onExit}>
           <ArrowLeft />
-          能力建设
+          产品工业化
         </button>
         <div>
-          <span>PROJECT GENESIS · INDUSTRIALIZATION</span>
-          <h1>HCTM-BCP-A01 产品工业化</h1>
+          <span>PROJECT GENESIS · FIRST DELIVERY</span>
+          <h1>首张正式订单商业闭环</h1>
         </div>
         <div className="world-clock">
-          <small>虚拟时间 · Asia/Shanghai</small>
+          <small>虚拟时间</small>
           <strong>{f.sim_time}</strong>
         </div>
       </header>
@@ -83,10 +85,6 @@ export function IndustrializationPlay({ onExit }: { onExit: () => void }) {
           <RotateCcw />
           复位
         </button>
-        <button onClick={() => (window.location.hash = "world-first-delivery")}>
-          <Wrench />
-          首次商业交付 Campaign
-        </button>
         <span>
           {s + 1}/{t.frames.length} · {f.phase}
         </span>
@@ -94,10 +92,10 @@ export function IndustrializationPlay({ onExit }: { onExit: () => void }) {
       <main className="world-main">
         <section className="world-status">
           <span
-            className={`world-state-badge ${f.serial_production_eligible ? "closed" : "active"}`}
+            className={`world-state-badge ${f.first_commercial_cycle_closed ? "closed" : "active"}`}
           >
-            {f.serial_production_eligible ? <BadgeCheck /> : <Wrench />}
-            {f.serial_production_eligible ? "M13 eligible" : f.phase}
+            {f.first_commercial_cycle_closed ? <BadgeCheck /> : <Truck />}
+            {f.first_commercial_cycle_closed ? "Genesis cycle closed" : f.phase}
           </span>
           <h2>{f.title}</h2>
           <p>
@@ -108,59 +106,75 @@ export function IndustrializationPlay({ onExit }: { onExit: () => void }) {
         <section className="three-state-grid">
           <article>
             <header>
-              <ClipboardCheck />
-              APQP / PPAP
+              <PackageCheck />
+              数量与库存 <small>World owns</small>
             </header>
             <dl>
-              {Object.entries(f.apqp_gates).map(([k, v]) => (
-                <div key={k}>
-                  <dt>{k}</dt>
-                  <dd>{v ? "通过" : "阻塞"}</dd>
+              <div>
+                <dt>正式需求</dt>
+                <dd>{f.demand}</dd>
+              </div>
+              <div>
+                <dt>发运 / 接受</dt>
+                <dd>
+                  {f.shipped} / {f.accepted}
+                </dd>
+              </div>
+              <div>
+                <dt>可销售库存</dt>
+                <dd>{f.inventory}</dd>
+              </div>
+              {f.shipments.map((x) => (
+                <div key={x.code}>
+                  <dt>{x.code}</dt>
+                  <dd>
+                    {x.quantity} · accepted {x.accepted}
+                  </dd>
                 </div>
               ))}
+            </dl>
+          </article>
+          <article>
+            <header>
+              <Banknote />
+              发票、应收与现金
+            </header>
+            <dl>
               <div>
-                <dt>PPAP</dt>
-                <dd>{f.ppap_status}</dd>
+                <dt>含税发票</dt>
+                <dd>{c(f.invoice_gross.value)}</dd>
+              </div>
+              <div>
+                <dt>应收</dt>
+                <dd>{c(f.ar.value)}</dd>
+              </div>
+              <div>
+                <dt>已核销回款</dt>
+                <dd>{c(f.collected.value)}</dd>
+              </div>
+              <div>
+                <dt>现金</dt>
+                <dd>{c(f.cash.value)}</dd>
               </div>
             </dl>
           </article>
           <article>
             <header>
-              <Wrench />
-              试制与质量 <small>World owns</small>
-            </header>
-            <dl>
-              {f.trials.map((x) => (
-                <div key={x.code}>
-                  <dt>{x.code}</dt>
-                  <dd>
-                    rev {x.revision} · Cpk {x.Cpk}
-                    <small>
-                      良率 {x.Yield}% · 泄漏 {x.leak_failures}
-                    </small>
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </article>
-          <article>
-            <header>
               <BadgeCheck />
-              发布与兼容
+              实际成本与毛利
             </header>
             <dl>
-              {f.releases.map((x) => (
-                <div key={x.code}>
-                  <dt>{x.code}</dt>
-                  <dd>
-                    rev {x.revision}
-                    <small>{x.hash.slice(0, 12)}</small>
-                  </dd>
-                </div>
-              ))}
               <div>
-                <dt>旧 HCTM</dt>
-                <dd>{f.compatibility}</dd>
+                <dt>收入</dt>
+                <dd>{c(f.revenue.value)}</dd>
+              </div>
+              <div>
+                <dt>实际成本</dt>
+                <dd>{c(f.actual_cost.value)}</dd>
+              </div>
+              <div>
+                <dt>项目毛利</dt>
+                <dd>{c(f.gross_margin.value)}</dd>
               </div>
             </dl>
           </article>

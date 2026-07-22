@@ -23,13 +23,14 @@
 | M10 Genesis Plant Build | 选址、场地控制、设施项目、公用工程、异常重排与验收 | Completed | hctm-genesis@0.3.0、M10 evidence、IAOS DES-052 |
 | M11 Genesis Capability Build | 资金补足、设备/实验室/仓储能力、核心团队与岗位资格 | Completed | hctm-genesis@0.4.0、M11 evidence、IAOS DES-053 |
 | M12 Genesis Industrialization | RFQ/定点、产品/工艺、供应商/工装、APQP、试制、PPAP 与量产批准 | Completed | hctm-genesis@0.5.0、M12 evidence、IAOS DES-054 |
+| M13 Genesis First Delivery | 正式 O2D、三批交付、客户接受、开票/回款、实际成本与项目毛利 | Completed | hctm-genesis@0.6.0、M13/Genesis evidence、IAOS DES-055 |
 | X1 System Atlas 全景治理 | 最终完成体、当前状态、依赖与进展历史 | Completed | DES-006、IAOS DES-049、双端动态图谱 |
 
 ## 2. 当前阶段
 
 M3、M3V、M4、M5、M6、M7 和跨里程碑的 X1 System Atlas 已完成。联动中心已支持联动检查与受治理场景运行，不依赖 CLI 完成 preflight、initialize、七幕推进、Agent 分析、verify 与 reset。
 
-PLAN-M8-001 至 PLAN-M12-001 均已完成，当前没有 active 主实施计划。Project Genesis 已可从 pre-incorporation 确定性推进到 M13 可消费的 `serial_production_eligible`。
+PLAN-M8-001 至 PLAN-M13-001 均已完成，当前没有 active 主实施计划。Project Genesis 已从 pre-incorporation 确定性推进到 `first_commercial_cycle_closed`，M9-M13 主纵向场景完成。
 
 M7 O0-O4 已完成。最终 `m7-acceptance-20260722-05` 从 clean reset 跑通编排 API 与 CLI 对照链：22 个事件、三 Agent、17 条离线业务断言、2 条在线 IAOS 断言和 M6 KPI 均通过；单 run 产生 9 次成功 Tool Call 与两套一致的 O2D Outbox 副作用，UI/CLI 均安全复位。AESE 8090/4173 与 IAOS 8082/3000 的本机部署和健康检查已记录在 M7 evidence。该基线由 M8 强制保留。
 
@@ -42,7 +43,59 @@ M7 的最小成功标准：
 5. 权限不足、跨租户、陈旧 cursor 和非法状态转换全部失败关闭。
 6. UI 与 CLI 对同一 pack 产生一致的 22 事件、Agent 建议、断言和 KPI。
 
-## 3. M12 当前范围
+## 3. M13 当前范围
+
+包含：
+
+- 从零可销售成品库存接收 10,000 件正式订单和 2,000 件追加需求。
+- M12 release manifest 到 Genesis-specific O2D 的兼容适配，以及 ATP/MRP、采购、IQC、生产、质量和库存。
+- 供应延期、设备停机和末批 300 件短缺的受治理恢复。
+- 9,000、2,700、300 三批实际发运、客户收货/接受和 delivery close。
+- 开票、应收、客户实际付款、银行到账、收款核销和合同负债处理。
+- 材料、人工、设备/能源、报废、质量、加急、物流和分摊实际成本，以及订单/项目毛利。
+- First Delivery Play、Project Genesis M9-M13 terminal-hash 链和 M3-M12 强制回归。
+
+不包含：
+
+- 第二订单/客户/产品、多工厂或长期滚动 S&OP/MPS。
+- 完整总账、税务申报、资金管理、真实银行/电子发票接口和法定报表。
+- 售后、退货、质保、贷项、坏账和复杂跨期收入/成本会计。
+- 参数化分支、Monte Carlo、A/B 和长期经营实验；属于 M14。
+
+## 4. M13 当前交付切片
+
+| Slice | 内容 | 状态 |
+| --- | --- | --- |
+| E0 | 订单、履约、财务与成本机器合同 | Completed |
+| E1 | M12 terminal 到 Genesis O2D 兼容适配 | Completed |
+| E2 | 正式订单、ATP/MRP 与供应执行 | Completed |
+| E3 | 正式生产、质量、库存与实际成本 | Completed |
+| E4 | 分批发运、客户接受与 300 件恢复 | Completed |
+| E5 | 开票、应收、银行回款与项目盈亏 | Completed |
+| E6 | IAOS O2D、财务与成本治理 | Completed |
+| E7 | 统一 Agent 与 First Delivery Play | Completed |
+| E8 | 全链验收与 Project Genesis 收口 | Completed |
+
+## 5. M13 完成条件
+
+- 从 M12 terminal contract 到 `first_commercial_cycle_closed` 可确定性运行、恢复、重放和分层复位。
+- 正式需求 12,000、采购/生产/报废/库存、三批发运和客户接受数量严格守恒。
+- 300 件短缺形成 observation、受治理恢复、第三批交付和 discrepancy close 完整链。
+- 客户接受、发票/应收、银行到账、收款核销、收入和现金严格分离且金额守恒。
+- M12 财务结转、订单实际成本、标准/实际差异、项目毛利和 closing cash 可解释对账。
+- 两仓权限、RLS、Outbox、幂等、API/UI、runbook/evidence、Project Genesis 总报告以及 M3-M12 回归全部通过。
+
+## 6. M13 风险与依赖
+
+- M12 1,200,000 CNY 试制成本的支付/应付状态和 2,000,000 CNY 合同负债履约处理尚需在 G4 冻结；禁止通过改 opening cash/利润静默配平。
+- 旧 HCTM 场景包含 1,200 件 opening inventory 和已发生事件，M13 只能复用语义/能力，不能继承库存或交易历史。
+- 发运不等于客户接受，发票不等于现金，毛利不等于现金余额；UI 和 IAOS 状态不能伪造 World/银行事实。
+- G4-G9 未关闭前不得进入 IAOS 写端点开发；E6 必须建立新的独立 IAOS branch/worktree。
+- actual cost 缺任一强制要素时经营分析必须失败或保持不完整，不能回退到估算后宣称盈利。
+- M13 reset 必须保留 M9-M12 L1 事实和旧场景数据，只清理本次运行的 L2/L3 对象。
+- 当前工作区已有其他人的测试、截图和生成物改动，实施 agent 必须保留并避免重叠修改。
+
+## 7. M12 已完成范围
 
 包含：
 
@@ -60,7 +113,7 @@ M7 的最小成功标准：
 - 第二客户/产品、多工厂、多版本并行量产或完整 CRM/CPQ/PLM/QMS/SRM。
 - CAD/CAE、高精度物理仿真、真实外部接口或参数化分支实验。
 
-## 4. M12 当前交付切片
+## 8. M12 交付切片
 
 | Slice | 内容 | 状态 |
 | --- | --- | --- |
@@ -73,7 +126,7 @@ M7 的最小成功标准：
 | D6 | 统一岗位与 Industrialization Play | Completed |
 | D7 | 全链、安全、恢复和回归验收 | Completed |
 
-## 5. M12 完成条件
+## 9. M12 完成条件
 
 - 从 M11 terminal contract 到 `serial_production_eligible` 可确定性运行、恢复、重放和安全复位。
 - RFQ/报价/定点、开发资金/合同负债、项目预算、试制成本和现金语义正确且守恒。
@@ -82,7 +135,7 @@ M7 的最小成功标准：
 - 焊接泄漏/Cpk 异常形成 observation、受治理变更、第二轮试制、问题关闭和客户 PPAP 批准完整链。
 - 两仓权限、RLS、Outbox、幂等、API/UI、runbook/evidence、M3/O2D 兼容以及 M7-M11 回归全部通过。
 
-## 6. M12 风险与依赖
+## 10. M12 风险与依赖
 
 - M11 closing cash 为 8,500,000 CNY，并需保留 3,000,000 工资准备金和 5,000,000 最低缓冲；G5 必须冻结客户工装预付款/开发预算，且预付款只能记合同负债，不能计收入。
 - 现有 `scenario-packs/hctm` 已预置同名产品/BOM/routing，但只是兼容 fixture；M12 必须产生独立 release manifest/hash，禁止把旧 seed 当完成证据。
@@ -92,7 +145,7 @@ M7 的最小成功标准：
 - M12 不得提前接收正式订单、运行正式 O2D 或宣称第一批交付完成。
 - 当前工作区已有其他人的测试、截图和生成物改动，实施 agent 必须保留并避免重叠修改。
 
-## 7. M11 已完成范围
+## 11. M11 已完成范围
 
 包含：
 
@@ -110,7 +163,7 @@ M7 的最小成功标准：
 - 第一张正式订单、开票、回款和实际项目盈亏；属于 M13。
 - 完整采购/SRM、HRIS/LMS、薪酬、EAM、固定资产会计、融资或 3D 产品。
 
-## 8. M11 交付切片
+## 12. M11 交付切片
 
 | Slice | 内容 | 状态 |
 | --- | --- | --- |
@@ -122,7 +175,7 @@ M7 的最小成功标准：
 | C5 | 统一岗位与 Capability Build Play | Completed |
 | C6 | 全链、安全、恢复和回归验收 | Completed |
 
-## 9. M11 完成条件
+## 13. M11 完成条件
 
 - 从 M10 terminal contract 到 `industrialization_eligible` 可确定性运行、恢复、重放和安全复位。
 - 资本实际到账、新预算、设施尾款、设备/租赁承诺、工资准备金和现金严格守恒。
@@ -131,7 +184,7 @@ M7 的最小成功标准：
 - 检漏设备失败形成 observation、Knowledge 差异、受治理整改、复验和关闭的完整因果链。
 - 两仓权限、RLS、隐私、Outbox、幂等、API/UI、runbook/evidence 以及 M7-M10 回归全部通过。
 
-## 10. M11 风险与依赖
+## 14. M11 风险与依赖
 
 - M10 closing cash 只有 10,000,000 CNY 且存在设施遗留承诺，不能无资金来源生成整线；G6 必须先冻结剩余资本实缴、采购/租赁组合和现金缓冲。
 - 资产登记、员工档案和培训记录不等于实际设备能力、人员到岗或技能掌握；只有 World consequence 和验收事实可推进能力状态。
@@ -141,7 +194,7 @@ M7 的最小成功标准：
 - M11 只交付通用设备和人员能力，不得提前宣称产品、APQP、试生产、PPAP 或 SOP 完成。
 - 当前工作区已有其他人的测试、截图和生成物改动，实施 agent 必须保留并避免重叠修改。
 
-## 11. M10 已完成范围
+## 15. M10 已完成范围
 
 包含：
 
@@ -159,7 +212,7 @@ M7 的最小成功标准：
 - BIM、3D、自由布局编辑器、真实地图/园区/承包商接口。
 - 完整地产、总账、税务、融资或通用项目管理产品。
 
-## 12. M10 交付切片
+## 16. M10 交付切片
 
 | Slice | 内容 | 状态 |
 | --- | --- | --- |
@@ -170,7 +223,7 @@ M7 的最小成功标准：
 | P4 | 统一角色与 Plant Build Play | Completed |
 | P5 | 全链、安全、恢复和回归验收 | Completed |
 
-## 13. M10 完成条件
+## 17. M10 完成条件
 
 - 至少三个候选先经过硬约束，再产生版本化、可解释的多维评分和受治理决策。
 - 从 M9 terminal contract 到 `capability_build_eligible` 可确定性运行、恢复、重放和安全复位。
@@ -179,7 +232,7 @@ M7 的最小成功标准：
 - 公用工程延期能形成 observation、Knowledge 差异、受治理重排和新实际结果的完整因果链。
 - 两仓权限、RLS、Outbox、幂等、API/UI、runbook/evidence 以及 M7/M8/M9 回归全部通过。
 
-## 14. M10 风险与依赖
+## 18. M10 风险与依赖
 
 - M9 只有 20,000,000 CNY 实际现金和 15,000,000 CNY 首年预算，首版不得假设可支付绿地自建；候选基线预计收敛到租赁标准厂房改造，但必须由规则和审批得出。
 - IAOS project/milestone 状态不等于现场实际进度；只有 AESE World consequence 和验收事实可以推进物理状态。
@@ -188,7 +241,7 @@ M7 的最小成功标准：
 - M10 只交付设施载体，不得提前引入生产设备、人员或投产能力，避免侵入 M11。
 - 当前工作区已有其他人的测试、截图和生成物改动，实施 agent 必须保留并避免重叠修改。
 
-## 15. M9 已完成范围
+## 19. M9 已完成范围
 
 包含：
 
@@ -206,7 +259,7 @@ M7 的最小成功标准：
 - RFQ/APQP/PPAP、首批交付和参数化实验。
 - 完整总账、税务、复杂融资或真实监管/银行接口。
 
-## 16. M9 交付切片
+## 20. M9 交付切片
 
 | Slice | 内容 | 状态 |
 | --- | --- | --- |
@@ -217,7 +270,7 @@ M7 的最小成功标准：
 | I4 | Genesis Incorporation Play | Completed |
 | I5 | 全链、恢复、安全和回归验收 | Completed |
 
-## 17. M9 完成条件
+## 21. M9 完成条件
 
 - pre-incorporation 到 `plant_project_eligible` 可确定性运行、恢复和重放。
 - 法人、账户、资本、任命和预算的三态及因果链可机器验证。
@@ -226,7 +279,7 @@ M7 的最小成功标准：
 - IAOS journal/Outbox 与业务提交原子，回滚不产生 committed outcome。
 - tenant、幂等、并发、断线和重复执行测试通过，M7/M8 零回归。
 
-## 18. M9 风险与依赖
+## 22. M9 风险与依赖
 
 - M8 初态中的 10,000,000 CNY 当前没有显式 owner；M9 必须通过 pack version 和资本事件迁移，禁止静默当作公司现金。
 - 法人档案 committed outcome 不等于外部登记已经生效；监管和银行结果由 AESE 确定性世界策略产生。
@@ -235,7 +288,7 @@ M7 的最小成功标准：
 - 自动 Agent 不得批准自身预算、伪造外部结果或绕过岗位 mandate。
 - 当前工作区已有其他人的测试与截图改动，实施 agent 必须保留并使用不重叠 worktree。
 
-## 19. M8 已完成范围
+## 23. M8 已完成范围
 
 包含：
 
@@ -257,7 +310,7 @@ M7 的最小成功标准：
 
 M8 决策门与 F0-F5 的任务、验收和跨仓顺序以 PLAN-M8-001 为准。后续 Project Genesis 分解为 M9-M13，参数化分支实验后移至 M14。
 
-## 20. M8 交付切片
+## 24. M8 交付切片
 
 | Slice | 内容 | 状态 |
 | --- | --- | --- |
@@ -268,7 +321,7 @@ M8 决策门与 F0-F5 的任务、验收和跨仓顺序以 PLAN-M8-001 为准。
 | F4 | Genesis world pack 与旧场景兼容 | Completed |
 | F5 | World Play 最小界面与全链验收 | Completed |
 
-## 21. M8 架构风险与依赖
+## 25. M8 架构风险与依赖
 
 - ADR-004 已 accepted；实现必须遵守独立 PostgreSQL database/账号/迁移边界，禁止跨库查询和外键。
 - AESE 仿真事实和 IAOS 管理事实必须物理/逻辑隔离，禁止共享表和跨库写入。
@@ -278,7 +331,7 @@ M8 决策门与 F0-F5 的任务、验收和跨仓顺序以 PLAN-M8-001 为准。
 - IAOS 修改必须在独立 worktree，并先完成权限、RLS、Outbox、幂等和无部分写入设计。
 - M7 22 事件、三 Agent、Preview/Live 与 reset 是强制回归门。
 
-## 22. M8 完成条件
+## 26. M8 完成条件
 
 - ADR-004 accepted，World/IAOS/Knowledge 所有权和 World Store 选型明确。
 - 相同 pack、规则版本、seed 和输入可重复产生相同 event log、state hash 与 KPI。
@@ -287,7 +340,7 @@ M8 决策门与 F0-F5 的任务、验收和跨仓顺序以 PLAN-M8-001 为准。
 - Genesis pack 可离线验证、初始化、推进、复位和 replay，旧 M7 场景不回归。
 - API/UI/runbook/evidence 与两仓 revision 完整。
 
-## 23. M7 已完成范围（保留基线）
+## 27. M7 已完成范围（保留基线）
 
 包含：
 
@@ -304,7 +357,7 @@ M8 决策门与 F0-F5 的任务、验收和跨仓顺序以 PLAN-M8-001 为准。
 - AESE 业务数据库、通用任务队列或工作流引擎。
 - 完整成本核算、3D 工厂和布局编辑器。
 
-## 24. M7 交付切片
+## 28. M7 交付切片
 
 | Slice | 内容 | 状态 |
 | --- | --- | --- |
@@ -314,7 +367,7 @@ M8 决策门与 F0-F5 的任务、验收和跨仓顺序以 PLAN-M8-001 为准。
 | O3 | 可视化场景运行控制台 | Completed |
 | O4 | 全链路、恢复、安全和三视口验收 | Completed |
 
-## 25. 历史风险与依赖
+## 29. 历史风险与依赖
 
 - IAOS Platform、PostgreSQL、NATS 和 O2D 可运行，`tenant-hctm` 的 work_order metadata、workflow config 和 tracer 数据已完成 seed/apply。
 - `/iaos/iaos-go` 当前主分支本地领先远程，任何集成开发必须使用独立 worktree 并确认基线。
@@ -333,7 +386,7 @@ M8 决策门与 F0-F5 的任务、验收和跨仓顺序以 PLAN-M8-001 为准。
 - 当前场景使用固定自然键，同一 tenant/scenario 首版只能有一个可写 active run。
 - 浏览器不得直接编排多个 IAOS 写 API；所有危险动作需要服务端权限、幂等和确认合同。
 
-## 26. M7 完成条件
+## 30. M7 完成条件
 
 - 非研发用户可从浏览器完整运行并复位第一条故事。
 - UI 状态只在 IAOS committed/no-op 和 snapshot cursor 证实后推进。
@@ -341,7 +394,7 @@ M8 决策门与 F0-F5 的任务、验收和跨仓顺序以 PLAN-M8-001 为准。
 - reset 影响可预览，一次性 confirmation token 不能重放，L1 始终保留。
 - IAOS 与 AESE 两仓权限、测试、部署、runbook 和 evidence 完整。
 
-## 27. M6 完成证据
+## 31. M6 完成证据
 
 M6 已满足：
 

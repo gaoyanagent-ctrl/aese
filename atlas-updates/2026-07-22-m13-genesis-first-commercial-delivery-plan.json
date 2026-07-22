@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m13-genesis-first-commercial-delivery-plan-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "启动 M13 Genesis 第一次完整商业交付计划",
+  "detail": "新增 approved DES-014 和 active PLAN-M13-001，消费 M12 serial_production_eligible，按机器合同、Genesis O2D 适配、订单供应、生产成本、三批交付、开票回款、IAOS 治理、First Delivery Play 和全链验收推进。目标形成 first_commercial_cycle_closed，完成 M9-M13 主纵向场景；多周期参数化经营后移 M14。",
+  "status_after": "building",
+  "progress_after": 80,
+  "current_state": "M13 E0 订单、履约、财务与成本机器合同进行中；G4-G9 基线和 IAOS gap audit 尚待完成。",
+  "evidence_ref": "docs/plans/2026-07-22-m13-genesis-first-commercial-delivery.md",
+  "occurred_at": "2026-07-22T16:35:00Z"
+}

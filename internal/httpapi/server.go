@@ -17,6 +17,7 @@ import (
 
 	"github.com/industrial-ai/iaos-aese/internal/application"
 	"github.com/industrial-ai/iaos-aese/internal/capabilitybuild"
+	"github.com/industrial-ai/iaos-aese/internal/firstdelivery"
 	"github.com/industrial-ai/iaos-aese/internal/genesis"
 	"github.com/industrial-ai/iaos-aese/internal/iaosclient"
 	"github.com/industrial-ai/iaos-aese/internal/incorporation"
@@ -242,6 +243,7 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/world/plant-build",
 			"/api/aese/v1/world/capability-build",
 			"/api/aese/v1/world/industrialization",
+			"/api/aese/v1/world/first-delivery",
 		},
 	})
 }
@@ -302,6 +304,15 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			trace := industrialization.BuildTrace()
 			if err := industrialization.Validate(trace); err != nil {
 				s.writeError(w, http.StatusInternalServerError, "industrialization_invalid", err.Error(), false, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, trace)
+			return
+		}
+		if rest[1] == "first-delivery" {
+			trace := firstdelivery.BuildTrace()
+			if err := firstdelivery.Validate(trace); err != nil {
+				s.writeError(w, http.StatusInternalServerError, "first_delivery_invalid", err.Error(), false, "", "")
 				return
 			}
 			s.writeJSON(w, http.StatusOK, trace)

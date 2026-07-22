@@ -633,6 +633,14 @@
 - 验证：两仓 Go test/vet、100 次 hash、Schema/pack、M3/O2D stable-code compatibility、前端 unit/typecheck/build、三视口 Playwright、真实 API/部署与 Atlas 同步通过。
 - 后续：当前无 active 主计划；M13 另立计划并只消费机器终态。
 
+## 2026-07-22 - M13 Genesis 第一次完整商业交付完成
+
+- 变更：完成 PLAN-M13-001 E0-E8/T1-T60；交付首单/追加、供应生产、三批接受、300 件恢复、发票/AR/银行核销、实际成本与毛利、First Delivery Play 和 M9-M13 端到端证据。IAOS revision `067bbb4` 交付十类治理权限。
+- 原因：把 M12 量产资格推进为第一张订单的真实商业与资金闭环。
+- 影响：`hctm-genesis@0.6.0` 输出 `first_commercial_cycle_closed=true`；Genesis 主纵向场景完成，长期多周期经营属于 M14。
+- 验证：两仓 Go test/vet、100 次 hash、Schema/pack、旧 O2D compatibility、前端 unit/typecheck/build、三视口 Playwright、真实 API/部署与 Atlas 同步通过。
+- 后续：当前无 active 主计划；M14 另立参数化实验计划。
+
 ## 2026-07-22 - M11 生产能力建设计划启动
 
 - 变更：新增 approved DES-012 和唯一 active 的 PLAN-M11-001，将 M11 拆为 C0-C6：机器合同、资金与受治理采购、AESE 设备世界、AESE 人员世界、IAOS 采购/资产/组织/资格治理、Capability Build Play 和全链验收；同步 README、Agent Context、Architecture、文档索引、Roadmap、Code Map 和 System Atlas 声明。
@@ -648,3 +656,11 @@
 - 影响：M12 成为当前唯一 active plan，目标终态固定为 `serial_production_eligible=true`。客户开发预付款按现金与合同负债处理；试制件不可销售。M12 通过 release manifest/hash 与旧 HCTM stable code 兼容，但不进入 M13 的正式订单、量产、交付、开票或回款。
 - 验证：`git diff --check`、DES/PLAN ID 唯一性、active plan 唯一性、T1-T53 连续唯一、全部 Atlas/World/场景 JSON 解析、受影响 Markdown 本地链接和 `scripts/check_system_atlas_tracking.sh` 均通过；本轮只修改设计与计划文档，未运行产品测试。工作区既有测试修改、截图变化和验收产物均未触碰。
 - 后续：执行 D0 T1-T9，关闭 G4-G8 的客户/资金/工程质量/兼容/IAOS gap 基线，再允许独立 IAOS worktree 开发。
+
+## 2026-07-22 - M13 第一次完整商业交付计划启动
+
+- 变更：新增 approved DES-014 和唯一 active 的 PLAN-M13-001，将 M13 拆为 E0-E8：机器合同、M12→Genesis O2D 适配、正式订单/供应、生产/质量/成本、三批交付与 300 件恢复、开票/应收/回款/利润、IAOS 治理、First Delivery Play 和 Project Genesis 总验收；同步 README、Agent Context、Architecture、文档索引、Roadmap、Code Map 和 System Atlas 声明。
+- 原因：M12 已输出 `serial_production_eligible=true`，但量产批准不等于已获得正式订单、完成物理交付、形成现金或证明盈利；M3-M7 的 O2D fixture 也不能替代 Genesis 的真实首单历史。
+- 影响：M13 成为当前唯一 active plan，目标终态固定为 `first_commercial_cycle_closed=true`。M13 从零可销售库存完成 12,000 件三批交付，补齐 invoice/AR/cash settlement、actual cost 和项目毛利，并收口 M9-M13；长期多周期经营和参数实验仍属于 M14。
+- 验证：`git diff --check`、DES/PLAN ID 唯一性、active plan 唯一性、T1-T60 连续唯一、全部 Atlas/World/场景 JSON 解析、受影响 Markdown 本地链接和 `scripts/check_system_atlas_tracking.sh` 均通过；本轮只修改设计与计划文档，未运行产品测试。工作区既有测试修改、截图变化和验收产物均未触碰。
+- 后续：执行 E0 T1-T9，先关闭 G4-G9 的财务结转、订单/履约、成本、兼容和 IAOS gap 基线，再允许独立 IAOS worktree 开发。
