@@ -45,3 +45,15 @@ func TestPlantBuildWorldAPI(t *testing.T) {
 		t.Fatalf("incomplete campaign %s", res.Body.String())
 	}
 }
+
+func TestAESE3CompletionAPI(t *testing.T) {
+	server := New(Config{})
+	req := httptest.NewRequest(http.MethodGet, "/api/aese/v1/world/aese3", nil)
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusOK { t.Fatalf("status=%d body=%s", res.Code, res.Body.String()) }
+	body := res.Body.String()
+	for _, want := range []string{`"code":"M17"`, `"code":"M24"`, `"industry_simulation_platform_ready":true`, `"automatic_business_writes":0`} {
+		if !strings.Contains(body, want) { t.Fatalf("missing %s in %s", want, body) }
+	}
+}

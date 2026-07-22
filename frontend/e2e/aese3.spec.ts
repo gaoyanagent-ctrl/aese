@@ -1,0 +1,2 @@
+import{expect,test}from"@playwright/test";
+test("AESE 3 closes M17-M24 without automatic writes",async({page})=>{await page.goto("/#world-aese3");await expect(page.getByRole("heading",{name:"Enterprise Completion Room"})).toBeVisible();await expect(page.getByText("industry_simulation_platform_ready = true")).toBeVisible();for(const code of ["M17","M18","M19","M20","M21","M22","M23","M24"]){await expect(page.getByText(new RegExp(`^${code} ·`))).toBeVisible()}await expect(page.getByText("automatic business writes = 0")).toBeVisible()});

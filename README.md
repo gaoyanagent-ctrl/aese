@@ -65,6 +65,8 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M14 参数化分支经营实验：Completed；60 个隔离 run 以共同随机数比较 baseline/lean/resilient，并输出不可自动投放的 `strategy_evidence_ready` 证据包。
 - M15 受治理策略发布与经营试点：Completed；M14 candidate 已通过独立审议、零写入 shadow、有限 canonical pilot，并以 adopted/rolled_back 双路径验证回滚与补偿闭环。
 - M16 持续策略保障与假设校准：Completed；12 周封存数据、质量优先 drift、8/4 校准/holdout 和三种保障 disposition 已验收。
+- AESE 3.0 完成体：M17-M24 已逐个完成，覆盖滚动 IBP、组合扩展、多基地网络、售后质量、工厂韧性、集团价值、多 Agent 组织和场景平台产品化。
+- `hctm-genesis@1.0.0` 和 `#world-aese3` 输出八个可审计 terminal，最终 `industry_simulation_platform_ready=true`；当前无 active 主计划。
 
 当前同一页面可运行 Preview 或 IAOS Live 沙盘，并可在联动中心通过无业务数据库的 AESE 薄编排 API 受治理运行和复位场景；浏览器不直接调用 IAOS 写接口。
 
@@ -127,6 +129,16 @@ npm run dev
 - [M15 受治理策略发布与经营试点实施计划](docs/plans/2026-07-22-m15-governed-strategy-release-and-pilot.md)
 - [M16 持续策略保障与假设校准设计](docs/designs/DES-017-continuous-strategy-assurance-and-calibration.md)
 - [M16 持续策略保障与假设校准实施计划](docs/plans/2026-07-22-m16-continuous-strategy-assurance-and-calibration.md)
+- [AESE 3.0 M17-M24 完成体规划](docs/designs/DES-018-aese-3-completion-program.md)
+- [M17 滚动 IBP 与 S&OP 设计](docs/designs/DES-019-rolling-ibp-and-sop.md)
+- [M17 滚动 IBP 与 S&OP 实施计划](docs/plans/2026-07-22-m17-rolling-ibp-and-sop.md)
+- [M18 多产品与多客户组合运营设计](docs/designs/DES-020-product-and-customer-portfolio-expansion.md)
+- [M19 多基地供应与履约网络设计](docs/designs/DES-021-multi-site-supply-and-fulfillment-network.md)
+- [M20 售后质保与闭环质量设计](docs/designs/DES-022-after-sales-warranty-and-closed-loop-quality.md)
+- [M21 资产人员 EHS 与工厂韧性设计](docs/designs/DES-023-plant-resource-and-ehs-resilience.md)
+- [M22 集团财务资金与投资治理设计](docs/designs/DES-024-group-finance-treasury-and-investment.md)
+- [M23 受治理多 Agent 组织设计](docs/designs/DES-025-governed-multi-agent-organization.md)
+- [M24 场景平台产品化与行业交付设计](docs/designs/DES-026-scenario-platform-productization.md)
 - [M3 本地运行手册](docs/runbooks/hctm-m3-local-run.md)
 - [M3V 2D 沙盘运行手册](docs/runbooks/hctm-m3v-2d-sandbox.md)
 - [M5 受治理 Agent Tracer 运行手册](docs/runbooks/hctm-m5-governed-agent-tracers.md)

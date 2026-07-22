@@ -180,6 +180,7 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 - DES-015 与 PLAN-M14-001 已完成。`hctm-genesis@0.7.0` 从 M13 checkpoint 创建隔离 World 分支，以版本化参数、策略、PRNG/seed set 和共同随机数完成 60-run 多周期实验；`strategy_evidence_ready=true` 仅代表证据完整，不代表策略已批准或可自动投放。当前无 active 主计划。
 - DES-016 与 PLAN-M15-001 已完成。`hctm-genesis@0.8.0` 将 M14 candidate 绑定为 StrategyRelease，完成独立审批、零写入 shadow、有限 canonical pilot、guardrail、rollback 和 compensation；adopted 与 injected rolled_back 路径均输出 `strategy_change_cycle_closed=true`。当前无 active 主计划。
 - DES-017 与 PLAN-M16-001 已完成。M16 消费 M15 adopted release，完成 12 周 as-of dataset、质量优先 drift、8/4 calibration/holdout 与新祖先 60-run replay；三种 disposition 均可诚实关闭且不自动修改 release。当前无 active 主计划。
+- DES-018 至 DES-026 与 PLAN-M17-001 至 PLAN-M24-001 已逐个完成。`hctm-genesis@1.0.0` 通过统一 strict contract、八个 milestone evidence frame、API 和 Completion Room 输出 `industry_simulation_platform_ready=true`；IAOS DES-059 提供八类受治理动作，所有动作保留 evidence、独立审批、RLS、CAS、幂等、journal/Outbox 边界。当前无 active 主计划。
 
 ## 7. 后续 agent 必须维护的信息
 

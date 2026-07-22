@@ -22,7 +22,9 @@
 | 维护 M13 第一次完整商业交付 | DES-014、PLAN-M13-001、M13/Genesis evidence；先读 `internal/firstdelivery/` 与 First Delivery campaign |
 | 维护 M14 参数化分支经营实验 | DES-015、PLAN-M14-001、M14 evidence；先读 `internal/experiment/`、`internal/genesisexperiment/` 与 Scenario Lab |
 | 维护 M15 受治理策略发布与经营试点 | DES-016、PLAN-M15-001、M15 evidence；先读 `internal/strategyrelease/` 与 Strategy Control Room |
-| 实现 M16 持续策略保障与假设校准 | DES-017、PLAN-M16-001、DES-015、DES-016；先读 M15 adopted release/evidence、M14 experiment 和 World/IAOS journal 合同 |
+| 维护 M16 持续策略保障与假设校准 | DES-017、PLAN-M16-001、M16 evidence；先读 `internal/assurance/` 与 Assurance Observatory |
+| 验证 AESE 3.0 M17-M24 完成体 | DES-018 至 DES-026、PLAN-M17 至 PLAN-M24、`internal/aese3/`、`#world-aese3` |
+| 发布 HCTM reference pack | `world-packs/hctm-genesis/manifest.json`、`world-packs/hctm-genesis/aese3/`、AESE 3 runbook |
 | 查看或维护双系统全景 | DES-006、`frontend/src/components/SystemAtlas.tsx`、IAOS System Atlas API |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
@@ -40,7 +42,7 @@
 | 文档索引 | `docs/README.md` | 文档分类、状态和编号 |
 | 项目上下文 | `docs/agent-project-context.md` | Agent 快速入门 |
 | 架构 | `docs/architecture.md` | 仓库边界、数据流、安全和可重复性 |
-| 路线图 | `docs/roadmap.md` | 里程碑状态与当前唯一 active plan |
+| 路线图 | `docs/roadmap.md` | 里程碑状态；当前无 active 主计划 |
 | 代码导航 | `docs/code-map.md` | 本文件 |
 | 历史记录 | `docs/progress-log.md` | 只追加进展日志 |
 | 薄编排服务入口 | `cmd/aese-server/main.go` | M7 run orchestration HTTP 服务启动入口 |
@@ -64,6 +66,8 @@
 | M14 completed plan | `docs/plans/2026-07-22-m14-parameterized-branch-experiments.md` | X0-X7 实验合同、分支、执行、证据、治理与 Scenario Lab |
 | M15 completed plan | `docs/plans/2026-07-22-m15-governed-strategy-release-and-pilot.md` | R0-R7 证据审议、发布、shadow、pilot、回滚、采纳与 Control Room |
 | M16 completed plan | `docs/plans/2026-07-22-m16-continuous-strategy-assurance-and-calibration.md` | A0-A7 dataset、drift、校准、holdout、再实验、治理与 Observatory |
+| AESE 3.0 program | `docs/designs/DES-018-aese-3-completion-program.md` | M17-M24 顺序、terminal、依赖和 program 完成边界 |
+| M17-M24 completed plans | `docs/plans/2026-07-22-m1*.md`、`docs/plans/2026-07-22-m2*.md` | 八个顺序 terminal 与最终 platform ready |
 
 ## 3. M3 实现路径
 
@@ -337,21 +341,52 @@ R0-R7 已完成，当前实现入口如下：
 
 ## 19. M16 持续保障实现路径
 
-A0-A7 实现后必须把“目标路径”更新为实际入口：
+A0-A7 已完成，当前实现入口如下：
 
-| 能力 | 目标路径 |
+| 能力 | 路径 |
 | --- | --- |
 | M16 设计与 completed plan | `docs/designs/DES-017-continuous-strategy-assurance-and-calibration.md`、`docs/plans/2026-07-22-m16-continuous-strategy-assurance-and-calibration.md` |
-| Assurance Schema 与 fixture | `world-contracts/schemas/strategy-assurance*.schema.json`、`world-contracts/fixtures/assurance/` |
-| Dataset、quality、drift、calibration 与 validation | `internal/strategyassurance/` |
-| Assurance CLI | `cmd/aese/assurance.go`；`aese assurance validate|inspect|collect|seal|assess|calibrate|validate-report|evidence` |
-| M14 replay reuse | `internal/experiment/`、`internal/genesisexperiment/`；新 ancestry/artifact namespace |
-| IAOS bridge adapter | `internal/bridge/iaos/`；assurance/dataset/drift/decision allowlist payload |
-| Strategy Assurance Observatory | `frontend/src/components/world/StrategyAssuranceObservatory.tsx`、`frontend/src/world/assurance.ts`、`/#world-assurance` |
+| Assurance Schema 与 fixture | `world-contracts/schemas/assurance-cycle.schema.json`、`world-contracts/fixtures/assurance-cycle.json` |
+| Dataset、quality、drift、calibration 与 validation | `internal/assurance/` |
+| Strategy Assurance Observatory | `frontend/src/components/world/AssuranceObservatory.tsx`、`frontend/src/world/assurance.ts`、`/#world-assurance` |
 | Assurance API | `internal/httpapi/server.go`（`/api/aese/v1/world/strategy-assurance`） |
 | M16 runbook / evidence | `docs/runbooks/genesis-strategy-assurance.md`、`docs/reports/m16-strategy-assurance-evidence.md` |
 
-## 20. 导航更新触发器
+## 20. AESE 3.0 M17-M24 实现路径
+
+B0-B7 实现后必须把“目标路径”更新为实际入口：
+
+| 能力 | 目标路径 |
+| --- | --- |
+| M17-M24 设计与 completed plans | `docs/designs/DES-018-aese-3-completion-program.md` 至 DES-026、`docs/plans/2026-07-22-m17-*` 至 M24 |
+| IBP Schema 与 fixture | `world-contracts/schemas/ibp-*.schema.json`、`world-contracts/fixtures/ibp/` |
+| Planning cycle、bucket、reconciliation 与 scenario | `internal/ibp/` |
+| IBP CLI | `cmd/aese/ibp.go`；`aese ibp validate|inspect|build|reconcile|evidence` |
+| IAOS bridge adapter | `internal/bridge/iaos/`；planning review/decision/release allowlist payload |
+| Executive IBP Room | `frontend/src/components/world/ExecutiveIBPRoom.tsx`、`frontend/src/world/ibp.ts`、`/#world-ibp` |
+| IBP API | `internal/httpapi/server.go`（`/api/aese/v1/world/ibp`） |
+| 严格 Go 类型、校验和 canonical hash | `internal/aese3/program.go`、`internal/aese3/program_test.go` |
+| Schema、fixture 与 pack registry | `world-contracts/schemas/aese3-program.schema.json`、`world-contracts/fixtures/aese3-program.json`、`world-packs/hctm-genesis/aese3/` |
+| API 与 Completion Room | `internal/httpapi/server.go`、`frontend/src/world/aese3.ts`、`frontend/src/components/world/AESE3CompletionRoom.tsx`、`#world-aese3` |
+| runbook / evidence | `docs/runbooks/aese3-reference-release.md`、`docs/reports/aese3-m17-m24-completion-evidence.md` |
+| IAOS 治理 | `/iaos/iaos-go-aese3/platform/internal/api/plant_governance.go`、IAOS DES-059 |
+
+## 21. M18-M24 设计导航
+
+| 里程碑 | 设计 |
+| --- | --- |
+| Program | `docs/designs/DES-018-aese-3-completion-program.md` |
+| M18 | `docs/designs/DES-020-product-and-customer-portfolio-expansion.md` |
+| M19 | `docs/designs/DES-021-multi-site-supply-and-fulfillment-network.md` |
+| M20 | `docs/designs/DES-022-after-sales-warranty-and-closed-loop-quality.md` |
+| M21 | `docs/designs/DES-023-plant-resource-and-ehs-resilience.md` |
+| M22 | `docs/designs/DES-024-group-finance-treasury-and-investment.md` |
+| M23 | `docs/designs/DES-025-governed-multi-agent-organization.md` |
+| M24 | `docs/designs/DES-026-scenario-platform-productization.md` |
+
+以上八个设计和计划均已完成；后续扩展必须另立 program，不得静默扩展 M24 reference certification。
+
+## 22. 导航更新触发器
 
 以下改动必须更新本文件：
 

@@ -300,3 +300,5 @@
     transition: none !important;
   }
 }
+.aese3-grid { grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+.aese3-grid article small { overflow-wrap: anywhere; opacity: .72; }

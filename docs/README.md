@@ -12,7 +12,7 @@
 | 当前里程碑和优先级 | `docs/roadmap.md` |
 | 任务到文件导航 | `docs/code-map.md` |
 | 历史进展 | `docs/progress-log.md` |
-| 最近完成实施任务 | `docs/plans/2026-07-22-m16-continuous-strategy-assurance-and-calibration.md`；当前无 active 主计划 |
+| 当前实施任务 | 无；PLAN-M17 至 PLAN-M24 已完成 |
 
 若内容冲突，当前状态以 `docs/roadmap.md` 为准，长期架构决策以 ADR 为准。
 
@@ -81,6 +81,15 @@
 | DES-015 | [M14 参数化分支经营实验](designs/DES-015-parameterized-branch-experiments.md) | Completed |
 | DES-016 | [M15 受治理策略发布与经营试点](designs/DES-016-governed-strategy-release-and-pilot.md) | Completed |
 | DES-017 | [M16 持续策略保障与假设校准](designs/DES-017-continuous-strategy-assurance-and-calibration.md) | Completed |
+| DES-018 | [AESE 3.0 M17-M24 完成体规划](designs/DES-018-aese-3-completion-program.md) | Completed |
+| DES-019 | [M17 滚动 IBP 与 S&OP](designs/DES-019-rolling-ibp-and-sop.md) | Completed |
+| DES-020 | [M18 多产品与多客户组合运营](designs/DES-020-product-and-customer-portfolio-expansion.md) | Completed |
+| DES-021 | [M19 多基地供应与履约网络](designs/DES-021-multi-site-supply-and-fulfillment-network.md) | Completed |
+| DES-022 | [M20 售后质保与闭环质量](designs/DES-022-after-sales-warranty-and-closed-loop-quality.md) | Completed |
+| DES-023 | [M21 资产人员 EHS 与工厂韧性](designs/DES-023-plant-resource-and-ehs-resilience.md) | Completed |
+| DES-024 | [M22 集团财务资金与投资治理](designs/DES-024-group-finance-treasury-and-investment.md) | Completed |
+| DES-025 | [M23 受治理多 Agent 组织](designs/DES-025-governed-multi-agent-organization.md) | Completed |
+| DES-026 | [M24 场景平台产品化与行业交付](designs/DES-026-scenario-platform-productization.md) | Completed |
 | PLAN-M3 | [M3 实施计划](plans/2026-07-19-m3-executable-scenario-package.md) | Completed |
 | PLAN-M3V | [快速 2D 企业沙盘实施计划](plans/2026-07-19-fast-track-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Completed |
@@ -96,6 +105,16 @@
 | PLAN-M14 | [M14 参数化分支经营实验实施计划](plans/2026-07-22-m14-parameterized-branch-experiments.md) | Completed |
 | PLAN-M15 | [M15 受治理策略发布与经营试点实施计划](plans/2026-07-22-m15-governed-strategy-release-and-pilot.md) | Completed |
 | PLAN-M16 | [M16 持续策略保障与假设校准实施计划](plans/2026-07-22-m16-continuous-strategy-assurance-and-calibration.md) | Completed |
+| PLAN-M17 | [M17 滚动 IBP 与 S&OP 实施计划](plans/2026-07-22-m17-rolling-ibp-and-sop.md) | Completed |
+| PLAN-M18 | [M18 多产品与多客户组合运营实施计划](plans/2026-07-22-m18-product-and-customer-portfolio-expansion.md) | Completed |
+| PLAN-M19 | [M19 多基地供应与履约网络实施计划](plans/2026-07-22-m19-multi-site-supply-and-fulfillment-network.md) | Completed |
+| PLAN-M20 | [M20 售后质保与闭环质量实施计划](plans/2026-07-22-m20-after-sales-warranty-and-closed-loop-quality.md) | Completed |
+| PLAN-M21 | [M21 资产人员 EHS 与工厂韧性实施计划](plans/2026-07-22-m21-plant-resource-and-ehs-resilience.md) | Completed |
+| PLAN-M22 | [M22 集团财务资金与投资治理实施计划](plans/2026-07-22-m22-group-finance-treasury-and-investment.md) | Completed |
+| PLAN-M23 | [M23 受治理多 Agent 组织实施计划](plans/2026-07-22-m23-governed-multi-agent-organization.md) | Completed |
+| PLAN-M24 | [M24 场景平台产品化与行业交付实施计划](plans/2026-07-22-m24-scenario-platform-productization.md) | Completed |
+| AESE 3 Runbook | [M17-M24 Reference Release](runbooks/aese3-reference-release.md) | Completed |
+| AESE 3 Evidence | [M17-M24 Completion Evidence](reports/aese3-m17-m24-completion-evidence.md) | Completed |
 | M9 Runbook | [Genesis Incorporation Runbook](runbooks/genesis-incorporation.md) | Completed |
 | M9 Evidence | [Genesis Incorporation Evidence](reports/m9-genesis-incorporation-evidence.md) | Completed |
 | M10 Runbook | [Genesis Plant Build Runbook](runbooks/genesis-plant-build.md) | Completed |

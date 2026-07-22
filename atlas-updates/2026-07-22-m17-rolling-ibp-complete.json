@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m17-rolling-ibp-complete-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M17 rolling IBP closed",
+  "detail": "Sequential AESE 3 evidence closes integrated_plan_cycle_closed with exact hash, explicit ownership and zero automatic business writes.",
+  "status_after": "building",
+  "progress_after": 93,
+  "current_state": "M17 terminal integrated_plan_cycle_closed=true",
+  "evidence_ref": "docs/plans/2026-07-22-m17-rolling-ibp-and-sop.md",
+  "occurred_at": "2026-07-22T22:17:00Z"
+}

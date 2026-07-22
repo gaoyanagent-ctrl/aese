@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-aese3-completion-program-and-m17-plan-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "批准 AESE 3.0 M17-M24 完成体并启动 M17",
+  "detail": "新增 DES-018 至 DES-026，将后续拆为滚动 IBP、组合扩展、多基地网络、售后质量、工厂韧性、集团价值、多 Agent 组织和场景平台产品化；仅 PLAN-M17-001 active，M18-M24 仍为 planned design。",
+  "status_after": "building",
+  "progress_after": 92,
+  "current_state": "M17 B0 Planning Cycle 与集成计划机器合同进行中；M18-M24 设计已批准但尚未实施。",
+  "evidence_ref": "docs/plans/2026-07-22-m17-rolling-ibp-and-sop.md",
+  "occurred_at": "2026-07-22T21:50:00Z"
+}

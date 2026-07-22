@@ -1,0 +1,11 @@
+{
+  "schema_version": "1.0",
+  "program": "AESE3-GENESIS-M17-M24",
+  "schema": "../../../world-contracts/schemas/aese3-program.schema.json",
+  "observation_subject": "iaos.{tenant_id}.aese3_observation",
+  "intent_subject": "iaos.{tenant_id}.aese3_intent",
+  "outcome_subject": "iaos.{tenant_id}.aese3_outcome",
+  "required_envelope": ["correlation_id", "idempotency_key", "evidence_hash"],
+  "direct_nats_allowed": false,
+  "automatic_business_writes": false
+}

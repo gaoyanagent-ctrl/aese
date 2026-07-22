@@ -15,6 +15,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/industrial-ai/iaos-aese/internal/aese3"
 	"github.com/industrial-ai/iaos-aese/internal/application"
 	"github.com/industrial-ai/iaos-aese/internal/assurance"
 	"github.com/industrial-ai/iaos-aese/internal/capabilitybuild"
@@ -250,6 +251,7 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/world/experiments",
 			"/api/aese/v1/world/strategy-control",
 			"/api/aese/v1/world/strategy-assurance",
+			"/api/aese/v1/world/aese3",
 		},
 	})
 }
@@ -349,6 +351,15 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			s.writeJSON(w, http.StatusOK, cycle)
+			return
+		}
+		if rest[1] == "aese3" {
+			program := aese3.BuildProgram()
+			if err := aese3.Validate(program); err != nil {
+				s.writeError(w, http.StatusInternalServerError, "aese3_invalid", err.Error(), false, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, program)
 			return
 		}
 		if rest[1] != "genesis" {

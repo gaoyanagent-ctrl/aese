@@ -1,0 +1,15 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aese.iaos.local/schemas/aese3-program.schema.json",
+  "title": "AESE 3 M17-M24 completion program",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "code", "tenant", "timezone", "parent_terminal", "milestones", "industry_simulation_platform_ready", "program_hash", "limitations"],
+  "properties": {
+    "schema_version": {"const": "1.0"}, "code": {"const": "AESE3-GENESIS-M17-M24"}, "tenant": {"type": "string", "minLength": 1}, "timezone": {"const": "Asia/Shanghai"}, "parent_terminal": {"type": "string", "minLength": 1}, "industry_simulation_platform_ready": {"const": true}, "program_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"}, "limitations": {"type": "string", "minLength": 1},
+    "milestones": {"type": "array", "minItems": 8, "maxItems": 8, "items": {"type": "object", "additionalProperties": false, "required": ["code", "title", "design", "terminal", "terminal_ready", "world_owner", "business_owner", "evidence", "automatic_business_writes", "evidence_hash"], "properties": {
+      "code": {"pattern": "^M(1[7-9]|2[0-4])$"}, "title": {"type": "string"}, "design": {"pattern": "^DES-0(19|2[0-6])$"}, "terminal": {"type": "string", "minLength": 1}, "terminal_ready": {"const": true}, "world_owner": {"const": "AESE World"}, "business_owner": {"const": "IAOS governed runtime"}, "automatic_business_writes": {"const": 0}, "evidence_hash": {"pattern": "^[a-f0-9]{64}$"},
+      "evidence": {"type": "array", "minItems": 3, "items": {"type": "object", "additionalProperties": false, "required": ["code", "value", "unit", "source_ref"], "properties": {"code": {"type": "string"}, "value": {"type": "integer", "minimum": 0}, "unit": {"type": "string"}, "source_ref": {"type": "string"}}}}
+    }}}
+  }
+}

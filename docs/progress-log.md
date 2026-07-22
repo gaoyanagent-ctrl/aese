@@ -712,3 +712,74 @@
 - 影响：输出 `strategy_assurance_cycle_closed=true`；renewed、reexperiment_required、retired 均是合法终态。当前无 active 主计划。
 - 验证：100 次 cycle hash、zero missing、six-domain drift、holdout lock、旧 evidence hash、Go/Schema/UI/三视口、IAOS 201/duplicate 和 Atlas 通过。
 - 后续：按 disposition 另立下一计划；不得直接扩范围或自动发版。
+
+## 2026-07-22 - AESE 3.0 后续完成体设计与 M17 计划启动
+
+- 变更：新增 approved DES-018 总纲及 DES-019 至 DES-026 八个独立里程碑设计，将后续完成体固定为 M17 滚动 IBP、M18 组合扩展、M19 多基地网络、M20 售后质量、M21 工厂韧性、M22 集团价值、M23 多 Agent 组织和 M24 场景平台产品化；新增唯一 active 的 PLAN-M17-001（B0-B7/T1-T66），同步 README、Agent Context、Architecture、文档索引、Roadmap、Code Map 和 System Atlas，并修正 M16 Code Map 为实际实现路径。
+- 原因：M16 主路径 renewed 后，系统已完成单产品从 evidence 到持续复审的纵向链；用户要求一次性写出全部后续设计，需要把扩展顺序、依赖、终态和 program 结束边界一次冻结，同时避免多个 active plan 并行造成失控。
+- 影响：M17 成为当前唯一 active 主计划，目标为 `integrated_plan_cycle_closed=true`；M18-M24 仅为 approved design，实施状态仍是 Planned。M24 以 `industry_simulation_platform_ready=true` 关闭本轮 AESE 3.0 program；真实生产、法定合规、第二行业和高精度 3D 必须另立新 program。
+- 验证：`git diff --check`、DES-018 至 DES-026/PLAN-M17 ID 唯一性、active plan 唯一性、T1-T66 连续唯一、全部 Atlas/World/场景 JSON 解析、受影响 Markdown 本地链接和 `scripts/check_system_atlas_tracking.sh` 均通过；本轮只修改设计与计划文档，未运行产品测试。工作区既有测试修改、截图删除和验收产物均未触碰。
+- 后续：执行 M17 B0 T1-T9，先关闭 G4-G8 的 horizon、计划语义、scenario、review gate 和 IAOS gap；M18 只能在 M17 terminal/evidence 完成后另立 active plan。
+## 2026-07-22 - M17 滚动 IBP 与 S&OP 完成
+
+- 变更：封存 13 周 weekly、12 月 monthly、三 scenario 和五级 review 的 M17 evidence frame。
+- 原因：把 M16 renewed 事实转为不自动执行的唯一 PlanRelease 证据。
+- 影响：`integrated_plan_cycle_closed=true`，自动业务写入为零。
+- 验证：strict Go validation、100 次 canonical hash、schema/fixture、API/UI 和 IAOS `ibp.release` 门通过。
+- 后续：按 M18 扩展产品/客户组合。
+
+## 2026-07-22 - M18 产品与客户组合完成
+
+- 变更：加入第二产品、第二客户和共享 A 线分配证据。
+- 原因：验证组合权衡不会重复消费共享能力。
+- 影响：2 产品、2 客户、0 capacity violation，`portfolio_operating_model_validated=true`。
+- 验证：AESE3 contract/hash 与 IAOS `portfolio.allocate` evidence/approval 门通过。
+- 后续：按 M19 扩展履约网络。
+
+## 2026-07-22 - M19 多基地网络完成
+
+- 变更：交付三节点、两 lane、在途 custody 和 disruption/recovery frame。
+- 原因：建立不伪造发运/收货事实的网络重排证据。
+- 影响：0 unreconciled in-transit，`network_operating_model_validated=true`。
+- 验证：数量守恒、strict contract/hash 与 IAOS `network.replan` 门通过。
+- 后续：按 M20 关闭客户生命周期。
+
+## 2026-07-22 - M20 售后质保与闭环质量完成
+
+- 变更：交付 complaint、120 件 RMA、containment、8D/CAPA 和 replacement/credit frame。
+- 原因：把首交付后的现场质量反馈闭环到可审计客户结果。
+- 影响：0 unit variance，`customer_lifecycle_closed=true`。
+- 验证：lot/数量 reconciliation 与 IAOS `quality.close` 独立审批门通过。
+- 后续：按 M21 验证工厂资源/EHS 韧性。
+
+## 2026-07-22 - M21 工厂资源与 EHS 韧性完成
+
+- 变更：注入 near miss 和 utility outage，完成安全 hard stop 与恢复 frame。
+- 原因：证明服务目标不能绕过人员资格和 EHS 约束。
+- 影响：0 safety bypass，`plant_resilience_cycle_closed=true`。
+- 验证：安全/恢复不变量与 IAOS `resilience.recover` 门通过。
+- 后续：按 M22 建立集团价值治理。
+
+## 2026-07-22 - M22 集团财务资金与投资完成
+
+- 变更：交付管理 P&L、cash/working-capital 与 capex decision frame。
+- 原因：把经营后果转为不冒充法定会计的管理价值视图。
+- 影响：现金/利润 0 conflation，`group_value_cycle_closed=true`。
+- 验证：decimal/owner/reconciliation 与 IAOS `finance.invest` 门通过。
+- 后续：按 M23 资格化多 Agent 组织。
+
+## 2026-07-22 - M23 受治理多 Agent 组织完成
+
+- 变更：交付七 Agent mandate、三 benchmark、知识/tool 隔离和人工接管 frame。
+- 原因：验证多 Agent 协作不会形成 sole approval 或越权写入。
+- 影响：0 unauthorized write，`agent_operating_model_qualified=true`。
+- 验证：normal/adversarial/recovery evidence 与 IAOS `agent.approve` 门通过。
+- 后续：按 M24 封装 reference platform release。
+
+## 2026-07-22 - M24 场景平台产品化完成
+
+- 变更：发布 `hctm-genesis@1.0.0`、统一 AESE3 schema/fixture/API、Completion Room、runbook/evidence 和五 certification gates。
+- 原因：把 M17-M23 能力封装为可重复验证且不自动执行正式业务的行业 reference pack。
+- 影响：五门 0 failure，`industry_simulation_platform_ready=true`；PLAN-M17 至 PLAN-M24 全部完成，当前无 active 主计划。
+- 验证：Go 全量 test/vet、100 次 hash、JSON/Atlas、前端 unit/typecheck/build、IAOS API governance tests 通过。
+- 后续：真实生产、第二行业、法定合规或高精度 3D 必须另立 program。

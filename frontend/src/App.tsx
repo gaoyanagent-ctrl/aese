@@ -26,6 +26,7 @@ import { FirstDeliveryPlay } from "./components/world/FirstDeliveryPlay";
 import { ScenarioLab } from "./components/world/ScenarioLab";
 import { StrategyControlRoom } from "./components/world/StrategyControlRoom";
 import { AssuranceObservatory } from "./components/world/AssuranceObservatory";
+import { AESE3CompletionRoom } from "./components/world/AESE3CompletionRoom";
 
 const SCENARIO_KEY = "order-expedite-01";
 const scenarioSource = new StaticScenarioDataSource({
@@ -238,6 +239,7 @@ export default function App() {
     | "world-experiments"
     | "world-strategy-control"
     | "world-assurance"
+    | "world-aese3"
   >("preview");
   const [integrationOpen, setIntegrationOpen] = useState(false);
   const [connectionVersion, setConnectionVersion] = useState(0);
@@ -258,7 +260,8 @@ export default function App() {
       | "world-first-delivery"
       | "world-experiments"
       | "world-strategy-control"
-      | "world-assurance",
+      | "world-assurance"
+      | "world-aese3",
   ) => {
     setMode(target);
     window.location.hash = target === "preview" ? "sandbox" : target;
@@ -280,6 +283,7 @@ export default function App() {
       if (target === "world-experiments") setMode("world-experiments");
       if (target === "world-strategy-control") setMode("world-strategy-control");
       if (target === "world-assurance") setMode("world-assurance");
+      if (target === "world-aese3") setMode("world-aese3");
       if (target === "sandbox") setMode("preview");
       if (target === "integration") {
         setMode("preview");
@@ -364,6 +368,8 @@ export default function App() {
     return <StrategyControlRoom onExit={() => navigate("world-experiments")} />;
   if (mode === "world-assurance")
     return <AssuranceObservatory onExit={() => navigate("world-strategy-control")} />;
+  if (mode === "world-aese3")
+    return <AESE3CompletionRoom onExit={() => navigate("world-assurance")} />;
   return (
     <>
       {mode === "live" ? (

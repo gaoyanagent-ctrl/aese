@@ -372,3 +372,35 @@ Adopted StrategyRelease + canonical World/IAOS observations
 AESE World 继续拥有外生事件和物理/经济结果；IAOS 拥有业务记录、active release、AssuranceCycle、finding、审批和 AssuranceDecision；Dataset 只保存允许的观察、stable refs 和 hash，不复制 IAOS 业务数据库。cutoff 后迟到事实通过 correction set 和新 dataset version 处理，不能静默改旧 evidence；Actor Knowledge、UI 或通知不能替代 source facts。
 
 数据质量必须先于 drift 和校准。前 8 周 calibration 与后 4 周 single-use holdout 严格隔离；候选参数只能修改批准的外生假设，不能改 hard constraint、KPI 或 StrategyRelease。新 replay 保留原 M14 EvidenceBundle，终态允许 `renewed`、`reexperiment_required` 或 `retired`。详细边界见 DES-017 和 PLAN-M16-001。
+
+## 21. AESE 3.0 完成体与 M17 滚动计划架构
+
+M16 主路径 `renewed` 后，M17-M24 按以下顺序扩大系统能力，而不是并行建设八套新业务系统：
+
+```text
+M17 rolling IBP/S&OP
+  -> M18 product/customer portfolio
+  -> M19 multi-site network
+  -> M20 after-sales and closed-loop quality
+  -> M21 plant resource/EHS resilience
+  -> M22 group value/treasury/investment
+  -> M23 governed multi-agent organization
+  -> M24 scenario platform productization
+```
+
+M17 首先建立跨需求、供应、产能、库存、交付、成本和现金的版本化计划控制面：
+
+```text
+M16 renewed assumptions + actual refs
+  -> Demand Review
+  -> Supply Review
+  -> Financial Reconciliation
+  -> Pre-IBP gap/options
+  -> Executive IBP decision
+  -> immutable PlanRelease
+  -> separate governed execution intents
+```
+
+IAOS 拥有 PlanningCycle、计划版本、review/decision、权限和 PlanRelease；AESE 拥有未来外生实现、资源约束和 scenario consequence；Knowledge 只包含角色已知假设和版本。Forecast 不等于订单，planned receipt 不等于实际到货，PlanRelease 不自动产生 PO/WO/Shipment/资金动作。
+
+M17-M24 已按顺序实现为 `internal/aese3` 的八个 immutable evidence frame，并由 schema、fixture、100 次 canonical hash、API 和 Completion Room 共同验证。IAOS DES-059 只接收 exact evidence 下的受治理动作；Program approval 不产生自动业务写入。Program 总边界见 DES-018，最终 reference pack 为 `hctm-genesis@1.0.0`。

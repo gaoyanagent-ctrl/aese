@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m22-group-value-complete-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M22 group value cycle closed",
+  "detail": "Sequential AESE 3 evidence closes group_value_cycle_closed with exact hash, explicit ownership and zero automatic business writes.",
+  "status_after": "building",
+  "progress_after": 98,
+  "current_state": "M22 terminal group_value_cycle_closed=true",
+  "evidence_ref": "docs/plans/2026-07-22-m22-group-finance-treasury-and-investment.md",
+  "occurred_at": "2026-07-22T22:22:00Z"
+}

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m18-portfolio-complete-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M18 portfolio model validated",
+  "detail": "Sequential AESE 3 evidence closes portfolio_operating_model_validated with exact hash, explicit ownership and zero automatic business writes.",
+  "status_after": "building",
+  "progress_after": 94,
+  "current_state": "M18 terminal portfolio_operating_model_validated=true",
+  "evidence_ref": "docs/plans/2026-07-22-m18-product-and-customer-portfolio-expansion.md",
+  "occurred_at": "2026-07-22T22:18:00Z"
+}
