@@ -1,0 +1,2 @@
+import{afterEach,describe,expect,it,vi}from'vitest';import{loadIncorporation}from'./incorporation';
+describe('incorporation API',()=>{afterEach(()=>vi.unstubAllGlobals());it('normalizes actor knowledge',async()=>{vi.stubGlobal('fetch',vi.fn().mockResolvedValue(new Response(JSON.stringify({frames:[{knowledge:null}]}),{status:200})));const trace=await loadIncorporation();expect(trace.frames[0].knowledge).toEqual([])})});

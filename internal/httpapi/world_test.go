@@ -19,3 +19,16 @@ func TestGenesisWorldAPI(t *testing.T) {
 		t.Fatalf("incomplete trace %s", res.Body.String())
 	}
 }
+
+func TestIncorporationWorldAPI(t *testing.T) {
+	server := New(Config{})
+	req := httptest.NewRequest(http.MethodGet, "/api/aese/v1/world/incorporation", nil)
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != 200 {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
+	if !strings.Contains(res.Body.String(), `"campaign":"incorporation"`) || !strings.Contains(res.Body.String(), `"plant_project_eligible":true`) {
+		t.Fatalf("incomplete campaign %s", res.Body.String())
+	}
+}

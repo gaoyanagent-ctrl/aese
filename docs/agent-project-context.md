@@ -171,7 +171,8 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 - M7 已完成：AESE 无状态编排 API 和联动中心控制台允许业务用户在浏览器运行并复位场景；clean reset 全链、CLI/UI 对账、IAOS DB/Outbox/Tool Call 和本机部署健康证据见 M7 evidence。
 - M7 设计见 `docs/designs/DES-005-governed-scenario-operations-console.md`，架构边界由 ADR-003 固定；M7 不建设 AESE 业务数据库，也不允许浏览器直接调用 IAOS 写端点。
 - 2026-07-22 已启动 M8：DES-007 和 PLAN-M8-001 把 AESE 2.0 收敛为 World / IAOS / Actor Knowledge 三态、确定性离散事件内核和 Project Genesis 纵向 Campaign。ADR-004 已 accepted，World Store 固定为独立 PostgreSQL，Actor Knowledge 首版只保存结构化认知；DES-008 已批准 observation/intent/committed outcome 与 journal/cursor 桥接合同，G1-G5 全部通过。
-- M8 F0/F1 已完成：`world-contracts/` 提供 strict Schema/fixture 和 F1 样例，`internal/worldcontract` 提供 Go 类型与 canonical hash，`internal/world`、`simtime`、`simevent`、`rules` 提供确定性内核、快照恢复和 replay，`deploy/world-postgres` 固化独立存储合同。M8 不废弃 M7；现有 `order-expedite-01`、CLI、Preview/Live 和受治理控制台仍是兼容基线。
+- M8 F0-F5 已完成：机器合同、确定性内核、三态设备 tracer、独立 IAOS World Bridge、Genesis pack、M7 adapter 与 World Play 均有实现和验收证据。M8 不废弃 M7；现有 `order-expedite-01`、CLI、Preview/Live 和受治理控制台仍是兼容基线。
+- PLAN-M9-001 已完成，当前没有 active 主实施计划。`hctm-genesis@0.2.0` 可从投资人出资推进到登记、开户/资本到账、CEO/CFO/项目负责人任命、预算批准，并输出 M10 可消费的 `plant_project_eligible`。
 
 ## 7. 后续 agent 必须维护的信息
 

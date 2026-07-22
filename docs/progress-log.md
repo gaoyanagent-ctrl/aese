@@ -569,6 +569,14 @@
 - 验证：数据库查询确认六个节点均为 `completed/100`，M8 六条原始 update key、AESE 校正记录与 IAOS bridge 完成记录均存在；两仓同步脚本重复执行成功。
 - 后续：无。
 
+## 2026-07-22 - M9 Project Genesis 企业成立与治理完成
+
+- 变更：完成 PLAN-M9-001 G4/G5 与 I0-I5/T1-T35；新增 `hctm-genesis@0.2.0` incorporation campaign、8 阶段纯函数 tracer、独立 owner 现金账户、登记/银行策略、三岗位与 Knowledge、预算/mandate/资格不变量、snapshot/restore/reset、统一 human/Agent 授权，以及 World Play 成立视图。IAOS 独立 worktree revision `edcb915` 新增五类 allowlist 治理动作、四个权限、FORCE RLS、幂等与事务 Outbox。
+- 原因：把 Genesis 从“企业已经存在”向前推进到法人、资金、管理岗位与预算均具备的机器可验证起点，为 M10 工厂建设立项提供真实前置条件。
+- 影响：M9 终态输出 `plant_project_eligible=true`；预算授权与现金、认缴与实缴严格分离。外部登记和银行结果仍由 AESE World 策略产生，IAOS 不能伪造；M7/M8 路径保留。
+- 验证：100 次 campaign hash、资金/岗位/mandate/snapshot 失败关闭、全量 AESE Go test/vet、IAOS 四 module test、Schema/JSON、32+ Vitest、生产构建、M7/M8/M9 Playwright 三视口通过。IAOS 真实 API 新建返回 201、重复返回 duplicate，预算自批返回 422；数据库确认 FORCE RLS 与 Outbox。两端 8090/8082/4173 已部署。
+- 后续：M10 工厂选址与建设立项应另立唯一 active plan，只消费 M9 机器资格，不从 UI 状态推断。
+
 ## 2026-07-22 - Atlas 401 自动恢复
 
 - 变更：System Atlas 的 IAOS 请求在缓存 token 返回 401 时自动清除旧身份、获取新 dev token 并重试一次；同一恢复逻辑覆盖图谱与文档下钻。
@@ -576,6 +584,14 @@
 - 影响：用户无需手动清理 localStorage 或先进入联动中心；非 401 错误不重试，避免隐藏权限与服务错误。
 - 验证：新增 Vitest 回归覆盖 `stale -> 401 -> refresh -> 200`；生产构建和类型检查通过；在实际 4173/8082 代理链注入失效 token，桌面 1440/1280 与移动 390 三项 Playwright 全部通过。
 - 后续：无。
+
+## 2026-07-22 - M9 企业成立与治理计划启动
+
+- 变更：新增 approved DES-010 和唯一 active 的 PLAN-M9-001，将 Project Genesis 下一阶段拆为 I0-I5：业务/机器合同、AESE 成立世界与经济规则、IAOS 法人与治理能力、CEO/CFO 统一岗位、Incorporation Play 和全链验收；同步 README、Agent Context、Architecture、文档索引、Roadmap 与 Code Map，并修正 M8 在文档索引中的陈旧 Active 状态。
+- 原因：M8 已完成三态世界和桥接基础，但当前 Genesis 从已有现金、人员和设备开始，仍不能证明企业如何合法成立、获得实际资本、建立管理授权并形成工厂建设资格。
+- 影响：M9 成为当前唯一 active plan；目标终态固定为 `plant_project_eligible=true`。M9 不进入工厂选址/建设、设备采购、APQP 或完整财务，且复用 M8 World Runtime/Bridge/Play，不建设第二套引擎。
+- 验证：`git diff --check`、DES/PLAN ID 唯一性、active plan 唯一性、全部 Atlas/World/场景 JSON 解析、受影响 Markdown 本地链接和 System Atlas tracking 均通过；本轮未修改产品代码，未运行产品测试。工作区既有测试修改和截图删除均未触碰。
+- 后续：执行 I0 T1-T6，先冻结资金/周期/费用、stable code、状态机、payload schema 和 IAOS gap，再允许独立 IAOS worktree 开发。
 
 ## 2026-07-22 - World Play null Knowledge 白屏修复
 

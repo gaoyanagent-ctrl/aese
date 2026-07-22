@@ -219,3 +219,20 @@ Actor Knowledge State
 现有 M7 无状态编排控制面保持独立并作为兼容基线，不直接承担持续 World Runtime。详细方案和实施门见 DES-007、ADR-004 与 PLAN-M8-001。
 
 World/IAOS 桥采用 DES-008 的持久 journal + cursor 模式：AESE 提交 actor-scoped observation；人员或 Agent 通过 IAOS Capability/Process 形成 intent；只有 IAOS 事务已提交或确定 no-op 的 committed outcome 才能驱动 AESE world consequence。SSE/Outbox 用于通知，断线恢复始终读取 journal，不依赖 webhook 或 direct NATS。
+
+## 13. M9 企业成立与治理纵向架构
+
+M9 复用 M8 World Runtime、World Store、三态模型和 IAOS Bridge，不建立第二套项目、组织、预算或 Agent 运行时：
+
+```text
+Founder / CEO / CFO human or deterministic role policy
+  -> IAOS Capability / Process / Policy
+  -> intent + governed business records
+  -> committed outcome + journal + Outbox
+  -> AESE schedules regulator/bank/world activity
+  -> registration/account/capital/appointment world consequence
+  -> actor-scoped observation and Knowledge
+  -> reconciliation and plant_project_eligible
+```
+
+虚构监管机构和银行属于 AESE 外部世界策略，不是 IAOS 用户。法人档案、治理决议、组织岗位、资本记录和预算审批属于 IAOS；登记生效、账户实际开立、资金实际到账和岗位实际接受属于 World State。详细边界见 DES-010 和 PLAN-M9-001。

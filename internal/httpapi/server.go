@@ -18,6 +18,7 @@ import (
 	"github.com/industrial-ai/iaos-aese/internal/application"
 	"github.com/industrial-ai/iaos-aese/internal/genesis"
 	"github.com/industrial-ai/iaos-aese/internal/iaosclient"
+	"github.com/industrial-ai/iaos-aese/internal/incorporation"
 	"github.com/industrial-ai/iaos-aese/internal/legacyprojection"
 	"github.com/industrial-ai/iaos-aese/internal/replay"
 	"github.com/industrial-ai/iaos-aese/internal/scenariopack"
@@ -234,6 +235,7 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/runs/:run_id/reset-plan",
 			"/api/aese/v1/runs/:run_id/reset",
 			"/api/aese/v1/world/genesis",
+			"/api/aese/v1/world/incorporation",
 		},
 	})
 }
@@ -259,8 +261,21 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 
 	switch rest[0] {
 	case "world":
-		if len(rest) != 2 || rest[1] != "genesis" || r.Method != http.MethodGet {
+		if len(rest) != 2 || r.Method != http.MethodGet {
 			s.writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "method not allowed", false, "", "")
+			return
+		}
+		if rest[1] == "incorporation" {
+			trace := incorporation.BuildTrace()
+			if err := incorporation.Validate(trace); err != nil {
+				s.writeError(w, http.StatusInternalServerError, "incorporation_invalid", err.Error(), false, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, trace)
+			return
+		}
+		if rest[1] != "genesis" {
+			s.writeError(w, http.StatusNotFound, "not_found", "route not found", false, "", "")
 			return
 		}
 		trace := genesis.BuildTrace()

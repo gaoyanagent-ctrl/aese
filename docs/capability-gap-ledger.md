@@ -10,3 +10,14 @@
 | 自动审批高风险维修 | 自主 Agent | 维修预算/停线 | 不允许 | 必须由 IAOS Policy/Approval 决定，AESE 不代批 | 禁止 |
 
 长期 JWT、AESE 直写 IAOS 数据库、正式 direct NATS 和 webhook-only 路径均不是临时方案。
+
+## M9 成立治理
+
+| 企业活动 | 角色 | IAOS 权限 | 实现 |
+| --- | --- | --- | --- |
+| 批准设立方案 | 创始投资人 | `genesis.incorporation.execute` | allowlist governance action |
+| 提交管理层任命 | 董事会 | `genesis.governance.appoint` | resolution + appointment action |
+| 提交启动预算 | CEO（人或 Agent） | `genesis.budget.submit` | 同一合同，无 UI 旁路 |
+| 核验资本/批准预算 | CFO/独立审批人 | `genesis.budget.approve` | 禁止自批、失效 mandate 失败关闭 |
+
+真实监管、银行、完整法人主数据和总账仍不在 M9；外部结果由 AESE 确定性策略产生。

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m9-genesis-incorporation-plan-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "启动 M9 Project Genesis 企业成立与治理计划",
+  "detail": "新增 approved DES-010 和 active PLAN-M9-001，将企业成立纵向闭环拆为业务/机器合同、AESE 登记与资金规则、IAOS 法人治理能力、CEO/CFO 统一岗位、Incorporation Play 和全链验收。目标从 pre-incorporation 确定性推进到 plant_project_eligible，同时区分法人登记事实、管理记录、角色认知、资本承诺、实缴、现金和预算。",
+  "status_after": "building",
+  "progress_after": 20,
+  "current_state": "M9 I0 业务基线与机器合同进行中；G4 资金/周期基线和 G5 IAOS gap audit 尚待完成。",
+  "evidence_ref": "docs/plans/2026-07-22-m9-genesis-incorporation.md",
+  "occurred_at": "2026-07-22T08:48:13Z"
+}

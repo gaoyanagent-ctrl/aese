@@ -15,6 +15,7 @@ import type { SandboxScenario } from './scenario/types';
 import { LiveSandbox } from './LiveSandbox';
 import { SystemAtlas, type AtlasEntryRef } from './components/SystemAtlas';
 import { WorldPlay } from './components/world/WorldPlay';
+import { IncorporationPlay } from './components/world/IncorporationPlay';
 
 const SCENARIO_KEY = 'order-expedite-01';
 const scenarioSource = new StaticScenarioDataSource({ [SCENARIO_KEY]: previewJson });
@@ -124,12 +125,12 @@ function Sandbox({ scenario, onModeChange, onOpenIntegration, onOpenAtlas, onOpe
 export default function App() {
   const [scenario, setScenario] = useState<SandboxScenario | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [mode, setMode] = useState<'preview' | 'live' | 'atlas' | 'world'>('preview');
+  const [mode, setMode] = useState<'preview' | 'live' | 'atlas' | 'world' | 'world-incorporation'>('preview');
   const [integrationOpen, setIntegrationOpen] = useState(false);
   const [connectionVersion, setConnectionVersion] = useState(0);
   const [runContext, setRunContext] = useState<OrchestrationRunContext | null>(() => getStoredRunContext());
 
-  const navigate = (target: 'preview' | 'live' | 'atlas' | 'world') => {
+  const navigate = (target: 'preview' | 'live' | 'atlas' | 'world' | 'world-incorporation') => {
     setMode(target);
     window.location.hash = target === 'preview' ? 'sandbox' : target;
   };
@@ -140,6 +141,7 @@ export default function App() {
       if (target === 'atlas') setMode('atlas');
       if (target === 'live') setMode('live');
       if (target === 'world') setMode('world');
+      if (target === 'world-incorporation') setMode('world-incorporation');
       if (target === 'sandbox') setMode('preview');
       if (target === 'integration') { setMode('preview'); setIntegrationOpen(true); }
     };
@@ -166,6 +168,7 @@ export default function App() {
   };
   if (mode === 'atlas') return <SystemAtlas onExit={() => navigate('preview')} onNavigate={navigateAtlasEntry} />;
   if (mode === 'world') return <WorldPlay onExit={() => navigate('preview')} />;
+  if (mode === 'world-incorporation') return <IncorporationPlay onExit={() => navigate('world')} />;
   return <>
     {mode === 'live'
       ? <LiveSandbox

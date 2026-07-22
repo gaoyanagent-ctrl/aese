@@ -57,6 +57,7 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M6 在线 2D 企业沙盘：完成；受治理完工/入库/发运、snapshot/cursor/SSE、在线 Agent 建议和 Preview/Live 双模式已通过验收。
 - M7 受治理场景运行控制台：完成；业务用户可从页面完成预检、初始化、逐幕运行、Agent 分析、验证和安全复位，CLI/UI 与 IAOS 审计副作用已完成对账。
 - M8 AESE 2.0 基础：Completed；F0-F5 已交付机器合同、确定性内核、三态 tracer、受治理 IAOS bridge、Genesis pack 与 World Play。
+- M9 Project Genesis 企业成立与治理：Completed；成立、登记、开户、资本、三岗位、mandate、预算与 `plant_project_eligible` 已通过两仓和三视口验收。
 
 当前同一页面可运行 Preview 或 IAOS Live 沙盘，并可在联动中心通过无业务数据库的 AESE 薄编排 API 受治理运行和复位场景；浏览器不直接调用 IAOS 写接口。
 
@@ -95,6 +96,8 @@ npm run dev
 - [AESE 2.0 企业生命周期仿真基础设计](docs/designs/DES-007-aese-2-foundation.md)
 - [AESE World 与 IAOS 三段式桥接合同](docs/designs/DES-008-world-iaos-bridge-contract.md)
 - [M8 AESE 2.0 三态世界与仿真内核实施计划](docs/plans/2026-07-22-m8-aese-2-foundation.md)
+- [M9 Project Genesis 企业成立与治理设计](docs/designs/DES-010-genesis-incorporation-and-governance.md)
+- [M9 Project Genesis 企业成立与治理实施计划](docs/plans/2026-07-22-m9-genesis-incorporation.md)
 - [M3 本地运行手册](docs/runbooks/hctm-m3-local-run.md)
 - [M3V 2D 沙盘运行手册](docs/runbooks/hctm-m3v-2d-sandbox.md)
 - [M5 受治理 Agent Tracer 运行手册](docs/runbooks/hctm-m5-governed-agent-tracers.md)
