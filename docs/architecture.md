@@ -312,3 +312,22 @@ Sales / Planning / Procurement / Production / Quality / Logistics / Finance
 客户正式需求/变更/接受/付款行为、供应/设备/运输现实、实际生产资源消耗和银行到账属于 AESE World State；订单、采购、工单、库存、发运、发票、应收、收款核销、成本和项目损益记录属于 IAOS；角色只通过权限和 observation 获得 Actor Knowledge。发运不等于客户接受，发票不等于现金，毛利不等于现金余额。
 
 M13 从 M12 release manifest 编译 Genesis-specific O2D 输入，期初可销售成品为零，并使用新交易/correlation code；旧 M3/M7 pack 继续作为回归 fixture，不能贡献库存或既成事件。M13 关闭 M9-M13 主纵向场景，长期多周期与参数化实验属于 M14。详细边界见 DES-014 和 PLAN-M13-001。
+
+## 18. M14 参数化分支经营实验架构
+
+M14 不把 M13 的单条闭环复制成第二套业务系统，而是在 AESE World 所有权内建立受治理实验层：
+
+```text
+Approved Genesis checkpoint + experiment definition
+  -> immutable parameter/policy/seed matrix
+  -> isolated World branches with common random numbers
+  -> bounded deterministic multi-cycle runs
+  -> run-level invariants, snapshots, hashes and KPI
+  -> paired comparison + constraint evaluation + Pareto frontier
+  -> immutable EvidenceBundle
+  -> optional IAOS recommendation intent (never auto-apply)
+```
+
+AESE 拥有 checkpoint fork、branch/run、随机流、外生事件、World consequence、artifact 和实验 KPI；IAOS 只拥有实验申请/审批、访问权限、证据接收、推荐与后续业务决策；Actor Knowledge 继续按角色权限投影。分支不创建正式 IAOS 订单、库存、发票或现金，父 checkpoint 和兄弟分支不可变。
+
+随机性必须是版本化输入：固定 PRNG 和命名 stream，同一 scenario profile/seed 的各策略使用共同随机数并做 paired comparison。默认展示硬约束、KPI 分布和 Pareto 前沿，不以单次运行、平均值或未批准权重宣称最优。只有 run 清单完整、hash 可复验、约束计算完成且无未解释失败时输出 `strategy_evidence_ready=true`。详细边界见 DES-015 和 PLAN-M14-001。

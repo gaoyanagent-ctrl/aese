@@ -12,7 +12,7 @@
 | 当前里程碑和优先级 | `docs/roadmap.md` |
 | 任务到文件导航 | `docs/code-map.md` |
 | 历史进展 | `docs/progress-log.md` |
-| 当前实施任务 | `docs/plans/2026-07-22-m13-genesis-first-commercial-delivery.md` |
+| 最近完成实施任务 | `docs/plans/2026-07-22-m14-parameterized-branch-experiments.md`；当前无 active 主计划 |
 
 若内容冲突，当前状态以 `docs/roadmap.md` 为准，长期架构决策以 ADR 为准。
 
@@ -78,6 +78,7 @@
 | DES-012 | [M11 Project Genesis 生产能力建设](designs/DES-012-genesis-production-capability-build.md) | Completed |
 | DES-013 | [M12 Project Genesis 产品工业化与量产批准](designs/DES-013-genesis-product-industrialization.md) | Completed |
 | DES-014 | [M13 Project Genesis 第一次完整商业交付](designs/DES-014-genesis-first-commercial-delivery.md) | Completed |
+| DES-015 | [M14 参数化分支经营实验](designs/DES-015-parameterized-branch-experiments.md) | Completed |
 | PLAN-M3 | [M3 实施计划](plans/2026-07-19-m3-executable-scenario-package.md) | Completed |
 | PLAN-M3V | [快速 2D 企业沙盘实施计划](plans/2026-07-19-fast-track-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Completed |
@@ -90,6 +91,7 @@
 | PLAN-M11 | [M11 Project Genesis 生产能力建设实施计划](plans/2026-07-22-m11-genesis-production-capability-build.md) | Completed |
 | PLAN-M12 | [M12 Project Genesis 产品工业化与量产批准实施计划](plans/2026-07-22-m12-genesis-product-industrialization.md) | Completed |
 | PLAN-M13 | [M13 Project Genesis 第一次完整商业交付实施计划](plans/2026-07-22-m13-genesis-first-commercial-delivery.md) | Completed |
+| PLAN-M14 | [M14 参数化分支经营实验实施计划](plans/2026-07-22-m14-parameterized-branch-experiments.md) | Completed |
 | M9 Runbook | [Genesis Incorporation Runbook](runbooks/genesis-incorporation.md) | Completed |
 | M9 Evidence | [Genesis Incorporation Evidence](reports/m9-genesis-incorporation-evidence.md) | Completed |
 | M10 Runbook | [Genesis Plant Build Runbook](runbooks/genesis-plant-build.md) | Completed |

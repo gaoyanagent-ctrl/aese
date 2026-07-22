@@ -62,6 +62,7 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M11 Project Genesis 生产能力建设：Completed；设备、人员、技能、班次、资金与治理联合门已输出 `industrialization_eligible`。
 - M12 Project Genesis 产品工业化与量产批准：Completed；RFQ、版本、APQP、两轮试制、PPAP 与治理门已输出 `serial_production_eligible`。
 - M13 Project Genesis 第一次完整商业交付：Completed；12,000 件交付、开票回款、实际成本与毛利已输出 `first_commercial_cycle_closed`。
+- M14 参数化分支经营实验：Completed；60 个隔离 run 以共同随机数比较 baseline/lean/resilient，并输出不可自动投放的 `strategy_evidence_ready` 证据包。
 
 当前同一页面可运行 Preview 或 IAOS Live 沙盘，并可在联动中心通过无业务数据库的 AESE 薄编排 API 受治理运行和复位场景；浏览器不直接调用 IAOS 写接口。
 
@@ -118,6 +119,8 @@ npm run dev
 - [M13 Project Genesis 第一次完整商业交付实施计划](docs/plans/2026-07-22-m13-genesis-first-commercial-delivery.md)
 - [M13 First Delivery 运行手册](docs/runbooks/genesis-first-delivery.md)
 - [Project Genesis M9-M13 端到端证据](docs/reports/project-genesis-m9-m13-e2e.md)
+- [M14 参数化分支经营实验设计](docs/designs/DES-015-parameterized-branch-experiments.md)
+- [M14 参数化分支经营实验实施计划](docs/plans/2026-07-22-m14-parameterized-branch-experiments.md)
 - [M3 本地运行手册](docs/runbooks/hctm-m3-local-run.md)
 - [M3V 2D 沙盘运行手册](docs/runbooks/hctm-m3v-2d-sandbox.md)
 - [M5 受治理 Agent Tracer 运行手册](docs/runbooks/hctm-m5-governed-agent-tracers.md)

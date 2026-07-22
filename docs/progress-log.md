@@ -664,3 +664,19 @@
 - 影响：M13 成为当前唯一 active plan，目标终态固定为 `first_commercial_cycle_closed=true`。M13 从零可销售库存完成 12,000 件三批交付，补齐 invoice/AR/cash settlement、actual cost 和项目毛利，并收口 M9-M13；长期多周期经营和参数实验仍属于 M14。
 - 验证：`git diff --check`、DES/PLAN ID 唯一性、active plan 唯一性、T1-T60 连续唯一、全部 Atlas/World/场景 JSON 解析、受影响 Markdown 本地链接和 `scripts/check_system_atlas_tracking.sh` 均通过；本轮只修改设计与计划文档，未运行产品测试。工作区既有测试修改、截图变化和验收产物均未触碰。
 - 后续：执行 E0 T1-T9，先关闭 G4-G9 的财务结转、订单/履约、成本、兼容和 IAOS gap 基线，再允许独立 IAOS worktree 开发。
+
+## 2026-07-22 - M14 参数化分支经营实验计划启动
+
+- 变更：新增 approved DES-015 和唯一 active 的 PLAN-M14-001，将 M14 拆为 X0-X7：实验机器合同、确定性随机流/矩阵、checkpoint 分支与持久目录、多周期策略、执行器、KPI/EvidenceBundle、IAOS 实验治理和 Scenario Lab；同步 README、Agent Context、Architecture、文档索引、Roadmap、Code Map 和 System Atlas 声明。
+- 原因：M13 已证明从成立到首单回款和毛利的单条确定性路径，但单次成功不能回答不同需求、供应、设备、质量和付款假设下哪种经营策略更稳健。
+- 影响：M14 成为当前唯一 active 主计划，终态固定为 `strategy_evidence_ready=true`。父 checkpoint、正式 IAOS 数据和兄弟分支必须隔离；策略用共同随机数进行 paired comparison，推荐只能形成证据/治理意图，不能自动投放。
+- 验证：`git diff --check`、DES/PLAN ID 唯一性、active plan 唯一性、T1-T64 连续唯一、全部 Atlas JSON 解析、受影响 Markdown 本地链接和 `scripts/check_system_atlas_tracking.sh` 均通过；本轮只修改设计与计划文档，未运行产品测试。工作区既有测试修改、截图变化和验收产物均未触碰。
+- 后续：执行 X0 T1-T9，先关闭 G4-G8 的 checkpoint/opening、参数/seed、策略/KPI、运行容量和 IAOS gap 基线，再允许分支持久化与 IAOS 写端点开发。
+
+## 2026-07-22 - M14 参数化分支经营实验完成
+
+- 变更：完成 PLAN-M14-001 X0-X7/T1-T64；交付严格实验合同、命名 PRNG 流、共同随机数、60-run 隔离矩阵、12 周经营规则、run-level KPI、paired delta、Pareto、EvidenceBundle、CLI/API、Scenario Lab 和 IAOS 实验/推荐治理。
+- 原因：让 M13 单次成功可在相同外生扰动下公平比较 baseline、lean 和 resilient，同时保持模拟证据与正式经营决策不可绕过的隔离门。
+- 影响：`hctm-genesis@0.7.0` 输出 `strategy_evidence_ready=true`；所有 run 的 production writes 为零，推荐状态固定为 proposed_not_applied。当前无 active 主计划。
+- 验证：共同随机数配对、命名流独立、100 次 evidence hash、60 个唯一 branch/run、严格 schema/CLI dry-run、Go test/vet、前端 unit/typecheck/build、三视口 Playwright、IAOS tenant/RLS/idempotency/journal/Outbox 与真实 API 重复提交通过。
+- 后续：任何策略投放必须另立计划并经过独立 IAOS intent/审批；不得直接消费 M14 推荐修改正式 Policy、订单、预算、采购、排产或现金。

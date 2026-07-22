@@ -1,0 +1,2 @@
+import {expect,test} from "@playwright/test";
+test("Scenario Lab produces evidence without production writes",async({page})=>{await page.goto("/#world-experiments");await expect(page.getByRole("heading",{name:/Scenario Lab/})).toBeVisible();await expect(page.getByText("strategy_evidence_ready = true")).toBeVisible();await expect(page.getByText("baseline / lean / resilient")).toBeVisible();await expect(page.getByText("0",{exact:true}).first()).toBeVisible();await expect(page.getByText(/Simulation decision evidence only/)).toBeVisible()});

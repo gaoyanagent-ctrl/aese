@@ -17,6 +17,7 @@ import (
 
 	"github.com/industrial-ai/iaos-aese/internal/application"
 	"github.com/industrial-ai/iaos-aese/internal/capabilitybuild"
+	"github.com/industrial-ai/iaos-aese/internal/experiment"
 	"github.com/industrial-ai/iaos-aese/internal/firstdelivery"
 	"github.com/industrial-ai/iaos-aese/internal/genesis"
 	"github.com/industrial-ai/iaos-aese/internal/iaosclient"
@@ -244,6 +245,7 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/world/capability-build",
 			"/api/aese/v1/world/industrialization",
 			"/api/aese/v1/world/first-delivery",
+			"/api/aese/v1/world/experiments",
 		},
 	})
 }
@@ -316,6 +318,15 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			s.writeJSON(w, http.StatusOK, trace)
+			return
+		}
+		if rest[1] == "experiments" {
+			evidence, err := experiment.BuildEvidence(experiment.DefaultDefinition())
+			if err != nil {
+				s.writeError(w, http.StatusInternalServerError, "experiment_invalid", err.Error(), false, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, evidence)
 			return
 		}
 		if rest[1] != "genesis" {

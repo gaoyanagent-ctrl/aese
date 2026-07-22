@@ -1,0 +1,1 @@
+{"schema_version":"1.0","payloads":["genesis.experiment.requested.v1","genesis.experiment.approved.v1","genesis.experiment.evidence.received.v1","genesis.strategy.recommendation.proposed.v1","genesis.strategy.recommendation.decided.v1"],"production_projection":false}

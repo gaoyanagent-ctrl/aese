@@ -88,6 +88,11 @@ export function FirstDeliveryPlay({ onExit }: { onExit: () => void }) {
         <span>
           {s + 1}/{t.frames.length} · {f.phase}
         </span>
+        {f.first_commercial_cycle_closed && (
+          <button onClick={() => { window.location.hash = "world-experiments"; }}>
+            Scenario Lab
+          </button>
+        )}
       </nav>
       <main className="world-main">
         <section className="world-status">
