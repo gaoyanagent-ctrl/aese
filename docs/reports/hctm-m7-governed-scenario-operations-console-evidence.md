@@ -20,7 +20,7 @@
 
 - T35：`m7-acceptance-20260722-05` 从 clean reset 完成 preflight、initialize、run-to-end、analyze、verify、reset。22 个 pack 事件映射为 10 个受治理动作与 12 个 unsupported/no-op 事实，失败 0；三 Agent 产生 9 条 Tool 证据并发布 3 条 recommendation；17 条离线业务断言通过，2 条 IAOS 在线断言通过。M6 KPI 为需求 12,000、可供/实发 11,700、缺口 300、交付状态 `partially_shipped`。
 - T36：UI 与 CLI 均为 initialize/apply 9 insert + 12 no-op、replay 10 triggered + 12 skipped + 0 failed、verify 2 passed + 0 failed、reset 15 deleted + 12 L1 preserved。单 run 数据库窗口新增 9 次成功 Tool Call、18 条 Outbox（两套各 9 条的 UI/CLI O2D 副作用）和 2 条 apply run；reset 后 scenario event/recommendation 归零。CLI 首次 verify 在 O2D 异步窗口内失败，第二次有界重试通过，两个 attempt 均保留。
-- T39：AESE API `http://127.0.0.1:8090` 的 `/health` 为 `UP`、`/ready` 为 `OK`；AESE frontend `http://127.0.0.1:4173` 返回 200。IAOS API `http://127.0.0.1:8082` 的 `/health` 为 `UP`、`/ready` 的 database/event_bus 均为 `OK`；IAOS frontend `http://127.0.0.1:3000` 返回 200。验收时 AESE revision 为 `4370afe163c888590bf6301afefcc6cb70941cb3`，IAOS revision 为 `8e267f74a8d5e9e92d779f0247c8065faf2ccb13`；AESE 本轮完成 revision 将以最终提交为准。
+- T39：AESE API `http://127.0.0.1:8090` 的 `/health` 为 `UP`、`/ready` 为 `OK`；AESE frontend `http://127.0.0.1:4173` 返回 200。IAOS API `http://127.0.0.1:8082` 的 `/health` 为 `UP`、`/ready` 的 database/event_bus 均为 `OK`；IAOS frontend `http://127.0.0.1:3000` 返回 200。M7 完成提交为 AESE `a4c9af356028822131fe2060ae68158512818f36`，联调部署使用 IAOS `8e267f74a8d5e9e92d779f0247c8065faf2ccb13`。
 
 ## 4. 证据清单（按章节累积）
 

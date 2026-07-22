@@ -9,5 +9,6 @@
   "progress_after": 100,
   "current_state": "M7 已完成，业务用户可通过联动中心受治理运行、验证和安全复位 HCTM order-expedite-01；当前无 active plan。",
   "evidence_ref": "docs/reports/hctm-m7-governed-scenario-operations-console-evidence.md",
+  "commit_sha": "a4c9af356028822131fe2060ae68158512818f36",
   "occurred_at": "2026-07-22T02:10:00Z"
 }
