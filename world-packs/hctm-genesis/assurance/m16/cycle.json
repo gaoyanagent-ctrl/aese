@@ -1,0 +1,1 @@
+{"schema_version":"1.0","code":"ASSURE-GENESIS-M16-001","tenant":"tenant-hctm","release":"STR-GENESIS-M15-RESILIENT@1.0.0","window_weeks":12,"calibration_weeks":8,"holdout_weeks":4,"timezone":"Asia/Shanghai"}

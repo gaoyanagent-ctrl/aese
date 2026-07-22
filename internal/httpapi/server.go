@@ -16,6 +16,7 @@ import (
 	"time"
 
 	"github.com/industrial-ai/iaos-aese/internal/application"
+	"github.com/industrial-ai/iaos-aese/internal/assurance"
 	"github.com/industrial-ai/iaos-aese/internal/capabilitybuild"
 	"github.com/industrial-ai/iaos-aese/internal/experiment"
 	"github.com/industrial-ai/iaos-aese/internal/firstdelivery"
@@ -248,6 +249,7 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/world/first-delivery",
 			"/api/aese/v1/world/experiments",
 			"/api/aese/v1/world/strategy-control",
+			"/api/aese/v1/world/strategy-assurance",
 		},
 	})
 }
@@ -338,6 +340,15 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 			s.writeJSON(w, http.StatusOK, trace)
+			return
+		}
+		if rest[1] == "strategy-assurance" {
+			cycle := assurance.BuildCycle()
+			if err := assurance.Validate(cycle); err != nil {
+				s.writeError(w, http.StatusInternalServerError, "assurance_invalid", err.Error(), false, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, cycle)
 			return
 		}
 		if rest[1] != "genesis" {

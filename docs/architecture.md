@@ -351,3 +351,24 @@ M14 EvidenceBundle + Pareto candidate
 IAOS 拥有 ChangeRequest、StrategyRelease、审批、Policy/Capability、incident、rollback、compensation 和 AdoptionDecision；AESE World 拥有 canonical pilot 时间、外生事件、物理/经济后果和 guardrail observation；Actor Knowledge 继续按当时权限和 observation 投影。shadow 只能计算 candidate decision，不能提交 intent 或预占资源。pilot 中每个业务动作必须由 IAOS committed outcome 驱动，IAOS release 状态不能直接创造库存、产能、交付或现金。
 
 回滚只停止 candidate release 对未来决策生效并恢复 prior release，不删除已经提交的采购、生产、库存、发运、发票或现金事实；遗留影响进入 open-commitment ledger 和受治理 compensating action。M15 不用单个 pilot 宣称因果改善，终态允许 `adopted`、`rejected` 或 `rolled_back`，只有过程、breach 和 commitment 全部对账后才输出 `strategy_change_cycle_closed=true`。详细边界见 DES-016 和 PLAN-M15-001。
+
+## 20. M16 持续策略保障与假设校准架构
+
+M16 消费 M15 主路径已采纳 release，但不把 adoption 当作永久有效：
+
+```text
+Adopted StrategyRelease + canonical World/IAOS observations
+  -> frozen ObservationSpec + as-of cutoff/cursor
+  -> immutable AssuranceDataset + quality/correction lineage
+  -> data quality gate
+  -> input/process/policy-action drift assessment
+  -> bounded 8-week CalibrationCandidate
+  -> single-use 4-week holdout
+  -> new-ancestry M14 common-random-number replay
+  -> renew | reexperiment_required | retire
+  -> strategy_assurance_cycle_closed
+```
+
+AESE World 继续拥有外生事件和物理/经济结果；IAOS 拥有业务记录、active release、AssuranceCycle、finding、审批和 AssuranceDecision；Dataset 只保存允许的观察、stable refs 和 hash，不复制 IAOS 业务数据库。cutoff 后迟到事实通过 correction set 和新 dataset version 处理，不能静默改旧 evidence；Actor Knowledge、UI 或通知不能替代 source facts。
+
+数据质量必须先于 drift 和校准。前 8 周 calibration 与后 4 周 single-use holdout 严格隔离；候选参数只能修改批准的外生假设，不能改 hard constraint、KPI 或 StrategyRelease。新 replay 保留原 M14 EvidenceBundle，终态允许 `renewed`、`reexperiment_required` 或 `retired`。详细边界见 DES-017 和 PLAN-M16-001。

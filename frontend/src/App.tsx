@@ -25,6 +25,7 @@ import { IndustrializationPlay } from "./components/world/IndustrializationPlay"
 import { FirstDeliveryPlay } from "./components/world/FirstDeliveryPlay";
 import { ScenarioLab } from "./components/world/ScenarioLab";
 import { StrategyControlRoom } from "./components/world/StrategyControlRoom";
+import { AssuranceObservatory } from "./components/world/AssuranceObservatory";
 
 const SCENARIO_KEY = "order-expedite-01";
 const scenarioSource = new StaticScenarioDataSource({
@@ -236,6 +237,7 @@ export default function App() {
     | "world-first-delivery"
     | "world-experiments"
     | "world-strategy-control"
+    | "world-assurance"
   >("preview");
   const [integrationOpen, setIntegrationOpen] = useState(false);
   const [connectionVersion, setConnectionVersion] = useState(0);
@@ -255,7 +257,8 @@ export default function App() {
       | "world-industrialization"
       | "world-first-delivery"
       | "world-experiments"
-      | "world-strategy-control",
+      | "world-strategy-control"
+      | "world-assurance",
   ) => {
     setMode(target);
     window.location.hash = target === "preview" ? "sandbox" : target;
@@ -276,6 +279,7 @@ export default function App() {
       if (target === "world-first-delivery") setMode("world-first-delivery");
       if (target === "world-experiments") setMode("world-experiments");
       if (target === "world-strategy-control") setMode("world-strategy-control");
+      if (target === "world-assurance") setMode("world-assurance");
       if (target === "sandbox") setMode("preview");
       if (target === "integration") {
         setMode("preview");
@@ -358,6 +362,8 @@ export default function App() {
     return <ScenarioLab onExit={() => navigate("world-first-delivery")} />;
   if (mode === "world-strategy-control")
     return <StrategyControlRoom onExit={() => navigate("world-experiments")} />;
+  if (mode === "world-assurance")
+    return <AssuranceObservatory onExit={() => navigate("world-strategy-control")} />;
   return (
     <>
       {mode === "live" ? (

@@ -21,7 +21,8 @@
 | 维护 M12 产品工业化与量产批准 | DES-013、PLAN-M12-001、M12 evidence；先读 `internal/industrialization/`、Industrialization campaign 与 IAOS DES-054 |
 | 维护 M13 第一次完整商业交付 | DES-014、PLAN-M13-001、M13/Genesis evidence；先读 `internal/firstdelivery/` 与 First Delivery campaign |
 | 维护 M14 参数化分支经营实验 | DES-015、PLAN-M14-001、M14 evidence；先读 `internal/experiment/`、`internal/genesisexperiment/` 与 Scenario Lab |
-| 实现 M15 受治理策略发布与经营试点 | DES-016、PLAN-M15-001、DES-008、DES-015；先读 M14 EvidenceBundle、IAOS Policy/Decision/Capability 与 World Bridge |
+| 维护 M15 受治理策略发布与经营试点 | DES-016、PLAN-M15-001、M15 evidence；先读 `internal/strategyrelease/` 与 Strategy Control Room |
+| 实现 M16 持续策略保障与假设校准 | DES-017、PLAN-M16-001、DES-015、DES-016；先读 M15 adopted release/evidence、M14 experiment 和 World/IAOS journal 合同 |
 | 查看或维护双系统全景 | DES-006、`frontend/src/components/SystemAtlas.tsx`、IAOS System Atlas API |
 | 修改华辰企业设定 | `docs/HCTM_Virtual_Enterprise_Blueprint.md` |
 | 修改对象和字段 | `docs/HCTM_Master_Data_Model.md` |
@@ -62,6 +63,7 @@
 | M13 completed plan | `docs/plans/2026-07-22-m13-genesis-first-commercial-delivery.md` | E0-E8 跨仓交付与 Genesis 收口记录 |
 | M14 completed plan | `docs/plans/2026-07-22-m14-parameterized-branch-experiments.md` | X0-X7 实验合同、分支、执行、证据、治理与 Scenario Lab |
 | M15 completed plan | `docs/plans/2026-07-22-m15-governed-strategy-release-and-pilot.md` | R0-R7 证据审议、发布、shadow、pilot、回滚、采纳与 Control Room |
+| M16 completed plan | `docs/plans/2026-07-22-m16-continuous-strategy-assurance-and-calibration.md` | A0-A7 dataset、drift、校准、holdout、再实验、治理与 Observatory |
 
 ## 3. M3 实现路径
 
@@ -321,21 +323,35 @@ X0-X7 已完成，当前实现入口如下：
 
 ## 18. M15 策略发布实现路径
 
-R0-R7 实现后必须把“目标路径”更新为实际入口：
+R0-R7 已完成，当前实现入口如下：
+
+| 能力 | 路径 |
+| --- | --- |
+| M15 设计与 completed plan | `docs/designs/DES-016-governed-strategy-release-and-pilot.md`、`docs/plans/2026-07-22-m15-governed-strategy-release-and-pilot.md` |
+| Strategy Schema 与 fixture | `world-contracts/schemas/strategy-release.schema.json`、`world-contracts/fixtures/strategy-release.json` |
+| Evidence review、release、shadow、guardrail | `internal/strategyrelease/` |
+| IAOS 治理端点 | `/api/v1/genesis/strategy/actions`；exact evidence/release hash、expected version、幂等和独立审批 |
+| Strategy Control Room | `frontend/src/components/world/StrategyControlRoom.tsx`、`frontend/src/world/strategyControl.ts`、`/#world-strategy-control` |
+| Strategy API | `internal/httpapi/server.go`（`GET /api/aese/v1/world/strategy-control`） |
+| M15 runbook / evidence | `docs/runbooks/genesis-strategy-control.md`、`docs/reports/m15-governed-strategy-release-evidence.md` |
+
+## 19. M16 持续保障实现路径
+
+A0-A7 实现后必须把“目标路径”更新为实际入口：
 
 | 能力 | 目标路径 |
 | --- | --- |
-| M15 设计与 completed plan | `docs/designs/DES-016-governed-strategy-release-and-pilot.md`、`docs/plans/2026-07-22-m15-governed-strategy-release-and-pilot.md` |
-| Strategy Schema 与 fixture | `world-contracts/schemas/strategy-*.schema.json`、`world-contracts/fixtures/strategy/` |
-| Evidence review、release、shadow、guardrail | `internal/strategyrelease/` |
-| Canonical pilot World 规则 | `internal/strategypilot/`、`world-packs/hctm-genesis/campaigns/strategy-pilot/` |
-| Strategy CLI | `cmd/aese/strategy.go`；`aese strategy validate|inspect|diff|preflight|shadow|pilot|rollback|evidence` |
-| IAOS bridge adapter | `internal/bridge/iaos/`；strategy release/pilot/rollback allowlist payload |
-| Strategy Control Room | `frontend/src/components/world/StrategyControlRoom.tsx`、`frontend/src/world/strategy.ts`、`/#world-strategy` |
-| Strategy API | `internal/httpapi/server.go`（`/api/aese/v1/world/strategy`） |
-| M15 runbook / evidence | `docs/runbooks/genesis-strategy-pilot.md`、`docs/reports/m15-governed-strategy-pilot-evidence.md` |
+| M16 设计与 completed plan | `docs/designs/DES-017-continuous-strategy-assurance-and-calibration.md`、`docs/plans/2026-07-22-m16-continuous-strategy-assurance-and-calibration.md` |
+| Assurance Schema 与 fixture | `world-contracts/schemas/strategy-assurance*.schema.json`、`world-contracts/fixtures/assurance/` |
+| Dataset、quality、drift、calibration 与 validation | `internal/strategyassurance/` |
+| Assurance CLI | `cmd/aese/assurance.go`；`aese assurance validate|inspect|collect|seal|assess|calibrate|validate-report|evidence` |
+| M14 replay reuse | `internal/experiment/`、`internal/genesisexperiment/`；新 ancestry/artifact namespace |
+| IAOS bridge adapter | `internal/bridge/iaos/`；assurance/dataset/drift/decision allowlist payload |
+| Strategy Assurance Observatory | `frontend/src/components/world/StrategyAssuranceObservatory.tsx`、`frontend/src/world/assurance.ts`、`/#world-assurance` |
+| Assurance API | `internal/httpapi/server.go`（`/api/aese/v1/world/strategy-assurance`） |
+| M16 runbook / evidence | `docs/runbooks/genesis-strategy-assurance.md`、`docs/reports/m16-strategy-assurance-evidence.md` |
 
-## 19. 导航更新触发器
+## 20. 导航更新触发器
 
 以下改动必须更新本文件：
 

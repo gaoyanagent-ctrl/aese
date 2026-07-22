@@ -696,3 +696,19 @@
 - 影响：`hctm-genesis@0.8.0` 输出 `strategy_change_cycle_closed=true`；adopted 与 rolled_back 都是合法终态，pilot 不被宣称为统计因果证明。当前无 active 主计划。
 - 验证：两条路径 100 次 hash、shadow 零写入、exact release、职责分离、真实 IAOS 201/duplicate、Go/Schema/前端/三视口、Atlas 与服务部署通过。
 - 后续：M16 必须依据 disposition 另立计划；M15 不授权真实生产租户或无人审批投放。
+
+## 2026-07-22 - M16 持续策略保障与假设校准计划启动
+
+- 变更：新增 approved DES-017 和唯一 active 的 PLAN-M16-001，将 M16 拆为 A0-A7：Assurance/Dataset/Drift 合同、canonical observation lineage、数据质量与 drift、有界校准和防泄漏、holdout/M14 replay、IAOS 到期复审治理、Assurance Observatory 和全链验收；同步 README、Agent Context、Architecture、文档索引、Roadmap、Code Map 和 System Atlas 声明，并修正 M15 Code Map 为实际实现路径。
+- 原因：M15 主路径已采纳 resilient release，但 adoption 只对当时 scope/version 有效；必须在复审日期前证明观察数据可信、假设仍受支持，并在不静默改 evidence/Policy 的情况下决定续期、重新实验或退役。
+- 影响：M16 成为当前唯一 active 主计划，机器终态固定为 `strategy_assurance_cycle_closed=true`，disposition 可以是 renewed、reexperiment_required 或 retired。数据质量优先于 drift；前 8 周 calibration 与后 4 周 holdout 隔离；校准只形成假设 candidate。
+- 验证：`git diff --check`、DES/PLAN ID 唯一性、active plan 唯一性、T1-T68 连续唯一、全部 Atlas/World/场景 JSON 解析、受影响 Markdown 本地链接和 `scripts/check_system_atlas_tracking.sh` 均通过；本轮只修改设计与计划文档，未运行产品测试。工作区既有测试修改、截图删除和验收产物均未触碰。
+- 后续：执行 A0 T1-T9，先关闭 G4-G8 的 observation/cutoff、drift、calibration/holdout、replay 和 IAOS assurance 基线，再允许封存 dataset 或改变 release review 状态。
+
+## 2026-07-22 - M16 持续策略保障与假设校准完成
+
+- 变更：完成 A0-A7/T1-T68；交付 12 周 as-of dataset/lineage、质量优先 drift、8/4 防泄漏校准/holdout、新祖先 60-run replay、三种 disposition、Assurance Observatory 和 IAOS 治理。
+- 原因：验证 M15 已采纳策略在后续环境中仍受假设支持，而不在线学习或自动修改 release。
+- 影响：输出 `strategy_assurance_cycle_closed=true`；renewed、reexperiment_required、retired 均是合法终态。当前无 active 主计划。
+- 验证：100 次 cycle hash、zero missing、six-domain drift、holdout lock、旧 evidence hash、Go/Schema/UI/三视口、IAOS 201/duplicate 和 Atlas 通过。
+- 后续：按 disposition 另立下一计划；不得直接扩范围或自动发版。

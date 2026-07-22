@@ -64,6 +64,7 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M13 Project Genesis 第一次完整商业交付：Completed；12,000 件交付、开票回款、实际成本与毛利已输出 `first_commercial_cycle_closed`。
 - M14 参数化分支经营实验：Completed；60 个隔离 run 以共同随机数比较 baseline/lean/resilient，并输出不可自动投放的 `strategy_evidence_ready` 证据包。
 - M15 受治理策略发布与经营试点：Completed；M14 candidate 已通过独立审议、零写入 shadow、有限 canonical pilot，并以 adopted/rolled_back 双路径验证回滚与补偿闭环。
+- M16 持续策略保障与假设校准：Completed；12 周封存数据、质量优先 drift、8/4 校准/holdout 和三种保障 disposition 已验收。
 
 当前同一页面可运行 Preview 或 IAOS Live 沙盘，并可在联动中心通过无业务数据库的 AESE 薄编排 API 受治理运行和复位场景；浏览器不直接调用 IAOS 写接口。
 
@@ -124,6 +125,8 @@ npm run dev
 - [M14 参数化分支经营实验实施计划](docs/plans/2026-07-22-m14-parameterized-branch-experiments.md)
 - [M15 受治理策略发布与经营试点设计](docs/designs/DES-016-governed-strategy-release-and-pilot.md)
 - [M15 受治理策略发布与经营试点实施计划](docs/plans/2026-07-22-m15-governed-strategy-release-and-pilot.md)
+- [M16 持续策略保障与假设校准设计](docs/designs/DES-017-continuous-strategy-assurance-and-calibration.md)
+- [M16 持续策略保障与假设校准实施计划](docs/plans/2026-07-22-m16-continuous-strategy-assurance-and-calibration.md)
 - [M3 本地运行手册](docs/runbooks/hctm-m3-local-run.md)
 - [M3V 2D 沙盘运行手册](docs/runbooks/hctm-m3v-2d-sandbox.md)
 - [M5 受治理 Agent Tracer 运行手册](docs/runbooks/hctm-m5-governed-agent-tracers.md)

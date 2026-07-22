@@ -12,7 +12,7 @@
 | 当前里程碑和优先级 | `docs/roadmap.md` |
 | 任务到文件导航 | `docs/code-map.md` |
 | 历史进展 | `docs/progress-log.md` |
-| 最近完成实施任务 | `docs/plans/2026-07-22-m15-governed-strategy-release-and-pilot.md`；当前无 active 主计划 |
+| 最近完成实施任务 | `docs/plans/2026-07-22-m16-continuous-strategy-assurance-and-calibration.md`；当前无 active 主计划 |
 
 若内容冲突，当前状态以 `docs/roadmap.md` 为准，长期架构决策以 ADR 为准。
 
@@ -80,6 +80,7 @@
 | DES-014 | [M13 Project Genesis 第一次完整商业交付](designs/DES-014-genesis-first-commercial-delivery.md) | Completed |
 | DES-015 | [M14 参数化分支经营实验](designs/DES-015-parameterized-branch-experiments.md) | Completed |
 | DES-016 | [M15 受治理策略发布与经营试点](designs/DES-016-governed-strategy-release-and-pilot.md) | Completed |
+| DES-017 | [M16 持续策略保障与假设校准](designs/DES-017-continuous-strategy-assurance-and-calibration.md) | Completed |
 | PLAN-M3 | [M3 实施计划](plans/2026-07-19-m3-executable-scenario-package.md) | Completed |
 | PLAN-M3V | [快速 2D 企业沙盘实施计划](plans/2026-07-19-fast-track-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Completed |
@@ -94,6 +95,7 @@
 | PLAN-M13 | [M13 Project Genesis 第一次完整商业交付实施计划](plans/2026-07-22-m13-genesis-first-commercial-delivery.md) | Completed |
 | PLAN-M14 | [M14 参数化分支经营实验实施计划](plans/2026-07-22-m14-parameterized-branch-experiments.md) | Completed |
 | PLAN-M15 | [M15 受治理策略发布与经营试点实施计划](plans/2026-07-22-m15-governed-strategy-release-and-pilot.md) | Completed |
+| PLAN-M16 | [M16 持续策略保障与假设校准实施计划](plans/2026-07-22-m16-continuous-strategy-assurance-and-calibration.md) | Completed |
 | M9 Runbook | [Genesis Incorporation Runbook](runbooks/genesis-incorporation.md) | Completed |
 | M9 Evidence | [Genesis Incorporation Evidence](reports/m9-genesis-incorporation-evidence.md) | Completed |
 | M10 Runbook | [Genesis Plant Build Runbook](runbooks/genesis-plant-build.md) | Completed |

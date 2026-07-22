@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260722-m16-continuous-strategy-assurance-and-calibration-plan-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "启动 M16 持续策略保障与假设校准计划",
+  "detail": "新增 approved DES-017 和 active PLAN-M16-001，对 M15 adopted release 建立 12 周 canonical observation、数据质量优先 drift、8/4 calibration/holdout、新祖先 M14 replay 和 renew/reexperiment/retire 决策；不自动修改 Policy 或旧 evidence。",
+  "status_after": "building",
+  "progress_after": 90,
+  "current_state": "M16 A0 Assurance、Dataset 与 Drift 机器合同进行中；G4-G8 尚待冻结。",
+  "evidence_ref": "docs/plans/2026-07-22-m16-continuous-strategy-assurance-and-calibration.md",
+  "occurred_at": "2026-07-22T20:50:00Z"
+}
