@@ -911,3 +911,11 @@
 - 影响：G3–G7 对应的业务事实进入设立案持久 state document；事实缺失或金额不守恒时保持 `initial_budget_approved`，不得进入 `enterprise_operational_ready`。
 - 验证：IAOS incorporation 单元测试覆盖完整一致事实和不一致拒绝；真实 PostgreSQL 完整生命周期再次通过并到达终态。
 - 后续：实现正式 override/批准失效矩阵、五 Agent 并发审计和完整 UI Runtime 投影。
+
+## 2026-07-23 - M9N 开户拒绝补正与 G3 重新审批
+
+- 变更：IAOS revision `eda6a41` 允许开户拒绝后通过原正式 Capability 重提修改后的受益所有人材料，但强制使用新 correlation 和新的 G3 Approval；旧批准不能复用。
+- 原因：外部银行拒绝必须使原申请授权边界失效，补正不能用状态直改或历史批准绕过治理。
+- 影响：未取得新 G3 的重提返回 422 且零写入；新批准消费后生成唯一新 Intent，设立案仍保持可审计的开户提交状态。
+- 验证：IAOS engine 单元测试与真实 PostgreSQL `TestIntegrationCapitalMismatchCommitsDiscrepancyWithoutStateAdvance` 通过，断言旧 G3 复用失败、新 G3 consumed 且新 correlation 只有一个 Intent。
+- 后续：继续正式 override/超时/撤权矩阵、五 Agent 全回归和 UI 联动。

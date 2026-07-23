@@ -128,7 +128,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T41 建立五个 Agent 的稳定主体、服务身份、组织岗位、Mandate、Capability/Tool allowlist、额度、期限和升级规则。
 - [ ] T42 让 Agent Tool、人工按钮和 API 进入同一 Capability/Process/Approval 路径，并区分建议、草稿、提交、批准和 committed outcome。
 - [x] T43 验证登记补正：Agent 可在原 G2、原 correlation、限次限期内补正，扩大范围必须重新审批。
-- [ ] T44 验证开户拒绝：原 G3 失效，修改受益所有人材料后重新审批。
+- [x] T44 验证开户拒绝：原 G3 失效，修改受益所有人材料后重新审批。
 - [x] T45 验证出资差异：禁止自动确认，生成 Discrepancy 并升级 `founder-principal`。
 - [x] T46 验证 Agent 越权：finance Agent 自批预算被职责分离拒绝，业务状态不变且 Tool Call/Decision/Journal 完整。
 - [x] T47 验证 Agent 暂停、Mandate 撤销/过期、金额超限、跨租户和工具禁用均在 dispatch 前失败关闭。
