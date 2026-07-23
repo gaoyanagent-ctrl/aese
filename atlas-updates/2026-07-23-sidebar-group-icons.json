@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-sidebar-group-icons-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "统一 IAOS 侧栏导航分组图标",
+  "detail": "四个业务分组移除 emoji 并使用 Lucide 线性 SVG，统一尺寸、描边和主题色。",
+  "status_after": "validating",
+  "progress_after": 99,
+  "current_state": "侧栏分组与系统菜单采用同一图标语言，三视口验收通过。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-23T13:55:00Z"
+}

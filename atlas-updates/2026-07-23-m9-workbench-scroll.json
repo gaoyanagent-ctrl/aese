@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-workbench-scroll-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "修复企业成立与治理页面纵向滚动",
+  "detail": "IAOS 工作台采用固定高度主滚动容器，并以真实 scrollHeight/scrollTop 三视口回归锁定。",
+  "status_after": "validating",
+  "progress_after": 99,
+  "current_state": "企业成立与治理页面在桌面和移动端均可上下滚动。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-23T13:35:00Z"
+}

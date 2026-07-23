@@ -1023,3 +1023,19 @@
 - 影响：权限标识保持稳定，用户侧不再暴露机器 code。
 - 验证：数据库资源名称正确；Founder 1440×900 Playwright 1/1。
 - 后续：新增菜单必须显式提供业务名称，不得用 code 作为默认展示名。
+
+## 2026-07-23 - 修复企业成立与治理页面滚动
+
+- 变更：IAOS 企业成立工作台改为固定高度内的独立纵向滚动容器，并增加真实 scrollTop 三视口回归。
+- 原因：原 `min-h-full` 被内容撑高，而 MainLayout 外层锁定 overflow，导致内外层都无法滚动。
+- 影响：桌面和移动端可完整访问工作台下部的追踪、资产和审计内容。
+- 验证：Next production build/deploy；1440×900、1280×720、390×844 Playwright 3/3。
+- 后续：固定 MainLayout 下的新工作区统一使用 `h-full min-h-0 overflow-y-auto`。
+
+## 2026-07-23 - 统一 IAOS 侧栏分组图标
+
+- 变更：业务智造层、智能中枢层、低代码工坊、企业数字治理移除 emoji，改用 IAOS 既有 Lucide 线性图标体系。
+- 原因：彩色 emoji 与系统菜单 SVG 的尺寸、描边、颜色和视觉语义不一致，呈现明显模板化观感。
+- 影响：四个分组统一使用 Factory、Cpu、LayoutGrid、ShieldCheck，并共享主题颜色和交互风格。
+- 验证：Next production build/deploy；三视口 Playwright 断言分组可见且无原 emoji，3/3。
+- 后续：结构性导航图标只使用系统图标库，不使用字体 emoji。
