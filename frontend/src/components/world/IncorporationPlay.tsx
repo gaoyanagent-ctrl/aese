@@ -60,6 +60,13 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
   if (!trace)
     return <main className="world-loading">正在加载企业成立世界…</main>;
   const f = trace.frames[step];
+  const lifecycle = trace.iaos_lifecycle;
+  const params = new URLSearchParams(window.location.hash.split("?")[1] ?? "");
+  const tenant = params.get("tenant") ?? "tenant-hctm-genesis";
+  const caseCode = lifecycle?.case_code ?? params.get("case") ?? "";
+  const processRun = params.get("process_run") ?? String(lifecycle?.process_runs?.[0]?.id ?? "");
+  const correlation = params.get("correlation") ?? String(lifecycle?.world_exchanges?.[0]?.correlation_id ?? "");
+  const iaosLink = `http://127.0.0.1:3000/#enterprise_lifecycle?tenant=${encodeURIComponent(tenant)}&case=${encodeURIComponent(caseCode)}&process_run=${encodeURIComponent(processRun)}&world_run=${encodeURIComponent(trace.world_run_id)}&correlation=${encodeURIComponent(correlation)}`;
   const roles = [
     f.governance.ceo,
     f.governance.cfo,
@@ -113,6 +120,9 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
           <Building2 />
           工厂建设 Campaign
         </button>
+        <a className="world-back" href={iaosLink} target="_blank" rel="noreferrer">
+          打开 IAOS 设立案
+        </a>
         <span>
           阶段 {step + 1}/{trace.frames.length} · {f.phase}
         </span>
@@ -227,6 +237,16 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
             </button>
           ))}
         </section>
+        {lifecycle && <section className="world-status" data-testid="iaos-lifecycle-projection">
+          <span>IAOS Effective Runtime Projection</span>
+          <h2>{lifecycle.case_code} · {String((lifecycle.state as {state?:string})?.state ?? "")}</h2>
+          <p>Process {processRun || "—"} · correlation {correlation || "—"}</p>
+          <div className="three-state-grid">
+            <article><header>Intent / Observation / CommittedOutcome</header><pre>{JSON.stringify(lifecycle.world_exchanges ?? [],null,2)}</pre></article>
+            <article><header>Discrepancy / Decision</header><pre>{JSON.stringify({discrepancies:(lifecycle.state as {discrepancies?:unknown[]})?.discrepancies,decisions:lifecycle.decisions},null,2)}</pre></article>
+            <article><header>Runtime lineage</header><pre>{JSON.stringify(lifecycle.lineage ?? {},null,2)}</pre></article>
+          </div>
+        </section>}
       </main>
     </div>
   );

@@ -927,3 +927,11 @@
 - 影响：每个 Agent 只能执行 Runtime Artifact/RBAC/Agent allowlist 交集内的 Capability；相同命令并发只产生一个业务效果和一组审计证据。
 - 验证：真实 PostgreSQL `TestIntegrationFiveAgentPermissionIdempotencyAndAuditMatrix` 通过，断言五条允许、五条拒绝以及并发结果 201/200、Journal=1、Decision=1。
 - 后续：继续人工 override、Runtime 全投影、AESE 生命周期页面和最终全量回归。
+
+## 2026-07-23 - M9N 正式 Override、Runtime 全投影与双向 Trace
+
+- 变更：IAOS revisions `7fe197b`、`7d48a43`、`93f2440`、`c66ddd6` 将 founder override 接入 Capability/Approval/Decision/Journal/Outbox，批准绑定 Runtime hash 和 30 分钟有效期；Runtime Artifact 统一 API/人工/Agent/Process 入口及动作阶段；Trace/工作台增加全局搜索、来源影响和 lineage。AESE M9 页面消费 IAOS lifecycle/process projection，并实现 tenant/case/process run/world run/correlation 五参数双向深链。
+- 原因：人工特批和 UI 动作不得绕过正式治理；两端不得维护互相脱离的完成状态。
+- 影响：超时或 Runtime 版本变化使批准失效；特批缺少原决定引用、理由或正式 G1–G7 Approval 时失败关闭；AESE 页面展示持久 Intent/Observation/CommittedOutcome/Discrepancy。
+- 验证：IAOS 单元/API 与真实 PostgreSQL founder override 测试通过；IAOS frontend production build、AESE IncorporationPlay test 和 production build 通过。
+- 后续：执行 clean tracer、双方重启恢复、真实库综合矩阵和最终全量回归。

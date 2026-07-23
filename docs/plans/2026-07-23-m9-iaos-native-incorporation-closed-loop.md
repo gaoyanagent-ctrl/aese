@@ -80,7 +80,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T13 将菜单投影统一为 `installed runtime artifact + effective permission + tenant access`，移除前端按租户名、用户名或 token 单角色裁剪。
 - [x] T14 逐项替换 M9 路径中的 `userID == "dev-user"` 特判；兼容 token 仅能映射到已登记主体且不得用于正式验收。
 - [x] T15 验证 API、菜单、直达路由、写操作四层一致授权，以及无访问关系、撤权、过期 Mandate 和跨租户失败关闭。
-- [ ] T16 验证 `founder-principal` 的人工接管/特批必须走正式 Capability、Decision、Approval、Journal 和 Outbox。
+- [x] T16 验证 `founder-principal` 的人工接管/特批必须走正式 Capability、Decision、Approval、Journal 和 Outbox。
 
 验收：D18.2 通过；M9 正式链零 `dev-user` bypass；身份和有效授权均可查询、可撤销、可审计。
 
@@ -117,7 +117,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T35 完成 `capital.contribution.match`、`appointment.eligibility`、`mandate.scope.and.limit`、`initial.budget.control` 和 `enterprise.operational.readiness`。
 - [x] T36 固定承诺、到账、核验余额、预算授权和实际现金的独立对象、单位、精度、引用和守恒规则。
 - [x] T37 实现开户与候选人 Intent/Observation/CommittedOutcome；外部结果只能由 World Bridge 输入。
-- [ ] T38 实现 G3–G7、批准失效、拒绝、补正、超时、撤权、版本变化和正式 override。
+- [x] T38 实现 G3–G7、批准失效、拒绝、补正、超时、撤权、版本变化和正式 override。
 - [x] T39 实现 readiness evaluator，只有法律主体、账户、核验出资、组织岗位、任命、Mandate 和预算引用一致时进入终态。
 - [x] T40 从 clean run 执行完整正常主线，保存 `enterprise_operational_ready` 和全链状态 hash。
 
@@ -126,7 +126,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 ## 10. P5 — Agent 组织与异常治理
 
 - [x] T41 建立五个 Agent 的稳定主体、服务身份、组织岗位、Mandate、Capability/Tool allowlist、额度、期限和升级规则。
-- [ ] T42 让 Agent Tool、人工按钮和 API 进入同一 Capability/Process/Approval 路径，并区分建议、草稿、提交、批准和 committed outcome。
+- [x] T42 让 Agent Tool、人工按钮和 API 进入同一 Capability/Process/Approval 路径，并区分建议、草稿、提交、批准和 committed outcome。
 - [x] T43 验证登记补正：Agent 可在原 G2、原 correlation、限次限期内补正，扩大范围必须重新审批。
 - [x] T44 验证开户拒绝：原 G3 失效，修改受益所有人材料后重新审批。
 - [x] T45 验证出资差异：禁止自动确认，生成 Discrepancy 并升级 `founder-principal`。
@@ -139,12 +139,12 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 ## 11. P6 — 工作台、Trace Spine 与双向联动
 
 - [x] T49 在 IAOS 增加“企业生命周期”业务导航及 DES-027 D10 的十个工作区。
-- [ ] T50 让全部菜单、表单、列表、详情、动作和 Agent Tool 从 Runtime Artifact 与有效权限投影。
-- [ ] T51 实现企业成立时间线、全局追踪搜索、对象“来源与影响”和 Runtime Artifact lineage。
+- [x] T50 让全部菜单、表单、列表、详情、动作和 Agent Tool 从 Runtime Artifact 与有效权限投影。
+- [x] T51 实现企业成立时间线、全局追踪搜索、对象“来源与影响”和 Runtime Artifact lineage。
 - [x] T52 实现 trace/evidence/world-exchange/lineage 只读 API，统一稳定键并禁止以数据库 UUID 作为场景唯一引用。
 - [x] T53 实现 evidence bundle 的 schema/version、canonical hash、引用清单和离线验证器。
-- [ ] T54 更新 AESE World M9 页面，消费同一 lifecycle/process projection，展示 Intent/Observation/CommittedOutcome/Discrepancy。
-- [ ] T55 实现 AESE → IAOS 与 IAOS → AESE 双向深链，携带 tenant、case、process run、world run 和 correlation。
+- [x] T54 更新 AESE World M9 页面，消费同一 lifecycle/process projection，展示 Intent/Observation/CommittedOutcome/Discrepancy。
+- [x] T55 实现 AESE → IAOS 与 IAOS → AESE 双向深链，携带 tenant、case、process run、world run 和 correlation。
 - [ ] T56 验证 IAOS/AESE/Bridge/浏览器重启与刷新后页面只从持久事实恢复，不依赖 local state 作为完成证据。
 
 验收：D18.7、D18.11 通过；业务人员可从一个设立案追溯全部语义、治理和 World 证据。

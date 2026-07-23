@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-native-runtime-trace-linkage-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M9N 正式 Override、Runtime 全投影与双向 Trace",
+  "detail": "founder override 进入正式 Capability/Approval/Decision/Journal/Outbox；双仓页面消费 Runtime/lifecycle projection 并携带五个稳定追踪参数双向跳转。",
+  "status_after": "validating",
+  "progress_after": 98,
+  "current_state": "治理与双仓可观察性门关闭；进入 clean-run、恢复和全量验收。",
+  "evidence_ref": "docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T10:30:00Z"
+}

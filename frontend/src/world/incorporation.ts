@@ -43,6 +43,17 @@ export type IncorporationTrace = {
   timezone: "Asia/Shanghai";
   policy_version: string;
   frames: IncorporationFrame[];
+  iaos_lifecycle?: {
+    case_code: string;
+    state: Record<string, unknown>;
+    journal: unknown[];
+    approvals: unknown[];
+    world_exchanges: Array<Record<string, unknown>>;
+    process_runs: Array<Record<string, unknown>>;
+    decisions: unknown[];
+    runtime_artifact: Record<string, unknown>;
+    lineage: Record<string, unknown>;
+  };
 };
 export async function loadIncorporation(
   signal?: AbortSignal,
@@ -54,5 +65,20 @@ export async function loadIncorporation(
     ...frame,
     knowledge: frame.knowledge ?? [],
   }));
+  if (typeof window !== "undefined") {
+    const params = new URLSearchParams(window.location.hash.split("?")[1] ?? "");
+    const caseCode = params.get("case");
+    const tenant = params.get("tenant") ?? localStorage.getItem("aese_iaos_tenant_id") ?? "tenant-hctm-genesis";
+    const token = localStorage.getItem("iaos_token");
+    const base = (localStorage.getItem("aese_iaos_base_url") ?? "http://127.0.0.1:8082").replace(/\/$/, "");
+    if (caseCode && token) {
+      const lifecycle = await fetch(`${base}/api/v1/incorporations/${encodeURIComponent(caseCode)}/trace`, {
+        signal,
+        headers: { Authorization: `Bearer ${token}`, "X-Tenant-ID": tenant },
+      });
+      if (!lifecycle.ok) throw new Error(`IAOS lifecycle API ${lifecycle.status}`);
+      trace.iaos_lifecycle = await lifecycle.json();
+    }
+  }
   return trace;
 }
