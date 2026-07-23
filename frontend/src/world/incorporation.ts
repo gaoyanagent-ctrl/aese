@@ -55,6 +55,22 @@ export type IncorporationTrace = {
     lineage: Record<string, unknown>;
   };
 };
+
+export function resolveIaosLifecycleBase(): string {
+  const fallback = `http://${window.location.hostname || "127.0.0.1"}:8082`;
+  const configured = localStorage.getItem("aese_iaos_base_url")?.trim();
+  if (!configured) return fallback;
+  try {
+    const candidate = new URL(configured, window.location.origin);
+    // A historical integration default stored the AESE/Vite origin here.
+    // That origin cannot serve IAOS /api/v1 routes in the standalone stack.
+    if (candidate.origin === window.location.origin) return fallback;
+    return candidate.toString().replace(/\/$/, "");
+  } catch {
+    return fallback;
+  }
+}
+
 export async function loadIncorporation(
   signal?: AbortSignal,
 ): Promise<IncorporationTrace> {
@@ -70,7 +86,7 @@ export async function loadIncorporation(
     const caseCode = params.get("case");
     const tenant = params.get("tenant") ?? localStorage.getItem("aese_iaos_tenant_id") ?? "tenant-hctm-genesis";
     const token = localStorage.getItem("iaos_token");
-    const base = (localStorage.getItem("aese_iaos_base_url") ?? `http://${window.location.hostname || "127.0.0.1"}:8082`).replace(/\/$/, "");
+    const base = resolveIaosLifecycleBase();
     if (caseCode && token) {
       const lifecycle = await fetch(`${base}/api/v1/incorporations/${encodeURIComponent(caseCode)}/trace`, {
         signal,

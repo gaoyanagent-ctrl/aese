@@ -15,10 +15,21 @@ test("AESE consumes persisted IAOS M9 lifecycle projection after refresh", async
   await page.addInitScript(({ token }) => {
     localStorage.setItem("iaos_token", token);
     localStorage.setItem("aese_iaos_tenant_id", "tenant-hctm-genesis");
+    // Reproduce a stale value written by an earlier AESE build. Lifecycle
+    // requests must still go to IAOS instead of the Vite origin.
+    localStorage.setItem("aese_iaos_base_url", window.location.origin);
   }, session);
+  const lifecycleRequests: string[] = [];
+  page.on("request", (request) => {
+    if (request.url().includes("/api/v1/incorporations/")) {
+      lifecycleRequests.push(request.url());
+    }
+  });
   const target = `/#world-incorporation?tenant=tenant-hctm-genesis&case=${encodeURIComponent(caseCode)}&process_run=&world_run=&correlation=`;
   await page.goto(target);
   await expect(page.getByTestId("iaos-lifecycle-projection")).toBeVisible();
+  expect(lifecycleRequests.length).toBeGreaterThan(0);
+  expect(lifecycleRequests.every((url) => new URL(url).port === "8082")).toBeTruthy();
   await expect(page.getByText("Intent / Observation / CommittedOutcome")).toBeVisible();
   const escapedHost = new URL(page.url()).hostname.replaceAll(".", "\\.");
   await expect(page.getByRole("link", { name: "打开 IAOS 设立案" })).toHaveAttribute("href", new RegExp(`^http://${escapedHost}:3000/.*tenant=.*case=.*process_run=.*world_run=.*correlation=`));

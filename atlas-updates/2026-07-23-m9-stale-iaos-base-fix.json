@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-stale-iaos-base-fix-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "修复 AESE 陈旧 IAOS base 导致的生命周期 404",
+  "detail": "AESE 拒绝与页面同 origin 的陈旧 IAOS localStorage 地址，自动使用当前浏览器主机的 8082，并以三视口网络断言锁定回归。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "AESE World 在局域网和陈旧浏览器配置下均将生命周期请求发送到 IAOS。",
+  "evidence_ref": "docs/solutions/SOL-001-m9-lan-lifecycle-loading-and-sse.md",
+  "occurred_at": "2026-07-23T07:00:00Z"
+}

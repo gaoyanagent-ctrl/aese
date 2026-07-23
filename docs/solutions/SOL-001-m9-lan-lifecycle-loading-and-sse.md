@@ -15,6 +15,8 @@ tags: [aese, m9, lan, sse]
 - IAOS/AESE 深链固定指向 localhost/127.0.0.1，远程浏览器打开了错误主机。
 - NATS EventSource 每 60 秒收到 `ERR_INCOMPLETE_CHUNKED_ENCODING`。
 - Vite 开发服务器在页面进入 BFCache 时报告 HMR WebSocket 关闭。
+- 浏览器残留的 `aese_iaos_base_url` 指向 AESE origin 时，生命周期请求错误地
+  发往 `:4173/api/v1/incorporations/...` 并返回 404；favicon 也返回 404。
 
 ## 根因与修复
 
@@ -26,6 +28,8 @@ tags: [aese, m9, lan, sse]
    heartbeat 时续期。
 4. Vite BFCache WebSocket 是开发 HMR 生命周期提示；业务投影和生产构建
    不依赖该连接。
+5. IAOS base resolver 拒绝与 AESE 页面相同 origin 的陈旧配置，自动回退到
+   当前浏览器 hostname 的 `:8082`；同时提供静态 favicon。
 
 ## 回归证据
 
@@ -33,5 +37,7 @@ tags: [aese, m9, lan, sse]
   `INC-E2E-1784787213558168936` 返回 200。
 - 以 `http://192.168.50.222:3000` 和 `:4173` 执行双仓三视口
   Playwright，各 3/3 通过；深链 host 保持 `192.168.50.222`。
+- AESE Playwright 显式注入 `aese_iaos_base_url=window.location.origin`，
+  三个视口仍全部通过，并断言 lifecycle 请求端口全部为 `8082`。
 - SSE curl 持续 70 秒后由客户端 `--max-time` 主动终止，接收 144 bytes；
   不再由服务端在 60 秒以 incomplete chunked encoding 截断。

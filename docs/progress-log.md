@@ -951,3 +951,11 @@
 - 影响：从 `192.168.50.222` 访问时 API、IAOS、AESE 与双向深链保持同一主机；SSE 不再每 60 秒异常断开。
 - 验证：局域网 IAOS/AESE Playwright 各 3/3；Go/API、AESE 38 tests 和双仓 build 通过；SSE 70 秒探针由客户端超时主动结束。
 - 后续：生产环境使用反向代理统一 origin，并关闭 Vite HMR。
+
+## 2026-07-23 - 修复 AESE 陈旧 IAOS 地址导致的生命周期 404
+
+- 变更：AESE IAOS base resolver 识别并拒绝指向当前 AESE origin 的陈旧 localStorage 配置，回退到浏览器 hostname 的 8082；补充 favicon 和陈旧配置网络回归。
+- 原因：旧浏览器状态可覆盖新的动态 fallback，使生命周期 API 错误发往 Vite 4173。
+- 影响：用户无需清理 localStorage；局域网打开 AESE World 时生命周期请求自动路由到 IAOS。
+- 验证：针对性 Vitest 2/2、production build、局域网三视口 Playwright 3/3 通过；Playwright 断言所有 incorporation 请求端口均为 8082。
+- 后续：生产环境部署时仍建议通过统一反向代理和显式环境配置消除开发端口依赖。
