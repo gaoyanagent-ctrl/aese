@@ -101,7 +101,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 
 - [x] T25 先实现 `incorporation.case.open`、`founder.resolution.prepare/approve`、`registration.package.validate/submit/observation.commit`。
 - [x] T26 发布 `enterprise.incorporation.lifecycle.v1` 和 `legal.registration.v1` 的最小可运行版本，持有 G1、G2 与补正分支。
-- [ ] T27 实现 `incorporation.document.completeness`、`incorporation.separation.of.duties` 和 `world.observation.trust` Decision 证据。
+- [x] T27 实现 `incorporation.document.completeness`、`incorporation.separation.of.duties` 和 `world.observation.trust` Decision 证据。
 - [x] T28 让业务事实、Process transition、Approval、Decision Audit、Journal 和 Outbox 在同一 IAOS 事务提交。
 - [x] T29 实现 IAOS registration Intent → AESE ingress/World Store → registration Observation → IAOS CommittedOutcome。
 - [ ] T30 对未知 correlation、错租户、乱序、旧 schema、hash 不符和重复 Observation 失败关闭或返回原结果。
@@ -116,7 +116,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [ ] T34 完成 `banking.and.capitalization.v1`、`organization.and.appointments.v1`、`mandate.and.initial.budget.v1`。
 - [ ] T35 完成 `capital.contribution.match`、`appointment.eligibility`、`mandate.scope.and.limit`、`initial.budget.control` 和 `enterprise.operational.readiness`。
 - [ ] T36 固定承诺、到账、核验余额、预算授权和实际现金的独立对象、单位、精度、引用和守恒规则。
-- [ ] T37 实现开户与候选人 Intent/Observation/CommittedOutcome；外部结果只能由 World Bridge 输入。
+- [x] T37 实现开户与候选人 Intent/Observation/CommittedOutcome；外部结果只能由 World Bridge 输入。
 - [ ] T38 实现 G3–G7、批准失效、拒绝、补正、超时、撤权、版本变化和正式 override。
 - [ ] T39 实现 readiness evaluator，只有法律主体、账户、核验出资、组织岗位、任命、Mandate 和预算引用一致时进入终态。
 - [x] T40 从 clean run 执行完整正常主线，保存 `enterprise_operational_ready` 和全链状态 hash。
@@ -127,10 +127,10 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 
 - [x] T41 建立五个 Agent 的稳定主体、服务身份、组织岗位、Mandate、Capability/Tool allowlist、额度、期限和升级规则。
 - [ ] T42 让 Agent Tool、人工按钮和 API 进入同一 Capability/Process/Approval 路径，并区分建议、草稿、提交、批准和 committed outcome。
-- [ ] T43 验证登记补正：Agent 可在原 G2、原 correlation、限次限期内补正，扩大范围必须重新审批。
+- [x] T43 验证登记补正：Agent 可在原 G2、原 correlation、限次限期内补正，扩大范围必须重新审批。
 - [ ] T44 验证开户拒绝：原 G3 失效，修改受益所有人材料后重新审批。
 - [x] T45 验证出资差异：禁止自动确认，生成 Discrepancy 并升级 `founder-principal`。
-- [ ] T46 验证 Agent 越权：finance Agent 自批预算被职责分离拒绝，业务状态不变且 Tool Call/Decision/Journal 完整。
+- [x] T46 验证 Agent 越权：finance Agent 自批预算被职责分离拒绝，业务状态不变且 Tool Call/Decision/Journal 完整。
 - [ ] T47 验证 Agent 暂停、Mandate 撤销/过期、金额超限、跨租户和工具禁用均在 dispatch 前失败关闭。
 - [ ] T48 对五 Agent 执行权限矩阵、知识可见范围、幂等、并发和审计回归。
 
@@ -154,7 +154,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T57 实现 reconciliation API/CLI，报告 missing、duplicate、lagging、hash_mismatch 和 terminal_conflict。
 - [ ] T58 验证至少一次投递、效果恰好一次：重复、乱序、延迟、断线、双方重启和 poller recovery 后收敛。
 - [ ] T59 在真实 PostgreSQL 验证租户隔离、FORCE RLS、职责分离、decimal 精度、并发、幂等碰撞和失败无部分写入。
-- [ ] T60 验证 Journal/Outbox 与业务事实原子提交，rollback 不产生 committed outcome，失败 Outbox 可恢复且不重复业务变化。
+- [x] T60 验证 Journal/Outbox 与业务事实原子提交，rollback 不产生 committed outcome，失败 Outbox 可恢复且不重复业务变化。
 - [ ] T61 执行 dry-run、apply、重复 apply、reset、replay、verify；证明生效法律事实不被 reset 删除。
 - [ ] T62 执行 API、IAOS UI 和 AESE UI 验收，由 `founder-principal` 完成菜单、直达路由、G1–G7 审批和授权写操作。
 - [ ] T63 运行 AESE/IAOS Go、Schema、数据库、前端、Playwright、Markdown links、JSON、Code Map、Atlas 和 M3–M24 回归。

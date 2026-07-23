@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-native-governed-exceptions-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "test",
+  "summary": "M9N 四条受治理异常真实 PostgreSQL 验收",
+  "detail": "登记补正、开户拒绝、出资差异和 finance Agent 自批均通过正式 IAOS 路径验证；补正 observation 不再误生成 CommittedOutcome。",
+  "status_after": "validating",
+  "progress_after": 90,
+  "current_state": "正常链与四异常已验证；重启恢复、授权矩阵和最终全量前端基线继续收口。",
+  "evidence_ref": "docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T06:00:00Z"
+}

@@ -863,3 +863,11 @@
 - 影响：正常链在同一业务事务维护 Process trace 和 Decision Audit；Trace API 可返回两者；任何主体（含 dev-user）均必须消费有效 Runtime Artifact。
 - 验证：IAOS Go/API 测试通过；真实 PostgreSQL 完整链断言 1 个 completed Process Run、15 条 Decision Audit、7 个 consumed Approval 和最终状态。
 - 后续：按 active plan 剩余未勾选项继续完成异常 replay、租户/撤权矩阵、恢复和双仓最终证据。
+
+## 2026-07-23 - M9N 四条受治理异常真实库验收
+
+- 变更：IAOS revision `955f43f` 增加登记补正、开户拒绝、出资差异和 finance Agent 自批四条真实 PostgreSQL 验收；修正补正观察误生成 CommittedOutcome 的问题。
+- 原因：异常线必须与正常线共用正式身份、Capability、Process/Decision、World Bridge、Journal 和 Outbox，不能只以领域单测代替。
+- 影响：登记 Agent 使用独立 service-only 主体在原 correlation 重提；银行拒绝和出资差异保持原状态并写异常证据；finance Agent 无法取得 G7 自批权限。
+- 验证：IAOS 全量 Go tests 通过；异常 integration suite 与正常完整链通过；部署后 founder 三视口 Playwright 3/3 通过。IAOS 前端全量 Vitest 暴露 15 个既有非 M9 测试失败（多为测试超时、旧英文文案断言及未 mock 的 401），M9 Playwright 与 production build 不受影响，但 T63 暂不关闭。
+- 后续：清理 IAOS 既有前端测试基线，再完成重启/乱序、租户撤权和 D18 最终矩阵。
