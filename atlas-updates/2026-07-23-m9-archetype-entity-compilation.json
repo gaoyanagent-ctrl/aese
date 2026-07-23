@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-archetype-entity-compilation-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "确立 Archetype 默认字段到 Entity 有效模型的编译和迁移门",
+  "detail": "DES-027 D19 明确三层字段合并、metadata/物理列一致性、既有事实非破坏迁移和 payload 安全回填要求；IAOS Runtime 1.2.6 已落实。",
+  "status_after": "validating",
+  "progress_after": 97,
+  "current_state": "M9 六类原型、十一项 Entity metadata、records API 与物理投影字段已一致，真实租户和 UI 回归通过。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T10:30:00Z"
+}

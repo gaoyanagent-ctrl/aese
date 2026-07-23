@@ -991,3 +991,11 @@
 - 影响：工作室默认选择完全由当前租户实际目录驱动，不再把其他业务阶段或租户的实体假设带入 M9。
 - 验证：局域网 E2E 断言选中 `/metadata/schemas` 第一项，schema/ui 404=0；完整 M9 Playwright 4/4、production build/deploy 通过。
 - 后续：继续检查其他 Studio 是否存在全局示例值覆盖租户目录的同类问题。
+
+## 2026-07-23 - 打通 Archetype 默认字段到 Entity 有效模型
+
+- 变更：DES-027 D19 明确 Core Archetype defaults → Domain Entity fields → Tenant extension 编译规则及非破坏性物理迁移门；IAOS Runtime 1.2.6 已将六类原型默认字段编译到十一项 Entity metadata 和物理投影，并从 payload 增量回填既有数据。
+- 原因：原安装器将原型字段与 Entity schema 分开注册，Entity 固定为 business_code/status/payload 三字段，导致语义资产中心与数据模型工坊展示不一致。
+- 影响：account、commitment、mandate、organization、role、document 的默认字段成为 Entity effective schema 的真实组成部分；旧设立事实保留，重复安装仍为 no-op。
+- 验证：Go incorporation/API 测试通过；真实租户 schema、records API 和 information_schema 一致；bank_account 既有记录 currency 回填为 CNY；IAOS Playwright 4/4。
+- 后续：后续 Domain/Tenant 字段扩展必须沿同一编译和迁移路径，不允许旁路直接修改工作室展示数据。
