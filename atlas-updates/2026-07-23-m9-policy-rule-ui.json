@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-policy-rule-ui-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "要求 Policy Profile 与 Rule 可发现、可解释、可持久编辑",
+  "detail": "DES-027 D19 增加 Profile/Rule 独立 UI、业务化字段解释、查看/编辑权限分离和刷新持久性门；IAOS 已完成对应实现。",
+  "status_after": "validating",
+  "progress_after": 99,
+  "current_state": "Founder 可在规则控制中心查看 8 条 Rule 明细并编辑 Profile/Rule；机器 JSON 已替换为业务摘要。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T12:30:00Z"
+}

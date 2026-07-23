@@ -408,7 +408,10 @@ M9 资产不能只存在于专用 artifact JSON、测试 fixture 或设立案 tr
 - Process Studio：一主四子五个已发布流程；每个 capability node 必须引用真实
   Capability key，不接受以 process key 伪装的占位节点。
 - Governance Studio：八个 active Policy Profile 与至少一条对应的 enabled
-  Policy Rule；只有 profile 没有 rule 不算实现。
+  Policy Rule；只有 profile 没有 rule 不算实现。Profile 与 Rule 必须有独立明细入口：
+  Profile 展示业务意图、失败策略、配置版本和 Runtime 来源，Rule 展示判定动作、适用对象、
+  阶段、优先级和启用状态；不得要求用户阅读原始 JSON 才能理解含义。查看与编辑权限分离，
+  `founder-principal` 的正式平台角色必须能通过原生 API 持久编辑，刷新后不得丢失。
 - Agent 组织：五个 service-only Agent 的岗位、Mandate、允许能力、有效期、
   金额上限和升级对象可查询；人类不能冒充 Agent 调用。
 

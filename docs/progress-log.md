@@ -1007,3 +1007,11 @@
 - 影响：enum 无选项或 Archetype 治理属性丢失会在安装前失败关闭，不再发布半有效 Entity schema。
 - 验证：修复前 API 稳定复现用户报告；修复后 tenant-hctm-genesis 十一项 Entity 全部 errors=0,warnings=0；Go 测试和 IAOS Playwright 4/4。
 - 后续：新增任何 M9 字段规则时必须同时扩展发布门与真实 Analyzer 回归。
+
+## 2026-07-23 - 补齐 Policy Rule UI 与 Founder 编辑闭环
+
+- 变更：DES-027 D19 增加 Profile/Rule 独立明细、业务化解释和持久编辑门；IAOS 规则控制中心新增 Rule 页签，把 Profile JSON 翻译为失败策略、版本和 Runtime 来源，并修复 founder 编辑权限。
+- 原因：8 条 Rule 只有 API 无 UI；前端将写权限硬编码为 tenant-001，且 Profile 保存只改内存；原始 definition JSON 对业务用户不可读。
+- 影响：founder 可查看 8 个 Profile 和 8 条 Rule 的真实含义，并通过原生 upsert API 持久修改；只读用户仍可打开完整详情。
+- 验证：Next production build/deploy、Policy UI Vitest 6/6、Founder governance Playwright 1/1，三视口主体场景 3/3。
+- 后续：Policy 变更的 dry-run、审批和审计仍按既有治理链执行，不以 UI 写权限替代业务审批。
