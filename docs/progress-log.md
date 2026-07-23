@@ -855,3 +855,11 @@
 - 影响：`tenant-hctm-genesis` 可由 `founder-principal` 经 G1–G7 到达 `enterprise_operational_ready`；三类 World 往返均形成 Intent/Observation/CommittedOutcome；对账覆盖五类故障。
 - 验证：真实 PostgreSQL 完整链验证 7 个 consumed Approval、3/3/3 World exchange 和终态；出资差异验证状态不推进且 Discrepancy/Journal/Outbox 原子写入；IAOS build、Go tests、AESE bridge/CLI/worldcontract tests，以及 1440×900、1280×720、390×844 Playwright 共三条通过。
 - 后续：补齐登记补正、开户拒绝和 Agent 自批的联合 replay，完成重启/乱序恢复、全量回归及 D18 最终证据矩阵。
+
+## 2026-07-23 - M9N Process/Decision 与身份安全门关闭
+
+- 变更：IAOS revision `30cc729` 将五个 Process Definition、主 Process Run 和逐 Capability Decision Audit 接入正式运行表；revision `9eebe1e` 移除 M9 对 `dev-user` 的 Runtime Artifact bypass，并批准 founder 身份迁移安全评审。
+- 原因：目录中的 Process/Policy 名称和开发账号兼容不能替代真实运行证据与正式授权。
+- 影响：正常链在同一业务事务维护 Process trace 和 Decision Audit；Trace API 可返回两者；任何主体（含 dev-user）均必须消费有效 Runtime Artifact。
+- 验证：IAOS Go/API 测试通过；真实 PostgreSQL 完整链断言 1 个 completed Process Run、15 条 Decision Audit、7 个 consumed Approval 和最终状态。
+- 后续：按 active plan 剩余未勾选项继续完成异常 replay、租户/撤权矩阵、恢复和双仓最终证据。

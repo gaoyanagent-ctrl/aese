@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-native-process-decision-security-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M9N Process/Decision 运行证据与 founder 身份安全门关闭",
+  "detail": "IAOS 正常链现持久化 completed Process Run 和逐 Capability Decision Audit；M9 dev-user Runtime Artifact bypass 已移除，founder 身份迁移安全评审通过。",
+  "status_after": "validating",
+  "progress_after": 86,
+  "current_state": "正常链运行治理证据完整；继续补异常 replay、恢复和最终证据矩阵。",
+  "evidence_ref": "docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T05:35:00Z"
+}

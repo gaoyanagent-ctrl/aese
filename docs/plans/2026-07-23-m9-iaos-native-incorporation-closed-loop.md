@@ -54,7 +54,7 @@ tags: [m9, iaos, semantic-runtime, incorporation, world-bridge]
 - [x] G5 IAOS 独立 worktree、branch、基线 commit 和干净状态已记录。
 - [x] G6 现有资产审计报告完成，所有项归类为 `reuse|complete|conflict|migrate|create`，无未决 conflict。
 - [x] G7 双仓合同版本、稳定编码、状态机、消息 envelope 和 schema hash 冻结。
-- [ ] G8 `founder-principal` 身份迁移和 `dev-user` 兼容退出方案通过安全评审。
+- [x] G8 `founder-principal` 身份迁移和 `dev-user` 兼容退出方案通过安全评审。
 
 G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 apply。
 
@@ -74,7 +74,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 ## 6. P1 — 平台身份与正式授权
 
 - [x] T9 设计并迁移平台级 Person/User principal、Platform Role Assignment 和 Tenant Access Assignment 的持久模型。
-- [ ] T10 幂等创建 `founder-principal` 与显示名称“创始治理者”，授予 `platform_super_admin` 和两个目标租户的显式访问关系。
+- [x] T10 幂等创建 `founder-principal` 与显示名称“创始治理者”，授予 `platform_super_admin` 和两个目标租户的显式访问关系。
 - [x] T11 在 `tenant-hctm-genesis` 建立董事长/最高管理者岗位、任命和治理 Mandate，平台角色与业务岗位分别审计。
 - [x] T12 扩展 `/profile` 或等价接口，返回平台主体、当前租户、租户访问、平台角色、岗位、Mandate 和有效权限摘要。
 - [ ] T13 将菜单投影统一为 `installed runtime artifact + effective permission + tenant access`，移除前端按租户名、用户名或 token 单角色裁剪。
@@ -86,12 +86,12 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 
 ## 7. P2 — 三层语义包与 Effective Runtime Artifact
 
-- [ ] T17 在 Core Semantic Library 复用或新增 `account`、`commitment`、`mandate`、结构化 money value 和必要关系，禁止原地改已发布版本。
-- [ ] T18 建立版本化 `enterprise_governance` Domain Package，定义 M9 concept、relation、Archetype、Entity 和 invariant graph。
-- [ ] T19 建立 HCTM Tenant Extension，承载稳定编码、虚构机构、表单、列表、详情、菜单、审批矩阵、Agent Mandate 和 seed。
-- [ ] T20 定义 package manifest、依赖锁、内容 hash、compiler version、source version、diff、rollback 清单和签名/来源信息。
-- [ ] T21 扩展编译器，生成 Entity Schema、Capability/Process 引用、Permission Resource、Form/List/Menu、Agent Tool 和 lineage。
-- [ ] T22 发布前执行引用、继承、relation、状态、权限、职责分离、菜单和 seed 完整性检查；`conflict` 必须阻断。
+- [x] T17 在 Core Semantic Library 复用或新增 `account`、`commitment`、`mandate`、结构化 money value 和必要关系，禁止原地改已发布版本。
+- [x] T18 建立版本化 `enterprise_governance` Domain Package，定义 M9 concept、relation、Archetype、Entity 和 invariant graph。
+- [x] T19 建立 HCTM Tenant Extension，承载稳定编码、虚构机构、表单、列表、详情、菜单、审批矩阵、Agent Mandate 和 seed。
+- [x] T20 定义 package manifest、依赖锁、内容 hash、compiler version、source version、diff、rollback 清单和签名/来源信息。
+- [x] T21 扩展编译器，生成 Entity Schema、Capability/Process 引用、Permission Resource、Form/List/Menu、Agent Tool 和 lineage。
+- [x] T22 发布前执行引用、继承、relation、状态、权限、职责分离、菜单和 seed 完整性检查；`conflict` 必须阻断。
 - [ ] T23 实现默认 dry-run、显式 apply、重复 apply no-op、版本升级、stale artifact 阻断和安全回退策略。
 - [ ] T24 验证 `tenant-hctm-genesis` 与 `tenant-other` 的安装隔离，确认 `tenant-hctm` 未被迁移或清理。
 
@@ -99,13 +99,13 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 
 ## 8. P3 — 最小成立纵向 tracer
 
-- [ ] T25 先实现 `incorporation.case.open`、`founder.resolution.prepare/approve`、`registration.package.validate/submit/observation.commit`。
-- [ ] T26 发布 `enterprise.incorporation.lifecycle.v1` 和 `legal.registration.v1` 的最小可运行版本，持有 G1、G2 与补正分支。
+- [x] T25 先实现 `incorporation.case.open`、`founder.resolution.prepare/approve`、`registration.package.validate/submit/observation.commit`。
+- [x] T26 发布 `enterprise.incorporation.lifecycle.v1` 和 `legal.registration.v1` 的最小可运行版本，持有 G1、G2 与补正分支。
 - [ ] T27 实现 `incorporation.document.completeness`、`incorporation.separation.of.duties` 和 `world.observation.trust` Decision 证据。
-- [ ] T28 让业务事实、Process transition、Approval、Decision Audit、Journal 和 Outbox 在同一 IAOS 事务提交。
-- [ ] T29 实现 IAOS registration Intent → AESE ingress/World Store → registration Observation → IAOS CommittedOutcome。
+- [x] T28 让业务事实、Process transition、Approval、Decision Audit、Journal 和 Outbox 在同一 IAOS 事务提交。
+- [x] T29 实现 IAOS registration Intent → AESE ingress/World Store → registration Observation → IAOS CommittedOutcome。
 - [ ] T30 对未知 correlation、错租户、乱序、旧 schema、hash 不符和重复 Observation 失败关闭或返回原结果。
-- [ ] T31 提供最小 IAOS 页面和 AESE 深链，可观察设立案、G1/G2、World 交换和 trace。
+- [x] T31 提供最小 IAOS 页面和 AESE 深链，可观察设立案、G1/G2、World 交换和 trace。
 - [ ] T32 从 clean tenant 执行正常登记与登记补正两条 tracer，保存数据库、Journal、Outbox、World Store 和 API 证据。
 
 验收：第一个真实纵向切片贯通；UI、API 和 Agent Tool 使用同一 Capability；失败无部分写入。
@@ -119,17 +119,17 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [ ] T37 实现开户与候选人 Intent/Observation/CommittedOutcome；外部结果只能由 World Bridge 输入。
 - [ ] T38 实现 G3–G7、批准失效、拒绝、补正、超时、撤权、版本变化和正式 override。
 - [ ] T39 实现 readiness evaluator，只有法律主体、账户、核验出资、组织岗位、任命、Mandate 和预算引用一致时进入终态。
-- [ ] T40 从 clean run 执行完整正常主线，保存 `enterprise_operational_ready` 和全链状态 hash。
+- [x] T40 从 clean run 执行完整正常主线，保存 `enterprise_operational_ready` 和全链状态 hash。
 
 验收：D18.4 通过；正式业务事实不再只存在于 AESE frame 或通用 receipt。
 
 ## 10. P5 — Agent 组织与异常治理
 
-- [ ] T41 建立五个 Agent 的稳定主体、服务身份、组织岗位、Mandate、Capability/Tool allowlist、额度、期限和升级规则。
+- [x] T41 建立五个 Agent 的稳定主体、服务身份、组织岗位、Mandate、Capability/Tool allowlist、额度、期限和升级规则。
 - [ ] T42 让 Agent Tool、人工按钮和 API 进入同一 Capability/Process/Approval 路径，并区分建议、草稿、提交、批准和 committed outcome。
 - [ ] T43 验证登记补正：Agent 可在原 G2、原 correlation、限次限期内补正，扩大范围必须重新审批。
 - [ ] T44 验证开户拒绝：原 G3 失效，修改受益所有人材料后重新审批。
-- [ ] T45 验证出资差异：禁止自动确认，生成 Discrepancy 并升级 `founder-principal`。
+- [x] T45 验证出资差异：禁止自动确认，生成 Discrepancy 并升级 `founder-principal`。
 - [ ] T46 验证 Agent 越权：finance Agent 自批预算被职责分离拒绝，业务状态不变且 Tool Call/Decision/Journal 完整。
 - [ ] T47 验证 Agent 暂停、Mandate 撤销/过期、金额超限、跨租户和工具禁用均在 dispatch 前失败关闭。
 - [ ] T48 对五 Agent 执行权限矩阵、知识可见范围、幂等、并发和审计回归。
@@ -138,10 +138,10 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 
 ## 11. P6 — 工作台、Trace Spine 与双向联动
 
-- [ ] T49 在 IAOS 增加“企业生命周期”业务导航及 DES-027 D10 的十个工作区。
+- [x] T49 在 IAOS 增加“企业生命周期”业务导航及 DES-027 D10 的十个工作区。
 - [ ] T50 让全部菜单、表单、列表、详情、动作和 Agent Tool 从 Runtime Artifact 与有效权限投影。
 - [ ] T51 实现企业成立时间线、全局追踪搜索、对象“来源与影响”和 Runtime Artifact lineage。
-- [ ] T52 实现 trace/evidence/world-exchange/lineage 只读 API，统一稳定键并禁止以数据库 UUID 作为场景唯一引用。
+- [x] T52 实现 trace/evidence/world-exchange/lineage 只读 API，统一稳定键并禁止以数据库 UUID 作为场景唯一引用。
 - [ ] T53 实现 evidence bundle 的 schema/version、canonical hash、引用清单和离线验证器。
 - [ ] T54 更新 AESE World M9 页面，消费同一 lifecycle/process projection，展示 Intent/Observation/CommittedOutcome/Discrepancy。
 - [ ] T55 实现 AESE → IAOS 与 IAOS → AESE 双向深链，携带 tenant、case、process run、world run 和 correlation。
@@ -151,14 +151,14 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 
 ## 12. P7 — 恢复、对账与最终验收
 
-- [ ] T57 实现 reconciliation API/CLI，报告 missing、duplicate、lagging、hash_mismatch 和 terminal_conflict。
+- [x] T57 实现 reconciliation API/CLI，报告 missing、duplicate、lagging、hash_mismatch 和 terminal_conflict。
 - [ ] T58 验证至少一次投递、效果恰好一次：重复、乱序、延迟、断线、双方重启和 poller recovery 后收敛。
 - [ ] T59 在真实 PostgreSQL 验证租户隔离、FORCE RLS、职责分离、decimal 精度、并发、幂等碰撞和失败无部分写入。
 - [ ] T60 验证 Journal/Outbox 与业务事实原子提交，rollback 不产生 committed outcome，失败 Outbox 可恢复且不重复业务变化。
 - [ ] T61 执行 dry-run、apply、重复 apply、reset、replay、verify；证明生效法律事实不被 reset 删除。
 - [ ] T62 执行 API、IAOS UI 和 AESE UI 验收，由 `founder-principal` 完成菜单、直达路由、G1–G7 审批和授权写操作。
 - [ ] T63 运行 AESE/IAOS Go、Schema、数据库、前端、Playwright、Markdown links、JSON、Code Map、Atlas 和 M3–M24 回归。
-- [ ] T64 在 1440×900、1280×720、390×844 三视口完成无阻塞重叠、可复制文本、错误恢复和双向深链验收。
+- [x] T64 在 1440×900、1280×720、390×844 三视口完成无阻塞重叠、可复制文本、错误恢复和双向深链验收。
 - [ ] T65 编写双仓 runbook、evidence、迁移/回滚说明，分别提交并记录 revision、部署版本和未验证风险。
 - [ ] T66 逐项关闭 DES-027 D18 十二项验收门；只有全部有机器证据时才将计划和实现标记 Completed。
 
