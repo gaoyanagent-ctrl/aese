@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-lan-sse-fix-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "修复 M9 局域网 lifecycle 加载与 SSE 截断",
+  "detail": "工作台自动发现最近 tenant case，双仓深链使用浏览器 hostname，SSE heartbeat 续期 write deadline。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "M9N 局域网 API、双向 UI 和持续事件连接通过回归。",
+  "evidence_ref": "docs/solutions/SOL-001-m9-lan-lifecycle-loading-and-sse.md",
+  "occurred_at": "2026-07-23T12:00:00Z"
+}

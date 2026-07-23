@@ -66,7 +66,7 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
   const caseCode = lifecycle?.case_code ?? params.get("case") ?? "";
   const processRun = params.get("process_run") ?? String(lifecycle?.process_runs?.[0]?.id ?? "");
   const correlation = params.get("correlation") ?? String(lifecycle?.world_exchanges?.[0]?.correlation_id ?? "");
-  const iaosLink = `http://127.0.0.1:3000/#enterprise_lifecycle?tenant=${encodeURIComponent(tenant)}&case=${encodeURIComponent(caseCode)}&process_run=${encodeURIComponent(processRun)}&world_run=${encodeURIComponent(trace.world_run_id)}&correlation=${encodeURIComponent(correlation)}`;
+  const iaosLink = `http://${window.location.hostname || "127.0.0.1"}:3000/#enterprise_lifecycle?tenant=${encodeURIComponent(tenant)}&case=${encodeURIComponent(caseCode)}&process_run=${encodeURIComponent(processRun)}&world_run=${encodeURIComponent(trace.world_run_id)}&correlation=${encodeURIComponent(correlation)}`;
   const roles = [
     f.governance.ceo,
     f.governance.cfo,

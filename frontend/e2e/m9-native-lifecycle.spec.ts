@@ -15,13 +15,13 @@ test("AESE consumes persisted IAOS M9 lifecycle projection after refresh", async
   await page.addInitScript(({ token }) => {
     localStorage.setItem("iaos_token", token);
     localStorage.setItem("aese_iaos_tenant_id", "tenant-hctm-genesis");
-    localStorage.setItem("aese_iaos_base_url", "http://127.0.0.1:8082");
   }, session);
   const target = `/#world-incorporation?tenant=tenant-hctm-genesis&case=${encodeURIComponent(caseCode)}&process_run=&world_run=&correlation=`;
   await page.goto(target);
   await expect(page.getByTestId("iaos-lifecycle-projection")).toBeVisible();
   await expect(page.getByText("Intent / Observation / CommittedOutcome")).toBeVisible();
-  await expect(page.getByRole("link", { name: "打开 IAOS 设立案" })).toHaveAttribute("href", /tenant=.*case=.*process_run=.*world_run=.*correlation=/);
+  const escapedHost = new URL(page.url()).hostname.replaceAll(".", "\\.");
+  await expect(page.getByRole("link", { name: "打开 IAOS 设立案" })).toHaveAttribute("href", new RegExp(`^http://${escapedHost}:3000/.*tenant=.*case=.*process_run=.*world_run=.*correlation=`));
   await page.getByRole("button", { name: "复位" }).click();
   const persisted = await request.get(`http://127.0.0.1:8082/api/v1/incorporations/${encodeURIComponent(caseCode)}/trace`, {
     headers: { Authorization: `Bearer ${session.token}`, "X-Tenant-ID": "tenant-hctm-genesis" },

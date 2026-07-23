@@ -70,7 +70,7 @@ export async function loadIncorporation(
     const caseCode = params.get("case");
     const tenant = params.get("tenant") ?? localStorage.getItem("aese_iaos_tenant_id") ?? "tenant-hctm-genesis";
     const token = localStorage.getItem("iaos_token");
-    const base = (localStorage.getItem("aese_iaos_base_url") ?? "http://127.0.0.1:8082").replace(/\/$/, "");
+    const base = (localStorage.getItem("aese_iaos_base_url") ?? `http://${window.location.hostname || "127.0.0.1"}:8082`).replace(/\/$/, "");
     if (caseCode && token) {
       const lifecycle = await fetch(`${base}/api/v1/incorporations/${encodeURIComponent(caseCode)}/trace`, {
         signal,

@@ -943,3 +943,11 @@
 - 影响：M9N 以 `founder-principal`、Effective Runtime Artifact 和正式 World Bridge 作为权威闭环；AESE 与 IAOS 使用同一持久 lifecycle projection。
 - 验证：AESE Go 全量、frontend 38/38、build、Playwright 3/3；IAOS Go 全量、M9 PostgreSQL matrix、frontend 332/332（单 worker）、build、Playwright 3/3；JSON、Code Map 和 Atlas checks 通过。
 - 后续：生产部署前替换 development fallback secrets；超出单法人/CNY/五 Agent 的范围另立计划。
+
+## 2026-07-23 - 修复 M9 局域网加载与 SSE 60 秒截断
+
+- 变更：移除不存在的 `INC-HCTM-001` 默认值，空输入通过 tenant-scoped recent API 自动加载最近 case；双仓 URL 使用浏览器 hostname；SSE heartbeat 续写 deadline；增加局域网 Playwright 参数化。
+- 原因：localhost 只代表浏览器所在机器，且 net/http 固定 WriteTimeout 会截断无限流。
+- 影响：从 `192.168.50.222` 访问时 API、IAOS、AESE 与双向深链保持同一主机；SSE 不再每 60 秒异常断开。
+- 验证：局域网 IAOS/AESE Playwright 各 3/3；Go/API、AESE 38 tests 和双仓 build 通过；SSE 70 秒探针由客户端超时主动结束。
+- 后续：生产环境使用反向代理统一 origin，并关闭 Vite HMR。
