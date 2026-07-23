@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-capability-artifact-access-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "修复 M9 Capability DSL Runtime Artifact 访问",
+  "detail": "IAOS Runtime 1.2.11 补齐 Founder 读取权限和二十项 Capability active snapshot，使 M9 平台资产可从 Studio 完整检查。",
+  "status_after": "validating",
+  "progress_after": 99,
+  "current_state": "M9 Capability DSL Runtime Artifact 已通过 API 与浏览器验收。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-23T13:38:00Z"
+}

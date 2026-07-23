@@ -1046,3 +1046,10 @@
 - 影响：时间线切换时证据同步过滤；未匹配 transition 明示，不再用整案数据伪装当前步骤；技术 JSON 采用可展开的渐进披露。
 - 验证：映射单测覆盖 8 frame/15 transition 唯一性与证据过滤；AESE production build 通过；1440×900、1280×720、390×844 Playwright 3/3。
 - 后续：保持 M9N active remediation，待双仓治理记录、Atlas 和最终用户验收一致后关闭 T67–T70。
+## 2026-07-23 - 修复 M9 Capability DSL Runtime Artifact 访问
+
+- 变更：IAOS Runtime 1.2.11 为 Founder 补齐 `output.template.read`，并为二十项 M9 Capability 安装 active artifact snapshot。
+- 原因：Capability Studio 菜单可见不等于 Runtime Artifact 可读；原安装器同时漏掉权限依赖和已发布 DSL snapshot。
+- 影响：打开 M9 Capability DSL 不再返回 403 或 `no_active_snapshot`，页面显示实际 Runtime version、compiler 和 artifact hash。
+- 验证：Go 针对测试通过；真实租户 apply 后 API 200；Founder Playwright 打开 DSL 并显示 Active v1。
+- 后续：后续 Studio 菜单安装必须同时检查全部读侧 API 依赖与发布态 artifact。
