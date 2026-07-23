@@ -895,3 +895,11 @@
 - 影响：`tenant-hctm` 未安装或清理 M9N；撤权后菜单消失且写入失败；暂停、过期、撤销、超额、跨租户和禁用工具在 dispatch 前失败关闭。
 - 验证：真实 PostgreSQL founder/profile/menu 测试覆盖 active/revoked access；actor authorization suite 覆盖七类失败；tenant-other 与 genesis 各有独立 active artifact，tenant-hctm 计数不变。
 - 后续：五 Agent 全权限/并发矩阵和 Runtime 表单/动作投影继续收口。
+
+## 2026-07-23 - M9N World Bridge 失败关闭与恢复矩阵
+
+- 变更：IAOS revision `efdd6e2` 对 M9 Observation 强制校验同租户、同 subject、同 correlation 的既有 governed Intent，并增加旧 schema、错误租户、重复/碰撞、服务重启及 poller 恢复的真实 PostgreSQL测试；AESE reconciliation 增加乱序和延迟到达的最终收敛回归。
+- 原因：至少一次投递只有在未知或乱序消息失败关闭、重复效果恰好一次，并且双方重启后从持久事实恢复时才能形成可靠闭环。
+- 影响：未关联 Observation 返回 `unknown_or_out_of_order_correlation` 且零写入；相同幂等键与相同 payload 返回原结果，碰撞 payload 被拒绝；重启后的 API 和 poller 从数据库恢复。
+- 验证：IAOS `TestIntegrationWorldBridgeRecoveryMatrix` 在真实 PostgreSQL 通过；AESE `go test ./internal/bridge/iaos` 通过并覆盖 shuffled 与 delayed convergence。
+- 后续：继续完成正式 override、业务对象守恒/readiness、五 Agent 全矩阵和双仓 UI 联动。

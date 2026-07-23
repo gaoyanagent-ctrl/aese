@@ -104,7 +104,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T27 实现 `incorporation.document.completeness`、`incorporation.separation.of.duties` 和 `world.observation.trust` Decision 证据。
 - [x] T28 让业务事实、Process transition、Approval、Decision Audit、Journal 和 Outbox 在同一 IAOS 事务提交。
 - [x] T29 实现 IAOS registration Intent → AESE ingress/World Store → registration Observation → IAOS CommittedOutcome。
-- [ ] T30 对未知 correlation、错租户、乱序、旧 schema、hash 不符和重复 Observation 失败关闭或返回原结果。
+- [x] T30 对未知 correlation、错租户、乱序、旧 schema、hash 不符和重复 Observation 失败关闭或返回原结果。
 - [x] T31 提供最小 IAOS 页面和 AESE 深链，可观察设立案、G1/G2、World 交换和 trace。
 - [ ] T32 从 clean tenant 执行正常登记与登记补正两条 tracer，保存数据库、Journal、Outbox、World Store 和 API 证据。
 
@@ -152,7 +152,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 ## 12. P7 — 恢复、对账与最终验收
 
 - [x] T57 实现 reconciliation API/CLI，报告 missing、duplicate、lagging、hash_mismatch 和 terminal_conflict。
-- [ ] T58 验证至少一次投递、效果恰好一次：重复、乱序、延迟、断线、双方重启和 poller recovery 后收敛。
+- [x] T58 验证至少一次投递、效果恰好一次：重复、乱序、延迟、断线、双方重启和 poller recovery 后收敛。
 - [ ] T59 在真实 PostgreSQL 验证租户隔离、FORCE RLS、职责分离、decimal 精度、并发、幂等碰撞和失败无部分写入。
 - [x] T60 验证 Journal/Outbox 与业务事实原子提交，rollback 不产生 committed outcome，失败 Outbox 可恢复且不重复业务变化。
 - [ ] T61 执行 dry-run、apply、重复 apply、reset、replay、verify；证明生效法律事实不被 reset 删除。

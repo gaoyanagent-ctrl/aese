@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-native-world-recovery-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M9N World Bridge 失败关闭与重启恢复矩阵",
+  "detail": "IAOS 对未知、错租户、乱序、旧 schema 和幂等碰撞 Observation 失败关闭；AESE reconciliation 验证乱序、延迟和重启后的持久事实收敛。",
+  "status_after": "validating",
+  "progress_after": 94,
+  "current_state": "World 至少一次投递与效果恰好一次恢复门关闭；继续业务对象、Agent 和 UI 最终验收。",
+  "evidence_ref": "docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T08:30:00Z"
+}
