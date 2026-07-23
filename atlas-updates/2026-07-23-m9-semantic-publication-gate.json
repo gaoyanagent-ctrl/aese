@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-semantic-publication-gate-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "要求 M9 Runtime 在写入前执行 Entity 语义发布门",
+  "detail": "DES-027 D19 新增 enum options、概念类型、Archetype 治理继承和真实 Analyzer 零错误零警告门；IAOS Runtime 1.2.7 已实现。",
+  "status_after": "validating",
+  "progress_after": 98,
+  "current_state": "M9 十一项 Entity 的真实 Semantic Analyzer 结果均为 errors=0,warnings=0。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T11:15:00Z"
+}

@@ -999,3 +999,11 @@
 - 影响：account、commitment、mandate、organization、role、document 的默认字段成为 Entity effective schema 的真实组成部分；旧设立事实保留，重复安装仍为 no-op。
 - 验证：Go incorporation/API 测试通过；真实租户 schema、records API 和 information_schema 一致；bank_account 既有记录 currency 回填为 CNY；IAOS Playwright 4/4。
 - 后续：后续 Domain/Tenant 字段扩展必须沿同一编译和迁移路径，不允许旁路直接修改工作室展示数据。
+
+## 2026-07-23 - 增加 M9 Entity 语义发布门
+
+- 变更：DES-027 D19 要求 Runtime 安装在写入前执行语义发布门，并以真实 Analyzer 对十一项 Entity 的零错误零警告作为验收；IAOS Runtime 1.2.7 补齐 enum options 和 system_managed/overridable 继承。
+- 原因：1.2.6 编译器只复制字段名、类型和 semantic_id，且安装流程没有 Analyzer 等价门，导致错误直到用户进入数据模型工坊才暴露。
+- 影响：enum 无选项或 Archetype 治理属性丢失会在安装前失败关闭，不再发布半有效 Entity schema。
+- 验证：修复前 API 稳定复现用户报告；修复后 tenant-hctm-genesis 十一项 Entity 全部 errors=0,warnings=0；Go 测试和 IAOS Playwright 4/4。
+- 后续：新增任何 M9 字段规则时必须同时扩展发布门与真实 Analyzer 回归。
