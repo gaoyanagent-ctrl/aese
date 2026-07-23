@@ -35,6 +35,16 @@ test("AESE consumes persisted IAOS M9 lifecycle projection after refresh", async
   expect(lifecycleRequests.length).toBeGreaterThan(0);
   expect(lifecycleRequests.every((url) => new URL(url).port === "8082")).toBeTruthy();
   await expect(page.getByText("Intent / Observation / CommittedOutcome")).toBeVisible();
+  await expect(page.getByTestId("incorporation-step-trace")).toContainText(
+    "incorporation.case.open",
+  );
+  await page.getByRole("button", { name: /plant_project_eligible/ }).click();
+  await expect(page.getByTestId("incorporation-step-trace")).toContainText(
+    "enterprise.readiness.evaluate",
+  );
+  await expect(
+    page.getByRole("link", { name: "在 IAOS 中定位" }),
+  ).toHaveAttribute("href", /step=7&capability=enterprise\.readiness\.evaluate/);
   const escapedHost = new URL(page.url()).hostname.replaceAll(".", "\\.");
   await expect(page.getByRole("link", { name: "打开 IAOS 设立案" })).toHaveAttribute("href", new RegExp(`^http://${escapedHost}:3000/.*tenant=.*case=.*process_run=.*world_run=.*correlation=`));
   await page.getByRole("button", { name: "复位" }).click();

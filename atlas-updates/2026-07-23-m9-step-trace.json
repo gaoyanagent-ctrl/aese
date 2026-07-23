@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-step-trace-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "补齐 M9 AESE 逐步骤 IAOS 可解释追踪",
+  "detail": "D20 固定 8 个 World frame 到 15 次 Capability transition 的映射，当前步骤展示流程、能力、实体、治理、事务和 World Bridge 证据。",
+  "status_after": "validating",
+  "progress_after": 99,
+  "current_state": "逐步追踪已通过映射单测、构建和三视口联动回归。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T13:10:00Z"
+}

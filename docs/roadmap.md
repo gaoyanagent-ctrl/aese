@@ -20,7 +20,7 @@
 | M7 受治理场景运行控制台 | 浏览器预检、初始化、逐幕运行、分析、验证和复位 | Completed | ADR-003、DES-005、PLAN-M7-001、M7 evidence |
 | M8 AESE 2.0 基础 | 三态世界、确定性离散事件内核、IAOS 双向桥和最小 Genesis tracer | Completed | PLAN-M8-001、World Play runbook、两仓测试与部署证据 |
 | M9 Genesis Incorporation | 注资、法人登记、治理、管理岗位、初始组织与预算 | Completed | hctm-genesis@0.2.0、M9 evidence、IAOS DES-051 |
-| M9N IAOS-native Incorporation Closed Loop | 用三层语义、正式身份、Runtime Artifact、Capability/Process/Approval 和 World Bridge 重建 M9 真实闭环 | Active remediation | 专用闭环已运行；通用 Semantic/Entity/Capability/Process/Policy 注册、十工作区和 Agent 操作层补齐中 |
+| M9N IAOS-native Incorporation Closed Loop | 用三层语义、正式身份、Runtime Artifact、Capability/Process/Approval 和 World Bridge 重建 M9 真实闭环 | Active remediation | D19 通用资产已补齐；D20 逐步骤 IAOS 可解释追踪已实现并进入最终治理验收 |
 | M10 Genesis Plant Build | 选址、场地控制、设施项目、公用工程、异常重排与验收 | Completed | hctm-genesis@0.3.0、M10 evidence、IAOS DES-052 |
 | M11 Genesis Capability Build | 资金补足、设备/实验室/仓储能力、核心团队与岗位资格 | Completed | hctm-genesis@0.4.0、M11 evidence、IAOS DES-053 |
 | M12 Genesis Industrialization | RFQ/定点、产品/工艺、供应商/工装、APQP、试制、PPAP 与量产批准 | Completed | hctm-genesis@0.5.0、M12 evidence、IAOS DES-054 |

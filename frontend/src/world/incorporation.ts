@@ -48,6 +48,7 @@ export type IncorporationTrace = {
     state: Record<string, unknown>;
     journal: unknown[];
     approvals: unknown[];
+    outbox: unknown[];
     world_exchanges: Array<Record<string, unknown>>;
     process_runs: Array<Record<string, unknown>>;
     decisions: unknown[];

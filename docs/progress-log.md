@@ -1039,3 +1039,10 @@
 - 影响：四个分组统一使用 Factory、Cpu、LayoutGrid、ShieldCheck，并共享主题颜色和交互风格。
 - 验证：Next production build/deploy；三视口 Playwright 断言分组可见且无原 emoji，3/3。
 - 后续：结构性导航图标只使用系统图标库，不使用字体 emoji。
+## 2026-07-23 - M9 AESE 逐步骤 IAOS 可解释追踪
+
+- 变更：DES-027 增加 D20，固定 8 个 AESE World frame 到 15 次 IAOS Capability transition 的显式映射；World 页面增加 Process、Capability、Entity 影响、治理、Journal/Outbox 与 World Bridge 当前步骤详情，并把 step/capability 带入 IAOS 深链。
+- 原因：原页面只显示当前 World frame 和整案 IAOS 原始 trace，无法回答每一步调用了什么能力、处于哪个流程、改变哪些数据。
+- 影响：时间线切换时证据同步过滤；未匹配 transition 明示，不再用整案数据伪装当前步骤；技术 JSON 采用可展开的渐进披露。
+- 验证：映射单测覆盖 8 frame/15 transition 唯一性与证据过滤；AESE production build 通过；1440×900、1280×720、390×844 Playwright 3/3。
+- 后续：保持 M9N active remediation，待双仓治理记录、Atlas 和最终用户验收一致后关闭 T67–T70。

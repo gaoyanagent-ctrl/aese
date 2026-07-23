@@ -188,6 +188,10 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T64 在 1440×900、1280×720、390×844 三视口完成无阻塞重叠、可复制文本、错误恢复和双向深链验收。
 - [x] T65 编写双仓 runbook、evidence、迁移/回滚说明，分别提交并记录 revision、部署版本和未验证风险。
 - [x] T66 逐项关闭 DES-027 D18 十二项验收门；只有全部有机器证据时才将计划和实现标记 Completed。
+- [x] T67 按 D20 建立 8 个 AESE frame 到 15 次 IAOS Capability transition 的版本化映射合同。
+- [x] T68 扩展 IAOS 生命周期深链和步骤高亮，支持 step、capability、process run 与 correlation 上下文。
+- [x] T69 在 AESE 为当前步骤展示 Process、Capability、主体、Entity、治理、事务和 World Bridge 分组证据。
+- [x] T70 增加映射完整性、关联过滤、unmatched、深链及三视口 UI 回归，并同步双仓 evidence。
 
 验收：D18.1–D18.12 全部通过；设计、代码、集成、部署和业务验收状态分别有证据。
 
@@ -233,7 +237,7 @@ P0
 
 ## 16. 完成定义
 
-- T1–T66 全部完成，G5–G8 全部关闭。
+- T1–T70 全部完成，G5–G8 全部关闭。
 - DES-027 D18 十二项验收门逐项有机器证据。
 - `enterprise_operational_ready` 可从 clean tenant 确定性运行、恢复、重放和验证。
 - 正常主线与四个异常场景共享同一 Runtime Artifact 和正式业务路径。

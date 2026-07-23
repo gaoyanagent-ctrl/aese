@@ -1,11 +1,16 @@
 import {
   ArrowLeft,
+  Activity,
   BadgeCheck,
   Banknote,
   Building2,
+  Database,
+  ExternalLink,
+  GitBranch,
   Pause,
   Play,
   RotateCcw,
+  ShieldCheck,
   StepForward,
   Users,
 } from "lucide-react";
@@ -14,6 +19,7 @@ import {
   loadIncorporation,
   type IncorporationTrace,
 } from "../../world/incorporation";
+import { buildIncorporationStepTrace } from "../../world/incorporationStepTrace";
 import "./WorldPlay.css";
 const money = (value: string) =>
   new Intl.NumberFormat("zh-CN", {
@@ -66,7 +72,10 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
   const caseCode = lifecycle?.case_code ?? params.get("case") ?? "";
   const processRun = params.get("process_run") ?? String(lifecycle?.process_runs?.[0]?.id ?? "");
   const correlation = params.get("correlation") ?? String(lifecycle?.world_exchanges?.[0]?.correlation_id ?? "");
-  const iaosLink = `http://${window.location.hostname || "127.0.0.1"}:3000/#enterprise_lifecycle?tenant=${encodeURIComponent(tenant)}&case=${encodeURIComponent(caseCode)}&process_run=${encodeURIComponent(processRun)}&world_run=${encodeURIComponent(trace.world_run_id)}&correlation=${encodeURIComponent(correlation)}`;
+  const stepTrace = buildIncorporationStepTrace(f, lifecycle);
+  const primaryCapability = stepTrace?.definition.capabilities[0] ?? "";
+  const iaosOrigin = `http://${window.location.hostname || "127.0.0.1"}:3000`;
+  const iaosLink = `${iaosOrigin}/#enterprise_lifecycle?tenant=${encodeURIComponent(tenant)}&case=${encodeURIComponent(caseCode)}&process_run=${encodeURIComponent(processRun)}&world_run=${encodeURIComponent(trace.world_run_id)}&correlation=${encodeURIComponent(correlation)}&step=${f.step}&capability=${encodeURIComponent(primaryCapability)}`;
   const roles = [
     f.governance.ceo,
     f.governance.cfo,
@@ -237,6 +246,134 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
             </button>
           ))}
         </section>
+        {stepTrace && (
+          <section
+            className="step-trace"
+            data-testid="incorporation-step-trace"
+            aria-labelledby="step-trace-heading"
+          >
+            <header className="step-trace-header">
+              <div>
+                <span>当前步骤的 IAOS 执行证据</span>
+                <h2 id="step-trace-heading">
+                  步骤 {f.step + 1} · {stepTrace.definition.process}
+                </h2>
+                <p>
+                  这里只显示当前 World 步骤关联的 IAOS 记录，不混入整案其他步骤。
+                </p>
+              </div>
+              <a href={iaosLink} target="_blank" rel="noreferrer">
+                在 IAOS 中定位
+                <ExternalLink aria-hidden="true" />
+              </a>
+            </header>
+            <div className="step-trace-summary">
+              <article>
+                <GitBranch aria-hidden="true" />
+                <span>Process</span>
+                <strong>{stepTrace.definition.process}</strong>
+                <small>
+                  run {String(stepTrace.processRun?.id ?? processRun ?? "—")}
+                </small>
+              </article>
+              <article>
+                <Activity aria-hidden="true" />
+                <span>Capabilities</span>
+                <strong>{stepTrace.definition.capabilities.length} 项</strong>
+                <small>{stepTrace.definition.states.join(" → ")}</small>
+              </article>
+              <article>
+                <Database aria-hidden="true" />
+                <span>Entity 影响</span>
+                <strong>{stepTrace.definition.entities.length} 类</strong>
+                <small>{stepTrace.definition.entities.join(" · ")}</small>
+              </article>
+              <article>
+                <ShieldCheck aria-hidden="true" />
+                <span>治理与事务证据</span>
+                <strong>
+                  {stepTrace.decisions.length + stepTrace.approvals.length} 条
+                </strong>
+                <small>
+                  Journal {stepTrace.journal.length} · Outbox{" "}
+                  {stepTrace.outbox.length}
+                </small>
+              </article>
+            </div>
+            <div className="step-capability-list">
+              {stepTrace.definition.capabilities.map((capability) => {
+                const transition = stepTrace.transitions.find(
+                  (item) => item.capability === capability,
+                );
+                return (
+                  <article key={capability}>
+                    <span className={transition ? "committed" : "unmatched"}>
+                      {transition ? "已提交" : "未匹配"}
+                    </span>
+                    <div>
+                      <strong>{capability}</strong>
+                      <small>
+                        {String(transition?.actor_id ?? "—")} ·{" "}
+                        {String(transition?.idempotency_key ?? "—")}
+                      </small>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
+            <nav className="step-studio-links" aria-label="当前步骤平台资产入口">
+              <a
+                href={`${iaosOrigin}/#capability_studio?capability=${encodeURIComponent(primaryCapability)}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Capability Studio
+              </a>
+              <a
+                href={`${iaosOrigin}/#process_studio?process=${encodeURIComponent(stepTrace.definition.process)}`}
+                target="_blank"
+                rel="noreferrer"
+              >
+                Process Studio
+              </a>
+              {stepTrace.definition.entities.map((entity) => (
+                <a
+                  key={entity}
+                  href={`${iaosOrigin}/#entity_explorer?entity=${encodeURIComponent(entity)}`}
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  Entity · {entity}
+                </a>
+              ))}
+            </nav>
+            <div className="step-evidence-groups">
+              {[
+                ["World Bridge", stepTrace.worldExchanges],
+                [
+                  "Decision / Approval",
+                  [...stepTrace.decisions, ...stepTrace.approvals],
+                ],
+                [
+                  "Journal / Outbox",
+                  [...stepTrace.journal, ...stepTrace.outbox],
+                ],
+              ].map(([label, evidence]) => (
+                <details key={String(label)}>
+                  <summary>
+                    {String(label)}
+                    <span>{(evidence as unknown[]).length} 条</span>
+                  </summary>
+                  {(evidence as unknown[]).length ? (
+                    <pre>{JSON.stringify(evidence, null, 2)}</pre>
+                  ) : (
+                    <p>当前步骤没有这类证据。</p>
+                  )}
+                </details>
+              ))}
+            </div>
+          </section>
+        )}
         {lifecycle && <section className="world-status" data-testid="iaos-lifecycle-projection">
           <span>IAOS Effective Runtime Projection</span>
           <h2>{lifecycle.case_code} · {String((lifecycle.state as {state?:string})?.state ?? "")}</h2>
