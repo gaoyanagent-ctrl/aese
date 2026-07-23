@@ -493,6 +493,62 @@ IAOS 企业生命周期页面必须接受 `step`、`capability`、`process_run` 
 - 缺失或无法关联的证据显示明确空状态，不回退为整案原始 JSON；
 - 单元测试覆盖映射完整性、关联过滤、unmatched 和深链编码，三视口完成交互验收。
 
+### D21 — 客户可解释 Capability Contract 与 Process 配置
+
+M9 的业务语义不得只存在于 Go 状态机、错误字符串或演示说明中。每项已发布
+Business Capability 必须携带机器可读且业务可解释的统一 Contract，至少包含：
+
+- `business_purpose`、适用对象和非目标；
+- 完整输入/输出字段、必填性、业务类型、金额单位与系统管理属性；
+- `preconditions`、状态 `from/to`、Entity read/write/append effects；
+- required position、Mandate、Policy、Approval Gate 和职责分离；
+- Intent/Observation/CommittedOutcome、Journal 和 Outbox 事件；
+- 稳定错误码、业务含义与恢复建议；
+- capability/source/compiler version、Runtime Artifact hash 和 lineage。
+
+表单、API、Agent Tool、Process node、Capability Studio 和 trace 必须消费同一
+Contract。前端不得另造业务说明，后端不得以空 `{"type":"object"}` 冒充完成的输入输出
+合同。专用 Go handler 可以实现事务原语，但其允许状态、数据影响和错误必须与已发布
+Contract 通过发布门一致。
+
+`enterprise.incorporation.lifecycle.v1` 必须是可读的主流程骨架：
+
+```text
+open case → prepare/approve resolution → record commitment
+→ legal.registration.v1
+→ banking.and.capitalization.v1
+→ organization.and.appointments.v1
+→ mandate.and.initial.budget.v1
+→ readiness evaluate
+```
+
+主流程不得把四个子流程藏在运行时代码之外。Process Definition 支持
+`capability|subprocess|approval|world_wait|branch|start|end` 节点，并为节点保存输入映射、
+输出映射、成功/失败边、Gate、Intent/Observation 合同和超时/升级配置。子流程中外部
+登记、银行和候选人结果必须以 `world_wait`/Observation 节点显式表达。
+
+Capability Studio 提供四层渐进披露：
+
+1. 业务解释：目的、执行者、条件、状态变化、数据影响、审批和后续；
+2. 配置视图：输入输出、Entity effects、Policy/Gate、事件和错误恢复；
+3. 专家 DSL：原始 JSON/YAML、Analyzer、Artifact、Diff、History；
+4. 运行证据：版本、调用主体、Decision、Approval、Journal、Outbox 和 trace 深链。
+
+客户配置按责任分层：Platform Core 由 IAOS 产品方维护；Domain Package 由解决方案团队
+发布；Tenant Extension 只能在 allowlist 内调整字段、阈值、审批角色、Policy 参数、
+SLA、通知和启用分支；业务人员与 Agent 只能执行已发布 Contract。任何租户配置都不得
+注入 SQL、任意脚本/URL、关闭 RLS/Journal/Outbox、绕过职责分离或把 Observation
+直接变成正式事实。
+
+发布门必须拒绝：空输入输出 schema、未知 Entity/Policy/Capability/Process 引用、
+不可达状态、无失败路径的外部等待、无角色的 Approval、类型不兼容 mapping、声明 effects
+与 Runtime transition 不一致、菜单可见但读侧 API 权限不完整、以及缺失 active snapshot。
+
+验收要求：20 项 M9 Capability 均有非空目的、输入、输出、状态/effects、治理、事件或
+明确无事件声明和错误合同；一主四子流程可从 Process Studio 解释全部 15 次正式
+transition；Founder 不读代码即可回答“谁在什么条件下执行、修改什么、输出什么、失败
+如何恢复”；API、Studio、Process 和 Agent Tool 的 Contract hash 一致。
+
 ## 4. 待确认设计树
 
 以下设计项已经确认，实施计划必须逐项映射：

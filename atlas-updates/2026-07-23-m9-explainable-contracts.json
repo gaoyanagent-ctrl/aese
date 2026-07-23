@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-explainable-contracts-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "补强 M9 可解释 Capability 与 Process 客户配置设计",
+  "detail": "DES-027 D21 固定二十项统一 Capability Contract、一主四子显式 Process、客户配置责任边界、发布门和 Studio 渐进解释视图。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "D21 设计与 IAOS Runtime 1.3.2 已部署，Capability/Process API、零诊断和 Founder 浏览器解释视图验收通过。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T14:15:00Z"
+}

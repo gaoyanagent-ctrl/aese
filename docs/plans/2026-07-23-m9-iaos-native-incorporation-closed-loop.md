@@ -2,7 +2,7 @@
 id: PLAN-M9-NATIVE-001
 title: M9 IAOS 原生语义驱动企业成立真实闭环实施计划
 date: 2026-07-23
-status: active
+status: completed
 author: Codex + User
 tags: [m9, iaos, semantic-runtime, incorporation, world-bridge]
 ---
@@ -192,6 +192,11 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T68 扩展 IAOS 生命周期深链和步骤高亮，支持 step、capability、process run 与 correlation 上下文。
 - [x] T69 在 AESE 为当前步骤展示 Process、Capability、主体、Entity、治理、事务和 World Bridge 分组证据。
 - [x] T70 增加映射完整性、关联过滤、unmatched、深链及三视口 UI 回归，并同步双仓 evidence。
+- [x] T71 按 D21 为二十项 M9 Capability 生成统一、非空且可解释的 Contract。
+- [x] T72 把一主四子 Process 升级为显式 capability/subprocess/approval/world_wait 结构。
+- [x] T73 增加 Capability/Process 发布门，校验 Contract 完整性和全部引用。
+- [x] T74 在 Capability Studio 增加业务解释与配置视图，专家 DSL 保持可展开。
+- [x] T75 升级租户 Runtime 数据，完成 API、Studio、Process、Agent Contract hash 和浏览器回归。
 
 验收：D18.1–D18.12 全部通过；设计、代码、集成、部署和业务验收状态分别有证据。
 
@@ -237,7 +242,7 @@ P0
 
 ## 16. 完成定义
 
-- T1–T70 全部完成，G5–G8 全部关闭。
+- T1–T75 全部完成，G5–G8 全部关闭。
 - DES-027 D18 十二项验收门逐项有机器证据。
 - `enterprise_operational_ready` 可从 clean tenant 确定性运行、恢复、重放和验证。
 - 正常主线与四个异常场景共享同一 Runtime Artifact 和正式业务路径。

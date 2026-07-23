@@ -1053,3 +1053,11 @@
 - 影响：打开 M9 Capability DSL 不再返回 403 或 `no_active_snapshot`，页面显示实际 Runtime version、compiler 和 artifact hash。
 - 验证：Go 针对测试通过；真实租户 apply 后 API 200；Founder Playwright 打开 DSL 并显示 Active v1。
 - 后续：后续 Studio 菜单安装必须同时检查全部读侧 API 依赖与发布态 artifact。
+
+## 2026-07-23 - M9 可解释 Capability 与 Process 配置闭环
+
+- 变更：DES-027 增加 D21；IAOS Runtime 1.3.2 为二十项 Capability 发布 Purpose、输入输出、状态、Entity/Journal/Outbox、治理、World 和错误恢复合同；主流程显式引用四个子流程，子流程声明 capability、event/world wait 与 timeout；Capability/Process Studio 增加业务解释层并保留专家 JSON。
+- 原因：原通用注册数量可见但配置不可理解，主流程隐藏后四段编排，客户无法知道能力做什么、输出什么、如何治理及如何恢复。
+- 影响：业务、治理和集成管理员可按职责理解并配置平台资产；核心语义、事务、幂等、RLS 和审计仍由平台强约束。T71–T75 完成，M9N remediation 重新关闭。
+- 验证：Go incorporation/API 测试通过；Process Studio 21/21、TypeScript、production build 通过；真实租户升级到 1.3.2，二十项合同 API 完整，五个 Process Analyzer 均零诊断；Founder Capability 与 Process 浏览器回归 2/2。
+- 后续：客户行业扩展应复用同一 Explainable Contract 和发布门，不得退回只有原始 JSON 或隐藏子流程的资产。
