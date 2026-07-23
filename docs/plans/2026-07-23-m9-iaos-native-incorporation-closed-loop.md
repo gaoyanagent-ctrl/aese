@@ -92,7 +92,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T20 定义 package manifest、依赖锁、内容 hash、compiler version、source version、diff、rollback 清单和签名/来源信息。
 - [x] T21 扩展编译器，生成 Entity Schema、Capability/Process 引用、Permission Resource、Form/List/Menu、Agent Tool 和 lineage。
 - [x] T22 发布前执行引用、继承、relation、状态、权限、职责分离、菜单和 seed 完整性检查；`conflict` 必须阻断。
-- [ ] T23 实现默认 dry-run、显式 apply、重复 apply no-op、版本升级、stale artifact 阻断和安全回退策略。
+- [x] T23 实现默认 dry-run、显式 apply、重复 apply no-op、版本升级、stale artifact 阻断和安全回退策略。
 - [ ] T24 验证 `tenant-hctm-genesis` 与 `tenant-other` 的安装隔离，确认 `tenant-hctm` 未被迁移或清理。
 
 验收：D18.1、D18.3 的资产部分通过；Runtime 只能消费已发布且未 stale 的 Effective Runtime Artifact。

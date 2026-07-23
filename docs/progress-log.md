@@ -871,3 +871,11 @@
 - 影响：登记 Agent 使用独立 service-only 主体在原 correlation 重提；银行拒绝和出资差异保持原状态并写异常证据；finance Agent 无法取得 G7 自批权限。
 - 验证：IAOS 全量 Go tests 通过；异常 integration suite 与正常完整链通过；部署后 founder 三视口 Playwright 3/3 通过。IAOS 前端全量 Vitest 暴露 15 个既有非 M9 测试失败（多为测试超时、旧英文文案断言及未 mock 的 401），M9 Playwright 与 production build 不受影响，但 T63 暂不关闭。
 - 后续：清理 IAOS 既有前端测试基线，再完成重启/乱序、租户撤权和 D18 最终矩阵。
+
+## 2026-07-23 - M9N Runtime Artifact 版本升级与安全回退
+
+- 变更：IAOS revision `3da05b5` 将 Artifact/Compiler 升至 1.1.0，并新增默认 dry-run、显式 apply 的已安装版本 rollback API；回退写 Outbox，版本与当前二进制不兼容时正式命令按 stale 失败关闭。
+- 原因：重复安装 no-op 之外还必须证明版本升级不覆盖旧内容 hash，并提供有审计、不会静默运行错误资产的回退边界。
+- 影响：旧 1.0.0 资产保留为 inactive revision，1.1.0 发布 Process/Decision 投影；回退操作不删除任何法律事实或历史证据。
+- 验证：IAOS Go/API 与正常/异常真实 PostgreSQL suite 通过；版本升级 apply 与后续重复 no-op 均执行成功。
+- 后续：验证 tenant-other 安装隔离和回退后的兼容二进制演练。
