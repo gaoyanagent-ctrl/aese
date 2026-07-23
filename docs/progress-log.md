@@ -983,3 +983,11 @@
 - 影响：六个 Core Archetype 可检查默认/继承字段，M9 Entity 不再产生三项 `semantic_concept_missing`，快速切换原型不再请求错误 History detail。
 - 验证：通用 API 字段数 account=7、commitment=7、mandate=8、document=7、document_line=5、document_with_lines 继承=7；快速切换 History 404=0；局域网 Playwright 4/4。
 - 后续：继续以 D19 逐页验收通用 Studio，不以注册数量替代字段、关系、History 和分析器质量。
+
+## 2026-07-23 - 修复 Entity Explorer 跨租户默认实体
+
+- 变更：IAOS 数据模型工坊移除 `sales_order` 硬编码初值，等待租户 schema 目录返回后保留有效选择或选择第一项；空目录不加载详情。
+- 原因：`tenant-hctm-genesis` 没有销售订单，但组件在目录返回前按示例实体请求 schema/ui，产生无意义 404。
+- 影响：工作室默认选择完全由当前租户实际目录驱动，不再把其他业务阶段或租户的实体假设带入 M9。
+- 验证：局域网 E2E 断言选中 `/metadata/schemas` 第一项，schema/ui 404=0；完整 M9 Playwright 4/4、production build/deploy 通过。
+- 后续：继续检查其他 Studio 是否存在全局示例值覆盖租户目录的同类问题。

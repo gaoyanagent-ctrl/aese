@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-entity-explorer-first-available-default-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "数据模型工坊改用租户实际第一项",
+  "detail": "DES-027 D19 增加 Entity Explorer 租户目录默认选择门；IAOS 已移除 sales_order 硬编码，目录返回前为空、返回后选择有效项或第一项。",
+  "status_after": "validating",
+  "progress_after": 97,
+  "current_state": "tenant-hctm-genesis schema/ui 不再产生 sales_order 404，局域网 E2E 4/4。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T09:06:00Z"
+}
