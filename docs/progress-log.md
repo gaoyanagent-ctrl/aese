@@ -1061,3 +1061,11 @@
 - 影响：业务、治理和集成管理员可按职责理解并配置平台资产；核心语义、事务、幂等、RLS 和审计仍由平台强约束。T71–T75 完成，M9N remediation 重新关闭。
 - 验证：Go incorporation/API 测试通过；Process Studio 21/21、TypeScript、production build 通过；真实租户升级到 1.3.2，二十项合同 API 完整，五个 Process Analyzer 均零诊断；Founder Capability 与 Process 浏览器回归 2/2。
 - 后续：客户行业扩展应复用同一 Explainable Contract 和发布门，不得退回只有原始 JSON 或隐藏子流程的资产。
+
+## 2026-07-23 - 补齐 M9 流程级业务目的
+
+- 变更：DES-027 D21 增加流程级目的合同；IAOS Runtime 1.3.3 为一主四子流程写入独立业务名称和目的，版本 API 返回描述，Process Studio 在列表和编辑抽屉顶部展示。
+- 原因：上一轮只解释了 Capability 和流程节点，没有解释整个流程为什么存在，安装器仍写入统一技术占位描述。
+- 影响：用户无需读节点或源码即可先理解流程整体目标，再下钻每一步能力、审批和 World 等待；说明来自正式 `process_definition`，不是前端硬编码。
+- 验证：五个流程目的完整性测试、Go incorporation/API、Process Studio 21/21、TypeScript、生产构建、在线 API 与 Founder 浏览器回归通过。
+- 后续：新增 Process 的发布门必须同时拒绝空显示名和空业务目的。

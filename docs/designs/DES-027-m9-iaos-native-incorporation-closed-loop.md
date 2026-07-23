@@ -527,6 +527,12 @@ open case → prepare/approve resolution → record commitment
 输出映射、成功/失败边、Gate、Intent/Observation 合同和超时/升级配置。子流程中外部
 登记、银行和候选人结果必须以 `world_wait`/Observation 节点显式表达。
 
+每个已发布 Process 还必须有流程级 `display_name` 和非空业务目的 `description`，说明
+“整个流程为什么存在、从什么业务条件开始、完成后保证什么结果”。流程目的属于
+`process_definition` 的正式版本化数据，列表 API、版本详情 API 和 Process Studio 必须
+读取同一来源；不得由前端根据 `process_key` 硬编码。流程级目的回答“整体做什么”，节点级
+Purpose、mapping 和 effect 回答“每一步怎么做”，两者不能互相替代。
+
 Capability Studio 提供四层渐进披露：
 
 1. 业务解释：目的、执行者、条件、状态变化、数据影响、审批和后续；

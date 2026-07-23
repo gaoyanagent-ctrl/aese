@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-process-purpose-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "补齐 M9 流程级业务目的合同",
+  "detail": "DES-027 D21 明确每个 Process 必须具有正式 display_name 和业务目的，列表、版本 API 与 Process Studio 消费同一 process_definition 数据。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "M9 一主四子流程均具备流程级目的和节点级步骤解释。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T14:45:00Z"
+}
