@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m10-m24-interactive-status-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "decision",
+  "summary": "纠正 M10 至 M24 的交互式完成口径",
+  "detail": "既有确定性 replay 继续作为参考证据，但统一标记 D22 Pending；没有持久工作项和真实参与者 E2E 不得称为交互式完成。",
+  "status_after": "validating",
+  "progress_after": 97,
+  "current_state": "M9 工作项合同成为 M10–M24 后续交付门，T84 已关闭。",
+  "evidence_ref": "docs/roadmap.md",
+  "occurred_at": "2026-07-23T16:00:00Z"
+}

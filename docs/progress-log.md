@@ -1101,3 +1101,11 @@
 - 影响：接管后工作项转为 human_task，正式 Capability Journal 的 actor 为 founder-principal；原分派证据不会覆盖。
 - 验证：在线案 `INC-TAKEOVER-1784819709` 验证短理由 400、finance-agent → Founder 接管成功、能力提交成功；Playwright 验证独立待办菜单可见原 Agent 与接管理由。
 - 后续：T83 仍需覆盖完整浏览器逐节点操作和尚未进入正常主线的 incorporation/legal Agent 参与。
+
+## 2026-07-23 - 纠正 M10–M24 完成口径
+
+- 变更：路线图把 M10–M24 改为 `Reference Replay Complete; D22 Pending`，保留既有确定性证据，但不再声称已完成交互式经营。
+- 原因：预计算场景可用于回归和解释业务因果，却不能证明人类、Agent、审批与外部参与者逐节点工作。
+- 影响：所有后续里程碑继承 DES-027 D22 完成门；只有持久工作项和真实主体 E2E 通过后才能恢复 Completed。
+- 验证：路线图与唯一 active M9N 计划一致，T84 关闭。
+- 后续：逐里程碑实施时复用 M9 工作项合同，不复制 M9 专用状态存储。

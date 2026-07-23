@@ -21,21 +21,21 @@
 | M8 AESE 2.0 基础 | 三态世界、确定性离散事件内核、IAOS 双向桥和最小 Genesis tracer | Completed | PLAN-M8-001、World Play runbook、两仓测试与部署证据 |
 | M9 Genesis Incorporation | 注资、法人登记、治理、管理岗位、初始组织与预算 | Completed | hctm-genesis@0.2.0、M9 evidence、IAOS DES-051 |
 | M9N IAOS-native Incorporation Closed Loop | 用三层语义、正式身份、Runtime Artifact、Capability/Process/Approval、持久工作项和 World Bridge 重建 M9 真实闭环 | Active | D19–D21 已部署；D22 人类/Agent/审批/World 逐节点参与正在补强 |
-| M10 Genesis Plant Build | 选址、场地控制、设施项目、公用工程、异常重排与验收 | Completed | hctm-genesis@0.3.0、M10 evidence、IAOS DES-052 |
-| M11 Genesis Capability Build | 资金补足、设备/实验室/仓储能力、核心团队与岗位资格 | Completed | hctm-genesis@0.4.0、M11 evidence、IAOS DES-053 |
-| M12 Genesis Industrialization | RFQ/定点、产品/工艺、供应商/工装、APQP、试制、PPAP 与量产批准 | Completed | hctm-genesis@0.5.0、M12 evidence、IAOS DES-054 |
-| M13 Genesis First Delivery | 正式 O2D、三批交付、客户接受、开票/回款、实际成本与项目毛利 | Completed | hctm-genesis@0.6.0、M13/Genesis evidence、IAOS DES-055 |
-| M14 Parameterized Branch Experiments | checkpoint 分支、多周期参数/策略、共同随机数、实验执行与决策证据 | Completed | hctm-genesis@0.7.0、M14 evidence、IAOS DES-056 |
-| M15 Governed Strategy Release & Pilot | evidence 审议、版本化发布、shadow、canonical pilot、guardrail 与回滚/采纳 | Completed | hctm-genesis@0.8.0、M15 evidence、IAOS DES-057 |
-| M16 Continuous Strategy Assurance & Calibration | canonical observation、数据质量、drift、8/4 校准/留出和策略复审 | Completed | M16 evidence、IAOS DES-058 |
-| M17 Rolling IBP & S&OP | 13 周执行/12 月财务计划、五级 review、PlanRelease | Completed | DES-019、PLAN-M17-001、AESE3 evidence |
-| M18 Product & Customer Portfolio | 第二产品/客户、共享能力和组合权衡 | Completed | DES-020、PLAN-M18-001、AESE3 evidence |
-| M19 Multi-site Network | 第二制造/外协节点、物流节点和网络韧性 | Completed | DES-021、PLAN-M19-001、AESE3 evidence |
-| M20 Closed-loop Customer Quality | 售后、质保、RMA、8D/CAPA 和追溯 | Completed | DES-022、PLAN-M20-001、AESE3 evidence |
-| M21 Plant Resilience | 资产、人员、EHS、能源和业务连续性 | Completed | DES-023、PLAN-M21-001、AESE3 evidence |
-| M22 Group Value Governance | 集团管理财务、资金、营运资本和投资 | Completed | DES-024、PLAN-M22-001、AESE3 evidence |
-| M23 Governed Multi-Agent Organization | 七 Agent、协作、评估、接管与安全 | Completed | DES-025、PLAN-M23-001、AESE3 evidence |
-| M24 Scenario Platform Productization | SDK、authoring、certification、registry 和发布 | Completed | DES-026、PLAN-M24-001、AESE3 evidence |
+| M10 Genesis Plant Build | 选址、场地控制、设施项目、公用工程、异常重排与验收 | Reference Replay Complete; D22 Pending | hctm-genesis@0.3.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
+| M11 Genesis Capability Build | 资金补足、设备/实验室/仓储能力、核心团队与岗位资格 | Reference Replay Complete; D22 Pending | hctm-genesis@0.4.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
+| M12 Genesis Industrialization | RFQ/定点、产品/工艺、供应商/工装、APQP、试制、PPAP 与量产批准 | Reference Replay Complete; D22 Pending | hctm-genesis@0.5.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
+| M13 Genesis First Delivery | 正式 O2D、三批交付、客户接受、开票/回款、实际成本与项目毛利 | Reference Replay Complete; D22 Pending | hctm-genesis@0.6.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
+| M14 Parameterized Branch Experiments | checkpoint 分支、多周期参数/策略、共同随机数、实验执行与决策证据 | Reference Replay Complete; D22 Pending | 既有实验 replay 保留；交互式决策工作项未验收 |
+| M15 Governed Strategy Release & Pilot | evidence 审议、版本化发布、shadow、canonical pilot、guardrail 与回滚/采纳 | Reference Replay Complete; D22 Pending | 既有策略 replay 保留；交互式治理工作项未验收 |
+| M16 Continuous Strategy Assurance & Calibration | canonical observation、数据质量、drift、8/4 校准/留出和策略复审 | Reference Replay Complete; D22 Pending | 既有校准 replay 保留；交互式复审工作项未验收 |
+| M17 Rolling IBP & S&OP | 13 周执行/12 月财务计划、五级 review、PlanRelease | Reference Replay Complete; D22 Pending | 既有 evidence 保留；交互式五级 review 未验收 |
+| M18 Product & Customer Portfolio | 第二产品/客户、共享能力和组合权衡 | Reference Replay Complete; D22 Pending | 既有 evidence 保留；交互式组合决策未验收 |
+| M19 Multi-site Network | 第二制造/外协节点、物流节点和网络韧性 | Reference Replay Complete; D22 Pending | 既有 evidence 保留；交互式网络决策未验收 |
+| M20 Closed-loop Customer Quality | 售后、质保、RMA、8D/CAPA 和追溯 | Reference Replay Complete; D22 Pending | 既有 evidence 保留；交互式质量工作项未验收 |
+| M21 Plant Resilience | 资产、人员、EHS、能源和业务连续性 | Reference Replay Complete; D22 Pending | 既有 evidence 保留；交互式应急工作项未验收 |
+| M22 Group Value Governance | 集团管理财务、资金、营运资本和投资 | Reference Replay Complete; D22 Pending | 既有 evidence 保留；交互式价值治理未验收 |
+| M23 Governed Multi-Agent Organization | 七 Agent、协作、评估、接管与安全 | Reference Replay Complete; D22 Pending | 既有 evidence 保留；真实多 Agent 工作项尚未验收 |
+| M24 Scenario Platform Productization | SDK、authoring、certification、registry 和发布 | Reference Replay Complete; D22 Pending | 既有 SDK evidence 保留；D22 交互式认证门尚未验收 |
 | X1 System Atlas 全景治理 | 最终完成体、当前状态、依赖与进展历史 | Completed | DES-006、IAOS DES-049、双端动态图谱 |
 
 ## 2. 当前阶段
