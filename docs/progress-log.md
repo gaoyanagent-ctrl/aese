@@ -1015,3 +1015,11 @@
 - 影响：founder 可查看 8 个 Profile 和 8 条 Rule 的真实含义，并通过原生 upsert API 持久修改；只读用户仍可打开完整详情。
 - 验证：Next production build/deploy、Policy UI Vitest 6/6、Founder governance Playwright 1/1，三视口主体场景 3/3。
 - 后续：Policy 变更的 dry-run、审批和审计仍按既有治理链执行，不以 UI 写权限替代业务审批。
+
+## 2026-07-23 - 修复流程工作室菜单业务名称
+
+- 变更：IAOS Runtime 1.2.9 将 M9 十项 menu resource 的权限 code 与展示 name 分离，`menu.process_studio` 显示为“流程编排控制台”。
+- 原因：安装器把资源 code 同时写入 name，覆盖业务菜单名称。
+- 影响：权限标识保持稳定，用户侧不再暴露机器 code。
+- 验证：数据库资源名称正确；Founder 1440×900 Playwright 1/1。
+- 后续：新增菜单必须显式提供业务名称，不得用 code 作为默认展示名。
