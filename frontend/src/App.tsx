@@ -272,7 +272,7 @@ export default function App() {
 
   useEffect(() => {
     const applyHash = () => {
-      const target = window.location.hash.replace(/^#/, "");
+      const target = window.location.hash.replace(/^#/, "").split("?")[0];
       if (target === "atlas") setMode("atlas");
       if (target === "live") setMode("live");
       if (target === "world") setMode("world");

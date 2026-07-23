@@ -2,7 +2,7 @@
 id: PLAN-M9-NATIVE-001
 title: M9 IAOS 原生语义驱动企业成立真实闭环实施计划
 date: 2026-07-23
-status: active
+status: completed
 author: Codex + User
 tags: [m9, iaos, semantic-runtime, incorporation, world-bridge]
 ---
@@ -106,7 +106,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T29 实现 IAOS registration Intent → AESE ingress/World Store → registration Observation → IAOS CommittedOutcome。
 - [x] T30 对未知 correlation、错租户、乱序、旧 schema、hash 不符和重复 Observation 失败关闭或返回原结果。
 - [x] T31 提供最小 IAOS 页面和 AESE 深链，可观察设立案、G1/G2、World 交换和 trace。
-- [ ] T32 从 clean tenant 执行正常登记与登记补正两条 tracer，保存数据库、Journal、Outbox、World Store 和 API 证据。
+- [x] T32 从 clean tenant 执行正常登记与登记补正两条 tracer，保存数据库、Journal、Outbox、World Store 和 API 证据。
 
 验收：第一个真实纵向切片贯通；UI、API 和 Agent Tool 使用同一 Capability；失败无部分写入。
 
@@ -145,7 +145,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T53 实现 evidence bundle 的 schema/version、canonical hash、引用清单和离线验证器。
 - [x] T54 更新 AESE World M9 页面，消费同一 lifecycle/process projection，展示 Intent/Observation/CommittedOutcome/Discrepancy。
 - [x] T55 实现 AESE → IAOS 与 IAOS → AESE 双向深链，携带 tenant、case、process run、world run 和 correlation。
-- [ ] T56 验证 IAOS/AESE/Bridge/浏览器重启与刷新后页面只从持久事实恢复，不依赖 local state 作为完成证据。
+- [x] T56 验证 IAOS/AESE/Bridge/浏览器重启与刷新后页面只从持久事实恢复，不依赖 local state 作为完成证据。
 
 验收：D18.7、D18.11 通过；业务人员可从一个设立案追溯全部语义、治理和 World 证据。
 
@@ -153,14 +153,14 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 
 - [x] T57 实现 reconciliation API/CLI，报告 missing、duplicate、lagging、hash_mismatch 和 terminal_conflict。
 - [x] T58 验证至少一次投递、效果恰好一次：重复、乱序、延迟、断线、双方重启和 poller recovery 后收敛。
-- [ ] T59 在真实 PostgreSQL 验证租户隔离、FORCE RLS、职责分离、decimal 精度、并发、幂等碰撞和失败无部分写入。
+- [x] T59 在真实 PostgreSQL 验证租户隔离、FORCE RLS、职责分离、decimal 精度、并发、幂等碰撞和失败无部分写入。
 - [x] T60 验证 Journal/Outbox 与业务事实原子提交，rollback 不产生 committed outcome，失败 Outbox 可恢复且不重复业务变化。
-- [ ] T61 执行 dry-run、apply、重复 apply、reset、replay、verify；证明生效法律事实不被 reset 删除。
-- [ ] T62 执行 API、IAOS UI 和 AESE UI 验收，由 `founder-principal` 完成菜单、直达路由、G1–G7 审批和授权写操作。
-- [ ] T63 运行 AESE/IAOS Go、Schema、数据库、前端、Playwright、Markdown links、JSON、Code Map、Atlas 和 M3–M24 回归。
+- [x] T61 执行 dry-run、apply、重复 apply、reset、replay、verify；证明生效法律事实不被 reset 删除。
+- [x] T62 执行 API、IAOS UI 和 AESE UI 验收，由 `founder-principal` 完成菜单、直达路由、G1–G7 审批和授权写操作。
+- [x] T63 运行 AESE/IAOS Go、Schema、数据库、前端、Playwright、Markdown links、JSON、Code Map、Atlas 和 M3–M24 回归。
 - [x] T64 在 1440×900、1280×720、390×844 三视口完成无阻塞重叠、可复制文本、错误恢复和双向深链验收。
-- [ ] T65 编写双仓 runbook、evidence、迁移/回滚说明，分别提交并记录 revision、部署版本和未验证风险。
-- [ ] T66 逐项关闭 DES-027 D18 十二项验收门；只有全部有机器证据时才将计划和实现标记 Completed。
+- [x] T65 编写双仓 runbook、evidence、迁移/回滚说明，分别提交并记录 revision、部署版本和未验证风险。
+- [x] T66 逐项关闭 DES-027 D18 十二项验收门；只有全部有机器证据时才将计划和实现标记 Completed。
 
 验收：D18.1–D18.12 全部通过；设计、代码、集成、部署和业务验收状态分别有证据。
 

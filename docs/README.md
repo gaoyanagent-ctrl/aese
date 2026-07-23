@@ -121,6 +121,8 @@
 | M9 Evidence | [Genesis Incorporation Evidence](reports/m9-genesis-incorporation-evidence.md) | Completed |
 | M9N Asset Audit | [IAOS-native M9 machine-readable asset audit](reports/m9-native-asset-audit.json) | Active |
 | M9N Frozen Contract | [IAOS-native M9 lifecycle contract](contracts/m9-native-incorporation-contract.json) | Active |
+| M9N Final Evidence | [IAOS-native M9 final evidence](reports/m9-native-final-evidence.md) | Completed |
+| M9N Closed-loop Runbook | [IAOS-native M9 operations](runbooks/m9-native-closed-loop.md) | Active |
 | M9N Risk Register | [IAOS-native M9 risk register](reports/m9-native-risk-register.json) | Active |
 | M10 Runbook | [Genesis Plant Build Runbook](runbooks/genesis-plant-build.md) | Completed |
 | M10 Evidence | [Genesis Plant Build Evidence](reports/m10-genesis-plant-build-evidence.md) | Completed |

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-native-final-completion-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "release",
+  "summary": "M9N IAOS 原生企业成立闭环最终完成",
+  "detail": "PLAN-M9-NATIVE-001 T1-T66 与 DES-027 D18 十二门全部以双仓代码、真实 PostgreSQL、恢复、Evidence Bundle 和六条三视口 Playwright 证据关闭。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "M9N 完成；当前无 active 主实施计划。",
+  "evidence_ref": "docs/reports/m9-native-final-evidence.md",
+  "occurred_at": "2026-07-23T11:30:00Z"
+}

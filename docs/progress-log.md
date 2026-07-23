@@ -935,3 +935,11 @@
 - 影响：超时或 Runtime 版本变化使批准失效；特批缺少原决定引用、理由或正式 G1–G7 Approval 时失败关闭；AESE 页面展示持久 Intent/Observation/CommittedOutcome/Discrepancy。
 - 验证：IAOS 单元/API 与真实 PostgreSQL founder override 测试通过；IAOS frontend production build、AESE IncorporationPlay test 和 production build 通过。
 - 后续：执行 clean tracer、双方重启恢复、真实库综合矩阵和最终全量回归。
+
+## 2026-07-23 - M9N 双仓最终验收完成
+
+- 变更：完成 clean 正常/补正 tracer、双方服务与浏览器刷新恢复、AESE reset 法律事实保护、真实 PostgreSQL M9 矩阵、双仓三视口 UI、runbook/evidence 和 D18 十二门；计划状态改为 completed。
+- 原因：计划只允许在代码、集成、部署、UI、恢复和业务证据全部存在时关闭。
+- 影响：M9N 以 `founder-principal`、Effective Runtime Artifact 和正式 World Bridge 作为权威闭环；AESE 与 IAOS 使用同一持久 lifecycle projection。
+- 验证：AESE Go 全量、frontend 38/38、build、Playwright 3/3；IAOS Go 全量、M9 PostgreSQL matrix、frontend 332/332（单 worker）、build、Playwright 3/3；JSON、Code Map 和 Atlas checks 通过。
+- 后续：生产部署前替换 development fallback secrets；超出单法人/CNY/五 Agent 的范围另立计划。
