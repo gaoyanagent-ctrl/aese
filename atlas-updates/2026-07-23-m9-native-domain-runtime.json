@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-native-domain-runtime-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "冻结 M9N 双仓合同并建立 IAOS 企业成立领域状态机",
+  "detail": "IAOS 已增加三层 Runtime Artifact、World Intent/Observation 信任门、五 Agent Mandate/allowlist 和 Trace Spine；AESE 增加持久 journal reconciliation，报告 missing/duplicate/lagging/terminal_conflict。",
+  "status_after": "building",
+  "progress_after": 55,
+  "current_state": "后端 Runtime/World/Agent/Trace 合同已落地；完整 replay、CommittedOutcome、工作台和最终恢复/三视口验收仍待完成。",
+  "evidence_ref": "docs/reports/m9-native-asset-audit.json",
+  "occurred_at": "2026-07-23T04:30:00Z"
+}

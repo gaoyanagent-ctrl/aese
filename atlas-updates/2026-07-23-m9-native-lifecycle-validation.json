@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-native-lifecycle-validation-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "test",
+  "summary": "M9N 正常闭环、三视口工作台与五类离线对账验证",
+  "detail": "IAOS 正常成立链已到 enterprise_operational_ready，World 形成 Intent/Observation/CommittedOutcome；AESE reconciliation/CLI 报告 missing、duplicate、lagging、hash_mismatch、terminal_conflict；三视口 UI 通过。",
+  "status_after": "validating",
+  "progress_after": 82,
+  "current_state": "正常闭环和出资差异已通过真实 PostgreSQL；其余异常 replay、重启恢复和最终全量回归继续收口。",
+  "evidence_ref": "internal/bridge/iaos/reconcile_test.go",
+  "occurred_at": "2026-07-23T05:15:00Z"
+}

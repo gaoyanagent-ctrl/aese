@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-iaos-native-loop-design-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "启动 M9 IAOS 原生语义驱动真实闭环设计",
+  "detail": "确认 enterprise_governance 为可复用 Domain Semantic Package，M9 必须通过三层语义、Runtime Artifact、能力、流程、权限、菜单和 World Bridge 形成真实闭环。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "AESE 3 reference remains completed；M9 IAOS 真实闭环增强正在设计，尚未开始业务实现。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T02:10:00Z"
+}

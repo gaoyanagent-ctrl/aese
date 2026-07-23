@@ -1,0 +1,33 @@
+{
+  "schema_version": "1.0",
+  "generated_at": "2026-07-23T00:00:00Z",
+  "aese_revision": "f4fda21c9ffc979e2cfe8835b3fbc4cd37a965e7",
+  "iaos_baseline_revision": "8e267f74a8d5e9e92d779f0247c8065faf2ccb13",
+  "iaos_worktree": "/iaos/iaos-go-m9-native",
+  "iaos_branch": "feat/m9-native-incorporation",
+  "iaos_current_revision": "13d02e1",
+  "target_tenant": "tenant-hctm-genesis",
+  "protected_tenant": "tenant-hctm",
+  "items": [
+    {"code":"core.semantic","owner":"iaos","classification":"complete","evidence":"58 concepts; no entity/archetype concepts in running baseline"},
+    {"code":"semantic.relations","owner":"iaos","classification":"create","evidence":"no relations in running baseline"},
+    {"code":"core.archetypes","owner":"iaos","classification":"complete","evidence":"document, document_line, document_with_lines, party and supplier only"},
+    {"code":"enterprise_governance.domain","owner":"iaos","classification":"create","evidence":"no versioned enterprise governance package"},
+    {"code":"hctm_genesis.extension","owner":"iaos","classification":"create","evidence":"clean lifecycle tenant required"},
+    {"code":"effective_runtime_artifact","owner":"iaos","classification":"complete","evidence":"capability artifact compiler exists; domain/entity/process lineage requires extension"},
+    {"code":"platform_identity","owner":"iaos","classification":"migrate","evidence":"dev-user bypass is not a persisted platform principal"},
+    {"code":"tenant_access","owner":"iaos","classification":"create","evidence":"founder-principal requires explicit access to two tenants"},
+    {"code":"incorporation.entities","owner":"iaos","classification":"create","evidence":"generic genesis_governance_record is not a domain model"},
+    {"code":"incorporation.capabilities","owner":"iaos","classification":"create","evidence":"twenty stable capabilities frozen by DES-027"},
+    {"code":"incorporation.processes","owner":"iaos","classification":"create","evidence":"one main and four child process codes frozen"},
+    {"code":"incorporation.policies","owner":"iaos","classification":"create","evidence":"eight policy codes frozen"},
+    {"code":"approval.gates","owner":"iaos","classification":"create","evidence":"G1-G7 require formal approval requests"},
+    {"code":"world_bridge","owner":"iaos+aese","classification":"migrate","evidence":"journal exists on prior M8 branch and was imported into dedicated worktree"},
+    {"code":"genesis_governance_record","owner":"iaos","classification":"migrate","evidence":"generic receipt retained only as migration source"},
+    {"code":"m9.failed_outbox","owner":"iaos","classification":"conflict","resolution":"do not reuse as completion evidence; recover or supersede through normal outbox worker before apply"},
+    {"code":"tenant_hctm.data","owner":"iaos","classification":"reuse","evidence":"protected compatibility baseline; no in-place migration"},
+    {"code":"aese.world.rules","owner":"aese","classification":"reuse","evidence":"existing deterministic M9 World rules remain authoritative for external consequences"}
+  ],
+  "unresolved_conflicts": [],
+  "publish_allowed": true
+}

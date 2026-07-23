@@ -791,3 +791,67 @@
 - 影响：用户可从首页选择任一过程，进入查看阶段步骤、World/IAOS 交换和治理边界；M8 tracer 回归其架构验证定位。该修复不扩大 IAOS 业务实现范围。
 - 验证：前端 38 个 unit tests、typecheck、production build 通过；新生命周期 E2E 在 1440、1280 和 390 三视口共 6 条通过，覆盖完整阶段可见、M9 深链接和 M8 次级入口。
 - 后续：M17-M24 仍需从联合 evidence 视图拆为独立运营工作台，并把页面推进接入已部署 IAOS committed outcome。
+
+## 2026-07-23 - M9 IAOS 原生真实闭环设计启动
+
+- 变更：新增 draft DES-027，确认 M9 必须从 IAOS Core/Domain/Tenant 三层语义出发，经 Archetype、Entity、Atomic Ability、Business Capability、Process/Policy/Decision、Runtime Artifact、权限、菜单和工作台进入 World Bridge；确认建立可复用 `enterprise_governance` Domain Semantic Package，而不是 HCTM 专属 CRUD。
+- 原因：现有 M9 只有 AESE frame、通用治理 receipt 和失败 Outbox，不能验证 IAOS 是否能从能力语义模型满足现实企业成立需求。
+- 影响：DES-010 的所有权原则保留，但 M9 实现边界重新进入设计；DES-027 批准前不开始 IAOS 业务实现。
+- 验证：对照 IAOS DES-023 五层语义模型、Semantic Archetype Catalog、Metadata Compiler、Capability Runtime 和动态菜单实现完成现状核验。
+- 后续：逐项确认 Core 扩展、Domain graph、能力/流程、World Bridge、UI、seed 和验收边界。
+
+## 2026-07-23 - M9 IAOS 原生真实闭环设计批准
+
+- 变更：完成 DES-027 D1–D18 决策并转为 Approved；正式平台主体确定为 `founder-principal`（显示名称“创始治理者”），`dev-user` 仅保留为本地兼容身份；确认二十个 Business Capability、一主四子 Process、八项 Policy、G1–G7 人工治理门、Trace Spine 和十二项最终验收门。
+- 原因：M9 正式验收不能依赖特殊开发账号、AESE frame 或通用治理 receipt，必须证明 IAOS 从三层语义资产到身份、能力、流程、权限、菜单、Agent 与 World Bridge 的真实闭环。
+- 影响：DES-027 已具备进入实施计划的批准基线；实现前仍需创建唯一 active 主计划，并在 IAOS 独立 branch/worktree 中完成平台改动。
+- 验证：逐项核对断线前会话确认记录与 DES-027 D1–D17，补录 `founder-principal` 身份模型和 D18 十二项验收门；文档状态与索引同步为 Approved。
+- 后续：编制跨 AESE/IAOS 的纵向实施计划，明确仓库所有权、依赖顺序、每个切片的真实测试证据和双仓提交边界。
+
+## 2026-07-23 - M9 IAOS 原生真实闭环实施计划启动
+
+- 变更：新增唯一 active 的 PLAN-M9-NATIVE-001，将 DES-027 拆为 P0–P7、T1–T66：基线审计与双仓隔离、平台身份、三层语义与 Runtime Artifact、登记纵向 tracer、完整成立主链、Agent 异常治理、工作台与 Trace Spine、恢复对账与最终验收。
+- 原因：按技术层横向铺开会延迟发现身份、事务、Bridge 和运行资产不一致；实施必须从最小登记 tracer 开始，每个切片交付可运行的纵向证据。
+- 影响：M9N 成为当前唯一 active 主计划；既有 M9–M24 reference completion 保留，但 M9 的 IAOS 原生真实闭环在 D18 十二项验收门全部通过前不得标记实现完成。
+- 验证：按跨仓规则阅读 IAOS AGENTS、Agent Context 和 Code Map；确认 IAOS 已有 Runtime Artifact、Capability、Process/Approval、Policy/Decision、Outbox 等基础，并识别 `dev-user` 特判为 P1 硬门；计划明确双仓所有权、独立 worktree、依赖顺序和每切片交付纪律。
+- 后续：执行 P0/T1–T8，先记录双仓基线并完成机器可读资产审计，不开始业务 Runtime Artifact 发布。
+
+## 2026-07-23 - M9N 双仓基线与领域状态机落地
+
+- 变更：从 IAOS `origin/main@8e267f7` 创建 `/iaos/iaos-go-m9-native`、`feat/m9-native-incorporation`，引入既有 M8 Bridge/M9 migration baseline；新增机器资产审计、冻结合同，以及 IAOS `internal/incorporation` 的 20 Capability、5 Process、8 Policy、7 Gate 目录和确定性状态机。
+- 原因：通用 `genesis_governance_record` 不能承载企业成立事实；先冻结跨仓合同并以可执行领域状态机锁住正常与异常语义，避免 API、UI 和 Agent 各自实现规则。
+- 影响：`tenant-hctm` 保持不变，新实现限定 `tenant-hctm-genesis`；失败 Outbox 不再作为完成证据。计划仍为 Active，尚未满足 D18。
+- 验证：IAOS `go test ./internal/incorporation` 通过，覆盖正常终态、重复幂等、登记补正、开户拒绝、出资差异、Agent 自批拒绝和目录基数；新增 JSON 均通过标准解析。
+- 后续：把领域状态机接入 PostgreSQL 原子事务、正式身份/Runtime Artifact/Approval/Journal/Outbox 与双向 World Bridge，再完成工作台和联合验收。
+
+## 2026-07-23 - M9N 成立事实原子持久化 tracer
+
+- 变更：IAOS 新增统一成立 command、trace、evidence API，把 `incorporation_case`、领域 Journal 与 `sys_outbox` 放入同一租户事务；新增 FORCE RLS、幂等碰撞、状态 hash 和生产/integration schema，提交 revision `4a76f38`。
+- 原因：正式成立事实不能继续停留在 AESE frame 或通用 JSON receipt，且失败转换不得留下部分业务状态或 Outbox。
+- 影响：API、后续 UI 与 Agent 已有单一 Capability 入口；旧 `genesis_governance_record` 仅保留为迁移来源，`tenant-hctm` 未迁移。
+- 验证：IAOS 领域/API 单测通过；真实 PostgreSQL 验证重复 no-op、同键异载荷 409、两个租户隔离和 bootstrap 重复执行；非法转换的 sqlmock 测试证明事务 rollback 且不写 Outbox。
+- 后续：接入 `founder-principal` 正式身份、G1–G7 Approval/Decision、Effective Runtime Artifact 和 registration World 往返。
+
+## 2026-07-23 - M9N 正式主体与治理门接线
+
+- 变更：IAOS 新增默认 dry-run、显式 apply 的 founder bootstrap，持久化 `founder-principal`、平台角色、两个租户可分别授予的访问关系、普通登录绑定、董事长岗位、Mandate、Capability 权限和 Outbox；G1–G7 改由 Approval Runtime 提交、决定并在成功业务事务中 consume，revision `63535a5`。
+- 原因：正式验收不能依赖 `dev-user`，请求体中的 `approved_by` 也不能替代真实 Approval 决定。
+- 影响：`founder-principal` 可通过普通登录获得 `platform_super_admin`，`/profile` 返回主体、平台角色、租户访问、岗位和 Mandate；Semantic Studio 不再按租户字符串由前端二次隐藏。
+- 验证：真实 PostgreSQL 已通过 bootstrap、普通登录、授权摘要、Capability 权限、G1 pending→approved→consumed、重复执行和 RLS 验证；IAOS Go 单测、前端 typecheck/build 通过。
+- 后续：发布三层语义和 Effective Runtime Artifact，完成 Process/Decision、World 往返与五 Agent。
+
+## 2026-07-23 - M9N Runtime Artifact、World、Agent 与 Trace Spine
+
+- 变更：IAOS revision `52b11ee` 发布 Core → enterprise_governance → HCTM Extension 三层 Effective Runtime Artifact，正式命令对 missing/stale 失败关闭；revision `13d02e1` 把 registration/bank/appointment Intent 原子写入 Bridge journal、校验可信 Observation，建立五 Agent 岗位/Mandate/Capability allowlist，并扩展 trace/evidence 聚合。AESE 新增离线 reconciliation 分类器。
+- 原因：API、UI 和 Agent 必须消费同一已发布运行资产；外部登记、银行和候选人事实只能来自 World；证据必须能按稳定 correlation 恢复和对账。
+- 影响：M9 正式路径已具备 Runtime Authority、外部事实信任门、Agent dispatch 前授权门和 Trace Spine 后端；旧 receipt 不再参与完成判断。
+- 验证：IAOS Go/API 与真实 PostgreSQL founder/G1/runtime tests 通过；AESE bridge/worldcontract tests 通过；reconciliation 覆盖 converged、missing、duplicate、lagging、terminal_conflict。
+- 后续：完成全正常链与四异常 replay、CommittedOutcome 自动回传、生命周期工作台及重启/三视口联合验收。
+
+## 2026-07-23 - M9N 正常闭环、工作台与离线对账验收
+
+- 变更：IAOS `1c2a8d6`、`8fedf25`、`802d4d5`、`2f24866` 完成完整正常链、三层语义投影、五 Agent 服务主体、CommittedOutcome、企业生命周期工作台及出资差异持久证据；AESE reconciliation 增加 `hash_mismatch` 并提供 `aese reconcile` 离线命令。
+- 原因：D18 要求正常链进入真实终态、异常拒绝仍保留升级证据，并且双方能在服务不可用时对持久 journal 做确定性复验。
+- 影响：`tenant-hctm-genesis` 可由 `founder-principal` 经 G1–G7 到达 `enterprise_operational_ready`；三类 World 往返均形成 Intent/Observation/CommittedOutcome；对账覆盖五类故障。
+- 验证：真实 PostgreSQL 完整链验证 7 个 consumed Approval、3/3/3 World exchange 和终态；出资差异验证状态不推进且 Discrepancy/Journal/Outbox 原子写入；IAOS build、Go tests、AESE bridge/CLI/worldcontract tests，以及 1440×900、1280×720、390×844 Playwright 共三条通过。
+- 后续：补齐登记补正、开户拒绝和 Agent 自批的联合 replay，完成重启/乱序恢复、全量回归及 D18 最终证据矩阵。

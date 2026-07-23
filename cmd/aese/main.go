@@ -9,8 +9,10 @@ import (
 	"os"
 
 	"github.com/industrial-ai/iaos-aese/internal/application"
+	bridgeiaos "github.com/industrial-ai/iaos-aese/internal/bridge/iaos"
 	"github.com/industrial-ai/iaos-aese/internal/scenariopack"
 	"github.com/industrial-ai/iaos-aese/internal/validate"
+	"github.com/industrial-ai/iaos-aese/internal/worldcontract"
 )
 
 const usage = `Usage:
@@ -20,6 +22,7 @@ const usage = `Usage:
   aese world inspect <world-dir>
   aese world run <world-dir> [--until <RFC3339>] [--apply --output <dir>]
   aese world replay <world-dir> --log <event-log.json> [--apply --output <dir>]
+  aese reconcile <bridge-journal.json>
   aese experiment validate|inspect|expand|run|compare|evidence|replay [--definition <json>] [--apply]
 
 Online commands are available after an IAOS target is configured:
@@ -59,6 +62,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return worldCommand(args[1:], stdout, stderr)
 	case "experiment":
 		return experimentCommand(args[1:], stdout, stderr)
+	case "reconcile":
+		return reconcileCommand(args[1:], stdout, stderr)
 	case "help", "-h", "--help":
 		fmt.Fprint(stdout, usage)
 		return 0
@@ -66,6 +71,32 @@ func run(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "unknown command %q\n%s", args[0], usage)
 		return 2
 	}
+}
+
+func reconcileCommand(args []string, stdout, stderr io.Writer) int {
+	if len(args) != 1 {
+		fmt.Fprintln(stderr, "reconcile requires exactly one bridge journal JSON file")
+		return 2
+	}
+	file, err := os.Open(args[0])
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	defer file.Close()
+	decoder := json.NewDecoder(file)
+	decoder.DisallowUnknownFields()
+	var entries []worldcontract.Envelope
+	if err := decoder.Decode(&entries); err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	report := bridgeiaos.Reconcile(entries)
+	_ = writeJSON(stdout, report)
+	if !report.Converged {
+		return 1
+	}
+	return 0
 }
 
 func validateCommand(args []string, stdout, stderr io.Writer) int {

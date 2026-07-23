@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-iaos-native-loop-design-approved-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "批准 M9 IAOS 原生语义驱动真实闭环设计",
+  "detail": "确认 founder-principal 平台主体、二十个 Business Capability、一主四子 Process、八项 Policy、七个人工治理门、Trace Spine、World Bridge 和十二项最终验收门。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "AESE 3 reference remains completed；M9 IAOS 原生真实闭环设计已批准，实施尚未开始。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T03:30:00Z"
+}

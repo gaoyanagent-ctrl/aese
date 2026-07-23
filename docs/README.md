@@ -90,6 +90,7 @@
 | DES-024 | [M22 集团财务资金与投资治理](designs/DES-024-group-finance-treasury-and-investment.md) | Completed |
 | DES-025 | [M23 受治理多 Agent 组织](designs/DES-025-governed-multi-agent-organization.md) | Completed |
 | DES-026 | [M24 场景平台产品化与行业交付](designs/DES-026-scenario-platform-productization.md) | Completed |
+| DES-027 | [M9 IAOS 原生语义驱动企业成立真实闭环](designs/DES-027-m9-iaos-native-incorporation-closed-loop.md) | Approved |
 | PLAN-M3 | [M3 实施计划](plans/2026-07-19-m3-executable-scenario-package.md) | Completed |
 | PLAN-M3V | [快速 2D 企业沙盘实施计划](plans/2026-07-19-fast-track-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Completed |
@@ -98,6 +99,7 @@
 | PLAN-M7 | [M7 受治理场景运行控制台实施计划](plans/2026-07-20-m7-governed-scenario-operations-console.md) | Completed |
 | PLAN-M8 | [M8 AESE 2.0 三态世界与仿真内核实施计划](plans/2026-07-22-m8-aese-2-foundation.md) | Completed |
 | PLAN-M9 | [M9 Project Genesis 企业成立与治理实施计划](plans/2026-07-22-m9-genesis-incorporation.md) | Completed |
+| PLAN-M9-NATIVE | [M9 IAOS 原生语义驱动企业成立真实闭环实施计划](plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md) | Active |
 | PLAN-M10 | [M10 Project Genesis 工厂选址与设施建设实施计划](plans/2026-07-22-m10-genesis-plant-build.md) | Completed |
 | PLAN-M11 | [M11 Project Genesis 生产能力建设实施计划](plans/2026-07-22-m11-genesis-production-capability-build.md) | Completed |
 | PLAN-M12 | [M12 Project Genesis 产品工业化与量产批准实施计划](plans/2026-07-22-m12-genesis-product-industrialization.md) | Completed |
@@ -117,6 +119,8 @@
 | AESE 3 Evidence | [M17-M24 Completion Evidence](reports/aese3-m17-m24-completion-evidence.md) | Completed |
 | M9 Runbook | [Genesis Incorporation Runbook](runbooks/genesis-incorporation.md) | Completed |
 | M9 Evidence | [Genesis Incorporation Evidence](reports/m9-genesis-incorporation-evidence.md) | Completed |
+| M9N Asset Audit | [IAOS-native M9 machine-readable asset audit](reports/m9-native-asset-audit.json) | Active |
+| M9N Frozen Contract | [IAOS-native M9 lifecycle contract](contracts/m9-native-incorporation-contract.json) | Active |
 | M10 Runbook | [Genesis Plant Build Runbook](runbooks/genesis-plant-build.md) | Completed |
 | M10 Evidence | [Genesis Plant Build Evidence](reports/m10-genesis-plant-build-evidence.md) | Completed |
 | M11 Runbook | [Genesis Capability Build Runbook](runbooks/genesis-capability-build.md) | Completed |

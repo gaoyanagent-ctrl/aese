@@ -2,7 +2,7 @@
 
 本文件是 AESE 当前里程碑状态和下一步优先级的权威来源。
 
-最后更新：2026-07-22。
+最后更新：2026-07-23。
 
 ## 1. 里程碑状态
 
@@ -20,6 +20,7 @@
 | M7 受治理场景运行控制台 | 浏览器预检、初始化、逐幕运行、分析、验证和复位 | Completed | ADR-003、DES-005、PLAN-M7-001、M7 evidence |
 | M8 AESE 2.0 基础 | 三态世界、确定性离散事件内核、IAOS 双向桥和最小 Genesis tracer | Completed | PLAN-M8-001、World Play runbook、两仓测试与部署证据 |
 | M9 Genesis Incorporation | 注资、法人登记、治理、管理岗位、初始组织与预算 | Completed | hctm-genesis@0.2.0、M9 evidence、IAOS DES-051 |
+| M9N IAOS-native Incorporation Closed Loop | 用三层语义、正式身份、Runtime Artifact、Capability/Process/Approval 和 World Bridge 重建 M9 真实闭环 | Active | DES-027、PLAN-M9-NATIVE-001 |
 | M10 Genesis Plant Build | 选址、场地控制、设施项目、公用工程、异常重排与验收 | Completed | hctm-genesis@0.3.0、M10 evidence、IAOS DES-052 |
 | M11 Genesis Capability Build | 资金补足、设备/实验室/仓储能力、核心团队与岗位资格 | Completed | hctm-genesis@0.4.0、M11 evidence、IAOS DES-053 |
 | M12 Genesis Industrialization | RFQ/定点、产品/工艺、供应商/工装、APQP、试制、PPAP 与量产批准 | Completed | hctm-genesis@0.5.0、M12 evidence、IAOS DES-054 |
@@ -41,7 +42,9 @@
 
 M3、M3V、M4、M5、M6、M7 和跨里程碑的 X1 System Atlas 已完成。联动中心已支持联动检查与受治理场景运行，不依赖 CLI 完成 preflight、initialize、七幕推进、Agent 分析、verify 与 reset。
 
-PLAN-M8-001 至 PLAN-M24-001 均已完成。M17-M24 严格消费前一 terminal，统一证据输出 `industry_simulation_platform_ready=true`；当前没有 active 主实施计划。下一轮若进入真实生产、第二行业、法定合规或高精度 3D，必须另立设计和计划。
+PLAN-M8-001 至 PLAN-M24-001 均已完成。M17-M24 严格消费前一 terminal，统一证据输出 `industry_simulation_platform_ready=true`。
+
+当前唯一 active 主实施计划为 `PLAN-M9-NATIVE-001`。它不撤销既有 M9–M24 reference completion，而是修复 M9 的 IAOS 原生事实承载：以 `founder-principal`、三层语义包、Effective Runtime Artifact、二十个 Business Capability、一主四子 Process、八项 Policy、G1–G7、五 Agent、Trace Spine 和真实 World Bridge 闭环重新验收 `enterprise_operational_ready`。实施按 P0–P7、T1–T66 推进；IAOS 修改必须在独立 worktree 中完成。
 
 M7 O0-O4 已完成。最终 `m7-acceptance-20260722-05` 从 clean reset 跑通编排 API 与 CLI 对照链：22 个事件、三 Agent、17 条离线业务断言、2 条在线 IAOS 断言和 M6 KPI 均通过；单 run 产生 9 次成功 Tool Call 与两套一致的 O2D Outbox 副作用，UI/CLI 均安全复位。AESE 8090/4173 与 IAOS 8082/3000 的本机部署和健康检查已记录在 M7 evidence。该基线由 M8 强制保留。
 

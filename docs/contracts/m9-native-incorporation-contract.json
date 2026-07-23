@@ -1,0 +1,37 @@
+{
+  "schema_version": "1.0",
+  "contract_key": "m9-native-incorporation",
+  "tenant_id": "tenant-hctm-genesis",
+  "business_timezone": "Asia/Shanghai",
+  "money": {"currency": "CNY", "scale": 2, "representation": "minor_units_int64"},
+  "terminal_state": "enterprise_operational_ready",
+  "states": [
+    "incorporation_case_opened",
+    "founder_resolution_approved",
+    "capital_commitments_confirmed",
+    "registration_submitted",
+    "legal_entity_registered",
+    "bank_account_opening_submitted",
+    "bank_account_opened",
+    "capital_contribution_verified",
+    "organization_established",
+    "executive_appointments_accepted",
+    "operating_mandates_activated",
+    "initial_budget_approved",
+    "enterprise_operational_ready"
+  ],
+  "envelope_required": [
+    "tenant_id",
+    "scenario_id",
+    "world_run_id",
+    "schema_version",
+    "correlation_id",
+    "causation_id",
+    "idempotency_key",
+    "occurred_at",
+    "canonical_hash"
+  ],
+  "capability_version": "1.0.0",
+  "process_version": "1.0.0",
+  "reset_policy": "draft_and_test_runs_only"
+}
