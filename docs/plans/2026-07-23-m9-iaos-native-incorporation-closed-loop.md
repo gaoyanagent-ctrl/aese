@@ -2,12 +2,39 @@
 id: PLAN-M9-NATIVE-001
 title: M9 IAOS 原生语义驱动企业成立真实闭环实施计划
 date: 2026-07-23
-status: completed
+status: active
 author: Codex + User
 tags: [m9, iaos, semantic-runtime, incorporation, world-bridge]
 ---
 
 # M9 IAOS 原生语义驱动企业成立真实闭环实施计划
+
+> 2026-07-23 remediation：此前将专用 `incorporation` 状态机及 Runtime
+> Artifact JSON 清单误判为通用 IAOS 资产完成。运行审计证明 M9 Entity 未进入
+> `entity_metadata_schema`、Capability 未进入 `capability_registry`，平台工作室、
+> 十个业务工作区和 Agent 操作入口也未达到 D10/D18。本计划恢复为 active；
+> 原 T17–T23、T41–T42、T49–T55、T62–T66 的完成标记只代表专用闭环证据，
+> 不再作为通用平台注册验收。
+
+## 0.1 补强后的不可替代验收定义
+
+- Semantic：Core/Domain concept、relation、Archetype 必须存在于通用 Semantic
+  Registry，可由 Semantic Studio API 查询；仅存在 Artifact JSON 不合格。
+- Entity：D3 的 11 个正式 Domain Entity 必须存在于
+  `entity_metadata_schema`，具有 semantic/archetype 引用、物理投影、RLS 和可查询
+  列表；不得以单个 `state_document` 代替全部正式对象。
+- Capability：D14 的 20 个能力必须以 published/active version 存在于
+  `capability_registry`，Capability Studio/API 可查询，专用命令入口必须引用该版本。
+- Process：D15 的一主四子流程必须存在于 `process_definition`，图节点引用已发布
+  Capability/subprocess，Process Studio 可打开版本和运行记录。
+- Policy：D16 的 8 项 Policy 必须存在于 `policy_profile/policy_rule`，可查询版本、
+  scope、规则和启用状态，Decision 必须引用其版本。
+- Agent：五个 Agent 必须能查询主体、岗位、Mandate、允许能力、工具、额度、有效期
+  和状态；必须提供人工可见的任务/调用/升级入口。
+- UI：D10 十个工作区必须是真实可导航视图，不得用一页原始 JSON 或名称 chip 代替；
+  至少支持新建 case、下一动作、G1–G7、Agent 任务和来源深链。
+- 完成门：机器验收必须分别从通用 API、数据库、平台工作室 UI 和业务 UI 反向证明；
+  任何目录返回空、深链 404 或必须读源码才能知道资产，M9 状态保持 active。
 
 ## 1. 目标
 

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-native-common-assets-remediation-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "risk",
+  "summary": "撤回 M9N 误完成并补齐 IAOS 通用资产",
+  "detail": "原完成证据未验证通用注册中心与十工作区；DES-027 新增 D19 机器门，IAOS Runtime 1.2.3 已补齐 11 Entity、20 Capability、5 Process、8 Policy Profile/Rule、5 Agent、10 relation 和现有案件数据投影。",
+  "status_after": "validating",
+  "progress_after": 90,
+  "current_state": "程序和系统数据已补齐并完成 API/build 验证；等待最终 UI 验收后重新关闭 M9N。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T07:56:00Z"
+}

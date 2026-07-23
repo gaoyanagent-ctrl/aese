@@ -392,6 +392,33 @@ DES-027 的实现只有在以下十二项全部满足后才能判定完成：
 
 完成证据必须同时来自 AESE 与 IAOS 两个仓库。设计完成、代码完成、集成完成和业务验收分别记录，不得互相替代。
 
+### D19 — 可发现、可操作与系统数据验收
+
+M9 资产不能只存在于专用 artifact JSON、测试 fixture 或设立案 trace 中。安装完成后，
+用户必须能从 IAOS 通用工作室发现并检查同一份有效资产：
+
+- Semantic Studio：Core `account`、`commitment`、`mandate`、`money_value`，
+  十一个领域概念及其关系图。
+- Entity Explorer：十一项 Entity 的 schema、列表定义、物理投影和租户隔离数据；
+  已存在的 native 设立案必须投影为可查询记录。
+- Capability Studio：二十项已发布 Business Capability，版本和
+  Runtime Artifact hash 可追溯。
+- Process Studio：一主四子五个已发布流程；每个 capability node 必须引用真实
+  Capability key，不接受以 process key 伪装的占位节点。
+- Governance Studio：八个 active Policy Profile 与至少一条对应的 enabled
+  Policy Rule；只有 profile 没有 rule 不算实现。
+- Agent 组织：五个 service-only Agent 的岗位、Mandate、允许能力、有效期、
+  金额上限和升级对象可查询；人类不能冒充 Agent 调用。
+
+`founder-principal` 登录后的“企业成立与治理”必须提供十个业务工作区：总览、设立案件、
+法律主体、公司治理、资本与账户、授权与预算、Agent 组织、我的审批、World 交换和成立审计。
+工作区展示通用注册中心和 native runtime 的真实数据，并提供到上述 Studio 的直达入口。
+
+完成度采用机器可检查门槛：11 Entity、20 Capability、5 Process、8 Policy Profile、
+8 Policy Rule、5 Agent、10 条领域 relation、10 个业务工作区；重复安装必须
+`no_op=true,writes=0`。任一数量、通用 API、records API、菜单授权或工作区缺失时，
+路线图只能标记为 active remediation，不能标记 completed。
+
 ## 4. 待确认设计树
 
 以下设计项已经确认，实施计划必须逐项映射：

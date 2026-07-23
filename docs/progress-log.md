@@ -967,3 +967,11 @@
 - 影响：从企业生命周期点击“打开 AESE World”时使用同一登录租户，且不放宽 RLS。
 - 验证：Vitest 3/3、AESE build、陈旧跨租户 token 三视口 Playwright 3/3、刷新恢复通过。
 - 后续：生产统一 origin 后可改为后端一次性交接码，避免任何长期 token 进入浏览器 URL。
+
+## 2026-07-23 - 撤回 M9N 误完成并补齐通用平台资产
+
+- 变更：撤回原 completed 结论并恢复 active remediation；DES-027 新增 D19 可发现性机器门。IAOS Runtime 1.2.3 将 11 Entity、20 Capability、5 Process、8 Policy Profile、8 Policy Rule、10 条语义关系和 5 Agent 写入通用注册中心，将现有设立案投影到 11 个租户隔离 Entity 表，并为 founder 开放 Studio 菜单；企业生命周期增加十个业务工作区和新建设立案入口。
+- 原因：原验收只证明专用状态机和 trace 闭环，错误地把 artifact 中的声明当成通用 Semantic/Entity/Capability/Process/Policy 注册完成，导致用户无法发现、理解和操作 M9 资产。
+- 影响：M9 资产现在可从 Semantic Studio、Entity Explorer、Capability Studio、Process Studio、Governance Studio 和企业生命周期工作台共同查看；占位流程节点和无 rule 的 Policy 已被真实注册数据替代。
+- 验证：通用 API 返回 11/20/5/8/8/5/10；11 个 Entity records API 均 HTTP 200 且有投影记录；重复 apply 返回 `no_op=true,writes=0`；IAOS Go 针对测试和 frontend production build 通过。
+- 后续：完成双仓文档/Atlas/代码提交和用户 UI 验收后，才允许重新关闭 M9N。
