@@ -77,9 +77,9 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T10 幂等创建 `founder-principal` 与显示名称“创始治理者”，授予 `platform_super_admin` 和两个目标租户的显式访问关系。
 - [x] T11 在 `tenant-hctm-genesis` 建立董事长/最高管理者岗位、任命和治理 Mandate，平台角色与业务岗位分别审计。
 - [x] T12 扩展 `/profile` 或等价接口，返回平台主体、当前租户、租户访问、平台角色、岗位、Mandate 和有效权限摘要。
-- [ ] T13 将菜单投影统一为 `installed runtime artifact + effective permission + tenant access`，移除前端按租户名、用户名或 token 单角色裁剪。
+- [x] T13 将菜单投影统一为 `installed runtime artifact + effective permission + tenant access`，移除前端按租户名、用户名或 token 单角色裁剪。
 - [x] T14 逐项替换 M9 路径中的 `userID == "dev-user"` 特判；兼容 token 仅能映射到已登记主体且不得用于正式验收。
-- [ ] T15 验证 API、菜单、直达路由、写操作四层一致授权，以及无访问关系、撤权、过期 Mandate 和跨租户失败关闭。
+- [x] T15 验证 API、菜单、直达路由、写操作四层一致授权，以及无访问关系、撤权、过期 Mandate 和跨租户失败关闭。
 - [ ] T16 验证 `founder-principal` 的人工接管/特批必须走正式 Capability、Decision、Approval、Journal 和 Outbox。
 
 验收：D18.2 通过；M9 正式链零 `dev-user` bypass；身份和有效授权均可查询、可撤销、可审计。
@@ -93,7 +93,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T21 扩展编译器，生成 Entity Schema、Capability/Process 引用、Permission Resource、Form/List/Menu、Agent Tool 和 lineage。
 - [x] T22 发布前执行引用、继承、relation、状态、权限、职责分离、菜单和 seed 完整性检查；`conflict` 必须阻断。
 - [x] T23 实现默认 dry-run、显式 apply、重复 apply no-op、版本升级、stale artifact 阻断和安全回退策略。
-- [ ] T24 验证 `tenant-hctm-genesis` 与 `tenant-other` 的安装隔离，确认 `tenant-hctm` 未被迁移或清理。
+- [x] T24 验证 `tenant-hctm-genesis` 与 `tenant-other` 的安装隔离，确认 `tenant-hctm` 未被迁移或清理。
 
 验收：D18.1、D18.3 的资产部分通过；Runtime 只能消费已发布且未 stale 的 Effective Runtime Artifact。
 
@@ -131,7 +131,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [ ] T44 验证开户拒绝：原 G3 失效，修改受益所有人材料后重新审批。
 - [x] T45 验证出资差异：禁止自动确认，生成 Discrepancy 并升级 `founder-principal`。
 - [x] T46 验证 Agent 越权：finance Agent 自批预算被职责分离拒绝，业务状态不变且 Tool Call/Decision/Journal 完整。
-- [ ] T47 验证 Agent 暂停、Mandate 撤销/过期、金额超限、跨租户和工具禁用均在 dispatch 前失败关闭。
+- [x] T47 验证 Agent 暂停、Mandate 撤销/过期、金额超限、跨租户和工具禁用均在 dispatch 前失败关闭。
 - [ ] T48 对五 Agent 执行权限矩阵、知识可见范围、幂等、并发和审计回归。
 
 验收：D18.5 通过；Agent 是正式 acting principal，不使用 `founder-principal` 或 `dev-user` token 冒充人工主体。

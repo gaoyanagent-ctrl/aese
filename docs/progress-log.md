@@ -887,3 +887,11 @@
 - 影响：旧 schema、错误租户/目录基数和篡改 evidence 均被机器拒绝；terminal case 可追溯 case、Runtime Artifact、Process、Approval、World、Journal 和 Outbox。
 - 验证：AESE worldcontract compatibility test、IAOS incorporation fixture/evidence tests通过；线上 terminal evidence 直接 pipe 至 verifier 验证通过。
 - 后续：继续授权矩阵、tenant-other 隔离和重启恢复验证。
+
+## 2026-07-23 - M9N Runtime 菜单、租户隔离与 Agent 授权矩阵
+
+- 变更：IAOS revisions `40f4ddc`、`5ee2c14`、`1c8769c` 完成 Runtime Artifact tenant-other 隔离、正式 acting subject/岗位/Mandate 校验、Agent 有效期/额度/工具开关，以及 Runtime Artifact + tenant access + RBAC 菜单投影。
+- 原因：token 中的角色、请求体 actor 或前端隐藏均不能替代服务端有效授权和租户隔离。
+- 影响：`tenant-hctm` 未安装或清理 M9N；撤权后菜单消失且写入失败；暂停、过期、撤销、超额、跨租户和禁用工具在 dispatch 前失败关闭。
+- 验证：真实 PostgreSQL founder/profile/menu 测试覆盖 active/revoked access；actor authorization suite 覆盖七类失败；tenant-other 与 genesis 各有独立 active artifact，tenant-hctm 计数不变。
+- 后续：五 Agent 全权限/并发矩阵和 Runtime 表单/动作投影继续收口。
