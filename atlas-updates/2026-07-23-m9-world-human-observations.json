@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-world-human-observations-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "增加 M9 World 外部参与者人工 Observation",
+  "detail": "登记、银行和候选人结果由用户在 AESE 显式提交到受治理 World Bridge，不再随 replay 自动生成，也不直接推进 IAOS 正式事实。",
+  "status_after": "building",
+  "progress_after": 93,
+  "current_state": "三类 World 输入入口已实现并通过构建，完整 15 节点浏览器 E2E 待关闭。",
+  "evidence_ref": "frontend/src/world/incorporation.ts",
+  "occurred_at": "2026-07-23T15:20:00Z"
+}

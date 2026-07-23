@@ -114,3 +114,57 @@ export async function loadIncorporation(
   }
   return trace;
 }
+
+export async function submitIncorporationObservation(
+  caseCode: string,
+  payloadType: string,
+  result: string,
+): Promise<void> {
+  const params = new URLSearchParams(window.location.hash.split("?")[1] ?? "");
+  const tenant = params.get("tenant") ?? "tenant-hctm-genesis";
+  const token = localStorage.getItem("iaos_token");
+  if (!token) throw new Error("缺少 IAOS 登录凭据，请从 IAOS 重新打开 AESE");
+  const correlation = params.get("correlation") || `corr-${caseCode}`;
+  const nonce = `${caseCode}-${payloadType}-${Date.now()}`;
+  const response = await fetch(
+    `${resolveIaosLifecycleBase()}/api/v1/world-bridge/observations`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+        "X-Tenant-ID": tenant,
+      },
+      body: JSON.stringify({
+        schema_version: "1.0",
+        message_id: `obs-${nonce}`,
+        kind: "observation",
+        tenant_id: tenant,
+        world_pack_key: "hctm-genesis",
+        world_pack_version: "1.0.0",
+        world_run_id: correlation,
+        branch_id: "main",
+        sim_occurred_at: new Date().toISOString(),
+        correlation_id: correlation,
+        causation_id: `external-review-${caseCode}`,
+        idempotency_key: `obs-${nonce}`,
+        producer: {
+          system: "aese",
+          component: "world-runtime",
+          version: "1.0.0",
+        },
+        subject_ref: {
+          namespace: "hctm",
+          type: "incorporation_case",
+          code: caseCode,
+        },
+        payload_type: payloadType,
+        payload: { result },
+      }),
+    },
+  );
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`World Observation ${response.status}: ${detail}`);
+  }
+}

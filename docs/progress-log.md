@@ -1077,3 +1077,11 @@
 - 影响：新设立案完成 `incorporation.case.open` 后只解锁 G1 等待项；刷新或服务重启不会丢失任务。M10–M24 的预计算 replay 不再自动等价于交互式完成。
 - 验证：IAOS API 单测、两端 TypeScript、IAOS production build 通过；在线创建 `INC-INTERACTIVE-1784818405` 后查询得到 15 项，节点 1 completed、仅节点 2 `waiting_approval`。
 - 后续：补 Agent 调度/人工接管动作、审批与 World wait 解锁、独立业务菜单和 Founder+五 Agent 端到端后再关闭 T76–T85。
+
+## 2026-07-23 - M9 工作项执行与 World 人工输入
+
+- 变更：IAOS 增加工作项执行 API、节点 JSON 输入、Gate 提交和正式 Agent 调度；AESE 增加登记、开户、候选人三类 Observation 按钮；IAOS 增加四个独立成立业务菜单。
+- 原因：持久工作项如果只能查看，仍不能证明人类和 Agent 实际参与；World 外部结果也不能继续由测试 helper 隐式注入。
+- 影响：审批前执行返回 409；Founder 批准后只推进 G1；finance-agent 以自己的 actor、岗位和 Mandate 完成出资承诺；World 按钮只写 Observation，不越权提交正式事实。
+- 验证：在线案 `INC-INTERACTIVE-1784818405` 验证 pre-approval 409、G1 approved、节点 2/3 分别由 Founder/finance-agent 提交，流程停在 G2；两仓 TypeScript、AESE build、IAOS Go 测试通过。
+- 后续：继续补完整 15 节点浏览器 E2E、人工接管与超时/拒绝恢复。

@@ -16,6 +16,7 @@ import {
 import { useEffect, useState } from "react";
 import {
   loadIncorporation,
+  submitIncorporationObservation,
   type IncorporationTrace,
 } from "../../world/incorporation";
 import {
@@ -68,6 +69,27 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
   const f = trace.frames[step];
   const lifecycle = trace.iaos_lifecycle;
   const unlockedFrame = unlockedIncorporationFrame(lifecycle);
+  const lifecycleState = String(lifecycle?.state?.state ?? "");
+  const pendingObservation =
+    lifecycleState === "registration_submitted"
+      ? {
+          type: "registration.decision.observed.v1",
+          result: "registered",
+          label: "登记机构确认登记",
+        }
+      : lifecycleState === "bank_account_opening_submitted"
+        ? {
+            type: "bank.account.decision.observed.v1",
+            result: "opened",
+            label: "银行确认开户",
+          }
+        : lifecycleState === "organization_established"
+          ? {
+              type: "appointment.acceptance.observed.v1",
+              result: "accepted",
+              label: "候选人确认接受任命",
+            }
+          : null;
   const params = new URLSearchParams(window.location.hash.split("?")[1] ?? "");
   const tenant = params.get("tenant") ?? "tenant-hctm-genesis";
   const caseCode = lifecycle?.case_code ?? params.get("case") ?? "";
@@ -126,6 +148,25 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
           <Building2 />
           工厂建设 Campaign
         </button>
+        {pendingObservation && caseCode && (
+          <button
+            onClick={() => {
+              setRefreshing(true);
+              submitIncorporationObservation(
+                caseCode,
+                pendingObservation.type,
+                pendingObservation.result,
+              )
+                .then(refresh)
+                .catch((e) => setError(String(e)))
+                .finally(() => setRefreshing(false));
+            }}
+            disabled={refreshing}
+          >
+            <Activity />
+            {pendingObservation.label}
+          </button>
+        )}
         <a className="world-back" href={iaosLink} target="_blank" rel="noreferrer">
           打开 IAOS 设立案
         </a>
