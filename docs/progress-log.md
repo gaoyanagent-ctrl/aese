@@ -919,3 +919,11 @@
 - 影响：未取得新 G3 的重提返回 422 且零写入；新批准消费后生成唯一新 Intent，设立案仍保持可审计的开户提交状态。
 - 验证：IAOS engine 单元测试与真实 PostgreSQL `TestIntegrationCapitalMismatchCommitsDiscrepancyWithoutStateAdvance` 通过，断言旧 G3 复用失败、新 G3 consumed 且新 correlation 只有一个 Intent。
 - 后续：继续正式 override/超时/撤权矩阵、五 Agent 全回归和 UI 联动。
+
+## 2026-07-23 - M9N 五 Agent 权限、并发与审计矩阵
+
+- 变更：IAOS revision `039921e` 对设立、治理、法务合规、财务和审计五个 service-only Agent 执行正式主体、岗位、Mandate、Capability 可见范围、越权拒绝、幂等并发和 Decision/Journal 审计矩阵。
+- 原因：单个 finance Agent 的异常测试不能证明五个 Agent 均受各自知识与工具边界约束。
+- 影响：每个 Agent 只能执行 Runtime Artifact/RBAC/Agent allowlist 交集内的 Capability；相同命令并发只产生一个业务效果和一组审计证据。
+- 验证：真实 PostgreSQL `TestIntegrationFiveAgentPermissionIdempotencyAndAuditMatrix` 通过，断言五条允许、五条拒绝以及并发结果 201/200、Journal=1、Decision=1。
+- 后续：继续人工 override、Runtime 全投影、AESE 生命周期页面和最终全量回归。

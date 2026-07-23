@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-native-five-agent-matrix-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "test",
+  "summary": "M9N 五 Agent 权限、并发和审计矩阵",
+  "detail": "五个 service-only Agent 分别验证主体、岗位、Mandate、Capability allowlist、越权拒绝及并发幂等唯一效果。",
+  "status_after": "validating",
+  "progress_after": 97,
+  "current_state": "五 Agent 治理矩阵关闭；继续人工 override、Runtime 投影和双仓 UI 验收。",
+  "evidence_ref": "docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T10:00:00Z"
+}

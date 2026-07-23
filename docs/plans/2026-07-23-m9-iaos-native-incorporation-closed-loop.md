@@ -132,7 +132,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T45 验证出资差异：禁止自动确认，生成 Discrepancy 并升级 `founder-principal`。
 - [x] T46 验证 Agent 越权：finance Agent 自批预算被职责分离拒绝，业务状态不变且 Tool Call/Decision/Journal 完整。
 - [x] T47 验证 Agent 暂停、Mandate 撤销/过期、金额超限、跨租户和工具禁用均在 dispatch 前失败关闭。
-- [ ] T48 对五 Agent 执行权限矩阵、知识可见范围、幂等、并发和审计回归。
+- [x] T48 对五 Agent 执行权限矩阵、知识可见范围、幂等、并发和审计回归。
 
 验收：D18.5 通过；Agent 是正式 acting principal，不使用 `founder-principal` 或 `dev-user` token 冒充人工主体。
 
