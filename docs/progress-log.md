@@ -959,3 +959,11 @@
 - 影响：用户无需清理 localStorage；局域网打开 AESE World 时生命周期请求自动路由到 IAOS。
 - 验证：针对性 Vitest 2/2、production build、局域网三视口 Playwright 3/3 通过；Playwright 断言所有 incorporation 请求端口均为 8082。
 - 后续：生产环境部署时仍建议通过统一反向代理和显式环境配置消除开发端口依赖。
+
+## 2026-07-23 - 修复 IAOS 到 AESE 跨 Origin 租户会话交接
+
+- 变更：IAOS World 深链在 fragment 中交接当前 JWT；AESE 接收后持久化并立即清除 URL token。
+- 原因：`:3000` 与 `:4173` 无法共享 localStorage，AESE 的旧租户 JWT 触发 RLS 404。
+- 影响：从企业生命周期点击“打开 AESE World”时使用同一登录租户，且不放宽 RLS。
+- 验证：Vitest 3/3、AESE build、陈旧跨租户 token 三视口 Playwright 3/3、刷新恢复通过。
+- 后续：生产统一 origin 后可改为后端一次性交接码，避免任何长期 token 进入浏览器 URL。

@@ -17,6 +17,8 @@ tags: [aese, m9, lan, sse]
 - Vite 开发服务器在页面进入 BFCache 时报告 HMR WebSocket 关闭。
 - 浏览器残留的 `aese_iaos_base_url` 指向 AESE origin 时，生命周期请求错误地
   发往 `:4173/api/v1/incorporations/...` 并返回 404；favicon 也返回 404。
+- IAOS 与 AESE 分属 `:3000`、`:4173` 两个 origin，不能共享 localStorage；
+  AESE 复用旧租户 JWT 时，RLS 将存在的 case 安全地投影为 404。
 
 ## 根因与修复
 
@@ -30,6 +32,8 @@ tags: [aese, m9, lan, sse]
    不依赖该连接。
 5. IAOS base resolver 拒绝与 AESE 页面相同 origin 的陈旧配置，自动回退到
    当前浏览器 hostname 的 `:8082`；同时提供静态 favicon。
+6. IAOS→AESE 深链通过 URL fragment 交接当前 JWT；AESE 接收后立即写入自身
+   origin 存储并从地址栏移除 token。服务端仍按 JWT tenant 执行 RLS。
 
 ## 回归证据
 
@@ -39,5 +43,7 @@ tags: [aese, m9, lan, sse]
   Playwright，各 3/3 通过；深链 host 保持 `192.168.50.222`。
 - AESE Playwright 显式注入 `aese_iaos_base_url=window.location.origin`，
   三个视口仍全部通过，并断言 lifecycle 请求端口全部为 `8082`。
+- AESE Playwright 先注入另一租户的陈旧 token，再通过深链接收正确 token；
+  首次加载和刷新后三个视口均通过，且 URL 中不再保留 `auth_token`。
 - SSE curl 持续 70 秒后由客户端 `--max-time` 主动终止，接收 144 bytes；
   不再由服务端在 60 秒以 incomplete chunked encoding 截断。

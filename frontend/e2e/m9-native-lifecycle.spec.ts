@@ -12,22 +12,26 @@ test("AESE consumes persisted IAOS M9 lifecycle projection after refresh", async
   });
   expect(login.ok()).toBeTruthy();
   const session = await login.json();
-  await page.addInitScript(({ token }) => {
-    localStorage.setItem("iaos_token", token);
+  await page.addInitScript(() => {
+    if (!sessionStorage.getItem("m9-stale-token-seeded")) {
+      localStorage.setItem("iaos_token", "stale-other-tenant-token");
+      sessionStorage.setItem("m9-stale-token-seeded", "true");
+    }
     localStorage.setItem("aese_iaos_tenant_id", "tenant-hctm-genesis");
     // Reproduce a stale value written by an earlier AESE build. Lifecycle
     // requests must still go to IAOS instead of the Vite origin.
     localStorage.setItem("aese_iaos_base_url", window.location.origin);
-  }, session);
+  });
   const lifecycleRequests: string[] = [];
   page.on("request", (request) => {
     if (request.url().includes("/api/v1/incorporations/")) {
       lifecycleRequests.push(request.url());
     }
   });
-  const target = `/#world-incorporation?tenant=tenant-hctm-genesis&case=${encodeURIComponent(caseCode)}&process_run=&world_run=&correlation=`;
+  const target = `/#world-incorporation?tenant=tenant-hctm-genesis&case=${encodeURIComponent(caseCode)}&process_run=&world_run=&correlation=&auth_token=${encodeURIComponent(session.token)}`;
   await page.goto(target);
   await expect(page.getByTestId("iaos-lifecycle-projection")).toBeVisible();
+  await expect(page).not.toHaveURL(/auth_token=/);
   expect(lifecycleRequests.length).toBeGreaterThan(0);
   expect(lifecycleRequests.every((url) => new URL(url).port === "8082")).toBeTruthy();
   await expect(page.getByText("Intent / Observation / CommittedOutcome")).toBeVisible();

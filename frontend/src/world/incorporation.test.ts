@@ -52,4 +52,29 @@ describe("incorporation API", () => {
     );
     expect(trace.iaos_lifecycle?.case_code).toBe("INC-E2E-1");
   });
+
+  it("accepts a lifecycle token handoff and removes it from the URL", async () => {
+    localStorage.setItem("iaos_token", "stale-other-tenant-token");
+    window.location.hash =
+      "#world-incorporation?tenant=tenant-hctm-genesis&case=INC-E2E-1&auth_token=fresh-genesis-token";
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ frames: [] }), { status: 200 }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ case_code: "INC-E2E-1" }), {
+          status: 200,
+        }),
+      );
+    vi.stubGlobal("fetch", fetcher);
+
+    await loadIncorporation();
+
+    expect(fetcher.mock.calls[1][1]?.headers).toMatchObject({
+      Authorization: "Bearer fresh-genesis-token",
+    });
+    expect(localStorage.getItem("iaos_token")).toBe("fresh-genesis-token");
+    expect(window.location.hash).not.toContain("auth_token");
+  });
 });

@@ -71,6 +71,21 @@ export function resolveIaosLifecycleBase(): string {
   }
 }
 
+function acceptLifecycleToken(params: URLSearchParams): string | null {
+  const handedOff = params.get("auth_token")?.trim();
+  if (!handedOff) return localStorage.getItem("iaos_token");
+  localStorage.setItem("iaos_token", handedOff);
+  params.delete("auth_token");
+  const route = window.location.hash.split("?")[0] || "#world-incorporation";
+  const query = params.toString();
+  window.history.replaceState(
+    null,
+    "",
+    `${window.location.pathname}${window.location.search}${route}${query ? `?${query}` : ""}`,
+  );
+  return handedOff;
+}
+
 export async function loadIncorporation(
   signal?: AbortSignal,
 ): Promise<IncorporationTrace> {
@@ -85,7 +100,7 @@ export async function loadIncorporation(
     const params = new URLSearchParams(window.location.hash.split("?")[1] ?? "");
     const caseCode = params.get("case");
     const tenant = params.get("tenant") ?? localStorage.getItem("aese_iaos_tenant_id") ?? "tenant-hctm-genesis";
-    const token = localStorage.getItem("iaos_token");
+    const token = acceptLifecycleToken(params);
     const base = resolveIaosLifecycleBase();
     if (caseCode && token) {
       const lifecycle = await fetch(`${base}/api/v1/incorporations/${encodeURIComponent(caseCode)}/trace`, {

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-cross-origin-session-handoff-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "修复 IAOS 到 AESE 的跨 origin 租户会话交接",
+  "detail": "IAOS 深链通过 fragment 交接当前 JWT，AESE 立即接收、持久化并清除 URL token；陈旧跨租户 token 不再导致 RLS 404。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "M9 企业生命周期可从 IAOS 跨 origin 打开 AESE，并在刷新后保持正确租户。",
+  "evidence_ref": "frontend/e2e/m9-native-lifecycle.spec.ts",
+  "occurred_at": "2026-07-23T07:15:00Z"
+}
