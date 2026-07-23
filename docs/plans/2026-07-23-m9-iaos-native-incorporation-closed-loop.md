@@ -66,8 +66,8 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T4 审计现有 `genesis_governance_record`、M9 receipt、World Journal、失败 Outbox 和 `tenant-hctm`/`tenant-hctm-genesis` 数据。
 - [x] T5 输出机器可读资产审计报告，逐项标记 `reuse|complete|conflict|migrate|create`、owner、依据和阻塞原因。
 - [x] T6 冻结稳定编码、money 结构、RFC 3339/`Asia/Shanghai` 时间、状态机、correlation/causation/idempotency 和 canonical hash。
-- [ ] T7 为 IAOS 与 AESE 分别建立 contract fixtures、破损 fixtures 和 schema compatibility tests。
-- [ ] T8 更新 capability gap ledger、双仓 code map、Atlas planned dependency 和风险清单。
+- [x] T7 为 IAOS 与 AESE 分别建立 contract fixtures、破损 fixtures 和 schema compatibility tests。
+- [x] T8 更新 capability gap ledger、双仓 code map、Atlas planned dependency 和风险清单。
 
 验收：G5–G7 关闭；没有未分类资产或隐式覆盖；dry-run 对两仓业务数据零写入。
 
@@ -142,7 +142,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [ ] T50 让全部菜单、表单、列表、详情、动作和 Agent Tool 从 Runtime Artifact 与有效权限投影。
 - [ ] T51 实现企业成立时间线、全局追踪搜索、对象“来源与影响”和 Runtime Artifact lineage。
 - [x] T52 实现 trace/evidence/world-exchange/lineage 只读 API，统一稳定键并禁止以数据库 UUID 作为场景唯一引用。
-- [ ] T53 实现 evidence bundle 的 schema/version、canonical hash、引用清单和离线验证器。
+- [x] T53 实现 evidence bundle 的 schema/version、canonical hash、引用清单和离线验证器。
 - [ ] T54 更新 AESE World M9 页面，消费同一 lifecycle/process projection，展示 Intent/Observation/CommittedOutcome/Discrepancy。
 - [ ] T55 实现 AESE → IAOS 与 IAOS → AESE 双向深链，携带 tenant、case、process run、world run 和 correlation。
 - [ ] T56 验证 IAOS/AESE/Bridge/浏览器重启与刷新后页面只从持久事实恢复，不依赖 local state 作为完成证据。

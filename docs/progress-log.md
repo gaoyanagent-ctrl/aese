@@ -879,3 +879,11 @@
 - 影响：旧 1.0.0 资产保留为 inactive revision，1.1.0 发布 Process/Decision 投影；回退操作不删除任何法律事实或历史证据。
 - 验证：IAOS Go/API 与正常/异常真实 PostgreSQL suite 通过；版本升级 apply 与后续重复 no-op 均执行成功。
 - 后续：验证 tenant-other 安装隔离和回退后的兼容二进制演练。
+
+## 2026-07-23 - M9N 合同兼容与 Evidence Bundle
+
+- 变更：双仓增加有效/破损 contract fixtures 和 fail-closed compatibility tests；IAOS revision `938a263` 增加 versioned evidence bundle、稳定引用清单、bundle hash 与离线 verifier；更新 capability gap ledger、Atlas planned dependency 和风险清单。
+- 原因：跨仓 schema 漂移和只依赖在线 API 的证据无法满足可重放、可离线审计的完成门。
+- 影响：旧 schema、错误租户/目录基数和篡改 evidence 均被机器拒绝；terminal case 可追溯 case、Runtime Artifact、Process、Approval、World、Journal 和 Outbox。
+- 验证：AESE worldcontract compatibility test、IAOS incorporation fixture/evidence tests通过；线上 terminal evidence 直接 pipe 至 verifier 验证通过。
+- 后续：继续授权矩阵、tenant-other 隔离和重启恢复验证。

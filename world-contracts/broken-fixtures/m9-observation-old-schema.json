@@ -1,0 +1,17 @@
+{
+  "schema_version": "0.9",
+  "message_id": "obs-m9-broken-001",
+  "kind": "observation",
+  "tenant_id": "tenant-hctm-genesis",
+  "world_pack_key": "hctm-genesis",
+  "world_pack_version": "1.0.0",
+  "world_run_id": "run-m9-broken",
+  "branch_id": "main",
+  "sim_occurred_at": "2026-07-23T12:00:00+08:00",
+  "correlation_id": "corr-m9-broken",
+  "idempotency_key": "idem-m9-broken",
+  "producer": {"system": "aese", "component": "world-runtime", "version": "1.0.0"},
+  "subject_ref": {"namespace": "hctm", "type": "incorporation_case", "code": "INC-BROKEN"},
+  "payload_type": "registration.decision.observed.v1",
+  "payload": {"result": "registered"}
+}

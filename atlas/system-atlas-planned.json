@@ -5,7 +5,8 @@
     {"key":"aese.world.time","title":"Virtual Time","status":"planned","owner":"AESE","evidence_ref":"docs/plans/2026-07-22-m8-aese-2-foundation.md"},
     {"key":"aese.world.knowledge","title":"Actor Knowledge","status":"planned","owner":"AESE","evidence_ref":"docs/designs/DES-009-world-contract-model.md"},
     {"key":"aese.world.genesis","title":"Project Genesis","status":"planned","owner":"AESE","evidence_ref":"docs/designs/DES-007-aese-2-foundation.md"},
-    {"key":"aese.world.iaos-bridge","title":"IAOS World Bridge","status":"planned","owner":"AESE + IAOS","evidence_ref":"docs/designs/DES-008-world-iaos-bridge-contract.md"}
+    {"key":"aese.world.iaos-bridge","title":"IAOS World Bridge","status":"planned","owner":"AESE + IAOS","evidence_ref":"docs/designs/DES-008-world-iaos-bridge-contract.md"},
+    {"key":"iaos.runtime.genesis-governance","title":"IAOS Native Genesis Governance Runtime","status":"validating","owner":"IAOS","evidence_ref":"docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md"}
   ],
   "dependencies": [
     {"from":"aese.world.time","to":"aese.world","relation":"part_of"},
@@ -13,6 +14,8 @@
     {"from":"aese.world.genesis","to":"aese.world.time","relation":"depends_on"},
     {"from":"aese.world.genesis","to":"aese.world.knowledge","relation":"depends_on"},
     {"from":"aese.world.iaos-bridge","to":"aese.world","relation":"integrates_with"},
-    {"from":"aese.world.genesis","to":"aese.world.iaos-bridge","relation":"depends_on"}
+    {"from":"aese.world.genesis","to":"aese.world.iaos-bridge","relation":"depends_on"},
+    {"from":"aese.world.genesis","to":"iaos.runtime.genesis-governance","relation":"depends_on"},
+    {"from":"aese.world.iaos-bridge","to":"iaos.runtime.genesis-governance","relation":"integrates_with"}
   ]
 }

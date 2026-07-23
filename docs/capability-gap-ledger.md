@@ -11,16 +11,19 @@
 
 长期 JWT、AESE 直写 IAOS 数据库、正式 direct NATS 和 webhook-only 路径均不是临时方案。
 
-## M9 成立治理
+## M9 成立治理（IAOS-native 1.1）
 
-| 企业活动 | 角色 | IAOS 权限 | 实现 |
+| 企业活动 | 角色 | IAOS 权限 | 实现/缺口 |
 | --- | --- | --- | --- |
-| 批准设立方案 | 创始投资人 | `genesis.incorporation.execute` | allowlist governance action |
-| 提交管理层任命 | 董事会 | `genesis.governance.appoint` | resolution + appointment action |
-| 提交启动预算 | CEO（人或 Agent） | `genesis.budget.submit` | 同一合同，无 UI 旁路 |
-| 核验资本/批准预算 | CFO/独立审批人 | `genesis.budget.approve` | 禁止自批、失效 mandate 失败关闭 |
+| 批准设立方案 | `founder-principal` | `founder.resolution.approve` | Effective Runtime Artifact + G1 + Process/Decision/Journal/Outbox，已交付 |
+| 工商登记/补正 | incorporation Agent + founder | `registration.*` | G2、World Intent/Observation/CommittedOutcome；原 correlation 补正，已交付 |
+| 开户与出资 | finance Agent + founder | `bank.account.*`、`capital.*` | G3/G4；拒绝或差异保持状态并产生 Discrepancy，已交付 |
+| 组织/任命 | governance Agent + founder | `organization.*`、`executive.*` | G5 与候选人 World observation，已交付 |
+| Mandate/预算/readiness | governance/finance/audit Agent + founder | `operating.mandate.*`、`initial.budget.*`、`enterprise.readiness.*` | G6/G7、职责分离和终态 evaluator；对象级守恒明细仍在最终验收 |
+| 双仓恢复对账 | AESE Bridge | `world.bridge.read` | 五类 reconciliation CLI 已交付；重启/延迟矩阵待关闭 |
 
-真实监管、银行、完整法人主数据和总账仍不在 M9；外部结果由 AESE 确定性策略产生。
+旧 `genesis.*` allowlist receipt 仅为迁移来源，不再作为 M9N 完成证据。真实监管、
+银行、完整法人主数据和总账仍为非目标；外部结果由 AESE 确定性策略产生。
 
 ## M10 工厂投资与项目治理
 

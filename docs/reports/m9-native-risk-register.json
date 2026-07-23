@@ -1,0 +1,39 @@
+{
+  "schema_version": "1.0",
+  "updated_at": "2026-07-23T06:45:00Z",
+  "plan": "PLAN-M9-NATIVE-001",
+  "risks": [
+    {
+      "key": "M9N-R1",
+      "severity": "high",
+      "status": "mitigating",
+      "risk": "Bridge duplicate, delay, restart or out-of-order delivery diverges",
+      "mitigation": "durable journal, idempotency keys, trusted correlation and five-class offline reconciliation",
+      "exit_evidence": "restart and poller recovery matrix"
+    },
+    {
+      "key": "M9N-R2",
+      "severity": "high",
+      "status": "mitigated",
+      "risk": "developer identity bypasses formal governance",
+      "mitigation": "founder-principal ordinary login, explicit tenant access, service-only agents and no M9 dev-user artifact bypass",
+      "exit_evidence": "docs/security/m9-founder-identity-migration-review.md"
+    },
+    {
+      "key": "M9N-R3",
+      "severity": "medium",
+      "status": "mitigating",
+      "risk": "UI projection diverges from installed Runtime Artifact",
+      "mitigation": "artifact projection plus permission resources; final menu/action projection tests pending",
+      "exit_evidence": "T13/T50 authorization and projection matrix"
+    },
+    {
+      "key": "M9N-R4",
+      "severity": "medium",
+      "status": "open",
+      "risk": "IAOS frontend legacy unit baseline is not fully green",
+      "mitigation": "M9 production build and Playwright are green; isolate and repair pre-existing Vitest failures before T63",
+      "exit_evidence": "full frontend test report"
+    }
+  ]
+}
