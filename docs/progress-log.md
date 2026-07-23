@@ -1085,3 +1085,11 @@
 - 影响：审批前执行返回 409；Founder 批准后只推进 G1；finance-agent 以自己的 actor、岗位和 Mandate 完成出资承诺；World 按钮只写 Observation，不越权提交正式事实。
 - 验证：在线案 `INC-INTERACTIVE-1784818405` 验证 pre-approval 409、G1 approved、节点 2/3 分别由 Founder/finance-agent 提交，流程停在 G2；两仓 TypeScript、AESE build、IAOS Go 测试通过。
 - 后续：继续补完整 15 节点浏览器 E2E、人工接管与超时/拒绝恢复。
+
+## 2026-07-23 - M9 交互式主线在线贯通
+
+- 变更：修正 Observation commit 和组织建立节点的主体分类；外部事实由 `world-bridge-runtime` 提交，无判断的组织投影由 `iaos-runtime` 执行，不扩大业务 Agent allowlist；Runtime 升级至 1.3.5。
+- 原因：在线 E2E 发现把 Observation commit 分给 incorporation/finance Agent 会被正式 allowlist 正确拒绝；外部事实提交不能为了跑通而给 Agent 越权。
+- 影响：15 个节点保留人类、Agent、审批、World wait 和系统事务的真实职责边界；Runtime 升级后旧批准失效并要求重新批准。
+- 验证：`INC-INTERACTIVE-1784818405` 达到 `enterprise_operational_ready`；15/15 work item completed、15 journal、G1–G7 均实际批准、三个 Observation 存在；actor 覆盖 Founder、finance/governance/audit Agent、IAOS Runtime 和 World Bridge Runtime。
+- 后续：T78 继续补人工接管/升级，T83 补浏览器多主体 E2E，T84–T85 收口未来里程碑合同与最终证据。

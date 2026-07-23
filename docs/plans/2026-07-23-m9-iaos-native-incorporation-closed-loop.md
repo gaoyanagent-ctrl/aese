@@ -255,13 +255,13 @@ P0
 > 单页查看标签，集成测试还自动批准 G1–G7；这些证据不能证明人类和 Agent 真正参与。
 > 因此本计划恢复为 `active`，此前 T1–T75 的底层资产继续保留，但完成结论暂时撤回。
 
-- [ ] T76 建立 tenant RLS 的持久化 Process Work Item，并支持断点恢复与幂等推进。
-- [ ] T77 将正常主线节点分类为 human/agent/approval/world_wait/capability，保存输入输出合同。
+- [x] T76 建立 tenant RLS 的持久化 Process Work Item，并支持断点恢复与幂等推进。
+- [x] T77 将正常主线节点分类为 human/agent/approval/world_wait/capability，保存输入输出合同。
 - [ ] T78 增加按 case 查询当前/历史工作项、执行 Agent 工作项和人工接管 API。
-- [ ] T79 审批与 World Observation 只能分别解除对应等待项，拒绝或超时不得推进。
-- [ ] T80 IAOS 增加“我的经营待办、Agent 任务、审批中心、流程运行、业务数据”独立菜单。
-- [ ] T81 工作项详情展示参与者、输入、输出、Capability、Policy、Approval、Journal 和 World 证据。
-- [ ] T82 AESE 默认按 IAOS 已提交状态逐帧解锁，移除交付模式自动播放。
+- [x] T79 审批与 World Observation 只能分别解除对应等待项，拒绝或超时不得推进。
+- [x] T80 IAOS 增加“我的经营待办、Agent 任务、审批中心、流程运行、业务数据”独立菜单。
+- [x] T81 工作项详情展示参与者、输入、输出、Capability、Policy、Approval、Journal 和 World 证据。
+- [x] T82 AESE 默认按 IAOS 已提交状态逐帧解锁，移除交付模式自动播放。
 - [ ] T83 增加 Founder + 五 Agent 交替操作、G1–G7 等待、三个 World wait 和重启恢复 E2E。
 - [ ] T84 将 M10–M24 的预计算 replay 明确标为参考模式，并继承 D22 的交互式完成门。
 - [ ] T85 更新运行数据、runbook、evidence、Roadmap、Code Map、Atlas，部署并完成浏览器验收。

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-interactive-e2e-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "test",
+  "summary": "贯通 M9 十五节点交互式在线主线",
+  "detail": "在线设立案逐项经过人工审批、Agent、World Observation 和系统事务，15 个工作项全部完成并到达 enterprise_operational_ready。",
+  "status_after": "validating",
+  "progress_after": 96,
+  "current_state": "T76、T77、T79–T82 已关闭；人工接管和浏览器多主体 E2E 尚待最终收口。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-23T15:35:00Z"
+}
