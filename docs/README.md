@@ -99,7 +99,7 @@
 | PLAN-M7 | [M7 受治理场景运行控制台实施计划](plans/2026-07-20-m7-governed-scenario-operations-console.md) | Completed |
 | PLAN-M8 | [M8 AESE 2.0 三态世界与仿真内核实施计划](plans/2026-07-22-m8-aese-2-foundation.md) | Completed |
 | PLAN-M9 | [M9 Project Genesis 企业成立与治理实施计划](plans/2026-07-22-m9-genesis-incorporation.md) | Completed |
-| PLAN-M9-NATIVE | [M9 IAOS 原生语义驱动企业成立真实闭环实施计划](plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md) | Completed |
+| PLAN-M9-NATIVE | [M9 IAOS 原生语义驱动企业成立真实闭环实施计划](plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md) | Active — D22 人机协同补强 |
 | PLAN-M10 | [M10 Project Genesis 工厂选址与设施建设实施计划](plans/2026-07-22-m10-genesis-plant-build.md) | Completed |
 | PLAN-M11 | [M11 Project Genesis 生产能力建设实施计划](plans/2026-07-22-m11-genesis-production-capability-build.md) | Completed |
 | PLAN-M12 | [M12 Project Genesis 产品工业化与量产批准实施计划](plans/2026-07-22-m12-genesis-product-industrialization.md) | Completed |

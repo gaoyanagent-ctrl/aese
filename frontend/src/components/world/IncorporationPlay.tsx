@@ -7,8 +7,7 @@ import {
   Database,
   ExternalLink,
   GitBranch,
-  Pause,
-  Play,
+  RefreshCw,
   RotateCcw,
   ShieldCheck,
   StepForward,
@@ -19,7 +18,10 @@ import {
   loadIncorporation,
   type IncorporationTrace,
 } from "../../world/incorporation";
-import { buildIncorporationStepTrace } from "../../world/incorporationStepTrace";
+import {
+  buildIncorporationStepTrace,
+  unlockedIncorporationFrame,
+} from "../../world/incorporationStepTrace";
 import "./WorldPlay.css";
 const money = (value: string) =>
   new Intl.NumberFormat("zh-CN", {
@@ -30,8 +32,21 @@ const money = (value: string) =>
 export function IncorporationPlay({ onExit }: { onExit: () => void }) {
   const [trace, setTrace] = useState<IncorporationTrace | null>(null);
   const [step, setStep] = useState(0);
-  const [playing, setPlaying] = useState(false);
   const [error, setError] = useState("");
+  const [refreshing, setRefreshing] = useState(false);
+  const refresh = () => {
+    setRefreshing(true);
+    loadIncorporation()
+      .then((next) => {
+        setTrace(next);
+        setStep((current) =>
+          Math.min(current, unlockedIncorporationFrame(next.iaos_lifecycle)),
+        );
+        setError("");
+      })
+      .catch((e) => setError(String(e)))
+      .finally(() => setRefreshing(false));
+  };
   useEffect(() => {
     const c = new AbortController();
     loadIncorporation(c.signal)
@@ -41,21 +56,6 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
       });
     return () => c.abort();
   }, []);
-  useEffect(() => {
-    if (!playing || !trace) return;
-    const id = setInterval(
-      () =>
-        setStep((v) => {
-          if (v >= trace.frames.length - 1) {
-            setPlaying(false);
-            return v;
-          }
-          return v + 1;
-        }),
-      850,
-    );
-    return () => clearInterval(id);
-  }, [playing, trace]);
   if (error)
     return (
       <main className="world-error" role="alert">
@@ -67,6 +67,7 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
     return <main className="world-loading">正在加载企业成立世界…</main>;
   const f = trace.frames[step];
   const lifecycle = trace.iaos_lifecycle;
+  const unlockedFrame = unlockedIncorporationFrame(lifecycle);
   const params = new URLSearchParams(window.location.hash.split("?")[1] ?? "");
   const tenant = params.get("tenant") ?? "tenant-hctm-genesis";
   const caseCode = lifecycle?.case_code ?? params.get("case") ?? "";
@@ -103,24 +104,20 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
         </div>
       </header>
       <nav className="world-controls">
-        <button onClick={() => setPlaying((v) => !v)}>
-          {playing ? <Pause /> : <Play />}
-          {playing ? "暂停" : "运行"}
+        <button onClick={refresh} disabled={refreshing}>
+          <RefreshCw />
+          {refreshing ? "同步中" : "同步 IAOS"}
         </button>
         <button
-          onClick={() =>
-            setStep((v) => Math.min(v + 1, trace.frames.length - 1))
-          }
-          disabled={step === trace.frames.length - 1}
+          onClick={() => setStep((v) => Math.min(v + 1, unlockedFrame))}
+          disabled={step >= unlockedFrame}
+          title={step >= unlockedFrame ? "请先在 IAOS 完成当前工作项" : ""}
         >
           <StepForward />
-          单步
+          查看下一已完成阶段
         </button>
         <button
-          onClick={() => {
-            setPlaying(false);
-            setStep(0);
-          }}
+          onClick={() => setStep(0)}
         >
           <RotateCcw />
           复位
@@ -133,7 +130,8 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
           打开 IAOS 设立案
         </a>
         <span>
-          阶段 {step + 1}/{trace.frames.length} · {f.phase}
+          已解锁 {unlockedFrame + 1}/{trace.frames.length} · 当前查看{" "}
+          {step + 1} · {f.phase}
         </span>
       </nav>
       <main className="world-main">
@@ -235,10 +233,13 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
             <button
               key={item.step}
               className={index === step ? "current" : ""}
-              onClick={() => {
-                setPlaying(false);
-                setStep(index);
-              }}
+              disabled={index > unlockedFrame}
+              title={
+                index > unlockedFrame
+                  ? "该阶段尚未由 IAOS 的能力、审批与 World Observation 提交"
+                  : ""
+              }
+              onClick={() => setStep(index)}
             >
               <span>{index + 1}</span>
               <strong>{item.phase}</strong>

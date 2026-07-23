@@ -1069,3 +1069,11 @@
 - 影响：用户无需读节点或源码即可先理解流程整体目标，再下钻每一步能力、审批和 World 等待；说明来自正式 `process_definition`，不是前端硬编码。
 - 验证：五个流程目的完整性测试、Go incorporation/API、Process Studio 21/21、TypeScript、生产构建、在线 API 与 Founder 浏览器回归通过。
 - 后续：新增 Process 的发布门必须同时拒绝空显示名和空业务目的。
+
+## 2026-07-23 - 重新打开 M9 交互式经营闭环
+
+- 变更：DES-027 增加 D22 人类/Agent/审批/World 工作项合同；M9N 计划与路线图恢复为 active；AESE 移除默认自动播放并按 IAOS 已提交状态锁定未来 frame；IAOS 增加 tenant RLS 的 15 节点持久工作项及“我的经营待办”视图。
+- 原因：原“十工作区”和自动化集成测试只能证明数据可查及状态机可运行，不能证明真实参与者逐节点输入、审批、等待和恢复。
+- 影响：新设立案完成 `incorporation.case.open` 后只解锁 G1 等待项；刷新或服务重启不会丢失任务。M10–M24 的预计算 replay 不再自动等价于交互式完成。
+- 验证：IAOS API 单测、两端 TypeScript、IAOS production build 通过；在线创建 `INC-INTERACTIVE-1784818405` 后查询得到 15 项，节点 1 completed、仅节点 2 `waiting_approval`。
+- 后续：补 Agent 调度/人工接管动作、审批与 World wait 解锁、独立业务菜单和 Founder+五 Agent 端到端后再关闭 T76–T85。

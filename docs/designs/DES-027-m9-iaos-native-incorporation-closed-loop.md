@@ -555,6 +555,51 @@ SLA、通知和启用分支；业务人员与 Agent 只能执行已发布 Contra
 transition；Founder 不读代码即可回答“谁在什么条件下执行、修改什么、输出什么、失败
 如何恢复”；API、Studio、Process 和 Agent Tool 的 Contract hash 一致。
 
+### D22 — 交互式经营工作项与真实参与者推进
+
+Process Definition 不是可一次性播放完的动画。运行到每个节点时，Runtime 必须创建并
+持久化一个可恢复的工作项，工作项类型限定为：
+
+- `human_task`：由明确自然人和岗位完成输入或治理决定；
+- `agent_task`：分派给具有服务身份、岗位、Mandate 和能力 allowlist 的 Agent；
+- `approval`：等待 Approval Runtime 的独立决定，禁止测试代码式自动批准；
+- `world_wait`：等待有 correlation、causation 和幂等键的外部 Observation；
+- `capability`：仅适用于无需新增业务判断、输入已由前序节点确定的系统事务步骤。
+
+工作项至少持有 process run/node、case、participant、capability、输入/输出合同、
+状态、期限、审批/Observation 引用、correlation、idempotency key 和审计时间。状态闭集
+为 `locked|ready|in_progress|waiting_approval|waiting_world|completed|failed|escalated`。
+页面关闭、服务重启或 Agent 暂停不能丢失当前工作项，也不能使流程越过等待节点。
+
+每次完成只推进一个 Process node：
+
+```text
+读取当前工作项
+→ 人类填写 / Agent 提议 / 发起审批 / 提交 World Observation
+→ Policy + Mandate + SoD 校验
+→ 调用一个已发布 Capability
+→ 同事务提交业务事实、Journal、Outbox 和工作项结果
+→ 解锁唯一后继工作项
+```
+
+Agent 不等于后台脚本。`agent_task` 必须显示分派对象、使用的工具、建议输入、执行输出和
+升级入口；高风险动作仍停在人工审批。人工接管必须写明原因并保留原 Agent 分派记录。
+
+IAOS 必须提供独立可发现入口：我的经营待办、Agent 任务、审批中心、流程运行、设立案件
+和 M9 业务数据。每个入口可从工作项下钻到 Capability Contract、Process node、
+Decision、Approval、Entity 变更、Journal、Outbox 与 World exchange。仅在“企业生命周期”
+页内放十个只读标签不构成工作台验收。
+
+AESE 默认使用 live interactive 模式：只允许查看 IAOS 已提交状态所解锁的 frame；未来
+frame 禁止点击，单步操作不能制造 IAOS 事实。测试自动驾驶必须通过显式 test-only 开关
+启用、带明显标识且不得用于交付验收。M10–M24 同样受此合同约束；预计算 replay 只能作为
+参考证据，不得标记为已完成的交互式业务闭环。
+
+验收必须由 `founder-principal` 与五个 service-only Agent 的真实主体交替完成正常主线：
+至少包含一个 Agent 任务、一个人工输入、G1–G7 实际等待与批准、三个 World wait，以及
+浏览器刷新和平台重启后的断点恢复。测试 helper 自动填充输入或批准只能用于回归测试，
+不能成为 D22 完成证据。
+
 ## 4. 待确认设计树
 
 以下设计项已经确认，实施计划必须逐项映射：

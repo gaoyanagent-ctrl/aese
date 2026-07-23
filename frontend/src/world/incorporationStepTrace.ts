@@ -116,6 +116,38 @@ export const incorporationStepDefinitions: IncorporationStepDefinition[] = [
   },
 ];
 
+const lifecycleFrameByState: Record<string, number> = {
+  draft: 0,
+  incorporation_case_opened: 0,
+  founder_resolution_approved: 1,
+  capital_commitments_confirmed: 1,
+  registration_submitted: 1,
+  legal_entity_registered: 2,
+  bank_account_opening_submitted: 3,
+  bank_account_opened: 3,
+  capital_contribution_verified: 3,
+  organization_established: 4,
+  executive_appointments_accepted: 5,
+  operating_mandates_activated: 5,
+  initial_budget_approved: 6,
+  enterprise_operational_ready: 7,
+};
+
+export function unlockedIncorporationFrame(
+  lifecycle: IncorporationTrace["iaos_lifecycle"],
+): number {
+  if (!lifecycle) return 0;
+  const stateDocument = (lifecycle as RecordValue).state;
+  const state = String(
+    (lifecycle as RecordValue).lifecycle_state ??
+      (typeof stateDocument === "object" && stateDocument !== null
+        ? (stateDocument as RecordValue).state
+        : stateDocument) ??
+      "",
+  );
+  return lifecycleFrameByState[state] ?? 0;
+}
+
 const records = (value: unknown): RecordValue[] =>
   Array.isArray(value)
     ? value.filter(

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-interactive-work-items-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "重新打开 M9 人类与 Agent 交互式经营闭环",
+  "detail": "DES-027 D22 定义持久工作项和逐节点推进；AESE 默认按 IAOS 已提交状态解锁 frame，自动播放不再作为交付模式。",
+  "status_after": "building",
+  "progress_after": 90,
+  "current_state": "设计、AESE 门控和 IAOS 首个持久工作项切片已部署，Agent 调度与完整 E2E 待补。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T14:55:00Z"
+}

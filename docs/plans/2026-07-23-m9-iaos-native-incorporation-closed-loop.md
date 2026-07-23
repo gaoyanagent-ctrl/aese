@@ -2,7 +2,7 @@
 id: PLAN-M9-NATIVE-001
 title: M9 IAOS 原生语义驱动企业成立真实闭环实施计划
 date: 2026-07-23
-status: completed
+status: active
 author: Codex + User
 tags: [m9, iaos, semantic-runtime, incorporation, world-bridge]
 ---
@@ -248,3 +248,20 @@ P0
 - 正常主线与四个异常场景共享同一 Runtime Artifact 和正式业务路径。
 - `founder-principal`、五 Agent、G1–G7、Capability/Process/Policy/Approval、World Bridge 和 Trace Spine 全部可审计。
 - 两仓提交、测试、部署、runbook、evidence、roadmap、code map、progress log 和 Atlas 状态一致。
+
+## 17. D22 交互式经营补强（重新打开）
+
+> 2026-07-23 用户验收发现：现有 AESE 会自动播放预计算 frame，IAOS 的“十工作区”只是
+> 单页查看标签，集成测试还自动批准 G1–G7；这些证据不能证明人类和 Agent 真正参与。
+> 因此本计划恢复为 `active`，此前 T1–T75 的底层资产继续保留，但完成结论暂时撤回。
+
+- [ ] T76 建立 tenant RLS 的持久化 Process Work Item，并支持断点恢复与幂等推进。
+- [ ] T77 将正常主线节点分类为 human/agent/approval/world_wait/capability，保存输入输出合同。
+- [ ] T78 增加按 case 查询当前/历史工作项、执行 Agent 工作项和人工接管 API。
+- [ ] T79 审批与 World Observation 只能分别解除对应等待项，拒绝或超时不得推进。
+- [ ] T80 IAOS 增加“我的经营待办、Agent 任务、审批中心、流程运行、业务数据”独立菜单。
+- [ ] T81 工作项详情展示参与者、输入、输出、Capability、Policy、Approval、Journal 和 World 证据。
+- [ ] T82 AESE 默认按 IAOS 已提交状态逐帧解锁，移除交付模式自动播放。
+- [ ] T83 增加 Founder + 五 Agent 交替操作、G1–G7 等待、三个 World wait 和重启恢复 E2E。
+- [ ] T84 将 M10–M24 的预计算 replay 明确标为参考模式，并继承 D22 的交互式完成门。
+- [ ] T85 更新运行数据、runbook、evidence、Roadmap、Code Map、Atlas，部署并完成浏览器验收。
