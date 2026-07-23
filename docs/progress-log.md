@@ -975,3 +975,11 @@
 - 影响：M9 资产现在可从 Semantic Studio、Entity Explorer、Capability Studio、Process Studio、Governance Studio 和企业生命周期工作台共同查看；占位流程节点和无 rule 的 Policy 已被真实注册数据替代。
 - 验证：通用 API 返回 11/20/5/8/8/5/10；11 个 Entity records API 均 HTTP 200 且有投影记录；重复 apply 返回 `no_op=true,writes=0`；IAOS Go 针对测试和 frontend production build 通过。
 - 后续：完成双仓文档/Atlas/代码提交和用户 UI 验收后，才允许重新关闭 M9N。
+
+## 2026-07-23 - 补齐 M9N Core Archetype 字段与语义引用
+
+- 变更：IAOS Runtime 1.2.5 为 account、commitment、mandate 安装 7/7/8 个默认字段及对应 Semantic Concept，注册 `stable_business_code`、`lifecycle_status`、`fact_payload`，并修复 Semantic Studio 原型切换时 snapshot identity 串线。
+- 原因：原安装器只创建原型主记录，导致原型不可继承复用；Entity 字段引用未注册 concept；前端短暂组合新原型 code 与旧 snapshot UUID 产生 404。
+- 影响：六个 Core Archetype 可检查默认/继承字段，M9 Entity 不再产生三项 `semantic_concept_missing`，快速切换原型不再请求错误 History detail。
+- 验证：通用 API 字段数 account=7、commitment=7、mandate=8、document=7、document_line=5、document_with_lines 继承=7；快速切换 History 404=0；局域网 Playwright 4/4。
+- 后续：继续以 D19 逐页验收通用 Studio，不以注册数量替代字段、关系、History 和分析器质量。

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-core-archetype-field-repair-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "补强 M9 Core Archetype 字段与语义一致性门",
+  "detail": "DES-027 D19 增加 Core Archetype 默认字段、semantic_id 存在性、History identity 和零 semantic_concept_missing 验收；IAOS Runtime 1.2.5 已完成对应修复。",
+  "status_after": "validating",
+  "progress_after": 96,
+  "current_state": "Core Archetype 字段和 History 已通过 API/UI 验证，M9N 保持逐页验收。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T08:46:00Z"
+}

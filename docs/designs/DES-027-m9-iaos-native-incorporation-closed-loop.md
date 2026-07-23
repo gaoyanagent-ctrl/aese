@@ -398,7 +398,9 @@ M9 资产不能只存在于专用 artifact JSON、测试 fixture 或设立案 tr
 用户必须能从 IAOS 通用工作室发现并检查同一份有效资产：
 
 - Semantic Studio：Core `account`、`commitment`、`mandate`、`money_value`，
-  十一个领域概念及其关系图。
+  十一个领域概念及其关系图。Core Archetype 不能只有名称：account、commitment、
+  mandate 必须分别提供稳定编码、状态、主体、金额/币种、范围/有效期等可继承默认字段，
+  且每个 `semantic_id` 必须在 Semantic Registry 中存在。
 - Entity Explorer：十一项 Entity 的 schema、列表定义、物理投影和租户隔离数据；
   已存在的 native 设立案必须投影为可查询记录。
 - Capability Studio：二十项已发布 Business Capability，版本和
@@ -418,6 +420,10 @@ M9 资产不能只存在于专用 artifact JSON、测试 fixture 或设立案 tr
 8 Policy Rule、5 Agent、10 条领域 relation、10 个业务工作区；重复安装必须
 `no_op=true,writes=0`。任一数量、通用 API、records API、菜单授权或工作区缺失时，
 路线图只能标记为 active remediation，不能标记 completed。
+
+Semantic Studio 的原型列表、详情、History 和 Artifact 必须使用同一原型 code 与
+snapshot identity。快速切换原型不得发出“新 code + 旧 snapshot UUID”的请求；
+所有正式 Entity schema 的语义分析必须为零 `semantic_concept_missing`。
 
 ## 4. 待确认设计树
 
