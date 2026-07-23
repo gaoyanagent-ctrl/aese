@@ -63,6 +63,7 @@ h1, h2, h3, p { margin-top: 0; }
 .icon-button, .play-button { min-width: 44px; min-height: 44px; display: inline-flex; align-items: center; justify-content: center; border: 1px solid var(--border); border-radius: 8px; cursor: pointer; background: var(--surface); transition: background 180ms ease-out, border-color 180ms ease-out; }
 .icon-button:hover:not(:disabled), .play-button:hover:not(:disabled) { border-color: var(--border-strong); background: var(--surface-hover); }
 .icon-button svg, .play-button svg { width: 18px; height: 18px; }
+.world-entry-button { padding-inline: 12px; white-space: nowrap; }
 .play-button { gap: 7px; min-width: 86px; border-color: #317784; color: #dcfbff; background: var(--accent-soft); font-weight: 700; }
 .integration-button { min-height: 44px; display: inline-flex; align-items: center; gap: 7px; padding: 0 12px; border: 1px solid #356570; border-radius: 8px; color: #dffbff; background: #102933; cursor: pointer; font-weight: 700; transition: background 180ms ease-out, border-color 180ms ease-out; }
 .integration-button:hover { border-color: var(--accent); background: var(--accent-soft); }

@@ -783,3 +783,11 @@
 - 影响：五门 0 failure，`industry_simulation_platform_ready=true`；PLAN-M17 至 PLAN-M24 全部完成，当前无 active 主计划。
 - 验证：Go 全量 test/vet、100 次 hash、JSON/Atlas、前端 unit/typecheck/build、IAOS API governance tests 通过。
 - 后续：真实生产、第二行业、法定合规或高精度 3D 必须另立 program。
+
+## 2026-07-23 - World 企业生命周期入口与导航修复
+
+- 变更：将 `#world` 从 `LAS-WLD-02` 设备 tracer 重构为 M8-M24 企业生命周期运营中心，明确公司成立、工厂建设、能力建设、产品工业化、商业交付和持续经营主路径；新增各阶段深链接、全程快速导航和独立 `#world-tristate` 架构验证入口，并将主沙盘按钮改为可见的“企业生命周期”。
+- 原因：M8 最小三态 tracer 被错误当成整体 World 首页，阶段页面虽存在但缺少统一目录和持久导航，用户无法理解或连续浏览企业运营过程。
+- 影响：用户可从首页选择任一过程，进入查看阶段步骤、World/IAOS 交换和治理边界；M8 tracer 回归其架构验证定位。该修复不扩大 IAOS 业务实现范围。
+- 验证：前端 38 个 unit tests、typecheck、production build 通过；新生命周期 E2E 在 1440、1280 和 390 三视口共 6 条通过，覆盖完整阶段可见、M9 深链接和 M8 次级入口。
+- 后续：M17-M24 仍需从联合 evidence 视图拆为独立运营工作台，并把页面推进接入已部署 IAOS committed outcome。

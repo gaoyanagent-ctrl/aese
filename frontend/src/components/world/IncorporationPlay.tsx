@@ -70,7 +70,7 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
       <header className="world-toolbar">
         <button className="world-back" onClick={onExit}>
           <ArrowLeft />
-          设备 tracer
+          生命周期总览
         </button>
         <div>
           <span>PROJECT GENESIS · INCORPORATION</span>

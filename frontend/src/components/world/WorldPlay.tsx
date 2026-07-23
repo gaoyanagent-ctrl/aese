@@ -64,7 +64,7 @@ export function WorldPlay({ onExit }: { onExit: () => void }) {
       <header className="world-toolbar">
         <button className="world-back" onClick={onExit}>
           <ArrowLeft />
-          返回沙盘
+          生命周期总览
         </button>
         <div>
           <span>PROJECT GENESIS · WORLD PLAY</span>

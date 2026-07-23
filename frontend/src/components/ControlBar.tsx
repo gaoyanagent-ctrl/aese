@@ -75,7 +75,7 @@ export function ControlBar({
       </div>
 
       <div className="playback-controls" aria-label="故事播放控制">
-        <button className="icon-button" onClick={onOpenWorld} aria-label="打开 World Play" title="World Play"><Orbit aria-hidden="true" /></button>
+        <button className="play-button world-entry-button" onClick={onOpenWorld} aria-label="打开企业生命周期运营中心" title="企业生命周期"><Orbit aria-hidden="true" /><span>企业生命周期</span></button>
         <button className="icon-button" onClick={onOpenAtlas} aria-label="打开系统全景" title="系统全景"><Map aria-hidden="true" /></button>
         <button className="icon-button" onClick={onOpenIntegration} aria-label="打开 AESE 与 IAOS 联动中心" title="AESE 与 IAOS 联动中心"><PlugZap aria-hidden="true" /></button>
         {mode === 'live' ? <>

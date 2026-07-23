@@ -27,6 +27,7 @@ import { ScenarioLab } from "./components/world/ScenarioLab";
 import { StrategyControlRoom } from "./components/world/StrategyControlRoom";
 import { AssuranceObservatory } from "./components/world/AssuranceObservatory";
 import { AESE3CompletionRoom } from "./components/world/AESE3CompletionRoom";
+import { WorldJourneyBar, WorldLifecycleHub } from "./components/world/WorldLifecycleHub";
 
 const SCENARIO_KEY = "order-expedite-01";
 const scenarioSource = new StaticScenarioDataSource({
@@ -231,6 +232,7 @@ export default function App() {
     | "live"
     | "atlas"
     | "world"
+    | "world-tristate"
     | "world-incorporation"
     | "world-plant-build"
     | "world-capability-build"
@@ -253,6 +255,7 @@ export default function App() {
       | "live"
       | "atlas"
       | "world"
+      | "world-tristate"
       | "world-incorporation"
       | "world-plant-build"
       | "world-capability-build"
@@ -273,6 +276,7 @@ export default function App() {
       if (target === "atlas") setMode("atlas");
       if (target === "live") setMode("live");
       if (target === "world") setMode("world");
+      if (target === "world-tristate") setMode("world-tristate");
       if (target === "world-incorporation") setMode("world-incorporation");
       if (target === "world-plant-build") setMode("world-plant-build");
       if (target === "world-capability-build")
@@ -345,31 +349,34 @@ export default function App() {
         onNavigate={navigateAtlasEntry}
       />
     );
-  if (mode === "world") return <WorldPlay onExit={() => navigate("preview")} />;
+  const journey = (current: string, content: React.ReactNode) => <><WorldJourneyBar current={current} />{content}</>;
+  if (mode === "world") return <WorldLifecycleHub onExit={() => navigate("preview")} />;
+  if (mode === "world-tristate")
+    return journey("world-tristate", <WorldPlay onExit={() => navigate("world")} />);
   if (mode === "world-incorporation")
-    return <IncorporationPlay onExit={() => navigate("world")} />;
+    return journey("world-incorporation", <IncorporationPlay onExit={() => navigate("world")} />);
   if (mode === "world-plant-build")
-    return <PlantBuildPlay onExit={() => navigate("world-incorporation")} />;
+    return journey("world-plant-build", <PlantBuildPlay onExit={() => navigate("world-incorporation")} />);
   if (mode === "world-capability-build")
-    return <CapabilityBuildPlay onExit={() => navigate("world-plant-build")} />;
+    return journey("world-capability-build", <CapabilityBuildPlay onExit={() => navigate("world-plant-build")} />);
   if (mode === "world-industrialization")
     return (
-      <IndustrializationPlay
+      journey("world-industrialization", <IndustrializationPlay
         onExit={() => navigate("world-capability-build")}
-      />
+      />)
     );
   if (mode === "world-first-delivery")
     return (
-      <FirstDeliveryPlay onExit={() => navigate("world-industrialization")} />
+      journey("world-first-delivery", <FirstDeliveryPlay onExit={() => navigate("world-industrialization")} />)
     );
   if (mode === "world-experiments")
-    return <ScenarioLab onExit={() => navigate("world-first-delivery")} />;
+    return journey("world-experiments", <ScenarioLab onExit={() => navigate("world-first-delivery")} />);
   if (mode === "world-strategy-control")
-    return <StrategyControlRoom onExit={() => navigate("world-experiments")} />;
+    return journey("world-strategy-control", <StrategyControlRoom onExit={() => navigate("world-experiments")} />);
   if (mode === "world-assurance")
-    return <AssuranceObservatory onExit={() => navigate("world-strategy-control")} />;
+    return journey("world-assurance", <AssuranceObservatory onExit={() => navigate("world-strategy-control")} />);
   if (mode === "world-aese3")
-    return <AESE3CompletionRoom onExit={() => navigate("world-assurance")} />;
+    return journey("world-aese3", <AESE3CompletionRoom onExit={() => navigate("world-assurance")} />);
   return (
     <>
       {mode === "live" ? (

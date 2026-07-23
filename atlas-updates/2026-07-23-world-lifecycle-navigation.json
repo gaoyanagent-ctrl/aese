@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-world-lifecycle-navigation-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "新增 World 企业生命周期运营中心与 M8-M24 全程导航",
+  "detail": "World 首页不再直接展示 LAS-WLD-02 tracer；现在展示从公司成立到产品交付和持续经营的完整阶段，并提供所有阶段深链接与持久快速导航。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "M8-M24 生命周期首页与浏览链已可用；M17-M24 独立运营工作台仍是后续缺口。",
+  "evidence_ref": "frontend/e2e/world-lifecycle.spec.ts",
+  "occurred_at": "2026-07-23T01:50:00Z"
+}
