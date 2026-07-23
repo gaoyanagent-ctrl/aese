@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-native-readiness-conservation-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M9N 业务事实守恒与企业可运营判定",
+  "detail": "IAOS 将法人、账户、组织、任命、Mandate、出资和预算建模为独立事实，并在 readiness evaluator 中校验引用与金额守恒。",
+  "status_after": "validating",
+  "progress_after": 95,
+  "current_state": "完整主链仅在业务事实一致时进入 enterprise_operational_ready；继续异常治理、Agent 与 UI 最终矩阵。",
+  "evidence_ref": "docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-23T09:00:00Z"
+}

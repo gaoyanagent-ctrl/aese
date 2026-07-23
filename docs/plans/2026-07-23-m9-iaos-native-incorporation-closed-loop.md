@@ -112,13 +112,13 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 
 ## 9. P4 — 资本、账户、组织、Mandate 与预算
 
-- [ ] T33 实现剩余 Business Capability，补齐开户、出资核验、组织、任命、Mandate、预算、readiness 和异常升级。
-- [ ] T34 完成 `banking.and.capitalization.v1`、`organization.and.appointments.v1`、`mandate.and.initial.budget.v1`。
-- [ ] T35 完成 `capital.contribution.match`、`appointment.eligibility`、`mandate.scope.and.limit`、`initial.budget.control` 和 `enterprise.operational.readiness`。
-- [ ] T36 固定承诺、到账、核验余额、预算授权和实际现金的独立对象、单位、精度、引用和守恒规则。
+- [x] T33 实现剩余 Business Capability，补齐开户、出资核验、组织、任命、Mandate、预算、readiness 和异常升级。
+- [x] T34 完成 `banking.and.capitalization.v1`、`organization.and.appointments.v1`、`mandate.and.initial.budget.v1`。
+- [x] T35 完成 `capital.contribution.match`、`appointment.eligibility`、`mandate.scope.and.limit`、`initial.budget.control` 和 `enterprise.operational.readiness`。
+- [x] T36 固定承诺、到账、核验余额、预算授权和实际现金的独立对象、单位、精度、引用和守恒规则。
 - [x] T37 实现开户与候选人 Intent/Observation/CommittedOutcome；外部结果只能由 World Bridge 输入。
 - [ ] T38 实现 G3–G7、批准失效、拒绝、补正、超时、撤权、版本变化和正式 override。
-- [ ] T39 实现 readiness evaluator，只有法律主体、账户、核验出资、组织岗位、任命、Mandate 和预算引用一致时进入终态。
+- [x] T39 实现 readiness evaluator，只有法律主体、账户、核验出资、组织岗位、任命、Mandate 和预算引用一致时进入终态。
 - [x] T40 从 clean run 执行完整正常主线，保存 `enterprise_operational_ready` 和全链状态 hash。
 
 验收：D18.4 通过；正式业务事实不再只存在于 AESE frame 或通用 receipt。

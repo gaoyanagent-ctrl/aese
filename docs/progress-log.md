@@ -903,3 +903,11 @@
 - 影响：未关联 Observation 返回 `unknown_or_out_of_order_correlation` 且零写入；相同幂等键与相同 payload 返回原结果，碰撞 payload 被拒绝；重启后的 API 和 poller 从数据库恢复。
 - 验证：IAOS `TestIntegrationWorldBridgeRecoveryMatrix` 在真实 PostgreSQL 通过；AESE `go test ./internal/bridge/iaos` 通过并覆盖 shuffled 与 delayed convergence。
 - 后续：继续完成正式 override、业务对象守恒/readiness、五 Agent 全矩阵和双仓 UI 联动。
+
+## 2026-07-23 - M9N 业务事实守恒与 Readiness
+
+- 变更：IAOS revision `e037abe` 将法律主体、银行账户、组织、任命、Operating Mandate、出资承诺、核验到账和预算授权固化为独立稳定引用/金额事实；readiness evaluator 对引用完整性、CNY、承诺与到账相等、预算不超过核验现金执行失败关闭。
+- 原因：顺序走完 Capability 不能替代企业已具备可运营条件的事实证明。
+- 影响：G3–G7 对应的业务事实进入设立案持久 state document；事实缺失或金额不守恒时保持 `initial_budget_approved`，不得进入 `enterprise_operational_ready`。
+- 验证：IAOS incorporation 单元测试覆盖完整一致事实和不一致拒绝；真实 PostgreSQL 完整生命周期再次通过并到达终态。
+- 后续：实现正式 override/批准失效矩阵、五 Agent 并发审计和完整 UI Runtime 投影。
