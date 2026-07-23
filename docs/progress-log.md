@@ -1093,3 +1093,11 @@
 - 影响：15 个节点保留人类、Agent、审批、World wait 和系统事务的真实职责边界；Runtime 升级后旧批准失效并要求重新批准。
 - 验证：`INC-INTERACTIVE-1784818405` 达到 `enterprise_operational_ready`；15/15 work item completed、15 journal、G1–G7 均实际批准、三个 Observation 存在；actor 覆盖 Founder、finance/governance/audit Agent、IAOS Runtime 和 World Bridge Runtime。
 - 后续：T78 继续补人工接管/升级，T83 补浏览器多主体 E2E，T84–T85 收口未来里程碑合同与最终证据。
+
+## 2026-07-23 - M9 Agent 工作项人工接管
+
+- 变更：IAOS 增加仅针对已解锁 Agent task 的人工接管 API 和 UI；持久保存原 Agent、Founder、理由、接管时间并发布审计 Outbox。
+- 原因：Agent 暂停、失效或需治理升级时必须可恢复，但 Founder 不能伪装为 Agent，也不能借接管绕过审批或 World wait。
+- 影响：接管后工作项转为 human_task，正式 Capability Journal 的 actor 为 founder-principal；原分派证据不会覆盖。
+- 验证：在线案 `INC-TAKEOVER-1784819709` 验证短理由 400、finance-agent → Founder 接管成功、能力提交成功；Playwright 验证独立待办菜单可见原 Agent 与接管理由。
+- 后续：T83 仍需覆盖完整浏览器逐节点操作和尚未进入正常主线的 incorporation/legal Agent 参与。

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260723-m9-agent-human-takeover-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "test",
+  "summary": "验证 M9 Agent 工作项人工接管",
+  "detail": "Founder 可对已解锁 Agent task 显式接管，保留原 Agent、理由和时间；短理由及非 Agent 节点 fail-closed，浏览器可见完整接管证据。",
+  "status_after": "validating",
+  "progress_after": 97,
+  "current_state": "T78 已关闭；完整浏览器逐节点多 Agent 主线仍待 T83。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-23T15:50:00Z"
+}

@@ -257,7 +257,7 @@ P0
 
 - [x] T76 建立 tenant RLS 的持久化 Process Work Item，并支持断点恢复与幂等推进。
 - [x] T77 将正常主线节点分类为 human/agent/approval/world_wait/capability，保存输入输出合同。
-- [ ] T78 增加按 case 查询当前/历史工作项、执行 Agent 工作项和人工接管 API。
+- [x] T78 增加按 case 查询当前/历史工作项、执行 Agent 工作项和人工接管 API。
 - [x] T79 审批与 World Observation 只能分别解除对应等待项，拒绝或超时不得推进。
 - [x] T80 IAOS 增加“我的经营待办、Agent 任务、审批中心、流程运行、业务数据”独立菜单。
 - [x] T81 工作项详情展示参与者、输入、输出、Capability、Policy、Approval、Journal 和 World 证据。
