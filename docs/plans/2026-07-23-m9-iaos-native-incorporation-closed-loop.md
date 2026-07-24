@@ -265,3 +265,7 @@ P0
 - [ ] T83 增加 Founder + 五 Agent 交替操作、G1–G7 等待、三个 World wait 和重启恢复 E2E。
 - [x] T84 将 M10–M24 的预计算 replay 明确标为参考模式，并继承 D22 的交互式完成门。
 - [ ] T85 更新运行数据、runbook、evidence、Roadmap、Code Map、Atlas，部署并完成浏览器验收。
+- [x] T86 按 D23 为节点 2 增加独立 Agent 派发、Runtime/工具白名单和持久 Agent Run。
+- [x] T87 将 `founder.resolution.prepare` 产出保存为治理决议草稿，并严格停在 G1 人工审批。
+- [x] T88 在 IAOS“Agent 组织/成立审计”显示身份、Mandate、Runtime、模型连接状态、工具与运行明细。
+- [x] T89 明确内置确定性 Runtime 与未来外部 LLM/API 连接边界，禁止明文凭据和虚假连接状态。

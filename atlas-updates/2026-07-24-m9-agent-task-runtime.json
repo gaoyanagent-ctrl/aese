@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260724-m9-agent-task-runtime-v1",
+  "node_key": "aese.m9-native-incorporation",
+  "update_type": "implementation",
+  "summary": "M9 节点2补齐受治理 Agent Runtime 与证据链",
+  "detail": "DES-027 D23 固化 service-only Agent、岗位/Mandate、Capability与工具白名单、派发、Agent Run、治理决议草稿、G1人工审批和外部模型边界；IAOS Runtime 1.3.9 实现首个纵向切片。",
+  "status_after": "validating",
+  "progress_after": 94,
+  "current_state": "节点2 Agent task 已真实派发并留存工具与产出；M9N仍需五Agent、G1-G7、三个World wait和重启恢复全链验收。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-24T09:30:00Z"
+}
