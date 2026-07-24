@@ -1133,3 +1133,11 @@
 - 影响：AESE 产生的 `HCTM-TEST001` 可在 IAOS 案件列表搜索，也可在治理工作台直接下拉选择并加载。
 - 验证：IAOS TypeScript、生产构建/部署及双入口 Playwright 回归通过。
 - 后续：M9 继续按交互式工作项合同验收逐节点操作。
+
+## 2026-07-24 - 清理 M9 通用案件实体测试投影
+
+- 变更：IAOS Runtime 1.3.6 重建通用 Entity 时排除测试 fixture 投影，并重新同步 `HCTM-TEST001`；治理案件选择器增加常显展开说明。
+- 原因：此前只过滤最近案件 API，通用 `incorporation_case` Entity 仍保留 60 多条安装时测试投影且缺少后创建的业务案件。
+- 影响：通用设立案件列表现在只有真实业务案件，canonical 测试审计事实未删除。
+- 验证：在线 Entity API `total=1` 且唯一编码为 `HCTM-TEST001`；Runtime 1.3.6 apply、后端部署、前端生产部署和 Playwright 通过。
+- 后续：将通用 Entity 投影从安装时重建演进为 Outbox 驱动的实时投影。
