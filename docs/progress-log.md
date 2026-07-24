@@ -1165,3 +1165,11 @@
 - 影响：用户从按钮进入表单，查看案件/节点/能力/主体，填写审批意见、金额或任务说明后确认提交。
 - 验证：TypeScript、生产构建/部署；Playwright 验证 G1 弹窗、无 JSON 输入和必填审批意见。
 - 后续：人工接管确认弹窗继续沿用同一表单框架。
+
+## 2026-07-24 - 修复 M9 准备与校验节点被跳过
+
+- 变更：Runtime 1.3.7 将工作项主线从 15 项修正为 18 项，补回 `founder.resolution.prepare`、`registration.package.validate`、`initial.budget.prepare`；安全重建仅完成开户节点的现有案件。
+- 原因：工作项模板手写时只保留状态变更能力，与 Process Definition 不一致。
+- 影响：新建设立案后步骤 2 由 incorporation-agent 准备创始人决议，步骤 3 才进入 G1 正式审批。
+- 验证：Go 顺序锁测试；在线 Runtime 1.3.7 apply；`HCTM-TEST001` 前六项顺序与状态 API 核对；Playwright 通过。
+- 后续：将工作项定义改为由 Process Definition 编译生成，消除双重维护。
