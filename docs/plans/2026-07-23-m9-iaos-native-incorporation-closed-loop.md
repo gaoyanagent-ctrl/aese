@@ -269,3 +269,5 @@ P0
 - [x] T87 将 `founder.resolution.prepare` 产出保存为治理决议草稿，并严格停在 G1 人工审批。
 - [x] T88 在 IAOS“Agent 组织/成立审计”显示身份、Mandate、Runtime、模型连接状态、工具与运行明细。
 - [x] T89 明确内置确定性 Runtime 与未来外部 LLM/API 连接边界，禁止明文凭据和虚假连接状态。
+- [x] T90 将发布的 Capability Input Contract 快照到工作项并以业务字段表单展示，前后端执行同一校验。
+- [x] T91 新建设立案收集初始业务资料，同事务补齐通用 Entity 的 document_no、document_date、status 和 payload。

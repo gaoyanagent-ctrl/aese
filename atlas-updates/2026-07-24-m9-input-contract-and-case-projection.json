@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260724-m9-input-contract-case-projection-v1",
+  "node_key": "aese.m9-native-incorporation",
+  "update_type": "implementation",
+  "summary": "M9 补齐节点输入合同与设立案 Entity 必填事实",
+  "detail": "DES-027 D23 要求 Capability input_schema 随工作项可见、业务表单与服务端同规则校验；新建案件收集初始资料并同事务补齐通用Entity的单据编号、业务日期、状态和payload。",
+  "status_after": "validating",
+  "progress_after": 95,
+  "current_state": "节点2合同来源与字段规则可见，案件Entity投影不再允许required字段为空；完整交互主线仍待验收。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-24T10:30:00Z"
+}

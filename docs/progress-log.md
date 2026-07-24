@@ -1188,3 +1188,10 @@
 - 影响：节点 2 现在由 `incorporation-agent` 读取案件、形成治理决议草稿并提交受治理能力，然后严格停在节点 3/G1 人工审批；当前明确使用内置确定性 Runtime，不冒充外部 LLM。T83 的五 Agent、G1–G7、三个 World wait 和重启恢复全链仍未完成。
 - 验证：IAOS scoped Go tests、TypeScript 编译和生产构建通过；在线案件已验证 Agent Run completed、3 次工具调用、治理决议草稿及步骤 2 completed/步骤 3 waiting_approval；生产后端/前端重部署成功，1440×900、1280×720、390×844 工作台回归通过。Atlas 声明已提交且 tracking check 通过，但线上同步入口对当前迁移/Founder 凭据分别返回 404/403，登记仍待具备 `system.atlas.manage` 的部署主体补同步。
 - 后续：完成 T83/T85 全链交替参与和断点恢复验收，再关闭 M9N。
+## 2026-07-24 - M9 输入合同与设立案 Entity 必填事实修复
+
+- 变更：节点 2 从无规则“业务说明”升级为决议目标、核心提案、风险限制三字段业务合同，工作项保存并展示已发布 Capability 的完整 Input Contract；新建设立案增加案件名称、拟设企业名称、拟注册地址和拟经营范围表单，Runtime 同事务同步 canonical 案件和通用 Entity 投影。
+- 原因：用户发现无法知道“输入合同”由谁定义及在哪里查看，同时数据模型工坊将 document_no/document_date/payload 声明为必填，但现有投影记录中字段为空。
+- 影响：合同来源明确为随 Runtime Artifact 发布的 IAOS/领域 Capability Contract，不是用户临时上传；UI 与服务端执行一致的长度校验。设立案件的系统管理字段由 Runtime 生成，不再产生 required 字段为空的新记录，历史记录在 Runtime 升级投影时修复。
+- 验证：scoped Go tests、TypeScript 编译与生产构建通过；后端/前端生产重部署和 Runtime 1.3.11 安装成功；真实 API 新建测试案件后，Entity 详情包含非空 document_no、document_date、status、payload 及四项初始资料；无效节点 2 输入返回 400；Playwright 合同与业务表单回归通过。
+- 后续：继续完成 T83 五 Agent、G1–G7、三个 World wait 和重启恢复全链验收。
