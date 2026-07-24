@@ -1195,3 +1195,11 @@
 - 影响：合同来源明确为随 Runtime Artifact 发布的 IAOS/领域 Capability Contract，不是用户临时上传；UI 与服务端执行一致的长度校验。设立案件的系统管理字段由 Runtime 生成，不再产生 required 字段为空的新记录，历史记录在 Runtime 升级投影时修复。
 - 验证：scoped Go tests、TypeScript 编译与生产构建通过；后端/前端生产重部署和 Runtime 1.3.11 安装成功；真实 API 新建测试案件后，Entity 详情包含非空 document_no、document_date、status、payload 及四项初始资料；无效节点 2 输入返回 400；Playwright 合同与业务表单回归通过。
 - 后续：继续完成 T83 五 Agent、G1–G7、三个 World wait 和重启恢复全链验收。
+
+## 2026-07-24 - M9 审批路由与工作分发改造
+
+- 变更：DES-027 新增 D24；IAOS 新增 DES-053、版本化审批方案、冻结 assignment、user/role/position/requester-selected/requester-manager 选择器、串行与 any/all/quorum 聚合、事项快照和分派通知；G1 从 founder 用户名硬编码改为 `position:chair`。
+- 原因：原 DES-035 首片明确排除了复杂路由，`approver_role` 未参与授权，任何拥有 `approval.manage` 的人都可审批，审批中心只展示 UUID 和技术资源，不能满足企业权责审批。
+- 影响：Process 只引用 flow key；提交时解析实际任职人并冻结。审批人能看到业务事项、发起人、路线和前序证据；非当前阶段受派人不能决策，岗位换人无需修改流程代码。
+- 验证：IAOS Approval/Incorporation/API scoped Go tests、Go vet、前端 TypeScript/生产构建、Atlas/Code Map 检查通过；后端和前端已重部署。真实案件 `INC-APPROVAL-1784896345` 验证 G1 `position:chair` 解析、事项/显示名/路线详情、recipient Outbox、决定聚合、Gate consume 及节点 4 解锁。
+- 后续：补浏览器三视口回归并继续 T83/T96 Founder 与五 Agent 全链。

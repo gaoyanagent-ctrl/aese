@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260724-m9-approval-routing-work-distribution-v1",
+  "node_key": "aese.m9-native-incorporation",
+  "update_type": "implementation",
+  "summary": "M9 审批改为配置驱动路由与实际处理人工作分发",
+  "detail": "DES-027 D24 与 IAOS DES-053 定义版本化审批方案、冻结assignment、串并行聚合、事项快照、通知和受派人决策权限；G1由position:chair解析，不再写死founder-principal。",
+  "status_after": "validating",
+  "progress_after": 95,
+  "current_state": "审批架构与代码纵向切片完成，待生产部署和新G1浏览器验收；完整Founder与五Agent主线仍未关闭。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-24T12:30:00Z"
+}

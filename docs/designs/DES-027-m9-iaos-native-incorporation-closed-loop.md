@@ -670,6 +670,27 @@ Capability Input Contract 由 IAOS/领域包版本化定义并随 Runtime Artifa
 案件与通用 Entity 投影。数据模型工坊声明 required 的字段为空属于合同违规，不能用
 “专用状态机与动态 Entity 是两套表”解释或容忍。
 
+### D24 — 配置驱动审批路由、工作分发与通知
+
+Process 的 `approval` 节点只能引用版本化 `flow_key`，不得写死用户名。Approval Runtime
+必须把审批方案解析为冻结的阶段和实际处理人 assignment：选择器至少支持具体用户、角色、
+组织岗位、申请人受限指定和申请人上级；阶段纵向串行，同阶段支持 `any|all|quorum`
+横向任一、全员或法定人数同意。无人可解析、非当前阶段处理人、职责分离失败或方案版本
+缺失都必须失败关闭。
+
+审批请求不是技术锁记录。审批人必须看到事项标题/摘要、案件、前序 Agent 草稿、拟执行
+Capability、关键输入、证据引用、发起人显示名、流程版本、每个阶段规则、选择器来源和
+实际处理人。提交后修改事项或输入 hash 必须重新申请，不得用旧批准执行新内容。
+
+阶段激活写 `approval.task.assigned` Outbox，由站内信/SSE/邮件 Adapter 通知实际处理人并
+携带 deep link；通知丢失不改变审批事实，审批中心可从 assignment 恢复待办。“待我审批”
+只显示当前用户 active assignment，“由我发起”按真实 JWT user id 过滤。
+
+M9 G1 使用 `enterprise.incorporation.g1@1`，当前选择器为 `position:chair`，所以 Genesis
+seed 仍解析到创始治理者，但更换任职人无需改 Process 或 Capability。执行 Gate 时只验证
+批准来自本请求冻结路线，不再比较 `founder-principal` 字符串。通用实现和完整不变量见
+IAOS `DES-053-approval-routing-and-work-distribution.md`。
+
 ## 4. 待确认设计树
 
 以下设计项已经确认，实施计划必须逐项映射：

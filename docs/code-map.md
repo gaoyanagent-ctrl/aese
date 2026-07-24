@@ -222,7 +222,7 @@ F0 合同入口已创建；F1-F5 目标路径仍须在实现时更新为实际�
 | M7 World Event adapter | `internal/legacyprojection/` |
 | World Play UI | `frontend/src/components/world/`、`frontend/src/world/` |
 | 企业生命周期首页与全程导航 | `frontend/src/components/world/WorldLifecycleHub.tsx`、`WorldLifecycleHub.css`、`#world`；M8 tracer 独立为 `#world-tristate` |
-| M9 IAOS 原生真实闭环设计 | `docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md`；D19 通用资产可发现性、D20 逐步骤追踪、D21 可解释合同、D22 持久工作项与逐节点参与、D23 Agent Runtime/工具/运行证据及外部模型边界 |
+| M9 IAOS 原生真实闭环设计 | `docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md`；D19 通用资产可发现性、D20 逐步骤追踪、D21 可解释合同、D22 持久工作项与逐节点参与、D23 Agent Runtime/工具/运行证据及外部模型边界、D24 配置驱动审批路由/工作分发/通知；通用实现见 IAOS DES-053 |
 | M9 IAOS 原生真实闭环 active remediation plan | `docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md`；原完成结论因通用注册中心/工作区缺口撤回，当前以 11/20/5/8/8/5/10 数量、records API、十工作区和重复安装 no-op 为关闭门 |
 | M9N 冻结合同、审计与风险 | `docs/contracts/m9-native-incorporation-contract.json`、`docs/reports/m9-native-asset-audit.json`、`docs/reports/m9-native-risk-register.json`；独立 IAOS worktree `/iaos/iaos-go-m9-native` |
 | M9N Bridge reconciliation | `internal/bridge/iaos/reconcile.go`、`aese reconcile <bridge-journal.json>` | 对持久 journal 按 message/correlation/hash 报告 missing、duplicate、lagging、hash_mismatch、terminal_conflict；稳定排序、只读、可离线复验 |
