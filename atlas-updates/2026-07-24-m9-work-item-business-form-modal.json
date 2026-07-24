@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260724-m9-work-item-business-form-modal-v1",
+  "node_key": "aese.m9.genesis-incorporation",
+  "update_type": "implementation",
+  "summary": "M9 工作项使用业务表单弹窗",
+  "detail": "D22 与 IAOS UI 禁止业务用户填写 JSON；审批、人工和 Agent 节点通过可读表单确认，金额从元转换为 minor unit。",
+  "status_after": "validating",
+  "progress_after": 98,
+  "current_state": "G1 弹窗、审批意见校验和无 JSON 输入已通过浏览器回归。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-24T06:50:00Z"
+}
