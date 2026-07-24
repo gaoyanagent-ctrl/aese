@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260724-m9-navigation-evidence-drilldown-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "test",
+  "summary": "验证 M9 案件、流程和事务证据入口",
+  "detail": "IAOS 独立菜单、最近案件搜索以及 Journal/Outbox 下钻已通过浏览器回归，用户可从 World/工作项定位正式业务与事务证据。",
+  "status_after": "validating",
+  "progress_after": 98,
+  "current_state": "M9 业务数据和事务证据已具备可发现入口。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-24T00:30:00Z"
+}

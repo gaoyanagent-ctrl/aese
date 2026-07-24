@@ -1109,3 +1109,11 @@
 - 影响：所有后续里程碑继承 DES-027 D22 完成门；只有持久工作项和真实主体 E2E 通过后才能恢复 Completed。
 - 验证：路线图与唯一 active M9N 计划一致，T84 关闭。
 - 后续：逐里程碑实施时复用 M9 工作项合同，不复制 M9 专用状态存储。
+
+## 2026-07-24 - M9 案件、流程与证据入口可发现性
+
+- 变更：IAOS 修复“企业设立案件/成立流程运行”菜单状态复用问题；案件编码增加最近记录搜索；案件、Process Run、Journal/Approval/World/Outbox 增加明细下钻。
+- 原因：节点完成后用户只能看到计数，无法定位业务数据与事务证据；独立菜单复用组件时没有同步目标 workspace。
+- 影响：节点 1 完成后可在“企业设立案件”查看状态和 Entity 数据，在“成立流程运行”查看 Process Run，在证据计数卡直接打开 Journal/Outbox 明细。
+- 验证：TypeScript、production build 与 Playwright 菜单/搜索/Journal 下钻回归通过。
+- 后续：继续把通用 JSON 输入逐步替换为 Capability Contract 生成的业务表单。
