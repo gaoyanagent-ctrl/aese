@@ -64,6 +64,7 @@
 | ADR-002 | [AESE 只读 2D 场景预览界面](decisions/ADR-002-aese-2d-preview-ui.md) | Accepted |
 | ADR-003 | [AESE 无状态场景编排 API](decisions/ADR-003-thin-scenario-orchestration-api.md) | Accepted |
 | ADR-004 | [AESE 仿真世界事实所有权](decisions/ADR-004-aese-world-state-ownership.md) | Accepted |
+| ADR-005 | [Process Definition 是工作项运行时的唯一事实源](decisions/ADR-005-process-definition-as-runtime-source.md) | Accepted |
 | DES-001 | [M3 可执行场景包与重放架构](designs/DES-001-m3-executable-scenario-package.md) | Completed |
 | DES-002 | [快速 2D 企业沙盘设计](designs/DES-002-fast-track-2d-enterprise-sandbox.md) | Completed |
 | DES-003 | [M5 受治理 Agent Tracer 设计](designs/DES-003-governed-agent-tracers.md) | Completed |

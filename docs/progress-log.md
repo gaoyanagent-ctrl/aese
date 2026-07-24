@@ -1173,3 +1173,11 @@
 - 影响：新建设立案后步骤 2 由 incorporation-agent 准备创始人决议，步骤 3 才进入 G1 正式审批。
 - 验证：Go 顺序锁测试；在线 Runtime 1.3.7 apply；`HCTM-TEST001` 前六项顺序与状态 API 核对；Playwright 通过。
 - 后续：将工作项定义改为由 Process Definition 编译生成，消除双重维护。
+
+## 2026-07-24 - Process Definition 成为工作项唯一事实源
+
+- 变更：新增 ADR-005；IAOS Runtime 1.3.8 从一主四子 Process Definition 递归编译18项工作项，删除 API 手写顺序；登记补正改为 recovery 分支，移除子流程重复 readiness。
+- 原因：顺序锁只能发现已知漂移，不能消除 Process 配置与 Runtime 双重维护。
+- 影响：客户发布的流程配置决定实际工作项；未知、循环、重复、Gate/主体不一致或不可编译定义在产生业务事实前失败关闭。
+- 验证：编译器、发布门、recovery/去重、API顺序测试通过；Runtime 1.3.8 在线安装；`HCTM-TEST001` 18项首尾和状态核对通过。
+- 后续：把 process version/artifact hash 持久绑定扩展为所有通用 Process Run 的平台能力。

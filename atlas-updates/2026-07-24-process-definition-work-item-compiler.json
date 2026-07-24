@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260724-process-definition-work-item-compiler-v1",
+  "node_key": "aese.m9.genesis-incorporation",
+  "update_type": "decision",
+  "summary": "Process Definition 成为 M9 工作项唯一事实源",
+  "detail": "ADR-005 与 IAOS Runtime 1.3.8 删除手写工作项顺序，从发布流程递归编译正常路径，并对分支、Capability、Gate 和参与主体失败关闭。",
+  "status_after": "validating",
+  "progress_after": 99,
+  "current_state": "线上 M9 工作项由流程编译为18项，步骤2 prepare、步骤3 approve。",
+  "evidence_ref": "docs/decisions/ADR-005-process-definition-as-runtime-source.md",
+  "occurred_at": "2026-07-24T07:45:00Z"
+}
