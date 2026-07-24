@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260724-m9-test-case-list-isolation-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "隔离 M9 测试 fixture 与业务案件列表",
+  "detail": "最近设立案按更新时间排序并默认隐藏已知自动化/异常测试案件，HCTM-TEST001 恢复为首条业务案件；历史测试证据仍可显式查询。",
+  "status_after": "validating",
+  "progress_after": 98,
+  "current_state": "默认业务列表仅含 HCTM-TEST001，include_test 保留排障能力。",
+  "evidence_ref": "docs/progress-log.md",
+  "occurred_at": "2026-07-24T05:10:00Z"
+}

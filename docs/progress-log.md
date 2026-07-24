@@ -1117,3 +1117,11 @@
 - 影响：节点 1 完成后可在“企业设立案件”查看状态和 Entity 数据，在“成立流程运行”查看 Process Run，在证据计数卡直接打开 Journal/Outbox 明细。
 - 验证：TypeScript、production build 与 Playwright 菜单/搜索/Journal 下钻回归通过。
 - 后续：继续把通用 JSON 输入逐步替换为 Capability Contract 生成的业务表单。
+
+## 2026-07-24 - 隔离 M9 测试案件与业务案件列表
+
+- 变更：最近设立案改为按更新时间倒序，默认排除 E2E、补正、拒绝、金额差异、职责分离等已知测试 fixture；保留 `include_test=true` 排障入口；案件工作区展示可点击业务案件卡片。
+- 原因：原查询优先排列 terminal 案件且限制 20 条，大量集成测试数据遮蔽了用户刚创建的 `HCTM-TEST001`。
+- 影响：不删除任何审计数据，但日常业务列表不再被测试 fixture 污染。
+- 验证：`HCTM-TEST001` Trace API 200；默认最近案件返回 1 条且为该案件，测试 fixture 为 0；显式 include_test 仍可访问；Playwright 通过。
+- 后续：长期应为 Case 增加显式 environment/data_classification 字段，替代历史前缀兼容过滤。
