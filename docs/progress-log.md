@@ -1186,5 +1186,5 @@
 - 变更：DES-027 新增 D23，明确 Agent 身份、岗位/Mandate、Capability/工具白名单、Runtime、派发、运行记录、草稿产出、人工审批和外部模型边界；IAOS Runtime 1.3.9 为 `founder.resolution.prepare` 增加独立派发与 `incorporation_agent_run`，并在 Agent 组织/成立审计展示完整配置和运行明细。
 - 原因：原工作项虽标为 `agent_task`，实际仍是服务端直接执行 Capability，用户无法知道 Agent 做什么、在哪里定义、调用哪些工具以及外部 API 是否已经连接。
 - 影响：节点 2 现在由 `incorporation-agent` 读取案件、形成治理决议草稿并提交受治理能力，然后严格停在节点 3/G1 人工审批；当前明确使用内置确定性 Runtime，不冒充外部 LLM。T83 的五 Agent、G1–G7、三个 World wait 和重启恢复全链仍未完成。
-- 验证：IAOS scoped Go tests、TypeScript 编译通过；在线案件已验证 Agent Run completed、3 次工具调用、治理决议草稿及步骤 2 completed/步骤 3 waiting_approval。生产重部署与浏览器回归在本次变更 closeout 中执行。
+- 验证：IAOS scoped Go tests、TypeScript 编译和生产构建通过；在线案件已验证 Agent Run completed、3 次工具调用、治理决议草稿及步骤 2 completed/步骤 3 waiting_approval；生产后端/前端重部署成功，1440×900、1280×720、390×844 工作台回归通过。Atlas 声明已提交且 tracking check 通过，但线上同步入口对当前迁移/Founder 凭据分别返回 404/403，登记仍待具备 `system.atlas.manage` 的部署主体补同步。
 - 后续：完成 T83/T85 全链交替参与和断点恢复验收，再关闭 M9N。
