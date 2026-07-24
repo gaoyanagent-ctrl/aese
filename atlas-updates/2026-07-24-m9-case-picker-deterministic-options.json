@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260724-m9-case-picker-deterministic-options-v1",
+  "node_key": "aese.m9.genesis-incorporation",
+  "update_type": "implementation",
+  "summary": "修复 M9 治理案件下拉空候选",
+  "detail": "IAOS 使用本地受控 combobox 替代会二次过滤的 AutoComplete，确保点击展示 HCTM-TEST001。",
+  "status_after": "validating",
+  "progress_after": 98,
+  "current_state": "案件点击展开、候选可见和选择加载已通过浏览器回归。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-24T06:00:00Z"
+}
