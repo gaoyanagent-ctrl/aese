@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260724-m9-case-picker-live-catalog-v1",
+  "node_key": "aese.m9.genesis-incorporation",
+  "update_type": "implementation",
+  "summary": "M9 案件下拉实时读取系统案件",
+  "detail": "IAOS 每次展开治理案件选择器时合并 recent 与通用 Entity 数据，避免初始化空快照。",
+  "status_after": "validating",
+  "progress_after": 98,
+  "current_state": "HCTM-TEST001 已通过实时下拉选择回归。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-24T06:25:00Z"
+}
