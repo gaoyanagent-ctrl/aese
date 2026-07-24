@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260724-m9-case-search-combobox-v1",
+  "node_key": "aese.m9.genesis-incorporation",
+  "update_type": "implementation",
+  "summary": "补齐 M9 业务案件的双入口可发现性",
+  "detail": "IAOS 设立案件列表提供独立筛选，企业成立与治理提供点击即展开的案件组合框，使 AESE 案件可从列表和单案工作台分别定位。",
+  "status_after": "validating",
+  "progress_after": 98,
+  "current_state": "HCTM-TEST001 已通过两个 IAOS 入口的浏览器回归。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-24T05:10:00Z"
+}
