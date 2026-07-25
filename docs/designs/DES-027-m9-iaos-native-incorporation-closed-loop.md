@@ -714,6 +714,34 @@ Entity 生命周期 → 受治理动作 → Approval Flow → 人员分派/决�
 
 AESE 只展示上述 IAOS 事实和证据，不解释或复制 Entity 状态机、审批路由或审批数据库。
 
+### D26 — 功能可解释性与配置关系
+
+M9 的平台资产不能只做到“可运行”，还必须做到实施人员无需阅读源码即可理解和配置。
+IAOS 的 System Atlas 必须把 M9 依赖投影到配置粒度：
+
+```text
+Core/Domain Semantic 默认生命周期
+→ 数据模型工坊 Entity 状态与受治理动作
+→ Capability 输入、输出与业务事实提交
+→ Approval Flow 阶段、人员选择器与会签规则
+→ Process 跨角色节点、等待与输入输出映射
+→ Approval Request / Agent Run / Process Run
+→ M9 Entity、Journal、Outbox 与 World evidence
+```
+
+“流程与审批”不能只连接流程工作室和审批工作台。Atlas 节点和边还必须指向语义资产中心
+的默认生命周期、数据模型工坊的生命周期动作、能力语义工作室、身份/岗位、Policy 和
+运行证据入口。菜单链接回答“去哪里”，依赖边回答“为什么需要它、配置被谁消费”。
+
+每个新增菜单或主要页面必须提供“功能说明”，至少包含业务目的、适用角色、前置配置、
+操作步骤、验证/恢复、相关数据与可点击上下游入口，并标识权威 DES/runbook。M9 首批覆盖
+流程编排控制台、审批中心和数据模型工坊生命周期页；既有页面后续渐进补齐。正常配置路径
+使用带标签和校验的业务表单，专家 DSL/JSON 只能作为次级入口。
+
+IAOS 通用实现以 `DES-060-process-approval-authoring-and-feature-guidance.md` 为权威合同。
+AESE 不复制配置编辑器；World 的功能说明负责解释它展示哪些 IAOS committed evidence、
+如何回到对应 case/work item/run，以及仿真 observation 与 IAOS 决定之间的边界。
+
 ## 4. 待确认设计树
 
 以下设计项已经确认，实施计划必须逐项映射：

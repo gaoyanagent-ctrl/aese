@@ -278,3 +278,5 @@ P0
 - [ ] T96 完成新 G1 真实浏览器验收、Runtime 数据迁移与 Founder/五 Agent 全链 T83。
 - [x] T97 统一 Entity 生命周期动作与正式 Approval Runtime，补齐 Flow 下拉、编译期
       fail-closed、批准后状态提交与 consume 合同。
+- [x] T98 按 D26 补齐流程/审批/Entity 配置关系、System Atlas 细粒度依赖和首批页面
+      “功能说明”；新增功能落实可解释性项目规则。

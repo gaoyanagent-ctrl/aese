@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260725-feature-explainability-configuration-map-v1",
+  "node_key": "aese.m9",
+  "update_type": "design",
+  "summary": "建立新功能说明和细粒度配置关系治理",
+  "detail": "DES-027 D26 与项目规则要求新功能同时交付目的、配置、操作、验证、关系和页面功能说明；System Atlas 必须表达 Semantic、Entity、Capability、Approval、Process 与运行证据之间的依赖，而非只有菜单链接。",
+  "status_after": "validating",
+  "progress_after": 97,
+  "current_state": "AESE 设计与项目规则已更新，IAOS DES-060 和首批页面实现进入验证。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-25T12:10:00Z"
+}

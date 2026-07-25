@@ -1216,3 +1216,15 @@
 - 验证：IAOS compiler/approval/API Go tests、TypeScript、生产构建、Code Map 和 Atlas
   tracking 检查通过。
 - 后续：部署在线版本并继续 T83/T96 Founder、五 Agent、G1–G7 与 World wait 全链验收。
+
+## 2026-07-25 - 新功能可解释性与配置关系治理
+
+- 变更：DES-027 新增 D26，要求 System Atlas 展示从语义默认生命周期到运行证据的细粒度
+  关系；AGENTS.md 增加功能目的、配置、使用、关系和页面“功能说明”的强制交付规则；
+  active M9N 计划增加并完成 T98。
+- 原因：现有全景图只连接顶层工作台，页面也缺少设计目的和实施步骤，客户仍需询问开发者
+  才能理解 Entity 审批、Approval Flow 和 Process 的职责与配置顺序。
+- 影响：规则生效后的新功能必须同时交付权威设计、业务表单、页面说明和 Atlas 关系；
+  旧页面按后续切片渐进补齐。IAOS 通用实现由 DES-060 承载。
+- 验证：Markdown 链接、Atlas 声明、Code Map 与文档治理脚本。
+- 后续：完成 M9 T83/T85/T96 全链验收，并为 AESE World 页面补同类功能说明。
