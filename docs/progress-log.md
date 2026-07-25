@@ -1203,3 +1203,16 @@
 - 影响：Process 只引用 flow key；提交时解析实际任职人并冻结。审批人能看到业务事项、发起人、路线和前序证据；非当前阶段受派人不能决策，岗位换人无需修改流程代码。
 - 验证：IAOS Approval/Incorporation/API scoped Go tests、Go vet、前端 TypeScript/生产构建、Atlas/Code Map 检查通过；后端和前端已重部署。真实案件 `INC-APPROVAL-1784896345` 验证 G1 `position:chair` 解析、事项/显示名/路线详情、recipient Outbox、决定聚合、Gate consume 及节点 4 解锁。
 - 后续：补浏览器三视口回归并继续 T83/T96 Founder 与五 Agent 全链。
+
+## 2026-07-25 - Entity 生命周期与正式审批语义统一
+
+- 变更：DES-027 新增 D25；IAOS Entity transition 区分 direct/approval，正式审批引用
+  租户 Flow 与 Capability，首次动作创建并路由请求，批准后核验对象/动作/hash，再提交
+  状态并 consume；数据模型工坊改为选择已有 active Flow。
+- 原因：原 Entity `approval_flow` 直接改状态，而 DES-053 Approval Runtime 负责人员路由，
+  两套机制并存会让客户配置“审批”后仍绕过审批人和审批中心。
+- 影响：Entity 配置回答业务对象允许怎样变化，Approval Flow 回答由谁决定；roles 只控制
+  发起，assignment 才赋予决定权。AESE 不复制该机制，只消费 IAOS committed evidence。
+- 验证：IAOS compiler/approval/API Go tests、TypeScript、生产构建、Code Map 和 Atlas
+  tracking 检查通过。
+- 后续：部署在线版本并继续 T83/T96 Founder、五 Agent、G1–G7 与 World wait 全链验收。

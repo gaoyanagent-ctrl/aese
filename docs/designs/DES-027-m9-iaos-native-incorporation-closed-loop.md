@@ -691,6 +691,29 @@ seed 仍解析到创始治理者，但更换任职人无需改 Process 或 Capab
 批准来自本请求冻结路线，不再比较 `founder-principal` 字符串。通用实现和完整不变量见
 IAOS `DES-053-approval-routing-and-work-distribution.md`。
 
+### D25 — Entity 生命周期与正式审批的单一语义
+
+数据模型工坊中的 Entity `approval_flow` 只定义记录生命周期，不得成为绕过正式
+Approval Runtime 的第二套审批机制。每个 transition 必须明确为：
+
+- `direct`：有权主体直接执行的状态动作；
+- `approval`：引用版本化 `approval_flow_key` 和批准后执行的 `capability_code`。
+
+正式审批动作首次执行只能创建 Approval Request、冻结业务事项和实际处理人，不能提前
+修改 Entity。请求批准后，以同一 request 重试动作时必须核对租户、Entity、记录、动作和
+intent hash，在同一业务事务中提交状态变化并 consume Approval。Entity transition 中的
+roles 只约束谁能发起动作，不代表谁能审批；审批权只来自 Flow 解析出的 active assignment。
+
+客户配置时应从当前租户 active Approval Flow 的名称和版本中选择，不要求记忆或手写 Key。
+由此形成统一关系：
+
+```text
+Entity 生命周期 → 受治理动作 → Approval Flow → 人员分派/决定
+→ Capability 提交业务事实 → Process 解锁后继节点
+```
+
+AESE 只展示上述 IAOS 事实和证据，不解释或复制 Entity 状态机、审批路由或审批数据库。
+
 ## 4. 待确认设计树
 
 以下设计项已经确认，实施计划必须逐项映射：

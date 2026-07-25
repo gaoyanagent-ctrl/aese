@@ -276,3 +276,5 @@ P0
 - [x] T94 审批中心展示业务事项、发起人显示名、路线、实际处理人，并按“待我审批/由我发起”过滤。
 - [x] T95 阶段激活写 recipient-scoped `approval.task.assigned` Outbox，非受派人决策失败关闭。
 - [ ] T96 完成新 G1 真实浏览器验收、Runtime 数据迁移与 Founder/五 Agent 全链 T83。
+- [x] T97 统一 Entity 生命周期动作与正式 Approval Runtime，补齐 Flow 下拉、编译期
+      fail-closed、批准后状态提交与 consume 合同。

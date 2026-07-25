@@ -56,6 +56,10 @@ D23 已补齐首个真实 Agent task 纵向切片：`incorporation-agent` 通过
 外部模型/API 尚未启用。该切片证明 Agent 任务合同，但不替代 T83 要求的五 Agent、
 G1–G7、三个 World wait 和重启恢复全链验收。
 
+D25 已消除数据模型工坊 Entity 生命周期与正式审批运行时的语义分叉：Entity 只声明
+状态和受治理动作，需审批的动作引用租户版本化 Flow，审批决定来自冻结 assignment，
+批准后才提交状态并 consume。该平台收敛不替代 M9 T83/T96 的完整交互式验收。
+
 M7 O0-O4 已完成。最终 `m7-acceptance-20260722-05` 从 clean reset 跑通编排 API 与 CLI 对照链：22 个事件、三 Agent、17 条离线业务断言、2 条在线 IAOS 断言和 M6 KPI 均通过；单 run 产生 9 次成功 Tool Call 与两套一致的 O2D Outbox 副作用，UI/CLI 均安全复位。AESE 8090/4173 与 IAOS 8082/3000 的本机部署和健康检查已记录在 M7 evidence。该基线由 M8 强制保留。
 
 M7 的最小成功标准：

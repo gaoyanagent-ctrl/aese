@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260725-m9-entity-approval-unification-v1",
+  "node_key": "aese.m9-native-incorporation",
+  "update_type": "design",
+  "summary": "M9 明确 Entity 生命周期与正式审批的单一语义",
+  "detail": "DES-027 D25 明确 Entity 只声明状态与受治理动作，正式审批必须委托 IAOS 版本化 Flow、冻结 assignment，并在批准后通过受治理动作提交状态与 consume。",
+  "status_after": "validating",
+  "progress_after": 98,
+  "current_state": "平台统一实现与静态验证完成；M9 T83/T96 全交互链仍待验收。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-25T08:00:00Z"
+}
