@@ -1,0 +1,32 @@
+{
+  "schema_version":"1.0",
+  "projection_id":"gp-inc-demo-001-2",
+  "tenant_id":"tenant-hctm-genesis",
+  "case_code":"INC-DEMO-001",
+  "world_run_id":"world-inc-demo-001",
+  "chapter":"founder_office",
+  "sim_time":"2026-07-27T09:00:00+08:00",
+  "time_scale":0,
+  "paused":true,
+  "cursor":2,
+  "world_scene":{"scene_id":"founder-office-v1","mode":"2.5d","theme":"industrial-warm"},
+  "lifecycle":{"state":"incorporation_case_opened","current_step":"founder.resolution.prepare","progress":10,"blocked_by":"incorporation-agent"},
+  "buildings":[{"code":"BLD-FOUNDER-OFFICE","kind":"office","label":"创始办公室","state":"active","x":4,"y":3,"evidence_ref":"case:INC-DEMO-001","available":true}],
+  "actors":[
+    {"actor_id":"founder-principal","actor_type":"human","display_name":"创始治理者","position":"董事长","state":"waiting"},
+    {"actor_id":"incorporation-agent","actor_type":"agent","display_name":"企业设立专员","position":"企业设立专员","state":"working","work_item_id":"WI-002"}
+  ],
+  "work_items":[{"work_item_id":"WI-002","title":"准备创始人决议","kind":"agent_task","status":"running","owner_type":"agent","owner_id":"incorporation-agent","capability":"founder.resolution.prepare","requires_me":false,"evidence_ref":"trace:INC-DEMO-001#WI-002"}],
+  "resources":{
+    "founder_cash":{"value":"3000000000","currency":"CNY","scale":2},
+    "company_cash":{"value":"0","currency":"CNY","scale":2},
+    "capital_committed":{"value":"2000000000","currency":"CNY","scale":2},
+    "capital_paid":{"value":"0","currency":"CNY","scale":2},
+    "budget_authorized":{"value":"0","currency":"CNY","scale":2},
+    "risk_level":"low"
+  },
+  "exchanges":[],
+  "brand":{"status":"candidate","company_name":"华辰热管理系统集团有限公司","primary_color":"#2563EB"},
+  "notifications":[{"notification_id":"N-001","severity":"info","message":"企业设立专员正在准备创始人决议","action_ref":"work-item:WI-002"}],
+  "evidence_refs":[{"ref":"trace:INC-DEMO-001","kind":"incorporation_trace"},{"ref":"process:enterprise.incorporation.lifecycle.v1","kind":"process"}]
+}

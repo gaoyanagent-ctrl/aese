@@ -119,12 +119,13 @@ export async function submitIncorporationObservation(
   caseCode: string,
   payloadType: string,
   result: string,
+  correlationOverride?: string,
 ): Promise<void> {
   const params = new URLSearchParams(window.location.hash.split("?")[1] ?? "");
   const tenant = params.get("tenant") ?? "tenant-hctm-genesis";
   const token = localStorage.getItem("iaos_token");
   if (!token) throw new Error("缺少 IAOS 登录凭据，请从 IAOS 重新打开 AESE");
-  const correlation = params.get("correlation") || `corr-${caseCode}`;
+  const correlation = correlationOverride || params.get("correlation") || `corr-${caseCode}`;
   // One external fact has one stable transport identity. IAOS additionally
   // performs semantic deduplication, but keeping the AESE envelope stable
   // prevents repeated clicks from creating misleading journal growth.

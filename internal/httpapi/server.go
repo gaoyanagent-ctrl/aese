@@ -19,8 +19,10 @@ import (
 	"github.com/industrial-ai/iaos-aese/internal/application"
 	"github.com/industrial-ai/iaos-aese/internal/assurance"
 	"github.com/industrial-ai/iaos-aese/internal/capabilitybuild"
+	"github.com/industrial-ai/iaos-aese/internal/creative"
 	"github.com/industrial-ai/iaos-aese/internal/experiment"
 	"github.com/industrial-ai/iaos-aese/internal/firstdelivery"
+	"github.com/industrial-ai/iaos-aese/internal/gameprojection"
 	"github.com/industrial-ai/iaos-aese/internal/genesis"
 	"github.com/industrial-ai/iaos-aese/internal/iaosclient"
 	"github.com/industrial-ai/iaos-aese/internal/incorporation"
@@ -41,6 +43,7 @@ const (
 
 type Config struct {
 	PackDir        string
+	IAOSBaseURL    string
 	RequestTimeout time.Duration
 	BodyLimit      int64
 	Logger         *log.Logger
@@ -244,6 +247,9 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/runs/:run_id/reset",
 			"/api/aese/v1/world/genesis",
 			"/api/aese/v1/world/incorporation",
+			"/api/aese/v1/game/incorporation/:case/projection",
+			"/api/aese/v1/game/creative/intent",
+			"/api/aese/v1/game/creative/names",
 			"/api/aese/v1/world/plant-build",
 			"/api/aese/v1/world/capability-build",
 			"/api/aese/v1/world/industrialization",
@@ -276,6 +282,93 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch rest[0] {
+	case "game":
+		if len(rest) == 3 && rest[1] == "creative" && r.Method == http.MethodPost {
+			provider := creative.DeterministicProvider{}
+			switch rest[2] {
+			case "intent":
+				var request creative.FounderIntentRequest
+				if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &request); err != nil {
+					s.writeError(w, http.StatusBadRequest, "invalid_creative_request", err.Error(), false, "", "")
+					return
+				}
+				intent, err := provider.AnalyzeIntent(ctx, request)
+				if err != nil {
+					s.writeError(w, http.StatusUnprocessableEntity, "invalid_founder_intent", err.Error(), false, "", "")
+					return
+				}
+				s.writeJSON(w, http.StatusOK, intent)
+				return
+			case "names":
+				var intent creative.FounderIntent
+				if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &intent); err != nil {
+					s.writeError(w, http.StatusBadRequest, "invalid_creative_request", err.Error(), false, "", "")
+					return
+				}
+				proposals, err := provider.GenerateNames(ctx, intent)
+				if err != nil {
+					s.writeError(w, http.StatusUnprocessableEntity, "invalid_founder_intent", err.Error(), false, "", "")
+					return
+				}
+				s.writeJSON(w, http.StatusOK, map[string]any{
+					"intent_id": intent.IntentID,
+					"status":    "candidate_only",
+					"proposals": proposals,
+				})
+				return
+			}
+		}
+		if len(rest) != 4 || rest[1] != "incorporation" || rest[3] != "projection" || r.Method != http.MethodGet {
+			s.writeError(w, http.StatusNotFound, "not_found", "route not found", false, "", "")
+			return
+		}
+		if s.cfg.IAOSBaseURL != "" {
+			token := strings.TrimSpace(strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer "))
+			if token == "" {
+				s.writeError(w, http.StatusUnauthorized, "iaos_token_required", "Bearer token is required for the live IAOS projection", false, "", "")
+				return
+			}
+			client, err := iaosclient.New(iaosclient.Config{
+				BaseURL: s.cfg.IAOSBaseURL, Token: token, TenantID: r.Header.Get("X-IAOS-Tenant-Id"),
+			})
+			if err != nil {
+				s.writeError(w, http.StatusInternalServerError, "iaos_projection_config_invalid", err.Error(), false, "", "")
+				return
+			}
+			trace, err := client.IncorporationTrace(ctx, rest[2])
+			if err != nil {
+				s.writeError(w, http.StatusBadGateway, "iaos_trace_unavailable", err.Error(), true, "", "")
+				return
+			}
+			items, err := client.IncorporationWorkItems(ctx, rest[2])
+			if err != nil {
+				s.writeError(w, http.StatusBadGateway, "iaos_work_items_unavailable", err.Error(), true, "", "")
+				return
+			}
+			projection, err := gameprojection.FromIAOS(trace, items)
+			if err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "iaos_projection_invalid", err.Error(), false, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, projection)
+			return
+		}
+		frame := len(incorporation.BuildTrace().Frames) - 1
+		if raw := r.URL.Query().Get("frame"); raw != "" {
+			value, err := strconv.Atoi(raw)
+			if err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_frame", "frame must be an integer", false, "", "")
+				return
+			}
+			frame = value
+		}
+		projection, err := gameprojection.FromIncorporationTrace(incorporation.BuildTrace(), rest[2], frame)
+		if err != nil {
+			s.writeError(w, http.StatusBadRequest, "projection_invalid", err.Error(), false, "", "")
+			return
+		}
+		s.writeJSON(w, http.StatusOK, projection)
+		return
 	case "world":
 		if len(rest) != 2 || r.Method != http.MethodGet {
 			s.writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "method not allowed", false, "", "")
@@ -1434,6 +1527,33 @@ func decodeRequestBody(r *http.Request, limit int64, dst any) error {
 	}
 	if err := json.Unmarshal(data, dst); err != nil {
 		return fmt.Errorf("invalid JSON: %w", err)
+	}
+	return nil
+}
+
+func decodeStrictRequestBody(r *http.Request, limit int64, dst any) error {
+	if r.Body == nil {
+		return fmt.Errorf("request body is required")
+	}
+	defer r.Body.Close()
+	reader := io.LimitReader(r.Body, limit+1)
+	data, err := io.ReadAll(reader)
+	if err != nil {
+		return fmt.Errorf("read request body: %w", err)
+	}
+	if int64(len(data)) > limit {
+		return fmt.Errorf("request body exceeds limit of %d bytes", limit)
+	}
+	if len(bytesTrim(data)) == 0 {
+		return fmt.Errorf("empty request body")
+	}
+	decoder := json.NewDecoder(strings.NewReader(string(data)))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(dst); err != nil {
+		return fmt.Errorf("invalid JSON: %w", err)
+	}
+	if decoder.Decode(&struct{}{}) != io.EOF {
+		return fmt.Errorf("invalid JSON: multiple values")
 	}
 	return nil
 }

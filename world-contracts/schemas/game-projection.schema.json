@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aese.local/world/v1/game-projection.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version","projection_id","tenant_id","case_code","world_run_id","chapter","sim_time","time_scale","paused","cursor","world_scene","lifecycle","buildings","actors","work_items","resources","exchanges","brand","notifications","evidence_refs"],
+  "properties": {
+    "schema_version": {"const":"1.0"},
+    "projection_id": {"type":"string","minLength":1},
+    "tenant_id": {"type":"string","minLength":1},
+    "case_code": {"type":"string","minLength":1},
+    "world_run_id": {"type":"string","minLength":1},
+    "chapter": {"enum":["founder_intent","brand_studio","founder_office","registration","banking","talent_governance","opening","operating_world"]},
+    "sim_time": {"type":"string","format":"date-time"},
+    "time_scale": {"enum":[0,1,2,4]},
+    "paused": {"type":"boolean"},
+    "cursor": {"type":"integer","minimum":0},
+    "world_scene": {"type":"object","additionalProperties":false,"required":["scene_id","mode","theme"],"properties":{"scene_id":{"type":"string","minLength":1},"mode":{"enum":["2d","2.5d"]},"theme":{"type":"string","minLength":1}}},
+    "lifecycle": {"type":"object","additionalProperties":false,"required":["state","current_step","progress"],"properties":{"state":{"type":"string","minLength":1},"current_step":{"type":"string","minLength":1},"progress":{"type":"integer","minimum":0,"maximum":100},"blocked_by":{"type":"string"}}},
+    "buildings": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["code","kind","label","state","x","y","available"],"properties":{"code":{"type":"string","minLength":1},"kind":{"type":"string","minLength":1},"label":{"type":"string","minLength":1},"state":{"type":"string","minLength":1},"x":{"type":"integer"},"y":{"type":"integer"},"evidence_ref":{"type":"string"},"available":{"type":"boolean"}}}},
+    "actors": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["actor_id","actor_type","display_name","position","state"],"properties":{"actor_id":{"type":"string","minLength":1},"actor_type":{"enum":["human","agent","runtime","world"]},"display_name":{"type":"string","minLength":1},"position":{"type":"string","minLength":1},"state":{"type":"string","minLength":1},"work_item_id":{"type":"string"}}}},
+    "work_items": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["work_item_id","title","kind","status","owner_type","owner_id","capability","requires_me","evidence_ref"],"properties":{"work_item_id":{"type":"string","minLength":1},"title":{"type":"string","minLength":1},"kind":{"enum":["human_task","agent_task","approval","world_wait","capability"]},"status":{"type":"string","minLength":1},"owner_type":{"enum":["human","agent","runtime","world"]},"owner_id":{"type":"string","minLength":1},"capability":{"type":"string","minLength":1},"requires_me":{"type":"boolean"},"evidence_ref":{"type":"string","minLength":1}}}},
+    "resources": {"$ref":"#/$defs/resources"},
+    "exchanges": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["exchange_id","kind","status","correlation_id","evidence_ref","occurred_at"],"properties":{"exchange_id":{"type":"string","minLength":1},"kind":{"enum":["intent","observation","committed_outcome","discrepancy"]},"status":{"type":"string","minLength":1},"correlation_id":{"type":"string","minLength":1},"evidence_ref":{"type":"string","minLength":1},"occurred_at":{"type":"string","format":"date-time"}}}},
+    "brand": {"type":"object","additionalProperties":false,"required":["status"],"properties":{"status":{"enum":["empty","candidate","selected","approved","retired"]},"company_name":{"type":"string"},"logo_asset_id":{"type":"string"},"primary_color":{"type":"string","pattern":"^#[0-9A-Fa-f]{6}$"}}},
+    "notifications": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["notification_id","severity","message"],"properties":{"notification_id":{"type":"string","minLength":1},"severity":{"enum":["info","success","warning","error"]},"message":{"type":"string","minLength":1},"action_ref":{"type":"string"}}}},
+    "evidence_refs": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["ref","kind"],"properties":{"ref":{"type":"string","minLength":1},"kind":{"type":"string","minLength":1}}}}
+  },
+  "$defs": {
+    "money": {"type":"object","additionalProperties":false,"required":["value","currency","scale"],"properties":{"value":{"type":"string","pattern":"^-?[0-9]+$"},"currency":{"const":"CNY"},"scale":{"const":2}}},
+    "resources": {"type":"object","additionalProperties":false,"required":["founder_cash","company_cash","capital_committed","capital_paid","budget_authorized","risk_level"],"properties":{"founder_cash":{"$ref":"#/$defs/money"},"company_cash":{"$ref":"#/$defs/money"},"capital_committed":{"$ref":"#/$defs/money"},"capital_paid":{"$ref":"#/$defs/money"},"budget_authorized":{"$ref":"#/$defs/money"},"risk_level":{"enum":["low","medium","high","critical"]}}}
+  }
+}

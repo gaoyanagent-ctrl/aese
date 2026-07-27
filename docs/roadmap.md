@@ -2,7 +2,7 @@
 
 本文件是 AESE 当前里程碑状态和下一步优先级的权威来源。
 
-最后更新：2026-07-24。
+最后更新：2026-07-27。
 
 ## 1. 里程碑状态
 
@@ -20,7 +20,8 @@
 | M7 受治理场景运行控制台 | 浏览器预检、初始化、逐幕运行、分析、验证和复位 | Completed | ADR-003、DES-005、PLAN-M7-001、M7 evidence |
 | M8 AESE 2.0 基础 | 三态世界、确定性离散事件内核、IAOS 双向桥和最小 Genesis tracer | Completed | PLAN-M8-001、World Play runbook、两仓测试与部署证据 |
 | M9 Genesis Incorporation | 注资、法人登记、治理、管理岗位、初始组织与预算 | Completed | hctm-genesis@0.2.0、M9 evidence、IAOS DES-051 |
-| M9N IAOS-native Incorporation Closed Loop | 用三层语义、正式身份、Runtime Artifact、Capability/Process/Approval、持久工作项和 World Bridge 重建 M9 真实闭环 | Active | D19–D21 已部署；D22 工作项和 D23 节点 2 Agent Runtime 已交付，五 Agent/G1–G7/World wait 全链验收仍待完成 |
+| M9N IAOS-native Incorporation Closed Loop | 用三层语义、正式身份、Runtime Artifact、Capability/Process/Approval、持久工作项和 World Bridge 重建 M9 真实闭环 | Completed | IAOS Runtime 1.3.13；18 工作项、G1–G7、三个 World wait、六次 Run/五 Agent 与中途重启恢复真实集成通过 |
+| GX Enterprise Genesis Game Experience | AI 企业身份、人工/Agent 协作和 2.5D 世界中的 M9 游戏化开局 | Completed MVP | DES-028、GameProjection live evidence、企业身份工作室、PixiJS/2D fallback、原创素材、三视口 live 浏览器验收 |
 | M10 Genesis Plant Build | 选址、场地控制、设施项目、公用工程、异常重排与验收 | Reference Replay Complete; D22 Pending | hctm-genesis@0.3.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
 | M11 Genesis Capability Build | 资金补足、设备/实验室/仓储能力、核心团队与岗位资格 | Reference Replay Complete; D22 Pending | hctm-genesis@0.4.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
 | M12 Genesis Industrialization | RFQ/定点、产品/工艺、供应商/工装、APQP、试制、PPAP 与量产批准 | Reference Replay Complete; D22 Pending | hctm-genesis@0.5.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
@@ -50,15 +51,22 @@ PLAN-M8-001 至 PLAN-M24-001 均已完成。M17-M24 严格消费前一 terminal�
 持久化工作项和真实参与者推进。M9N 因 DES-027 D22 再次打开；只有人工、Agent、审批、
 World wait 和断点恢复的交互式证据齐备后才能重新关闭。
 
-D23 已补齐首个真实 Agent task 纵向切片：`incorporation-agent` 通过独立派发入口读取
-案件、形成创始人决议草稿、调用受治理 Capability，并持久化 Runtime、工具调用、输出
-和失败状态；节点完成后严格停在 G1 人工审批。当前执行器是 IAOS 内置确定性 Runtime，
-外部模型/API 尚未启用。该切片证明 Agent 任务合同，但不替代 T83 要求的五 Agent、
-G1–G7、三个 World wait 和重启恢复全链验收。
+D23/T83 已完成完整交互主线：Runtime 1.3.13 将登记校验正式分派
+`legal-compliance-agent`，18 个持久工作项依次经过 Founder、五 Agent、G1–G7 和三个
+World wait；集成测试在第二个 World wait 后重建 Server 并恢复至
+`enterprise_operational_ready`。当前 Agent 执行器仍明确为 IAOS 内置确定性 Runtime，
+未配置外部模型时不冒充已连接 LLM。
 
 D25 已消除数据模型工坊 Entity 生命周期与正式审批运行时的语义分叉：Entity 只声明
 状态和受治理动作，需审批的动作引用租户版本化 Flow，审批决定来自冻结 assignment，
 批准后才提交状态并 consume。该平台收敛不替代 M9 T83/T96 的完整交互式验收。
+
+PLAN-GX-001 已完成 MVP：游戏从 IAOS verified evidence bundle 与 18 个工作项编译
+GameProjection；AI 企业身份候选通过 `incorporation.case.open` 才成为正式案件事实；
+PixiJS 2.5D、DOM/2D fallback、工作项深链、World Observation、治理证据和
+`enterprise_operational_ready` 已在 1440×900、1280×720、390×844 三视口通过 live
+浏览器恢复验收。按需外部 LLM/Logo connector 仍遵循 provider/密钥治理边界，不把凭据
+放入 AESE 仓库。
 
 M7 O0-O4 已完成。最终 `m7-acceptance-20260722-05` 从 clean reset 跑通编排 API 与 CLI 对照链：22 个事件、三 Agent、17 条离线业务断言、2 条在线 IAOS 断言和 M6 KPI 均通过；单 run 产生 9 次成功 Tool Call 与两套一致的 O2D Outbox 副作用，UI/CLI 均安全复位。AESE 8090/4173 与 IAOS 8082/3000 的本机部署和健康检查已记录在 M7 evidence。该基线由 M8 强制保留。
 

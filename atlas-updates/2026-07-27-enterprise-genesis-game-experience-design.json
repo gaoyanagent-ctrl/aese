@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260727-enterprise-genesis-game-experience-design-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "设计 Enterprise Genesis AI 原生企业创生游戏体验",
+  "detail": "将 M9 的真实流程、人工治理、五 Agent、AI 命名与 Logo、2.5D 世界、GameProjection 和证据追踪组织为可持续企业经营模拟的开局。",
+  "status_after": "designed",
+  "progress_after": 0,
+  "current_state": "DES-028 为 draft；现有 M9N active remediation 不变，游戏化实现尚未开始。",
+  "evidence_ref": "docs/designs/DES-028-enterprise-genesis-game-experience.md",
+  "occurred_at": "2026-07-27T00:00:00Z"
+}

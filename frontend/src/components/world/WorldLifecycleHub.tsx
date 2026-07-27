@@ -28,7 +28,7 @@ type Stage = {
 
 const stages: Stage[] = [
   { milestone: "M8", title: "三态世界与 IAOS Bridge", summary: "验证客观世界、IAOS 管理事实与角色认知如何发现并关闭偏差。", exchange: "Observation → Journal → Intent → Outcome", href: "#world-tristate", entryLabel: "进入 M8 三态架构验证", icon: Network, kind: "foundation" },
-  { milestone: "M9", title: "公司成立与治理", summary: "从投资人出资开始，完成法人、治理岗位、组织和初始预算。", exchange: "World 经济事实 ↔ IAOS 治理记录", href: "#world-incorporation", entryLabel: "进入 M9 公司成立", icon: Building2 },
+  { milestone: "M9", title: "Enterprise Genesis 企业创生", summary: "在 2.5D 世界中与数字员工共同完成品牌、法人、资本、管理层和初始预算。", exchange: "玩家 + Agent ↔ IAOS 治理 ↔ World", href: "#enterprise-genesis", entryLabel: "进入 Enterprise Genesis 企业创生", icon: Building2 },
   { milestone: "M10", title: "工厂选址与设施建设", summary: "比较选址方案，推进场地、公用工程、项目付款与设施验收。", exchange: "工程进展 ↔ 项目、预算与审批", href: "#world-plant-build", entryLabel: "进入 M10 工厂建设", icon: Factory },
   { milestone: "M11", title: "生产能力建设", summary: "完成设备、实验室、仓储、人员招聘、培训和岗位资格。", exchange: "设备/人员状态 ↔ 采购、资产与资格", href: "#world-capability-build", entryLabel: "进入 M11 能力建设", icon: Wrench },
   { milestone: "M12", title: "产品工业化", summary: "贯通 RFQ、产品与工艺设计、APQP、试制、PPAP 和量产批准。", exchange: "试制与质量结果 ↔ 工程版本与放行", href: "#world-industrialization", entryLabel: "进入 M12 产品工业化", icon: FlaskConical },
@@ -73,7 +73,7 @@ export function WorldLifecycleHub({ onExit }: { onExit: () => void }) {
 }
 
 const journey = [
-  ["总览", "world"], ["M8", "world-tristate"], ["M9", "world-incorporation"], ["M10", "world-plant-build"], ["M11", "world-capability-build"], ["M12", "world-industrialization"], ["M13", "world-first-delivery"], ["M14", "world-experiments"], ["M15", "world-strategy-control"], ["M16", "world-assurance"], ["M17–24", "world-aese3"],
+  ["总览", "world"], ["M8", "world-tristate"], ["M9 游戏", "enterprise-genesis"], ["M9 证据", "world-incorporation"], ["M10", "world-plant-build"], ["M11", "world-capability-build"], ["M12", "world-industrialization"], ["M13", "world-first-delivery"], ["M14", "world-experiments"], ["M15", "world-strategy-control"], ["M16", "world-assurance"], ["M17–24", "world-aese3"],
 ] as const;
 
 export function WorldJourneyBar({ current }: { current: string }) {

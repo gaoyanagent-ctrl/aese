@@ -21,6 +21,7 @@ const usage = `Usage:
 Options:
   --listen <addr>         HTTP listen address (default :8090)
   --pack-dir <path>       scenario pack directory (default scenario-packs/hctm)
+  --iaos-base-url <url>   live IAOS API; absent uses deterministic offline projection
   --request-timeout <dur>  request timeout, e.g. 30s (default 30s)
   --body-limit <bytes>    max request body bytes (default 1048576)
 `
@@ -35,6 +36,7 @@ func run(args []string) int {
 	fs := flag.NewFlagSet("aese-server", flag.ContinueOnError)
 	listen := fs.String("listen", ":8090", "http listen address")
 	packDir := fs.String("pack-dir", "scenario-packs/hctm", "scenario pack directory")
+	iaosBaseURL := fs.String("iaos-base-url", "", "live IAOS API base URL")
 	timeout := fs.Duration("request-timeout", 30*time.Second, "request timeout")
 	bodyLimit := fs.Int64("body-limit", 1<<20, "request body byte limit")
 	showHelp := fs.Bool("help", false, "show usage")
@@ -70,6 +72,7 @@ func run(args []string) int {
 	logger := log.New(os.Stdout, "[aese-server] ", log.LstdFlags|log.Lshortfile)
 	server := httpapi.New(httpapi.Config{
 		PackDir:        *packDir,
+		IAOSBaseURL:    *iaosBaseURL,
 		RequestTimeout: *timeout,
 		BodyLimit:      *bodyLimit,
 		Logger:         logger,

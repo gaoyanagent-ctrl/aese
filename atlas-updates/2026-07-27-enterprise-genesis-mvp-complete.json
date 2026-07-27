@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260727-enterprise-genesis-mvp-complete-v1",
+  "node_key": "aese.world.genesis",
+  "update_type": "release",
+  "summary": "完成 Enterprise Genesis M9 游戏化企业创生 MVP",
+  "detail": "交付 live IAOS evidence GameProjection、AI 企业身份候选、PixiJS 2.5D/2D fallback、原创素材、18工作项/五Agent/七审批/三World wait联动与三视口刷新恢复验收。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "M9N 与 GX 主线完成；enterprise_operational_ready 可从游戏恢复并移交 M10。",
+  "evidence_ref": "docs/runbooks/enterprise-genesis-game.md",
+  "occurred_at": "2026-07-27T14:52:00Z"
+}

@@ -1,5 +1,5 @@
 import { AlertTriangle, LoaderCircle } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useState } from "react";
 import previewJson from "../../scenario-packs/hctm/stories/order-expedite-01/preview.json";
 import { ControlBar } from "./components/ControlBar";
 import { EnterpriseNav } from "./components/EnterpriseNav";
@@ -28,6 +28,7 @@ import { StrategyControlRoom } from "./components/world/StrategyControlRoom";
 import { AssuranceObservatory } from "./components/world/AssuranceObservatory";
 import { AESE3CompletionRoom } from "./components/world/AESE3CompletionRoom";
 import { WorldJourneyBar, WorldLifecycleHub } from "./components/world/WorldLifecycleHub";
+const EnterpriseGenesisGame=lazy(()=>import("./components/game/EnterpriseGenesisGame").then(module=>({default:module.EnterpriseGenesisGame})));
 
 const SCENARIO_KEY = "order-expedite-01";
 const scenarioSource = new StaticScenarioDataSource({
@@ -242,6 +243,7 @@ export default function App() {
     | "world-strategy-control"
     | "world-assurance"
     | "world-aese3"
+    | "enterprise-genesis"
   >("preview");
   const [integrationOpen, setIntegrationOpen] = useState(false);
   const [connectionVersion, setConnectionVersion] = useState(0);
@@ -264,7 +266,8 @@ export default function App() {
       | "world-experiments"
       | "world-strategy-control"
       | "world-assurance"
-      | "world-aese3",
+      | "world-aese3"
+      | "enterprise-genesis",
   ) => {
     setMode(target);
     window.location.hash = target === "preview" ? "sandbox" : target;
@@ -288,6 +291,7 @@ export default function App() {
       if (target === "world-strategy-control") setMode("world-strategy-control");
       if (target === "world-assurance") setMode("world-assurance");
       if (target === "world-aese3") setMode("world-aese3");
+      if (target === "enterprise-genesis") setMode("enterprise-genesis");
       if (target === "sandbox") setMode("preview");
       if (target === "integration") {
         setMode("preview");
@@ -351,6 +355,8 @@ export default function App() {
     );
   const journey = (current: string, content: React.ReactNode) => <><WorldJourneyBar current={current} />{content}</>;
   if (mode === "world") return <WorldLifecycleHub onExit={() => navigate("preview")} />;
+  if (mode === "enterprise-genesis")
+    return <Suspense fallback={<main className="loading-state">正在加载企业创生世界…</main>}><EnterpriseGenesisGame onExit={() => navigate("world")} /></Suspense>;
   if (mode === "world-tristate")
     return journey("world-tristate", <WorldPlay onExit={() => navigate("world")} />);
   if (mode === "world-incorporation")

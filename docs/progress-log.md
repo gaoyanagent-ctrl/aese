@@ -1224,3 +1224,35 @@
 - 影响：重复点击不再增长 Journal；已有重复历史 Observation 的案件也能继续对应 world_wait 节点；其他案件证据不能冒用。
 - 验证：IAOS 完整 lifecycle 与 World Bridge recovery 集成测试通过；AESE TypeScript 测试和生产构建。
 - 后续：继续按三个 World wait 分别验收登记、开户与任命外部参与者交互。
+
+## 2026-07-27 - Enterprise Genesis 游戏化企业创生体验设计
+
+- 变更：新增 draft DES-028，将 M9 设计为玩家、五个数字员工、IAOS Runtime 与 World 共同推进的企业创生游戏；定义创业构想、AI 命名与 Logo、创始办公室、登记、银行资本、人才治理、开业准备七章，以及世界沙盘、经营桌面、治理证据三层界面、GameProjection、CreativeJob 和 GX0–GX5 交付切片。
+- 原因：现有 M9 已能通过持久工作项、审批和 World wait 走通真实过程，但体验仍以流程工作台为主，无法让玩家直观感受“从一个想法创建一家企业”，也没有把生成式 AI 素材、数字员工和 2D/2.5D 世界统一起来。
+- 影响：DES-028 保留 IAOS 的事实、权限和审计权威，把游戏画面限定为 committed projection；AI 名称、Logo 和文案先作为候选资产，人工选择并通过 Capability 后才生效。当前 M9N active plan 状态不变，DES-028 批准前不开始实现。
+- 验证：对照现有 DES-027 D22–D25、M9 World/Agent/Approval 实现和 Capitalism Lab 官方公司创建、Logo、管理层、政策与 AI 经理玩法；使用 UI/UX 设计规则核对三视口、触摸、键盘、减弱动效、图表替代和性能边界。
+- 后续：确认产品命名、美术风格、AI 素材 provider/许可、名称检查范围和首版行业边界，再将 DES-028 转为 Approved 并建立实施计划。
+
+## 2026-07-27 - Enterprise Genesis GX0 开工
+
+- 变更：DES-028 转为 Approved；新增 M9N 下的 active parallel subplan PLAN-GX-001，拆为 GX0–GX5、GXT1–GXT46；完成首个 `GameProjection` Go 合同、JSON Schema、示例 fixture 和严格校验测试。
+- 原因：2.5D 画面必须先消费稳定、可追溯的只读投影，不能从现有 frame 或前端状态自行推断业务进度；同时当前 M9N T83/T96 尚在收口，新游戏实现需明确并行边界。
+- 影响：游戏层已有 actor、work item、资金、品牌、World exchange、通知和 evidence ref 的机器合同；GX0/GX1 可继续并行，GX2–GX4 的正式推进仍依赖 M9N 交互式合同。
+- 验证：GameProjection fixture 同时通过 JSON Schema 与 Go strict parser；非法时间倍率和缺失 evidence 的工作项失败关闭。
+- 后续：实现 IncorporationTrace → GameProjection 编译器和只读 projection API，再建立 TypeScript data source 与三层界面线框。
+
+## 2026-07-27 - Enterprise Genesis GX0 投影 API 与游戏壳
+
+- 变更：完成 IncorporationTrace → GameProjection 确定性编译器、按 case/frame 的只读 API、前端 TypeScript data source 和 Enterprise Genesis 三层游戏壳；生命周期 M9 默认入口切换为游戏体验，原 M9 证据入口保留。
+- 原因：游戏画面必须从后端 committed projection 恢复，不能由前端播放状态推断公司成立进度。
+- 影响：桌面和移动端已能查看等距世界、章节、资金、工作项、Agent 和证据；每个工作项携带 evidence ref。当前场景图形为代码原生原型，PixiJS/AI 素材和真实 IAOS case 聚合仍在后续切片。
+- 验证：Go gameprojection/httpapi/worldcontract tests、前端 TypeScript、17 files/42 tests 和 Vite production build 通过；构建提示主 chunk 703.68 kB，已登记为 GX5 动态拆包任务。
+- 后续：完成 GX1 FounderIntent、命名、CreativeJob、BrandAsset 与品牌工作室。
+
+## 2026-07-27 - Enterprise Genesis M9 游戏主线完成
+
+- 变更：完成 live GameProjection、AI 企业身份工作室、`incorporation.case.open` 正式选择、PixiJS 2.5D/DOM fallback、原创企业城市素材、IAOS 工作项深链、World Observation 操作、五 Agent/18 工作项/证据视图和开业场景；IAOS Runtime 升级至 1.3.13，将登记材料校验分派法务合规 Agent。
+- 原因：静态 frame 和查看型工作台不能证明玩家、五 Agent、G1–G7 与 World 真实交替推进，也无法提供从创业想法进入企业世界的可玩入口。
+- 影响：`#enterprise-genesis?tenant=&case=` 读取 IAOS verified evidence bundle，不建立第二业务真相；AI 候选只有经现有 Capability 创建案件后才生效。M9N 与 PLAN-GX-001 均达到完成门，终态可移交 M10。
+- 验证：AESE `go test ./...`；前端 17 files/42 tests、TypeScript、production build；mock 与 live Playwright 在 1440×900、1280×720、390×844 各 3/3 通过；live case `INC-WORK-ITEM-E2E-1785163319408212558` 为 18 completed、G1–G7、三个 World wait、六次 Agent Run/五个 distinct Agent、100% `enterprise_operational_ready`；IAOS 集成测试包含中途 Server 重建恢复。
+- 后续：外部按需 LLM/Logo connector 需另行配置受治理 provider 与密钥；未配置时继续使用明确标记的 deterministic/文字几何 fallback。

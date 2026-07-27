@@ -1,0 +1,20 @@
+{
+  "schema_version": "1.0",
+  "collection": "enterprise-genesis",
+  "assets": [
+    {
+      "asset_id": "eg-city-background-v1",
+      "asset_type": "scene_background",
+      "file": "enterprise-city-v1.png",
+      "mime": "image/png",
+      "width": 1672,
+      "height": 941,
+      "sha256": "3e6b3d3688b142e52c1d5ecb58b1239590319564454696eb385e60daa20fa98d",
+      "source": "OpenAI image generation",
+      "license": "project-generated",
+      "status": "approved",
+      "created_at": "2026-07-27T14:17:00Z",
+      "retention": "retain while referenced by Enterprise Genesis scene v1"
+    }
+  ]
+}

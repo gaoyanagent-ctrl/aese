@@ -2,7 +2,7 @@
 id: PLAN-M9-NATIVE-001
 title: M9 IAOS 原生语义驱动企业成立真实闭环实施计划
 date: 2026-07-23
-status: active
+status: completed
 author: Codex + User
 tags: [m9, iaos, semantic-runtime, incorporation, world-bridge]
 ---
@@ -262,9 +262,9 @@ P0
 - [x] T80 IAOS 增加“我的经营待办、Agent 任务、审批中心、流程运行、业务数据”独立菜单。
 - [x] T81 工作项详情展示参与者、输入、输出、Capability、Policy、Approval、Journal 和 World 证据。
 - [x] T82 AESE 默认按 IAOS 已提交状态逐帧解锁，移除交付模式自动播放。
-- [ ] T83 增加 Founder + 五 Agent 交替操作、G1–G7 等待、三个 World wait 和重启恢复 E2E。
+- [x] T83 增加 Founder + 五 Agent 交替操作、G1–G7 等待、三个 World wait 和重启恢复 E2E。
 - [x] T84 将 M10–M24 的预计算 replay 明确标为参考模式，并继承 D22 的交互式完成门。
-- [ ] T85 更新运行数据、runbook、evidence、Roadmap、Code Map、Atlas，部署并完成浏览器验收。
+- [x] T85 更新运行数据、runbook、evidence、Roadmap、Code Map、Atlas，部署并完成浏览器验收。
 - [x] T86 按 D23 为节点 2 增加独立 Agent 派发、Runtime/工具白名单和持久 Agent Run。
 - [x] T87 将 `founder.resolution.prepare` 产出保存为治理决议草稿，并严格停在 G1 人工审批。
 - [x] T88 在 IAOS“Agent 组织/成立审计”显示身份、Mandate、Runtime、模型连接状态、工具与运行明细。
@@ -275,6 +275,6 @@ P0
 - [x] T93 实现 user/role/position/requester-selected/requester-manager 路由和串行、any/all/quorum 聚合。
 - [x] T94 审批中心展示业务事项、发起人显示名、路线、实际处理人，并按“待我审批/由我发起”过滤。
 - [x] T95 阶段激活写 recipient-scoped `approval.task.assigned` Outbox，非受派人决策失败关闭。
-- [ ] T96 完成新 G1 真实浏览器验收、Runtime 数据迁移与 Founder/五 Agent 全链 T83。
+- [x] T96 完成新 G1 真实浏览器验收、Runtime 数据迁移与 Founder/五 Agent 全链 T83。
 - [x] T97 统一 Entity 生命周期动作与正式 Approval Runtime，补齐 Flow 下拉、编译期
       fail-closed、批准后状态提交与 consume 合同。
