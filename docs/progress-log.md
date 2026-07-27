@@ -1238,3 +1238,11 @@
   frame 冒充。
 - 验证：Unit、TypeScript、生产构建与三视口 Playwright。
 - 后续：M9 T83/T85/T96 继续使用动态真实案件完成全链验收。
+
+## 2026-07-27 - 企业成立外部确认幂等修复
+
+- 变更：登记、开户和任命外部确认按案件、payload type、result 生成稳定 transport identity；IAOS 同步增加业务事实级去重和案件绑定的可信存在性校验。
+- 原因：旧 AESE 每次点击生成新幂等键，重复 Journal 又触发 IAOS `count != 1`，将已有可信登记结果反转为拒绝。
+- 影响：重复点击不再增长 Journal；已有重复历史 Observation 的案件也能继续对应 world_wait 节点；其他案件证据不能冒用。
+- 验证：IAOS 完整 lifecycle 与 World Bridge recovery 集成测试通过；AESE TypeScript 测试和生产构建。
+- 后续：继续按三个 World wait 分别验收登记、开户与任命外部参与者交互。
