@@ -125,6 +125,7 @@
 | M9N Final Evidence | [IAOS-native M9 final evidence](reports/m9-native-final-evidence.md) | Completed |
 | M9N Closed-loop Runbook | [IAOS-native M9 operations](runbooks/m9-native-closed-loop.md) | Active |
 | SOL-001 | [M9 LAN lifecycle loading and SSE continuity](solutions/SOL-001-m9-lan-lifecycle-loading-and-sse.md) | Completed |
+| SOL-002 | [企业成立外部确认重复点击幂等](solutions/SOL-002-incorporation-observation-click-idempotency.md) | Completed |
 | M9N Risk Register | [IAOS-native M9 risk register](reports/m9-native-risk-register.json) | Active |
 | M10 Runbook | [Genesis Plant Build Runbook](runbooks/genesis-plant-build.md) | Completed |
 | M10 Evidence | [Genesis Plant Build Evidence](reports/m10-genesis-plant-build-evidence.md) | Completed |

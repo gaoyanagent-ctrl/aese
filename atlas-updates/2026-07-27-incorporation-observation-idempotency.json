@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260727-incorporation-observation-idempotency-v1",
+  "node_key": "aese.m9.world-observation",
+  "update_type": "implementation",
+  "summary": "企业成立外部确认改为稳定幂等业务事实",
+  "detail": "AESE 对同一案件、Observation 类型和结果复用稳定 transport identity，并由 IAOS 业务事实去重兼容旧客户端重试。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "重复点击登记、开户或任命确认不会产生新的相同 Journal 事实。",
+  "evidence_ref": "docs/solutions/SOL-002-incorporation-observation-click-idempotency.md",
+  "occurred_at": "2026-07-27T12:25:00Z"
+}
