@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260727-world-stale-case-recovery-v1",
+  "node_key": "aese.m9",
+  "update_type": "implementation",
+  "summary": "修复 AESE World 因失效设立案深链无法打开",
+  "detail": "IAOS lifecycle trace 返回 404 时保留 AESE World 本地基线，展示可恢复警告并从 recent API 提供有效案件入口；401、403 和平台错误继续失败关闭。E2E 不再固定依赖已清理案件。",
+  "status_after": "validating",
+  "progress_after": 98,
+  "current_state": "代码和回归已补齐，正在完成生产构建与在线部署。",
+  "evidence_ref": "docs/solutions/SOL-002-aese-world-stale-incorporation-case-recovery.md",
+  "occurred_at": "2026-07-27T09:00:00Z"
+}

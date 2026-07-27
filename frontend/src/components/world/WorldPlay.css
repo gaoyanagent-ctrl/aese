@@ -235,6 +235,47 @@
 .world-error button {
   min-height: 44px;
 }
+.world-recovery-warning {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+  padding: 14px 16px;
+  border: 1px solid #8a6326;
+  border-radius: 10px;
+  background: rgba(138, 99, 38, 0.14);
+  color: var(--text);
+}
+.world-recovery-warning p {
+  margin: 4px 0;
+}
+.world-recovery-warning small {
+  color: var(--text-muted);
+}
+.world-recovery-warning nav {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+.world-recovery-warning a {
+  min-height: 36px;
+  padding: 8px 12px;
+  border: 1px solid #b88837;
+  border-radius: 8px;
+  color: var(--accent);
+  text-decoration: none;
+}
+@media (max-width: 640px) {
+  .world-recovery-warning {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .world-recovery-warning nav {
+    justify-content: flex-start;
+  }
+}
 .facility-zones {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));

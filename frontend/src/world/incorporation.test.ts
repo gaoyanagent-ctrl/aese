@@ -77,4 +77,35 @@ describe("incorporation API", () => {
     expect(localStorage.getItem("iaos_token")).toBe("fresh-genesis-token");
     expect(window.location.hash).not.toContain("auth_token");
   });
+
+  it("keeps World available and offers recent cases when a handed-off case no longer exists", async () => {
+    localStorage.setItem("iaos_token", "test-token");
+    window.location.hash =
+      "#world-incorporation?tenant=tenant-hctm-genesis&case=INC-REMOVED";
+    const fetcher = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ frames: [{ knowledge: [] }] }), { status: 200 }),
+      )
+      .mockResolvedValueOnce(new Response("not found", { status: 404 }))
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ items: [{ case_code: "HCTM-TEST001" }] }),
+          { status: 200 },
+        ),
+      );
+    vi.stubGlobal("fetch", fetcher);
+
+    const trace = await loadIncorporation();
+
+    expect(trace.frames).toHaveLength(1);
+    expect(trace.iaos_lifecycle).toBeUndefined();
+    expect(trace.iaos_lifecycle_warning).toEqual({
+      code: "case_not_found",
+      message: "IAOS 中不存在设立案 INC-REMOVED，已保留 AESE World 本地基线。",
+      requested_case: "INC-REMOVED",
+      available_cases: ["HCTM-TEST001"],
+    });
+    expect(fetcher.mock.calls[2][0]).toContain("/api/v1/incorporations/recent");
+  });
 });

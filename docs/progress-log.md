@@ -1228,3 +1228,13 @@
   旧页面按后续切片渐进补齐。IAOS 通用实现由 DES-060 承载。
 - 验证：Markdown 链接、Atlas 声明、Code Map 与文档治理脚本。
 - 后续：完成 M9 T83/T85/T96 全链验收，并为 AESE World 页面补同类功能说明。
+
+## 2026-07-27 - AESE World 失效设立案深链恢复
+
+- 变更：M9 lifecycle trace 返回 404 时不再终止 World；页面保留本地基线、显示结构化警告
+  并列出 IAOS recent cases。E2E 改为动态选择真实案件，World Hub 测试更新为当前入口。
+- 原因：旧深链固定引用已清理的 `INC-HCTM-001`，IAOS 404 被错误提升为整个 campaign 失败。
+- 影响：用户能打开 World 并切换有效案件；401/403/5xx 仍失败关闭，正式进度不会由本地
+  frame 冒充。
+- 验证：Unit、TypeScript、生产构建与三视口 Playwright。
+- 后续：M9 T83/T85/T96 继续使用动态真实案件完成全链验收。

@@ -55,6 +55,12 @@ export type IncorporationTrace = {
     runtime_artifact: Record<string, unknown>;
     lineage: Record<string, unknown>;
   };
+  iaos_lifecycle_warning?: {
+    code: "case_not_found";
+    message: string;
+    requested_case: string;
+    available_cases: string[];
+  };
 };
 
 export function resolveIaosLifecycleBase(): string {
@@ -104,10 +110,29 @@ export async function loadIncorporation(
     const token = acceptLifecycleToken(params);
     const base = resolveIaosLifecycleBase();
     if (caseCode && token) {
+      const headers = { Authorization: `Bearer ${token}`, "X-Tenant-ID": tenant };
       const lifecycle = await fetch(`${base}/api/v1/incorporations/${encodeURIComponent(caseCode)}/trace`, {
         signal,
-        headers: { Authorization: `Bearer ${token}`, "X-Tenant-ID": tenant },
+        headers,
       });
+      if (lifecycle.status === 404) {
+        const recent = await fetch(`${base}/api/v1/incorporations/recent`, {
+          signal,
+          headers,
+        });
+        const body = recent.ok
+          ? await recent.json() as { items?: Array<{ case_code?: string }> }
+          : {};
+        trace.iaos_lifecycle_warning = {
+          code: "case_not_found",
+          message: `IAOS 中不存在设立案 ${caseCode}，已保留 AESE World 本地基线。`,
+          requested_case: caseCode,
+          available_cases: (body.items ?? [])
+            .map((item) => item.case_code?.trim() ?? "")
+            .filter(Boolean),
+        };
+        return trace;
+      }
       if (!lifecycle.ok) throw new Error(`IAOS lifecycle API ${lifecycle.status}`);
       trace.iaos_lifecycle = await lifecycle.json();
     }

@@ -62,6 +62,8 @@ D25 已消除数据模型工坊 Entity 生命周期与正式审批运行时的�
 D26 进一步要求 System Atlas 展示 Semantic → Entity → Capability → Approval Flow →
 Process → Runtime Evidence 的配置与运行依赖，并为新菜单/主要页面提供“功能说明”。
 IAOS DES-060 已交付流程/审批/Entity 首批入口；AESE World 后续按同一合同渐进补齐。
+M9 World 深链已补充失效案件恢复：trace 404 时保留 World 基线并列出当前 recent cases，
+不再让已清理的旧 case 阻断页面；身份、权限和平台错误仍失败关闭。
 
 M7 O0-O4 已完成。最终 `m7-acceptance-20260722-05` 从 clean reset 跑通编排 API 与 CLI 对照链：22 个事件、三 Agent、17 条离线业务断言、2 条在线 IAOS 断言和 M6 KPI 均通过；单 run 产生 9 次成功 Tool Call 与两套一致的 O2D Outbox 副作用，UI/CLI 均安全复位。AESE 8090/4173 与 IAOS 8082/3000 的本机部署和健康检查已记录在 M7 evidence。该基线由 M8 强制保留。
 
