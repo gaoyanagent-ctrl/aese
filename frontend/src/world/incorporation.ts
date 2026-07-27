@@ -252,7 +252,10 @@ export async function submitIncorporationObservation(
   const token = localStorage.getItem("iaos_token");
   if (!token) throw new Error("缺少 IAOS 登录凭据，请从 IAOS 重新打开 AESE");
   const correlation = params.get("correlation") || `corr-${caseCode}`;
-  const nonce = `${caseCode}-${payloadType}-${Date.now()}`;
+  // One external fact has one stable transport identity. IAOS additionally
+  // performs semantic deduplication, but keeping the AESE envelope stable
+  // prevents repeated clicks from creating misleading journal growth.
+  const nonce = `${caseCode}-${payloadType}-${result}`;
   const response = await fetch(
     `${resolveIaosLifecycleBase()}/api/v1/world-bridge/observations`,
     {

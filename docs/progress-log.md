@@ -1251,3 +1251,11 @@
 - 验证：事实解析单元测试覆盖无案件、登记前和已提交三种状态；前端 TypeScript、构建、
   Atlas tracking、Markdown 链接和 diff check。
 - 后续：将同一来源标签和三态对账合同扩展到 M10–M24 的 World-owned 数值。
+
+## 2026-07-27 - 企业成立外部确认幂等修复
+
+- 变更：登记、开户和任命外部确认按案件、payload type、result 生成稳定 transport identity；IAOS 同步增加业务事实级去重和案件绑定的可信存在性校验。
+- 原因：旧 AESE 每次点击生成新幂等键，重复 Journal 又触发 IAOS `count != 1`，将已有可信登记结果反转为拒绝。
+- 影响：重复点击不再增长 Journal；已有重复历史 Observation 的案件也能继续对应 world_wait 节点；其他案件证据不能冒用。
+- 验证：IAOS 完整 lifecycle 与 World Bridge recovery 集成测试通过；AESE TypeScript 测试和生产构建。
+- 后续：继续按三个 World wait 分别验收登记、开户与任命外部参与者交互。
