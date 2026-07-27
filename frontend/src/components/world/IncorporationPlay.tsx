@@ -16,6 +16,7 @@ import {
 import { useEffect, useState } from "react";
 import {
   loadIncorporation,
+  resolveIncorporationFacts,
   submitIncorporationObservation,
   type IncorporationTrace,
 } from "../../world/incorporation";
@@ -104,6 +105,15 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
     f.governance.cfo,
     f.governance.project_director,
   ];
+  const displayFacts = resolveIncorporationFacts(f, lifecycle);
+  const sourceTag = (source: {
+    source: string;
+    sourceLabel: string;
+  }) => (
+    <small className={`fact-source ${source.source}`}>
+      {source.sourceLabel}
+    </small>
+  );
   return (
     <div className="world-play">
       <header className="world-toolbar">
@@ -221,7 +231,10 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
             <dl>
               <div>
                 <dt>法人</dt>
-                <dd>HCTM-SZ-MFG · {f.legal_entity_status}</dd>
+                <dd>
+                  {displayFacts.legalEntity.value} · {f.legal_entity_status}
+                  {sourceTag(displayFacts.legalEntity)}
+                </dd>
               </div>
               <div>
                 <dt>登记</dt>
@@ -230,7 +243,9 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
               <div>
                 <dt>公司账户</dt>
                 <dd>
-                  {f.company.status} · {money(f.company.balance.value)}
+                  {displayFacts.companyAccount.value} · {f.company.status} ·{" "}
+                  {money(f.company.balance.value)}
+                  {sourceTag(displayFacts.companyAccount)}
                 </dd>
               </div>
               <div>
@@ -242,25 +257,37 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
           <article>
             <header>
               <Banknote />
-              资金与预算 <small>来源：虚构基线</small>
+              资金与预算 <small>逐项标注数据来源</small>
             </header>
             <dl>
               <div>
                 <dt>投资人现金</dt>
-                <dd>{money(f.investor.balance.value)}</dd>
+                <dd>
+                  {money(f.investor.balance.value)}
+                  <small className="fact-source world_baseline">
+                    AESE 华辰场景假设
+                  </small>
+                </dd>
               </div>
               <div>
                 <dt>认缴资本</dt>
-                <dd>{money(f.capital_committed.value)}</dd>
+                <dd>
+                  {money(displayFacts.capitalCommitted.value)}
+                  {sourceTag(displayFacts.capitalCommitted)}
+                </dd>
               </div>
               <div>
                 <dt>实缴资本</dt>
-                <dd>{money(f.capital_paid.value)}</dd>
+                <dd>
+                  {money(displayFacts.capitalPaid.value)}
+                  {sourceTag(displayFacts.capitalPaid)}
+                </dd>
               </div>
               <div>
                 <dt>预算授权</dt>
                 <dd>
-                  {money(f.budget.amount.value)} · {f.budget.status}
+                  {money(displayFacts.budget.value)} · {f.budget.status}
+                  {sourceTag(displayFacts.budget)}
                   <small>预算不是现金或实际支出</small>
                 </dd>
               </div>

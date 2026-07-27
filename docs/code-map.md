@@ -230,6 +230,7 @@ F0 合同入口已创建；F1-F5 目标路径仍须在实现时更新为实际�
 | M9N World 人工 Observation | `frontend/src/world/incorporation.ts::submitIncorporationObservation`、`IncorporationPlay.tsx` | 登记、开户、任命三个外部参与者按钮通过受治理 `/api/v1/world-bridge/observations` 写 Observation；不直接推进 IAOS，用户仍需执行对应 world_wait 工作项 |
 | M9N 局域网加载与 SSE 排障 | `docs/solutions/SOL-001-m9-lan-lifecycle-loading-and-sse.md` | 最近 case 自动发现、浏览器 hostname 双向链接、60 秒 SSE write deadline 续期与 BFCache/HMR 边界 |
 | M9N 失效案件深链恢复 | `frontend/src/world/incorporation.ts`、`frontend/src/components/world/IncorporationPlay.tsx`、`docs/solutions/SOL-002-aese-world-stale-incorporation-case-recovery.md` | trace 404 保留 AESE World 基线并查询 recent cases；401/403/5xx 仍失败关闭 |
+| M9N World 事实来源投影 | `frontend/src/world/incorporation.ts::resolveIncorporationFacts`、`frontend/src/components/world/IncorporationPlay.tsx`、DES-027 D27 | IAOS committed 字段优先；登记前展示拟设名称；缺少案件事实时将固定编码和金额明确标为 AESE 场景假设 |
 | World Play API | `internal/httpapi/server.go`（`/api/aese/v1/world/genesis`） |
 | 验收 runbook / 能力缺口 | `docs/runbooks/aese-world-play.md`、`docs/capability-gap-ledger.md` |
 | Atlas planned 投影 | `atlas/system-atlas-planned.json` |

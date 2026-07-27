@@ -63,6 +63,108 @@ export type IncorporationTrace = {
   };
 };
 
+export type IncorporationFactSource =
+  | "iaos_committed"
+  | "world_baseline"
+  | "pending";
+
+export type DisplayFact = {
+  value: string;
+  source: IncorporationFactSource;
+  sourceLabel: string;
+};
+
+type LifecycleState = {
+  proposed_company_name?: string;
+  legal_entity_code?: string;
+  bank_account_code?: string;
+  commitment_minor?: number;
+  contribution_minor?: number;
+  budget_authorized_minor?: number;
+};
+
+const displayFact = (
+  value: string,
+  source: IncorporationFactSource,
+  sourceLabel: string,
+): DisplayFact => ({ value, source, sourceLabel });
+
+const minorToMajor = (minor: number): string => (minor / 100).toFixed(2);
+
+/**
+ * IAOS committed state wins. Pack values remain visible only as explicitly
+ * labelled simulation assumptions and never masquerade as active-case facts.
+ */
+export function resolveIncorporationFacts(
+  frame: IncorporationFrame,
+  lifecycle?: IncorporationTrace["iaos_lifecycle"],
+) {
+  const state = (lifecycle?.state ?? {}) as LifecycleState;
+  const proposedName = state.proposed_company_name?.trim();
+  const legalEntityCode = state.legal_entity_code?.trim();
+  const bankAccountCode = state.bank_account_code?.trim();
+  const hasCommittedCase = Boolean(lifecycle?.case_code);
+
+  return {
+    legalEntity: legalEntityCode
+      ? displayFact(legalEntityCode, "iaos_committed", "IAOS 登记提交事实")
+      : proposedName
+        ? displayFact(
+            `${proposedName}（待登记编码）`,
+            "pending",
+            "IAOS 设立案输入",
+          )
+        : displayFact(
+            `${frame.company.owner}（场景目标）`,
+            "world_baseline",
+            "AESE 华辰场景假设",
+          ),
+    companyAccount: bankAccountCode
+      ? displayFact(bankAccountCode, "iaos_committed", "IAOS 开户提交事实")
+      : displayFact(
+          frame.company.code,
+          "world_baseline",
+          "AESE 华辰场景假设",
+        ),
+    capitalCommitted:
+      hasCommittedCase && Number(state.commitment_minor) > 0
+        ? displayFact(
+            minorToMajor(Number(state.commitment_minor)),
+            "iaos_committed",
+            "IAOS 设立案提交事实",
+          )
+        : displayFact(
+            frame.capital_committed.value,
+            "world_baseline",
+            "AESE 华辰场景假设",
+          ),
+    capitalPaid:
+      hasCommittedCase && Number(state.contribution_minor) > 0
+        ? displayFact(
+            minorToMajor(Number(state.contribution_minor)),
+            "iaos_committed",
+            "IAOS 资本核验提交事实",
+          )
+        : displayFact(
+            frame.capital_paid.value,
+            "world_baseline",
+            "AESE 华辰场景假设",
+          ),
+    budget:
+      hasCommittedCase && Number(state.budget_authorized_minor) > 0
+        ? displayFact(
+            minorToMajor(Number(state.budget_authorized_minor)),
+            "iaos_committed",
+            "IAOS 预算审批提交事实",
+          )
+        : displayFact(
+            frame.budget.amount.value,
+            "world_baseline",
+            "AESE 华辰场景假设",
+          ),
+  };
+}
+
 export function resolveIaosLifecycleBase(): string {
   const fallback = `http://${window.location.hostname || "127.0.0.1"}:8082`;
   const configured = localStorage.getItem("aese_iaos_base_url")?.trim();

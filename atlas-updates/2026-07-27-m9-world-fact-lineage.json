@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese-20260727-m9-world-fact-lineage-v1",
+  "node_key": "aese.m9-native-incorporation",
+  "update_type": "implementation",
+  "summary": "区分 M9 World 场景假设与 IAOS 案件事实",
+  "detail": "企业成立 World 优先展示 IAOS committed 法人、账户、资本和预算；登记前展示拟设名称，缺失案件事实时将华辰固定编码和金额明确标记为 AESE 场景假设。",
+  "status_after": "validating",
+  "progress_after": 98,
+  "current_state": "数据来源投影和 UI 标签已实现，正在完成前端与文档治理验证。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-27T10:00:00Z"
+}

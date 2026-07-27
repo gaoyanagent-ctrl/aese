@@ -578,6 +578,8 @@ M8 决策门与 F0-F5 的任务、验收和跨仓顺序以 PLAN-M8-001 为准。
 - Actor Knowledge 必须遵守可见范围，不能为了方便让 Agent 读取全量客观世界。
 - IAOS 修改必须在独立 worktree，并先完成权限、RLS、Outbox、幂等和无部分写入设计。
 - M7 22 事件、三 Agent、Preview/Live 与 reset 是强制回归门。
+- M9 World 展示已按 DES-027 D27 区分 IAOS committed 事实、设立案输入与 AESE 场景
+  假设；后续三态对账不得移除来源标识或用 pack 值补写 IAOS。
 
 ## 43. M8 完成条件
 

@@ -742,6 +742,29 @@ IAOS 通用实现以 `DES-060-process-approval-authoring-and-feature-guidance.md
 AESE 不复制配置编辑器；World 的功能说明负责解释它展示哪些 IAOS committed evidence、
 如何回到对应 case/work item/run，以及仿真 observation 与 IAOS 决定之间的边界。
 
+### D27 — World 展示事实来源与案件优先级
+
+AESE World 的华辰基线是确定性仿真输入，不是当前 IAOS 设立案已经提交的业务事实。页面
+不得再把 `HCTM-SZ-MFG`、预设银行账户或基线金额无标识地显示为当前案件结果。
+
+案件联动时采用以下优先级：
+
+```text
+IAOS committed state
+→ IAOS 设立案输入（尚未形成登记结果）
+→ AESE world-pack 场景假设
+```
+
+登记前显示 IAOS 的拟设企业名称，并明确标记“待登记编码”；登记完成后显示 IAOS
+`legal_entity_code`。银行账户、认缴、实缴和预算同样优先读取 trace 中已提交字段。
+没有 IAOS committed 值时可以保留场景基线用于解释世界，但每项必须标记“AESE 华辰场景
+假设”。投资人世界现金、公司客观余额等 World-owned 值必须标记其 owner，不得被描述为
+IAOS 账簿余额。
+
+该优先级只影响展示投影，不允许 AESE 把 pack 基线回写 IAOS，也不允许 UI 根据未来 frame
+推断尚未提交的案件事实。后续 bridge 应逐步将 World-owned 余额与 IAOS record ref 通过
+observation/outcome 对账，来源标签不能代替三态一致性验证。
+
 ## 4. 待确认设计树
 
 以下设计项已经确认，实施计划必须逐项映射：
