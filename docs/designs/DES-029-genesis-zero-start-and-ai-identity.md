@@ -53,11 +53,10 @@ tenant ID、case code 和 token 不出现在主导航 URL；token 不放 query/h
 玩家先登录或创建平台级账号。首版单机可以使用本机 owner 账号，但它仍是平台身份，
 不能复用通用 `founder-principal` 作为所有玩家的全局主体。
 
-当前私人开发纵切使用显式“游戏用户名 → 本机 player ID”映射：第一个用户名会认领
-浏览器中已有的未绑定 player ID，以便找回此前创建的 Workspace；后续用户名使用独立
-player ID。它只解决本机体验和企业选择，不是可信认证，服务端仍必须在正式多人版本用
-IAOS DES-062 PlayerAccount/OIDC 替换。租户内 M9 执行主体暂为该租户自己的
-`founder-principal`，不能据此把不同玩家视作同一个平台主体。
+浏览器中的“游戏用户名 → 本机 player ID”只用于界面偏好和本机企业列表标签，不参与
+生产授权。生产控制面从当前 IAOS session 的 source tenant/user 解析或建立稳定
+Player subject；新租户 owner、chair 任职、Founder Mandate 和 M9 人工工作项都引用
+这个真实 subject，不再复用固定 `founder-principal`。
 
 ### Step 1 — 创建创业空间
 
@@ -80,9 +79,9 @@ IAOS `GenesisProvisioningSaga` 服务端执行：
 3. 建立当前玩家的 owner membership 与 tenant-scoped founder subject；
 4. 安装 M9 Semantic、Entity、Capability、Policy、Approval、Process 和 Agent Runtime；
 5. 创建五个 service-only Genesis Assistant，但不把它们冒充公司正式员工；
-6. 执行 RLS 跨租户、登录、Capability Registry 和 Process compiler smoke check；
-7. 激活 tenant 并签发 tenant-scoped session；
-8. 通知 AESE 创建对应 World Run。
+6. 等待 AESE 创建并持久化独立 World Run binding evidence；
+7. 执行 RLS、owner binding、Runtime 和 World smoke，之后才激活 tenant；
+8. 签发仅含 `genesis_owner` 的 tenant-scoped session。
 
 进度页以八个可恢复 checkpoint 展示，不使用无限 spinner。失败显示阶段、原因、重试和
 支持证据 ID。
@@ -99,30 +98,27 @@ IAOS `GenesisProvisioningSaga` 服务端执行：
 
 ## 4. 控制平面合同
 
-### 4.0 当前可运行纵切与生产边界
+### 4.0 当前生产纵切
 
-AESE 已实现 loopback local adapter：
+IAOS DES-062 控制面与 AESE BFF 已实现：
 
 ```text
 根主页
 -> 创建隔离创业空间
 -> 服务端生成 workspace/tenant/world/case 标识
 -> IAOS tenant_account(provisioning)
--> Founder bootstrap
--> tenant-scoped session
+-> Player owner/chair/Mandate bind
 -> M9 Runtime install
+-> AESE World evidence
 -> tenant active
+-> tenant-scoped genesis_owner session
 -> MiniMax M3 企业身份工作室
 ```
 
-Workspace 映射以 `0600` 本地状态文件幂等保存，浏览器只提交 player ID、项目显示名和
-idempotency key，不能提交 tenant ID。非 loopback IAOS 必须配置
-`GENESIS_PLATFORM_TOKEN`，不会尝试 dev token。
-
-该 adapter 用于当前单机产品验收。多玩家生产形态以 IAOS DES-062 为权威：玩家必须由
-IAOS/OIDC 认证；workspace owner 取服务端 subject；平台凭据不进入浏览器；Founder
-bootstrap 不得继续使用全局固定 subject；World committed outcome 和 RLS/login smoke
-通过后才激活 tenant。
+Workspace/World 引用以 `0600` 本地状态文件保存；tenant、membership、Runtime 和
+checkpoint 以 IAOS 为权威。浏览器只提交项目配置和幂等键，不能提交 tenant ID；
+AESE 转发当前 Player session，不保存平台凭据或 Founder 密码。loopback dev adapter
+仅在明确缺少生产 session 的本地开发路径保留。
 
 ### 4.1 对外 API
 
@@ -131,7 +127,9 @@ POST /api/v1/genesis/workspaces
 GET  /api/v1/genesis/workspaces
 GET  /api/v1/genesis/workspaces/{workspace_id}
 POST /api/v1/genesis/workspaces/{workspace_id}/retry
+POST /api/v1/genesis/workspaces/{workspace_id}/world-ready
 POST /api/v1/genesis/workspaces/{workspace_id}/session
+POST /api/v1/genesis/workspaces/{workspace_id}/members
 ```
 
 调用者只需 `genesis.workspace.create/read`；平台内部服务身份才拥有 tenant create、
@@ -155,6 +153,22 @@ identity bootstrap、runtime install 和 activate 权限。
 AESE 只接收 `tenant_activated` committed outcome 后创建 World Run。主页聚合展示可以
 由 AESE BFF 返回，但租户、身份和 Runtime 事实都来自 IAOS。AESE 不保存密码、平台
 管理员 token 或租户业务表。
+
+### 4.4 跨仓、权限与失败恢复矩阵
+
+| 事实/动作 | 权威仓库 | 浏览器权限 | 失败状态与恢复 |
+|---|---|---|---|
+| Workspace、member、checkpoint | IAOS | 当前 Player membership | 保持 provisioning/failed；同幂等键 retry |
+| Tenant create/activate | IAOS SaaS Ops | 无 platform 权限 | World/smoke 前不可 active |
+| Owner user/role/position/Mandate | IAOS Identity/Governance | `genesis_owner` | 幂等 upsert；绑定失败不签 session |
+| M9 Runtime | IAOS Runtime | 只读/执行已授权资产 | content hash no-op；失败停在 runtime checkpoint |
+| World Run binding | AESE | 当前 Workspace | 稳定 workspace/world key 重试；无 evidence 不激活 |
+| CreativeJob | AESE | tenant session 必须匹配请求 tenant | 同输入互斥/幂等；失败保留 reason 后重试 |
+| Incorporation case | IAOS M9 Runtime | chair + Founder Mandate | Capability 事务回滚；不产生部分业务事实 |
+
+失败注入至少覆盖 tenant 创建失败、owner 绑定失败、Runtime 安装失败、World evidence
+缺失、smoke 失败、session 兑换失败、模型超时/429/5xx、非法模型 JSON 和重复请求。
+任何失败都不得把平台 token、密码或模型密钥写入响应、日志或持久证据。
 
 ## 5. MiniMax 真实 AI Provider
 
@@ -262,7 +276,7 @@ tenant/case/workspace 绑定进入游戏，不允许由玩家手填 tenant ID。
 - 根地址进入产品主页，不需要复杂 URL。
 - 从平台玩家身份创建全新的 IAOS tenant 和 AESE World Run。
 - MiniMax 实际调用证据可见，fallback 明确标记。
-- 玩家从空白 workspace 完成公司身份选择和 18 个 M9 工作项。
+- 玩家从空白 workspace 完成公司身份选择和 23 个 M9 工作项。
 - 第二个独立 tenant 重复全链并通过 RLS 隔离验证。
 - 主页、provisioning、身份工作室和游戏在 1440、1280、390 三视口通过。
 

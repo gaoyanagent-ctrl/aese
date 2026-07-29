@@ -19,6 +19,8 @@ export type FounderIntent=FounderIntentRequest&{schema_version:"1.0";intent_id:s
 export type NamingProposal={proposal_id:string;chinese_name:string;english_name:string;short_name:string;rationale:string;slogan:string;keywords:string[];primary_color:string;risk_hints:string[];status:"candidate"};
 export type GenesisWorkspace={
  workspace_id:string;owner_player_id:string;display_name:string;tenant_id:string;world_run_id:string;case_code:string;
- status:"provisioning"|"active"|"failed";current_step:string;last_error?:string;created_at:string;updated_at:string;
+ status:"provisioning"|"awaiting_world"|"active"|"failed";current_step:string;last_error?:string;created_at:string;updated_at:string;
+ correlation_id?:string;attempt?:number;evidence_refs?:Record<string,string>;
+ steps?:Array<{step_key:string;status:string;attempt:number;evidence_ref?:string;last_error?:string;updated_at:string}>;
 };
 export type GenesisWorkspaceResult=GenesisWorkspace&{tenant_token:string};

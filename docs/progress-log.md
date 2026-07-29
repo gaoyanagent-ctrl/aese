@@ -1556,3 +1556,19 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：玩家逐项触发财务组织、账套、科目、资本过账和就绪检查；`iaos-runtime` 仍是确定性执行者但不冒充会计责任人。Controller、总账、资金和成本岗位默认明确为空缺，通知 Founder 补位但不伪造任职。
 - 验证：IAOS 主线 `ff259a8` 已推送和部署；目标租户安装 Runtime 1.8.0，API 返回 6 岗位、4 SoD、5 财务节点，重复安装 no-op；资金与总账同主体兼任被数据库阻断且回滚无残留。AESE 前端测试与生产构建通过。
 - 后续：M9 财务 F10/F13B 关闭；继续 F15–F35，按 M10–M13 真实工程、资产、采购、生产和销售事实建设 AP/AR、固定资产、制造成本、结账和完整报表。
+
+## 2026-07-29 - M9 零起点生产控制面与财务基线收口
+
+- 变更：IAOS 独立 worktree 实现 owner-scoped Genesis Workspace/member/step 控制面、八步 provisioning、World evidence 激活门和 tenant-only `genesis_owner` 会话；M9 Runtime 安装与人工工作项移除新租户对 `platform_super_admin`、固定 `founder-principal` 和 HCTM 组织编码的依赖。AESE BFF 转发 Player session，五步创建向导展示八 checkpoint 证据；CreativeJob 持久保存 provider/model/host/request/token/latency/validation/fallback，并以真实 IAOS profile 阻断跨租户读取。新增 M9–M13 财务对象清单、五项 M9 财务 Capability 的权限/额度/敏感度/SoD/补偿矩阵及离线校验器。
+- 原因：旧 loopback adapter 会以固定 Founder 和平台管理员路径创建租户，无法作为多人交付边界；M9 财务 F1/F5 也缺少机器可读盘点和真实数据证据，不能准确区分 M9 已完成对象与 M10–M13 规划对象。
+- 影响：普通认证 Player 能在不持有平台权限、密码或 tenant URL 决策权的情况下创建隔离企业；新案件节点 1 使用真实 Player subject，节点 2 交给设立 Agent。M9 财务范围可以独立判定完成，AP/AR/资产/成本/月结仍明确属于后续里程碑。
+- 验证：AESE Go 全量测试、前端 20 文件/56 项测试和生产构建通过；IAOS Go 全量测试通过。真实 PostgreSQL 验证同幂等键 no-op、八 checkpoint、另一 Player 读取 404、JWT 仅 `genesis_owner`、新租户 23 个 M9 工作项及动态 owner participant；目标财务租户验证 1 张凭证/2 条分录、11 类 M9 财务投影计数和 `m9_%` 物理表为 0。
+- 后续：完成 PLAN-GXZ-001 Z32——从本次全新 Workspace 逐项跑完 23 个 M9 节点并归档最终 evidence；随后进入 M10，不把 F15–F35 提前算作 M9 欠项。
+
+## 2026-07-29 - M9 全新 Workspace 端到端验收完成
+
+- 变更：通过 IAOS 生产 Genesis Workspace 控制面创建独立租户和 World Run，使用动态 Player subject 创建设立案并完成全部 23 个工作项；同时清除财务岗位空缺通知中残留的固定 `founder-principal` 回退。
+- 原因：PLAN-GXZ-001 Z32 要求证明零起点创建的企业能够走完真实 M9，而不只是证明 Runtime 可以安装。
+- 影响：GX-ZERO 状态从 Validating 更新为 Completed；M9 完成口径包含 8/8 provisioning checkpoint、23/23 工作项、7/7 正式审批门、3/3 可信 World wait、6 次 Agent run/5 类 Agent 和最终 `enterprise_operational_ready`。
+- 验证：全新租户经真实 HTTP API 验收；AESE `go test ./...`、前端 20 files/56 tests、生产构建通过；IAOS `go test ./...` 与 System Atlas tracking 通过。
+- 后续：进入 M10 的订单、采购和应付闭环；F15–F35 继续按 M10–M13 财务路线图实施，不回写为 M9 欠项。

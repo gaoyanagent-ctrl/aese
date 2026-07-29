@@ -1,0 +1,74 @@
+{
+  "schema_version": "1.0",
+  "currency": "CNY",
+  "amount_scale": 2,
+  "timezone": "Asia/Shanghai",
+  "objects": [
+    {"code":"cash_account","milestone":"M9","authority":"IAOS","canonical_entity":"bank_account","historical_source":"m9_bank_account","migration_status":"migrated"},
+    {"code":"capital_commitment","milestone":"M9","authority":"IAOS","canonical_entity":"capital_commitment","historical_source":"m9_capital_commitment","migration_status":"migrated"},
+    {"code":"budget_envelope","milestone":"M9","authority":"IAOS","canonical_entity":"budget_envelope","historical_source":"m9_budget_envelope","migration_status":"migrated"},
+    {"code":"journal_entry","milestone":"M9","authority":"IAOS","canonical_entity":"journal_entry","historical_source":"m9_journal_entry","migration_status":"migrated"},
+    {"code":"accounts_payable","milestone":"M10-M11","authority":"IAOS","canonical_entity":"accounts_payable_open_item","historical_source":"plant_project_commitment","migration_status":"planned"},
+    {"code":"fixed_asset","milestone":"M10-M11","authority":"IAOS","canonical_entity":"fixed_asset","historical_source":"equipment_asset","migration_status":"planned"},
+    {"code":"manufacturing_cost","milestone":"M12-M13","authority":"IAOS","canonical_entity":"cost_object_actual","historical_source":"production_and_inventory_events","migration_status":"planned"},
+    {"code":"accounts_receivable","milestone":"M13","authority":"IAOS","canonical_entity":"accounts_receivable_open_item","historical_source":"invoice_and_receipt_events","migration_status":"planned"},
+    {"code":"profit_measure","milestone":"M13","authority":"IAOS","canonical_entity":"management_profit_measure","historical_source":"delivery_margin_projection","migration_status":"planned"}
+  ],
+  "controls": [
+    {
+      "capability":"finance.organization.configure",
+      "responsible_position":"finance-lead",
+      "executor":"finance-agent",
+      "permission":"finance.organization.configure",
+      "approval_gate":"G4-upstream",
+      "amount_limit_minor":"0",
+      "data_classification":"internal",
+      "sod_conflicts":["internal-audit"],
+      "compensation":"rerun idempotently and reconcile duty templates; never delete accepted appointments"
+    },
+    {
+      "capability":"accounting.book.activate",
+      "responsible_position":"finance-controller",
+      "executor":"founder-escalation-while-vacant",
+      "permission":"accounting.book.activate",
+      "approval_gate":"G4-upstream",
+      "amount_limit_minor":"0",
+      "data_classification":"confidential",
+      "sod_conflicts":["general-ledger-accountant","internal-audit"],
+      "compensation":"keep the unopened period inactive and rerun with the same book and period key"
+    },
+    {
+      "capability":"chart.of.accounts.activate",
+      "responsible_position":"finance-lead",
+      "executor":"finance-agent",
+      "permission":"chart.of.accounts.activate",
+      "approval_gate":"G4-upstream",
+      "amount_limit_minor":"0",
+      "data_classification":"internal",
+      "sod_conflicts":["internal-audit"],
+      "compensation":"supersede the draft chart version; posted account codes remain immutable"
+    },
+    {
+      "capability":"capital.contribution.post",
+      "responsible_position":"general-ledger-accountant",
+      "executor":"founder-escalation-while-vacant",
+      "permission":"capital.contribution.post",
+      "approval_gate":"G4",
+      "amount_limit_minor":"100000000",
+      "data_classification":"restricted",
+      "sod_conflicts":["treasury-accountant","finance-controller"],
+      "compensation":"post a governed reversal referencing the original journal entry; never update posted lines"
+    },
+    {
+      "capability":"finance.opening.readiness.evaluate",
+      "responsible_position":"internal-audit",
+      "executor":"audit-agent",
+      "permission":"finance.opening.readiness.evaluate",
+      "approval_gate":"G7",
+      "amount_limit_minor":"0",
+      "data_classification":"confidential",
+      "sod_conflicts":["finance-lead","finance-controller"],
+      "compensation":"leave readiness false, create discrepancy evidence, and rerun after remediation"
+    }
+  ]
+}

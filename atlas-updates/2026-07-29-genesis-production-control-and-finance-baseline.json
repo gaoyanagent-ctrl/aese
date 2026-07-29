@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.production-control-finance-baseline.2026-07-29",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "完成 M9 零起点生产控制面与财务治理基线",
+  "detail": "AESE 接入 IAOS owner-scoped Genesis Workspace 控制面，提供五步向导、八 checkpoint 证据、tenant-only session 与持久 CreativeJob；同时发布 M9–M13 财务对象盘点及 M9 权限、额度、敏感度、SoD、补偿矩阵。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "生产控制面、M9 财务 F1/F5 以及全新 Workspace 的 23/23 节点最终验收均已完成；F15–F35 按路线图进入 M10–M13。",
+  "evidence_ref": "docs/designs/DES-029-genesis-zero-start-and-ai-identity.md",
+  "occurred_at": "2026-07-29T16:00:00Z"
+}

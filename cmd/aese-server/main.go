@@ -95,8 +95,10 @@ func run(args []string) int {
 		BodyLimit:        *bodyLimit,
 		Logger:           logger,
 		CreativeProvider: creativeProvider,
+		CreativeJobStore: creative.NewJobStore(envOrDefault("GENESIS_CREATIVE_JOB_STORE", ".aese-data/genesis-creative-jobs.json")),
 		GenesisWorkspaceService: &genesisworkspace.Service{
-			Store: genesisworkspace.NewStore(envOrDefault("GENESIS_WORKSPACE_STORE", ".aese-data/genesis-workspaces.json")),
+			Store:        genesisworkspace.NewStore(envOrDefault("GENESIS_WORKSPACE_STORE", ".aese-data/genesis-workspaces.json")),
+			ControlPlane: &genesisworkspace.ControlPlaneClient{BaseURL: *iaosBaseURL},
 			Provisioner: genesisworkspace.IAOSClient{
 				BaseURL:       *iaosBaseURL,
 				PlatformToken: os.Getenv("GENESIS_PLATFORM_TOKEN"),

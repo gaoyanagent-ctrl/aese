@@ -56,19 +56,32 @@ type BrandBrief struct {
 }
 
 type CreativeJob struct {
-	JobID        string         `json:"job_id"`
-	TenantID     string         `json:"tenant_id"`
-	CaseCode     string         `json:"case_code"`
-	Kind         string         `json:"kind"`
-	Status       string         `json:"status"`
-	Provider     string         `json:"provider"`
-	Model        string         `json:"model"`
-	ModelVersion string         `json:"model_version"`
-	Prompt       string         `json:"prompt"`
-	Seed         string         `json:"seed"`
-	Parameters   map[string]any `json:"parameters"`
-	CreatedAt    string         `json:"created_at"`
-	ContentHash  string         `json:"content_hash"`
+	JobID            string         `json:"job_id"`
+	TenantID         string         `json:"tenant_id"`
+	WorkspaceID      string         `json:"workspace_id,omitempty"`
+	CaseCode         string         `json:"case_code"`
+	CorrelationID    string         `json:"correlation_id,omitempty"`
+	Kind             string         `json:"kind"`
+	Status           string         `json:"status"`
+	Provider         string         `json:"provider"`
+	Model            string         `json:"model"`
+	ModelVersion     string         `json:"model_version"`
+	Prompt           string         `json:"prompt"`
+	Seed             string         `json:"seed"`
+	Parameters       map[string]any `json:"parameters"`
+	CreatedAt        string         `json:"created_at"`
+	ContentHash      string         `json:"content_hash"`
+	InputHash        string         `json:"input_hash"`
+	RequestID        string         `json:"request_id"`
+	PromptVersion    string         `json:"prompt_version"`
+	BaseURLHost      string         `json:"base_url_host"`
+	LatencyMS        int64          `json:"latency_ms"`
+	TokenUsage       map[string]int `json:"token_usage"`
+	FinishReason     string         `json:"finish_reason"`
+	ValidationResult string         `json:"validation_result"`
+	FallbackReason   string         `json:"fallback_reason,omitempty"`
+	Error            string         `json:"error,omitempty"`
+	CompletedAt      string         `json:"completed_at,omitempty"`
 }
 
 type BrandAsset struct {

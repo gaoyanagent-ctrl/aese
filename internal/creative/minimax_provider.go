@@ -54,6 +54,14 @@ func NewMiniMaxProvider(cfg MiniMaxConfig) (*MiniMaxProvider, error) {
 	}, nil
 }
 
+func (p *MiniMaxProvider) ProviderStatus() ProviderStatus {
+	host := ""
+	if parsed, err := url.Parse(p.baseURL); err == nil {
+		host = parsed.Hostname()
+	}
+	return ProviderStatus{State: "connected", Provider: "MiniMax", Model: p.model, BaseURLHost: host, PromptVersion: namingPromptVersion}
+}
+
 func (p *MiniMaxProvider) AnalyzeIntent(ctx context.Context, req FounderIntentRequest) (FounderIntent, error) {
 	return (DeterministicProvider{}).AnalyzeIntent(ctx, req)
 }
@@ -169,7 +177,13 @@ func (p *MiniMaxProvider) completeOnce(ctx context.Context, messages []map[strin
 			Message struct {
 				Content string `json:"content"`
 			} `json:"message"`
+			FinishReason string `json:"finish_reason"`
 		} `json:"choices"`
+		Usage struct {
+			PromptTokens     int `json:"prompt_tokens"`
+			CompletionTokens int `json:"completion_tokens"`
+			TotalTokens      int `json:"total_tokens"`
+		} `json:"usage"`
 	}
 	if err := json.Unmarshal(body, &completion); err != nil || len(completion.Choices) == 0 {
 		return "", false, fmt.Errorf("MiniMax returned an invalid completion envelope")
@@ -185,7 +199,24 @@ func (p *MiniMaxProvider) completeOnce(ctx context.Context, messages []map[strin
 	if strings.Contains(content, "<think>") || strings.Contains(content, "```") {
 		return "", false, fmt.Errorf("MiniMax returned non-JSON reasoning or markdown")
 	}
+	recordGenerationEvidence(ctx, GenerationEvidence{
+		RequestID:    firstNonEmpty(resp.Header.Get("x-request-id"), resp.Header.Get("request-id")),
+		FinishReason: completion.Choices[0].FinishReason,
+		TokenUsage: map[string]int{
+			"prompt_tokens": completion.Usage.PromptTokens, "completion_tokens": completion.Usage.CompletionTokens,
+			"total_tokens": completion.Usage.TotalTokens,
+		},
+	})
 	return content, false, nil
+}
+
+func firstNonEmpty(values ...string) string {
+	for _, value := range values {
+		if strings.TrimSpace(value) != "" {
+			return strings.TrimSpace(value)
+		}
+	}
+	return ""
 }
 
 type namingResult struct {

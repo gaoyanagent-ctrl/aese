@@ -12,6 +12,38 @@ type Provider interface {
 	GenerateNames(context.Context, FounderIntent) ([]NamingProposal, error)
 }
 
+type ProviderStatus struct {
+	State         string `json:"state"`
+	Provider      string `json:"provider"`
+	Model         string `json:"model"`
+	BaseURLHost   string `json:"base_url_host,omitempty"`
+	PromptVersion string `json:"prompt_version"`
+}
+
+type StatusProvider interface{ ProviderStatus() ProviderStatus }
+
+type GenerationEvidence struct {
+	RequestID    string
+	FinishReason string
+	TokenUsage   map[string]int
+}
+
+type generationEvidenceKey struct{}
+
+func WithGenerationEvidence(ctx context.Context, sink func(GenerationEvidence)) context.Context {
+	return context.WithValue(ctx, generationEvidenceKey{}, sink)
+}
+
+func recordGenerationEvidence(ctx context.Context, evidence GenerationEvidence) {
+	if sink, ok := ctx.Value(generationEvidenceKey{}).(func(GenerationEvidence)); ok && sink != nil {
+		sink(evidence)
+	}
+}
+
+func (DeterministicProvider) ProviderStatus() ProviderStatus {
+	return ProviderStatus{State: "fallback", Provider: "deterministic", Model: "built-in", PromptVersion: namingPromptVersion}
+}
+
 type FounderIntentRequest struct {
 	TenantID     string   `json:"tenant_id"`
 	CaseCode     string   `json:"case_code"`
@@ -52,7 +84,7 @@ func (p DeterministicProvider) AnalyzeIntent(_ context.Context, req FounderInten
 	return intent, nil
 }
 
-func (DeterministicProvider) GenerateNames(_ context.Context, intent FounderIntent) ([]NamingProposal, error) {
+func (DeterministicProvider) GenerateNames(ctx context.Context, intent FounderIntent) ([]NamingProposal, error) {
 	if err := intent.Validate(); err != nil {
 		return nil, err
 	}
@@ -77,6 +109,10 @@ func (DeterministicProvider) GenerateNames(_ context.Context, intent FounderInte
 			Status:    "candidate",
 		})
 	}
+	recordGenerationEvidence(ctx, GenerationEvidence{
+		RequestID: "deterministic-" + stableSlug(intent.CaseCode), FinishReason: "deterministic",
+		TokenUsage: map[string]int{"prompt_tokens": 0, "completion_tokens": 0, "total_tokens": 0},
+	})
 	return out, nil
 }
 

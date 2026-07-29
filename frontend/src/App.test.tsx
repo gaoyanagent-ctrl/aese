@@ -61,10 +61,10 @@ describe('AESE game home', () => {
     await user.click(screen.getAllByRole('button', { name: /创建新企业/ })[0]);
 
     expect(
-      screen.getByRole('heading', { name: '先为你的企业建立独立运行空间' }),
+      screen.getByRole('heading', { name: '先定义创业项目' }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole('button', { name: /创建空间并进入 AI 身份工作室/ }),
+      screen.getByRole('button', { name: '下一步' }),
     ).toBeInTheDocument();
   });
 });

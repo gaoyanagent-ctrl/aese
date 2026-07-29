@@ -49,6 +49,7 @@ type Config struct {
 	BodyLimit               int64
 	Logger                  *log.Logger
 	CreativeProvider        creative.Provider
+	CreativeJobStore        *creative.JobStore
 	GenesisWorkspaceService *genesisworkspace.Service
 }
 
@@ -60,6 +61,7 @@ type Server struct {
 	runs                    map[string]*runRecord
 	order                   []string
 	creativeProvider        creative.Provider
+	creativeJobStore        *creative.JobStore
 	genesisWorkspaceService *genesisworkspace.Service
 }
 
@@ -191,6 +193,7 @@ func New(cfg Config) *Server {
 		logf:                    cfg.Logger.Printf,
 		mux:                     http.NewServeMux(),
 		creativeProvider:        cfg.CreativeProvider,
+		creativeJobStore:        cfg.CreativeJobStore,
 		genesisWorkspaceService: cfg.GenesisWorkspaceService,
 	}
 	server.RegisterRoutes()
@@ -304,6 +307,12 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			s.writeError(w, http.StatusUnauthorized, "player_identity_required", "X-Genesis-Player-Id is required", false, "", "")
 			return
 		}
+		if authorization := strings.TrimSpace(r.Header.Get("Authorization")); authorization != "" {
+			fields := strings.Fields(authorization)
+			if len(fields) == 2 && strings.EqualFold(fields[0], "Bearer") {
+				ctx = genesisworkspace.WithIAOSToken(ctx, fields[1])
+			}
+		}
 		if len(rest) == 4 && rest[3] == "session" && r.Method == http.MethodPost {
 			result, err := s.genesisWorkspaceService.RefreshSession(ctx, playerID, rest[2])
 			if err != nil {
@@ -319,7 +328,7 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 		}
 		switch r.Method {
 		case http.MethodGet:
-			items, err := s.genesisWorkspaceService.List(playerID)
+			items, err := s.genesisWorkspaceService.List(ctx, playerID)
 			if err != nil {
 				s.writeError(w, http.StatusInternalServerError, "workspace_list_failed", err.Error(), true, "", "")
 				return
@@ -348,6 +357,36 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	case "game":
+		if len(rest) == 3 && rest[1] == "creative" && rest[2] == "status" && r.Method == http.MethodGet {
+			status := creative.ProviderStatus{State: "not_configured", Provider: "none", PromptVersion: "genesis-naming-v1"}
+			if provider, ok := s.creativeProvider.(creative.StatusProvider); ok {
+				status = provider.ProviderStatus()
+			}
+			s.writeJSON(w, http.StatusOK, status)
+			return
+		}
+		if len(rest) == 3 && rest[1] == "creative" && rest[2] == "jobs" && r.Method == http.MethodGet {
+			if strings.TrimSpace(r.Header.Get("Authorization")) == "" || s.creativeJobStore == nil {
+				s.writeError(w, http.StatusUnauthorized, "creative_job_access_denied", "authenticated workspace session required", false, "", "")
+				return
+			}
+			tenantID := strings.TrimSpace(r.Header.Get("X-IAOS-Tenant-Id"))
+			if tenantID == "" {
+				s.writeError(w, http.StatusBadRequest, "creative_job_tenant_required", "X-IAOS-Tenant-Id is required", false, "", "")
+				return
+			}
+			if err := s.validateCreativeSession(ctx, r, tenantID); err != nil {
+				s.writeError(w, http.StatusForbidden, "creative_job_access_denied", err.Error(), false, "", "")
+				return
+			}
+			items, err := s.creativeJobStore.List(tenantID, strings.TrimSpace(r.URL.Query().Get("case")))
+			if err != nil {
+				s.writeError(w, http.StatusInternalServerError, "creative_job_read_failed", err.Error(), true, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, map[string]any{"items": items})
+			return
+		}
 		if len(rest) == 3 && rest[1] == "creative" && r.Method == http.MethodPost {
 			provider := s.creativeProvider
 			switch rest[2] {
@@ -355,6 +394,10 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				var request creative.FounderIntentRequest
 				if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &request); err != nil {
 					s.writeError(w, http.StatusBadRequest, "invalid_creative_request", err.Error(), false, "", "")
+					return
+				}
+				if err := s.validateCreativeSession(ctx, r, request.TenantID); err != nil {
+					s.writeError(w, http.StatusForbidden, "creative_session_invalid", err.Error(), false, "", "")
 					return
 				}
 				intent, err := provider.AnalyzeIntent(ctx, request)
@@ -370,15 +413,101 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 					s.writeError(w, http.StatusBadRequest, "invalid_creative_request", err.Error(), false, "", "")
 					return
 				}
-				proposals, err := provider.GenerateNames(ctx, intent)
+				if err := s.validateCreativeSession(ctx, r, intent.TenantID); err != nil {
+					s.writeError(w, http.StatusForbidden, "creative_session_invalid", err.Error(), false, "", "")
+					return
+				}
+				providerStatus := creative.ProviderStatus{State: "not_configured", Provider: "unknown", PromptVersion: "genesis-naming-v1"}
+				if statusProvider, ok := provider.(creative.StatusProvider); ok {
+					providerStatus = statusProvider.ProviderStatus()
+				}
+				inputHash := creative.Hash(intent)
+				jobID := "creative-" + strings.TrimPrefix(inputHash, "sha256:")[:24]
+				started := time.Now().UTC()
+				job := creative.CreativeJob{
+					JobID: jobID, TenantID: intent.TenantID, CaseCode: intent.CaseCode,
+					WorkspaceID: strings.TrimSpace(r.Header.Get("X-Genesis-Workspace-Id")),
+					CorrelationID: "corr-" + intent.CaseCode,
+					Kind: "company_naming", Status: "running", Provider: providerStatus.Provider,
+					Model: providerStatus.Model, ModelVersion: providerStatus.Model,
+					Prompt: providerStatus.PromptVersion, PromptVersion: providerStatus.PromptVersion,
+					BaseURLHost: providerStatus.BaseURLHost, InputHash: inputHash,
+					RequestID: jobID, CreatedAt: started.Format(time.RFC3339),
+					TokenUsage: map[string]int{}, ValidationResult: "pending",
+				}
+				if providerStatus.State == "fallback" {
+					job.FallbackReason = "external_model_not_configured"
+				}
+				if s.creativeJobStore != nil {
+					existing, replay, err := s.creativeJobStore.Begin(job)
+					if errors.Is(err, creative.ErrJobRunning) {
+						s.writeError(w, http.StatusConflict, "creative_job_running", "a naming job is already running for this input", true, "", "")
+						return
+					}
+					if err != nil {
+						s.writeError(w, http.StatusInternalServerError, "creative_job_write_failed", err.Error(), true, "", "")
+						return
+					}
+					if replay {
+						s.writeJSON(w, http.StatusOK, map[string]any{
+							"intent_id": intent.IntentID, "status": "candidate_only",
+							"proposals": existing.Parameters["proposals"], "creative_job": existing,
+							"provider_status": providerStatus, "idempotent_replay": true,
+						})
+						return
+					}
+				}
+				generationEvidence := creative.GenerationEvidence{TokenUsage: map[string]int{}}
+				generationCtx := creative.WithGenerationEvidence(ctx, func(e creative.GenerationEvidence) {
+					if e.RequestID != "" {
+						generationEvidence.RequestID = e.RequestID
+					}
+					if e.FinishReason != "" {
+						generationEvidence.FinishReason = e.FinishReason
+					}
+					for key, value := range e.TokenUsage {
+						generationEvidence.TokenUsage[key] += value
+					}
+				})
+				proposals, err := provider.GenerateNames(generationCtx, intent)
 				if err != nil {
+					job.Status = "failed"
+					job.Error = err.Error()
+					job.ValidationResult = "failed"
+					job.LatencyMS = time.Since(started).Milliseconds()
+					job.CompletedAt = time.Now().UTC().Format(time.RFC3339)
+					if s.creativeJobStore != nil {
+						_ = s.creativeJobStore.Save(job)
+					}
 					s.writeError(w, http.StatusBadGateway, "creative_provider_failed", err.Error(), true, "", "")
 					return
 				}
+				job.Status = "completed"
+				if generationEvidence.RequestID != "" {
+					job.RequestID = generationEvidence.RequestID
+				}
+				job.FinishReason = generationEvidence.FinishReason
+				if job.FinishReason == "" {
+					job.FinishReason = "stop"
+				}
+				job.TokenUsage = generationEvidence.TokenUsage
+				job.ValidationResult = "valid"
+				job.LatencyMS = time.Since(started).Milliseconds()
+				job.ContentHash = creative.Hash(proposals)
+				job.Parameters = map[string]any{"proposals": proposals}
+				job.CompletedAt = time.Now().UTC().Format(time.RFC3339)
+				if s.creativeJobStore != nil {
+					if err := s.creativeJobStore.Save(job); err != nil {
+						s.writeError(w, http.StatusInternalServerError, "creative_job_write_failed", err.Error(), true, "", "")
+						return
+					}
+				}
 				s.writeJSON(w, http.StatusOK, map[string]any{
-					"intent_id": intent.IntentID,
-					"status":    "candidate_only",
-					"proposals": proposals,
+					"intent_id":       intent.IntentID,
+					"status":          "candidate_only",
+					"proposals":       proposals,
+					"creative_job":    job,
+					"provider_status": providerStatus,
 				})
 				return
 			}
@@ -1665,6 +1794,34 @@ func extractBearerToken(r *http.Request) (string, error) {
 		return "", fmt.Errorf("Authorization must be Bearer token")
 	}
 	return strings.TrimSpace(parts[1]), nil
+}
+
+func (s *Server) validateCreativeSession(ctx context.Context, r *http.Request, tenantID string) error {
+	tenantID = strings.TrimSpace(tenantID)
+	if tenantID == "" {
+		return fmt.Errorf("creative request tenant is required")
+	}
+	if strings.TrimSpace(s.cfg.IAOSBaseURL) == "" {
+		return nil
+	}
+	token, err := extractBearerToken(r)
+	if err != nil || token == "" {
+		return fmt.Errorf("authenticated workspace session required")
+	}
+	client, err := iaosclient.New(iaosclient.Config{
+		BaseURL: s.cfg.IAOSBaseURL, Token: token, TenantID: tenantID,
+	})
+	if err != nil {
+		return fmt.Errorf("invalid IAOS session configuration")
+	}
+	profile, err := client.Profile(ctx)
+	if err != nil {
+		return fmt.Errorf("IAOS workspace session validation failed")
+	}
+	if profile.TenantID != tenantID {
+		return fmt.Errorf("workspace session tenant does not match creative request")
+	}
+	return nil
 }
 
 func firstNonEmpty(values ...string) string {

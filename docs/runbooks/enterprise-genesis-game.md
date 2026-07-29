@@ -6,13 +6,12 @@
 
 1. 输入游戏用户名登录。首次登录会关联当前浏览器此前创建企业所用的本机 player ID。
 2. 在“我的企业”点击“继续游戏”恢复已有企业；或点击“创建新企业”。
-3. 新建时输入创业项目名称。这里不是正式公司名称。
-4. 点击“创建空间并进入 AI 身份工作室”。
-5. 服务端自动分配 Workspace、IAOS tenant、World Run 和案件编号，建立 Founder，
-   安装 M9 Runtime 并激活租户。
-6. 成功后浏览器保存 `founder-principal` tenant-scoped token，自动进入 MiniMax M3
-   身份工作室；历史 Workspace 的管理员 token 会在首次创建案件遇到身份 422 时通过
-   owner-scoped session endpoint 自动刷新一次。
+3. 按五步向导填写创业项目、制造模板、区域/时区、真实性等级和数据保留确认。
+4. 点击“创建空间并进入身份工作室”。
+5. IAOS 服务端分配 Workspace、tenant、World Run 和案件编号，绑定真实 Player
+   subject，安装 M9 Runtime；AESE 写入 World binding evidence 后才完成 smoke 和激活。
+6. 成功后浏览器只保存 `genesis_owner` tenant-scoped token；它没有
+   `platform_super_admin` 或平台管理权限。
 
 进入新企业后不再直接填写设立表单：
 
@@ -25,11 +24,14 @@
 页面右侧主线任务显示当前目标；IAOS capability 与 evidence 属于治理层，不要求玩家
 先理解技术节点。
 
-本地状态保存在 `.aese-data/genesis-workspaces.json`，权限为 `0600`。同一玩家和
-idempotency key 重试返回同一个 tenant；不同创建动作得到不同 tenant。
+AESE 的 Workspace/World 稳定引用保存在 `.aese-data/genesis-workspaces.json`，权限为
+`0600`；tenant、owner membership、Runtime、checkpoint 和 session 的权威数据在 IAOS
+生产控制面。同一认证 Player 和 idempotency key 重试返回同一个 tenant；不同创建动作
+得到不同 tenant。
 
-本地 IAOS 地址为 loopback 时可以使用 dev adapter。非 loopback 部署必须给 AESE
-服务端配置 `GENESIS_PLATFORM_TOKEN`；不得把 token 写进 Vite 环境变量或浏览器。
+没有 IAOS Player session 时，loopback 本地开发仍可显式使用 dev adapter。正常产品
+路径必须把当前 Player session 转发给受限的 Genesis Workspace API；不得把平台 token
+写进 AESE 状态、Vite 环境变量或浏览器。
 
 当前限制：游戏用户名和 player ID 映射保存在浏览器 localStorage，只有本机体验意义，
 没有密码校验且不能跨设备找回。正式多人
@@ -61,8 +63,8 @@ npm run dev
 http://127.0.0.1:4173/#enterprise-genesis?tenant=tenant-hctm-genesis&case=<CASE_CODE>
 ```
 
-浏览器需要已有 `founder-principal` 登录 token。游戏把 token 传给 AESE，AESE 再读取
-IAOS 的已校验 evidence bundle 和 18 个持久工作项；前端不访问数据库。
+浏览器需要当前 Workspace 的 tenant session。游戏把 token 传给 AESE，AESE 再读取
+IAOS 的已校验 evidence bundle 和 23 个持久工作项；前端不访问数据库。
 
 ## 3. 操作主线
 
@@ -73,7 +75,7 @@ IAOS 的已校验 evidence bundle 和 18 个持久工作项；前端不访问数
    审批和系统任务；所有写入仍由 IAOS Runtime 治理，不需要跳转其他页面。
 4. 到登记、开户或任命 World wait 时，在游戏进入政务、银行或任命办理。AESE 发送受治理
    Observation，再执行对应 commit Capability；刷新后只展示新的 committed projection。
-5. 18 个工作项完成后进入“经营世界”，必须显示
+5. 23 个工作项完成后进入“经营世界”，必须显示
    `enterprise_operational_ready`、100%、五 Agent、资金与证据。
 
 ## 4. AI 与素材边界
@@ -111,7 +113,7 @@ npx playwright test e2e/enterprise-genesis-interactive.spec.ts
 
 GX_LIVE=1 \
 M9_EXPECT_READY=1 \
-M9_CASE_CODE=<通过18工作项完成的CASE_CODE> \
+M9_CASE_CODE=<通过23工作项完成的CASE_CODE> \
 npx playwright test e2e/enterprise-genesis-live.spec.ts
 ```
 

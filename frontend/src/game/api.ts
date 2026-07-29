@@ -11,11 +11,20 @@ export async function loadGameProjection(caseCode:string,frame:number,signal?:Ab
  return response.json() as Promise<GameProjection>;
 }
 async function postJSON<T>(path:string,body:unknown){
- const response=await fetch(path,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(body)});
+ const token=localStorage.getItem("iaos_token")??"";
+ const tenant=localStorage.getItem("aese_iaos_tenant_id")??localStorage.getItem("iaos_tenant_id")??"";
+ const workspace=localStorage.getItem("aese_genesis_workspace_id")??"";
+ const response=await fetch(path,{method:"POST",headers:{"content-type":"application/json",...(token?{Authorization:`Bearer ${token}`}:{}) ,...(tenant?{"X-IAOS-Tenant-Id":tenant}:{}),...(workspace?{"X-Genesis-Workspace-Id":workspace}:{})},body:JSON.stringify(body)});
  if(!response.ok)throw new Error(`Creative API ${response.status}`);
  return response.json() as Promise<T>;
 }
 export const analyzeFounderIntent=(request:FounderIntentRequest)=>postJSON<FounderIntent>("/api/aese/v1/game/creative/intent",request);
+export type CreativeProviderStatus={state:"connected"|"degraded"|"fallback"|"not_configured";provider:string;model:string;base_url_host?:string;prompt_version:string};
+export async function loadCreativeProviderStatus(){
+ const response=await fetch("/api/aese/v1/game/creative/status");
+ if(!response.ok)throw new Error(`Creative Provider 状态加载失败 ${response.status}`);
+ return response.json() as Promise<CreativeProviderStatus>;
+}
 export async function generateCompanyNames(intent:FounderIntent){
  const result=await postJSON<{status:"candidate_only";proposals:NamingProposal[]}>("/api/aese/v1/game/creative/names",intent);
  return result.proposals;
@@ -52,19 +61,23 @@ export function signOutGenesisPlayer(){
  localStorage.removeItem("iaos_tenant_id");
  localStorage.removeItem("aese_genesis_workspace_id");
  localStorage.removeItem("aese_genesis_case_code");
+ localStorage.removeItem("aese_genesis_player_token");
 }
 export async function listGenesisWorkspaces(){
  const player=genesisPlayerID();
- const response=await fetch("/api/aese/v1/genesis/workspaces",{headers:{"X-Genesis-Player-Id":player}});
+ const token=localStorage.getItem("aese_genesis_player_token")??localStorage.getItem("iaos_token")??"";
+ const response=await fetch("/api/aese/v1/genesis/workspaces",{headers:{"X-Genesis-Player-Id":player,...(token?{Authorization:`Bearer ${token}`}:{})}});
  if(!response.ok)throw new Error(`企业列表加载失败 ${response.status}: ${await response.text()}`);
  const result=await response.json() as{items:GenesisWorkspaceResult[]};
  return result.items;
 }
-export async function createGenesisWorkspace(displayName:string,idempotencyKey:string){
+export async function createGenesisWorkspace(input:{display_name:string;idempotency_key:string;template_key:string;region:string;timezone:string;realism_level:"standard"|"strict";data_retention_confirmed:boolean}){
  const player=genesisPlayerID();
- const response=await fetch("/api/aese/v1/genesis/workspaces",{method:"POST",headers:{"content-type":"application/json","X-Genesis-Player-Id":player},body:JSON.stringify({owner_player_id:player,display_name:displayName,idempotency_key:idempotencyKey})});
+ const token=localStorage.getItem("aese_genesis_player_token")??localStorage.getItem("iaos_token")??"";
+ const response=await fetch("/api/aese/v1/genesis/workspaces",{method:"POST",headers:{"content-type":"application/json","X-Genesis-Player-Id":player,...(token?{Authorization:`Bearer ${token}`}:{})},body:JSON.stringify({owner_player_id:player,...input})});
  if(!response.ok)throw new Error(`创业空间创建失败 ${response.status}: ${await response.text()}`);
  const result=await response.json() as GenesisWorkspaceResult;
+ if(token)localStorage.setItem("aese_genesis_player_token",token);
  localStorage.setItem("iaos_token",result.tenant_token);
  localStorage.setItem("aese_iaos_tenant_id",result.tenant_id);
  localStorage.setItem("iaos_tenant_id",result.tenant_id);
@@ -76,7 +89,8 @@ async function refreshGenesisSession(){
  const player=genesisPlayerID();
  const workspace=localStorage.getItem("aese_genesis_workspace_id");
  if(!workspace)throw new Error("缺少创业空间标识，请从游戏主页重新进入");
- const response=await fetch(`/api/aese/v1/genesis/workspaces/${encodeURIComponent(workspace)}/session`,{method:"POST",headers:{"X-Genesis-Player-Id":player}});
+ const token=localStorage.getItem("aese_genesis_player_token")??localStorage.getItem("iaos_token")??"";
+ const response=await fetch(`/api/aese/v1/genesis/workspaces/${encodeURIComponent(workspace)}/session`,{method:"POST",headers:{"X-Genesis-Player-Id":player,...(token?{Authorization:`Bearer ${token}`}:{})}});
  if(!response.ok)throw new Error(`Founder 会话刷新失败 ${response.status}: ${await response.text()}`);
  const result=await response.json() as GenesisWorkspaceResult;
  localStorage.setItem("iaos_token",result.tenant_token);
@@ -84,7 +98,8 @@ async function refreshGenesisSession(){
 }
 export async function resumeGenesisWorkspace(workspace:GenesisWorkspaceResult){
  const player=genesisPlayerID();
- const response=await fetch(`/api/aese/v1/genesis/workspaces/${encodeURIComponent(workspace.workspace_id)}/session`,{method:"POST",headers:{"X-Genesis-Player-Id":player}});
+ const token=localStorage.getItem("aese_genesis_player_token")??localStorage.getItem("iaos_token")??"";
+ const response=await fetch(`/api/aese/v1/genesis/workspaces/${encodeURIComponent(workspace.workspace_id)}/session`,{method:"POST",headers:{"X-Genesis-Player-Id":player,...(token?{Authorization:`Bearer ${token}`}:{})}});
  if(!response.ok)throw new Error(`进入企业失败 ${response.status}: ${await response.text()}`);
  const result=await response.json() as GenesisWorkspaceResult;
  localStorage.setItem("iaos_token",result.tenant_token);

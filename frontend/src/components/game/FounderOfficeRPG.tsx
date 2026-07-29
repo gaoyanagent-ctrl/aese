@@ -1,6 +1,7 @@
 import { ArrowLeft, Bot, Check, LoaderCircle, MapPin, MessageSquareText, ShieldCheck, Sparkles } from "lucide-react";
-import { useMemo, useState } from "react";
-import { analyzeFounderIntent, createIncorporationCase, generateCompanyNames } from "../../game/api";
+import { useEffect, useMemo, useState } from "react";
+import { analyzeFounderIntent, createIncorporationCase, generateCompanyNames, loadCreativeProviderStatus } from "../../game/api";
+import type { CreativeProviderStatus } from "../../game/api";
 import type { FounderIntentRequest, NamingProposal } from "../../game/types";
 import { FounderOfficeCanvas } from "./FounderOfficeCanvas";
 import "./FounderOfficeRPG.css";
@@ -23,7 +24,7 @@ const lines=[
  ["很好。第一批客户是谁？这会决定企业的价值主张。"],
  ["你准备靠什么产品或服务赢得市场？"],
  ["最后定下公司的性格。数字员工会据此调整建议风格。"],
- ["我已经整理出创业构想。你可以补充一句自己的想法，然后让 MiniMax M3 形成身份提案。"],
+ ["我已经整理出创业构想。你可以补充一句自己的想法，再使用当前已连接的创意 Provider 形成身份提案。"],
  ["身份提案已经送达。选一个你愿意带领十年的名字。"],
  ["正式提交前，确认企业落在哪里、准备经营什么。之后 IAOS 会创建受治理的设立案。"],
 ];
@@ -34,6 +35,9 @@ export function FounderOfficeRPG({caseCode,onExit,onCreated}:{caseCode:string;on
  const[idea,setIdea]=useState("我想创建一家真正理解制造现场、重视工程可靠性并坚持长期主义的企业。");
  const[names,setNames]=useState<NamingProposal[]>([]),[selected,setSelected]=useState(""),[address,setAddress]=useState("江苏省苏州市工业园区创生大道1号"),[scope,setScope]=useState("工业产品的研发、制造、销售与技术服务");
  const[busy,setBusy]=useState(false),[error,setError]=useState("");
+ const[provider,setProvider]=useState<CreativeProviderStatus>({state:"not_configured",provider:"none",model:"",prompt_version:"genesis-naming-v1"});
+ useEffect(()=>{void loadCreativeProviderStatus().then(setProvider).catch(()=>setProvider({state:"degraded",provider:"unknown",model:"",prompt_version:"genesis-naming-v1"}))},[]);
+ const providerLabel=provider.state==="connected"?`${provider.provider} ${provider.model}`:"确定性离线候选";
  const progress=Math.round(stage/7*100);
  const line=lines[Math.min(stage,7)];
  const next=(value:string)=>{
@@ -56,7 +60,7 @@ export function FounderOfficeRPG({caseCode,onExit,onCreated}:{caseCode:string;on
    <div className="gx-rpg__speech"><MessageSquareText aria-hidden="true"/><p>{line[0]}</p>{line[1]&&<span>{line[1]}</span>}
     {stage===0&&<div className="gx-rpg__avatars">{avatars.map((item,index)=><button key={item.name} className={avatar===index?"selected":""} onClick={()=>setAvatar(index)}><i style={{"--skin":item.skin,"--hair":item.hair} as React.CSSProperties}/><strong>{item.name}</strong><small>{item.role}</small></button>)}<button className="gx-rpg__continue" onClick={()=>setStage(1)}>使用这个形象 <ArrowLeft/></button></div>}
     {stage>=1&&stage<=4&&<div className="gx-rpg__choices">{Object.values(choices)[stage-1].map(choice=><button key={choice} onClick={()=>next(choice)}>{choice}<span>选择</span></button>)}</div>}
-    {stage===5&&<div className="gx-rpg__idea"><label>补充你的创业宣言<textarea value={idea} onChange={event=>setIdea(event.target.value)}/></label><button onClick={()=>void generate()} disabled={busy}>{busy?<LoaderCircle className="gx-spin"/>:<Sparkles/>}{busy?"数字员工正在与 MiniMax M3 协作…":"让 AI 形成 4 组企业身份提案"}</button></div>}
+    {stage===5&&<div className="gx-rpg__idea"><label>补充你的创业宣言<textarea value={idea} onChange={event=>setIdea(event.target.value)}/></label><small>{provider.state==="connected"?`外部模型已连接：${providerLabel}`:"外部模型未启用；结果将明确标记为确定性 fallback。"}</small><button onClick={()=>void generate()} disabled={busy}>{busy?<LoaderCircle className="gx-spin"/>:<Sparkles/>}{busy?`${providerLabel} 正在生成…`:`让 ${providerLabel} 形成 4 组企业身份提案`}</button></div>}
     {stage===6&&<div className="gx-rpg__names">{names.map(item=><button key={item.proposal_id} className={selected===item.proposal_id?"selected":""} style={{"--brand":item.primary_color} as React.CSSProperties} onClick={()=>setSelected(item.proposal_id)}><i>{item.short_name.slice(0,1)}</i><div><strong>{item.chinese_name}</strong><small>{item.english_name}</small><p>{item.slogan}</p></div>{selected===item.proposal_id&&<Check/>}</button>)}{selected&&<button className="gx-rpg__continue" onClick={()=>setStage(7)}>我选择这个名字 <ArrowLeft/></button>}</div>}
     {stage===7&&<div className="gx-rpg__final"><label>注册地址<input value={address} onChange={event=>setAddress(event.target.value)}/></label><label>经营范围<textarea value={scope} onChange={event=>setScope(event.target.value)}/></label><button onClick={()=>void commit()} disabled={busy||!selected}>{busy?<LoaderCircle className="gx-spin"/>:<ShieldCheck/>}{busy?"正在写入 IAOS 企业事实…":"签署创始人指令并启动企业设立"}</button></div>}
     {error&&<p className="gx-rpg__error" role="alert">{error}</p>}
