@@ -23,7 +23,7 @@
 | M9N IAOS-native Incorporation Closed Loop | 用三层语义、正式身份、Runtime Artifact、Capability/Process/Approval、持久工作项和 World Bridge 重建 M9 真实闭环 | Completed | 25 个 Capability active binding；23 个显式工作项（含 5 个财务开业节点）、G1–G7、三个 World wait、六次 Run/五 Agent 与中途重启恢复真实集成通过 |
 | GX Enterprise Genesis Game Experience | AI 企业身份、人工/Agent 协作和 2.5D 世界中的 M9 游戏化开局 | Completed | DES-028、从空白 case 创建、23 工作项游戏内操作、G1–G7、三个 World wait、三视口 live 浏览器验收 |
 | GX-ZERO Zero-start Enterprise Genesis | 从产品主页创建独立 tenant、World Run、真实 AI 企业身份和 M9 企业 | Active | 全 17 RPG 事件、角色/资产透明精灵、室内移动、音效、奖励、大事记、Founder 多租户选择、双租户隔离与失败恢复已完成；剩余生产控制面持久 CreativeJob 与平台级 workspace API 后进入 M10 |
-| M9-FIN Manufacturing Finance Foundation | 在 M9 建立财务组织、账套、科目、期初资本会计和开业报表，并在 M10–M13 接通 AP/AR/资金/资产/成本/总账 | Active | M9 F1 已交付财务组织、账套、期间、资本双分录、就绪硬门、开业报表、穿透工作台及 5 个显式财务工作项；25 个 M9 Capability 全部进入 execution 边界；19 张历史投影已迁移为里程碑无关存储。完整职责矩阵、非 M9 业务写入迁移和 M10–M13 子账仍未完成 |
+| M9-FIN Manufacturing Finance Foundation | 在 M9 建立财务组织、账套、科目、期初资本会计和开业报表，并在 M10–M13 接通 AP/AR/资金/资产/成本/总账 | Active | M9 F0–F13B 已交付 6 岗位/2 active Mandate/4 阻断 SoD、5 个责任工作项与通知、资本双分录、就绪硬门、开业报表及 AESE↔IAOS 组织/账务/报表穿透；非 M9 业务写入迁移和 M10–M13 子账仍未完成 |
 | M10 Genesis Plant Build | 选址、场地控制、设施项目、公用工程、异常重排与验收 | Reference Replay Complete; D22 Pending | hctm-genesis@0.3.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
 | M11 Genesis Capability Build | 资金补足、设备/实验室/仓储能力、核心团队与岗位资格 | Reference Replay Complete; D22 Pending | hctm-genesis@0.4.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
 | M12 Genesis Industrialization | RFQ/定点、产品/工艺、供应商/工装、APQP、试制、PPAP 与量产批准 | Reference Replay Complete; D22 Pending | hctm-genesis@0.5.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
@@ -82,7 +82,7 @@ DES-030 已批准把完整制造企业财务底座纳入 Project Genesis。该�
 AP、AR、固定资产、制造成本和总账。PLAN-M9-FIN-001 已进入 active：M9 已完成首批
 财务 Entity/Capability/Process、资本双分录、开业报表、就绪硬门和 IAOS 财务穿透页；
 25 个 M9 Capability 已按 M9 D27 进入统一执行边界；财务开业 5 个动作成为显式工作项，无 Capability Execution
-Context 的凭证 DML 由数据库拒绝。F10、F13 及 F15–F35 和非财务受治理写入迁移仍未
+Context 的凭证 DML 由数据库拒绝。F10、F13 已完成；F15–F35 和非财务受治理写入迁移仍未
 完成，不得把当前开业切片描述为完整会计系统或全平台 Capability 强制迁移完成。
 
 M7 O0-O4 已完成。最终 `m7-acceptance-20260722-05` 从 clean reset 跑通编排 API 与 CLI 对照链：22 个事件、三 Agent、17 条离线业务断言、2 条在线 IAOS 断言和 M6 KPI 均通过；单 run 产生 9 次成功 Tool Call 与两套一致的 O2D Outbox 副作用，UI/CLI 均安全复位。AESE 8090/4173 与 IAOS 8082/3000 的本机部署和健康检查已记录在 M7 evidence。该基线由 M8 强制保留。

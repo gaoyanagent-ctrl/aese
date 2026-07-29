@@ -312,3 +312,19 @@ P0
 裸 `UPDATE finance_journal_entry` 继续返回 `governed_write_context_required`。
 后续 AP/AR、库存、资产、成本等表必须按
 IAOS DES-065 的风险顺序进入同一强制边界，不能把当前财务纵切误称为全平台迁移完成。
+
+## 19. D28 财务责任岗位与游戏内逐节点协作
+
+- [x] T107 IAOS Runtime 1.8.0 发布六个财务岗位模板、两个现任服务主体 Mandate 和四条
+      阻断型 SoD；空缺岗位不得由 Founder 或 Runtime 隐式占位。
+- [x] T108 五个财务工作项分别保存执行者、责任岗位、通知对象和空缺升级标记；激活时
+      原子写入幂等 `incorporation.work_item.assigned` Outbox。
+- [x] T109 IAOS 财务工作台增加“组织与待办”，显示岗位任职、Mandate、能力范围、SoD
+      和案件五个财务责任节点。
+- [x] T110 AESE 将五个财务节点路由到企业总部，补齐业务说明和玩家逐项执行入口；开业
+      财务中心在建设期即可穿透 IAOS 组织与待办，完成后再开放账务和报表入口。
+
+验收：目标租户安装 Runtime 1.8.0 后返回 6 个岗位、4 条 SoD 和 5 个财务节点；
+财务负责人、内审为 active，Controller/总账/资金/成本为 vacant；同一主体兼任资金与
+总账被数据库 `finance_sod_violation` 阻断且无残留。AESE 前端 20 个测试文件/56 项测试
+与生产构建通过。

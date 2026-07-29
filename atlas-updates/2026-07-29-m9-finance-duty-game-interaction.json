@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.finance-duty-game-interaction.2026-07-29",
+  "node_key": "aese.m9",
+  "update_type": "implementation",
+  "summary": "完成 M9 财务责任治理与游戏逐节点协作",
+  "detail": "AESE 将五个 IAOS 财务工作项路由到企业总部并补齐业务说明；财务中心在建设期可穿透 Runtime 1.8.0 的六岗位、Mandate、四条 SoD、通知与责任待办，完成后继续穿透账务和报表。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "M9 玩家可逐项推进财务开业，并从游戏穿透查看 IAOS 权威责任和执行证据；M10–M13 财务子账仍按后续里程碑建设。",
+  "evidence_ref": "docs/designs/DES-030-manufacturing-finance-operating-system.md",
+  "occurred_at": "2026-07-29T15:25:00Z"
+}

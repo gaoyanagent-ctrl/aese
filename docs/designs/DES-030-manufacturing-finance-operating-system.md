@@ -311,15 +311,19 @@ IAOS DES-064 已将 19 张投影原位迁移为 `entity_projection_*`，保留 U
 
 ### 8.1 M9 新增工作项
 
-现有组织建立后、开业检查前增加：
+实缴资本核验后、初始组织建立前增加五个已发布工作项：
 
-1. `finance.organization.establish`：建立 CFO、Controller、会计、出纳和成本岗位；
-2. `accounting.book.configure`：选择账套、会计准则、本位币、年度和期间；
-3. `chart.of.accounts.activate`：启用制造业科目及财务维度；
-4. `opening.balance.prepare`：从已验证银行、资本和成立费用生成期初凭证草稿；
-5. `opening.balance.approve`：Founder/CFO 双人复核开业资产负债；
-6. `opening.balance.post`：过账期初凭证并完成总账/银行对账；
-7. `finance.readiness.evaluate`：验证岗位、账套、规则、期间、凭证和报表可用。
+1. `finance.organization.configure`：安装财务负责人、Controller、总账、资金、成本和内审岗位模板；
+2. `accounting.book.activate`：选择账套、CAS-BE、CNY 本位币、年度和首个开放期间；
+3. `chart.of.accounts.activate`：启用开业科目及控制属性；
+4. `capital.contribution.post`：从已验证银行到账和资本事实生成并过账双分录凭证；
+5. `finance.opening.readiness.evaluate`：验证岗位模板、账套、期间、凭证和借贷平衡。
+
+这五项都是 23 节点正式主流程的一部分，不再是
+`capital.contribution.verify` 的隐藏内部副作用。玩家在 AESE 企业总部逐项发起，
+IAOS `iaos-runtime` 执行确定性 Capability，但责任分别归属 `finance-lead`、
+`finance-controller`、`general-ledger-accountant` 和 `internal-audit`。执行者不等于责任人。
+需要人工审批的资本事实仍由既有 G4 冻结并决定；M9 不额外虚构一个“自动批准期初凭证”的门。
 
 M9 终态增加 `finance_opening_ready=true`，并作为
 `enterprise_operational_ready` 的必要条件。既有案件需要版本化迁移或补建流程，禁止
@@ -353,8 +357,8 @@ M9 终态增加 `finance_opening_ready=true`，并作为
 
 ### 8.3 当前已实现的开业读取与硬门
 
-当前兼容版本先把资本核验后的财务子步骤放在同一事务中，避免旧 18 节点案件因流程版本
-变化失去重放能力；8.1 的七个显式工作项仍由 F13 在新流程版本中交付。
+当前 Runtime 1.8.0 已把资本核验后的五个财务子步骤编译为第 11–15 项持久工作项。
+历史已完成案件不改写事实；新案件和仅完成首节点的可安全迁移案件使用 23 节点流程。
 
 已实现读取模型：
 
@@ -526,14 +530,14 @@ input/output contract、权限、额度、数据范围、失败升级、证据�
 
 M9 企业总部新增“财务中心”，玩家依次完成：
 
-1. 与 CFO 候选人讨论财务治理原则；
-2. 建立财务组织并处理兼岗冲突；
-3. 选择会计准则、会计年度和制造业科目模板；
-4. 查看银行注资 Observation；
-5. 让会计 Agent 生成期初凭证草稿；
-6. 穿透查看“银行到账 → 资本事项 → 记账规则 → 凭证 → 总账 → 报表”；
-7. Founder 与 CFO 双人确认开业资产负债；
-8. 在财务驾驶舱查看现金、实收资本、成立费用和未清应付。
+1. 查看六个财务责任岗位，识别 Controller、总账、资金和成本岗位空缺；
+2. 检查四条职责分离规则，冲突兼任由 IAOS 数据库拒绝；
+3. 发起 `finance.organization.configure`；
+4. 发起账套/期间与科目启用；
+5. 在银行 Observation 和 G4 资本事实成立后发起资本过账；
+6. 发起内部审计财务就绪检查；
+7. 穿透查看“银行到账 → 资本事项 → Capability Execution → 凭证 → 总账 → 报表”；
+8. 在 IAOS“组织与待办”查看执行者、责任岗位、Mandate、通知对象和岗位空缺升级。
 
 后续 M10–M13 每个业务章节同时出现财务后果，但不要求玩家逐张手工制证。正常自动凭证由
 规则生成；异常、重大金额、手工调整、关账和政策选择才进入玩家/财务人员决策。
@@ -562,8 +566,15 @@ IAOS 目标菜单：
 
 当前已交付 IAOS `财务账务与报表`（`#finance_workspace`）第一纵切，可按设立案查看
 财务组织、账套、期间、开业凭证、银行日记账、总账/试算平衡和开业资产负债表。AESE
-企业总部与治理档案通过“查看系统账务 / 查看财务报表”进入该页面。页面数据来自
+企业总部与治理档案通过“查看组织与待办 / 查看系统账务 / 查看财务报表”进入该页面。
+组织视图来自 `GET /api/v1/finance/opening/:case_code/operations`，账务和报表来自
 `GET /api/v1/finance/opening/:case_code` 的同一已过账凭证，不是游戏投影的复制。
+
+Runtime 1.8.0 安装六条 `finance_duty_definition`、四条阻断型
+`finance_sod_rule`，并只为已有任职主体的 `finance-agent@finance-lead` 与
+`audit-agent@internal-audit` 保留 active Mandate。其余岗位明确为 vacant；工作项激活时
+生成幂等 `incorporation.work_item.assigned` Outbox。空缺责任岗位会通知 Founder 补位，
+但不会把 Founder 伪装成财务任职人。
 
 完整财务报表按“业务事实/子账 → 凭证与总账 → 期间报表读取模型 → 已审批发布快照 →
 管理 KPI/驾驶舱”五层建设。M9 当前只完成开业凭证和开业资产负债表，不包含利润表、

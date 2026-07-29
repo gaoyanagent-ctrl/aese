@@ -9,7 +9,7 @@ function iaosBaseUrl(): string {
 
 export function financeWorkspaceUrl(
   projection: Pick<GameProjection, "tenant_id" | "case_code">,
-  view: "ledger" | "reports",
+  view: "ledger" | "reports" | "operations",
 ): string {
   const query = new URLSearchParams({
     tenant: projection.tenant_id,

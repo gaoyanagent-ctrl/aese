@@ -1548,3 +1548,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：目标租户已获得 25 个 active 执行绑定和新版财务子流程；新建设立案使用 23 个持久工作项，历史已完成案件保持原事实不被改写。文档不再把通知、Mandate 和游戏交互误标为已完成。
 - 验证：目标租户 Runtime 1.7.0 为 active、1.6.0 为 superseded；25 个 M9 binding 均 active；目标 Outbox 43/43 `PROCESSED`；PostgreSQL tracer 以 23 工作项、7 门、3 World wait、6 Agent Run/5 Agent 到达运营就绪；IAOS Go、vet、治理检查、Code Map 和 Atlas 检查通过。
 - 后续：完成 F10/F13B 财务职责、Mandate、通知和游戏交互；隔离全量 PostgreSQL integration 测试数据库，并按 DES-065 继续扩展非 M9 业务写入治理。
+
+## 2026-07-29 - M9 财务责任岗位、通知与游戏协作闭环
+
+- 变更：IAOS Runtime 1.8.0 安装六个财务责任岗位、两个现任 Agent Mandate 和四条阻断 SoD；五个财务工作项保存执行者、责任岗位、通知对象及空缺升级，并在激活时写幂等 Outbox。财务工作台新增“组织与待办”。AESE 将五个财务节点路由到企业总部，补齐逐项操作说明，并让开业财务中心在建设期即可穿透组织、Mandate、SoD 和待办。
+- 原因：只有财务 Capability 和自动执行节点仍无法回答“谁负责、谁能做、岗位空缺怎么办”，游戏中的财务中心也不能只在全部完成后才成为可点击装饰。
+- 影响：玩家逐项触发财务组织、账套、科目、资本过账和就绪检查；`iaos-runtime` 仍是确定性执行者但不冒充会计责任人。Controller、总账、资金和成本岗位默认明确为空缺，通知 Founder 补位但不伪造任职。
+- 验证：IAOS 主线 `ff259a8` 已推送和部署；目标租户安装 Runtime 1.8.0，API 返回 6 岗位、4 SoD、5 财务节点，重复安装 no-op；资金与总账同主体兼任被数据库阻断且回滚无残留。AESE 前端测试与生产构建通过。
+- 后续：M9 财务 F10/F13B 关闭；继续 F15–F35，按 M10–M13 真实工程、资产、采购、生产和销售事实建设 AP/AR、固定资产、制造成本、结账和完整报表。
