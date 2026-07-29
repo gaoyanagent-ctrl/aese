@@ -42,7 +42,7 @@
 | 文档索引 | `docs/README.md` | 文档分类、状态和编号 |
 | 项目上下文 | `docs/agent-project-context.md` | Agent 快速入门 |
 | 架构 | `docs/architecture.md` | 仓库边界、数据流、安全和可重复性 |
-| 路线图 | `docs/roadmap.md` | 里程碑状态；当前 active 主计划为 M9N D22 交互式经营补强 |
+| 路线图 | `docs/roadmap.md` | 里程碑状态；当前 active 主计划为 PLAN-GXZ-001 零起点主页、独立租户与真实 AI |
 | 代码导航 | `docs/code-map.md` | 本文件 |
 | 历史记录 | `docs/progress-log.md` | 只追加进展日志 |
 | 薄编排服务入口 | `cmd/aese-server/main.go` | M7 run orchestration HTTP 服务启动入口 |
@@ -124,13 +124,20 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | 任务 | 路径 |
 | --- | --- |
 | 前端工程与依赖 | `frontend/` |
-| 应用壳和响应式布局 | `frontend/src/App.tsx`、`frontend/src/styles/global.css` |
+| 应用壳和根路由 | `frontend/src/App.tsx`；根路径进入 Enterprise Genesis Home，`#sandbox` 保留旧样板沙盘 |
+| Enterprise Genesis 产品主页 | `frontend/src/components/game/GenesisHome.tsx`、`GenesisHome.css`；创建企业、样板世界、M9 旅程和开发状态入口 |
+| Genesis Workspace onboarding | `frontend/src/components/game/GenesisOnboarding.tsx`、`frontend/src/game/api.ts`；先自动创建隔离空间再进入身份工作室 |
+| Genesis 游戏登录与企业大厅 | `frontend/src/components/game/GenesisLogin.tsx`、`GenesisCompanyLobby.tsx`、`frontend/src/game/api.ts`；本机用户名映射 owner player ID，owner-scoped 列表与 Founder session 恢复 |
+| Genesis Workspace BFF | `internal/genesisworkspace/`、`/api/aese/v1/genesis/workspaces`、`POST /api/aese/v1/genesis/workspaces/:workspace/session`；本地幂等映射、IAOS tenant/Founder/M9 Runtime/owner-scoped Founder session 编排 |
+| Enterprise Genesis AI 身份 | `internal/creative/minimax_provider.go`、`provider.go`、`cmd/aese-server/main.go`；配置 MiniMax-M3 真实生成，deterministic provider 仅作未配置时的显式离线基线 |
+| Enterprise Genesis RPG 主线 | `frontend/src/components/game/FounderOfficeRPG.tsx`、`FounderOfficeCanvas.tsx`、`MissionBriefing.tsx`、`RPGEventIntro.tsx`、`LocationScene.tsx`、`frontend/src/game/iaosLinks.ts`；全 17 工作项专属剧情、FounderProfile、城市/室内玩家移动、旅行转场、生成式 NPC 精灵、可检查物件、财务穿透、音效、奖励、大事记和 committed trophy |
+| 设立与企业主数据 | IAOS `platform/internal/api/incorporation.go`；`incorporation_case` 显式拟设资料列，登记 committed 后物化 `entity_projection_legal_entity`；IAOS SOL-036 / DES-064 / AESE SOL-005 |
 | 2D 画布与沙盘组件 | `frontend/src/components/` |
 | 播放 reducer 和 Hook | `frontend/src/playback/` |
 | 视图模型、校验和静态数据源 | `frontend/src/scenario/` |
 | 场景预览数据 | `scenario-packs/hctm/stories/order-expedite-01/preview.json` |
 | 单元与组件测试 | `frontend/src/**/*.test.ts(x)` |
-| 浏览器验收 | `frontend/e2e/` |
+| 浏览器验收 | `frontend/e2e/`；根主页回归见 `genesis-home.spec.ts` |
 | 固定视口截图 | `frontend/test-results/*-completed.png` |
 | 启动和操作手册 | `docs/runbooks/hctm-m3v-2d-sandbox.md` |
 | M3V 验收证据 | `docs/reports/hctm-m3v-2d-sandbox-evidence.md` |
@@ -222,13 +229,15 @@ F0 合同入口已创建；F1-F5 目标路径仍须在实现时更新为实际�
 | M7 World Event adapter | `internal/legacyprojection/` |
 | World Play UI | `frontend/src/components/world/`、`frontend/src/world/` |
 | 企业生命周期首页与全程导航 | `frontend/src/components/world/WorldLifecycleHub.tsx`、`WorldLifecycleHub.css`、`#world`；M8 tracer 独立为 `#world-tristate` |
-| M9 IAOS 原生真实闭环设计 | `docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md`；D19 通用资产可发现性、D20 逐步骤追踪、D21 可解释合同、D22 持久工作项与逐节点参与、D23 Agent Runtime/工具/运行证据及外部模型边界、D24 配置驱动审批路由/工作分发/通知、D25 Entity 生命周期与正式审批单一语义；通用实现见 IAOS DES-053 |
+| M9 IAOS 原生真实闭环设计 | `docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md`；D19 通用资产可发现性、D20 逐步骤追踪、D21 可解释合同、D22 持久工作项与逐节点参与、D23 Agent Runtime/工具/运行证据及外部模型边界、D24 配置驱动审批路由/工作分发/通知、D25 Entity 生命周期与正式审批单一语义、D26 财务开业、D27 全量 Capability 执行边界与 23 项显式正常路径；通用实现见 IAOS DES-053/DES-065 |
 | M9 IAOS 原生真实闭环 active remediation plan | `docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md`；原完成结论因通用注册中心/工作区缺口撤回，当前以 11/20/5/8/8/5/10 数量、records API、十工作区和重复安装 no-op 为关闭门 |
 | M9 游戏化企业创生体验设计 | `docs/designs/DES-028-enterprise-genesis-game-experience.md`；AI 企业身份工作室、2.5D 世界、人工/Agent 协作、GameProjection、CreativeJob 与 GX0–GX5 |
+| Genesis 零起点与真实 AI 设计 | `docs/decisions/ADR-006-genesis-workspace-precedes-enterprise.md`、`docs/designs/DES-029-genesis-zero-start-and-ai-identity.md`、`docs/plans/2026-07-28-genesis-zero-start-and-ai-identity.md`；根主页 → PlayerAccount → GenesisWorkspace → IAOS tenant provisioning → AESE World Run → MiniMax naming → incorporation case；当前 active |
+| M9–M13 制造企业财务运行体系 | `docs/designs/DES-030-manufacturing-finance-operating-system.md`、`docs/plans/2026-07-28-m9-manufacturing-finance-foundation.md`；IAOS `platform/internal/entityprojection/storage.go`、`platform/internal/api/finance_opening.go`、`platform/internal/incorporation/platform_assets.go`、`platform/internal/compiler/entity.go`、`frontend/src/components/finance/FinanceWorkspace.tsx`、DES-063/DES-064 与 SOL-039；AESE `internal/iaosclient/incorporation.go`、`internal/gameprojection/iaos.go`、`frontend/src/components/game/{LocationScene,EnterpriseGenesisGame}.tsx`、`frontend/src/game/iaosLinks.ts` | M9 已实现财务组织、账套、期间、1002/4001、实收资本双分录、就绪硬门、历史回填、银行日记账、总账、试算平衡、开业资产负债表、IAOS 正式工作台与游戏穿透；人工 INTERACTIVE 案件保留并回填，19 张历史 `m9_*` 已原位迁移为 `entity_projection_*`，M10+ 禁止里程碑前缀投影；M10/M11 AP/资产、M12/M13 成本/O2C、完整月结和经营报表仍按 active plan 后续交付 |
 | Enterprise Genesis active subplan | `docs/plans/2026-07-27-enterprise-genesis-game-experience.md`；M9N 下的并行 AESE owner，GX0–GX5 / GXT1–GXT46 |
-| GameProjection 合同/API | `internal/gameprojection/`、`internal/iaosclient/incorporation.go`、`world-contracts/schemas/game-projection.schema.json`、`world-contracts/fixtures/game-projection.json`、`GET /api/aese/v1/game/incorporation/:case/projection?frame=`；配置 `aese-server --iaos-base-url` 后读取 IAOS verified evidence bundle 与18个持久工作项，离线时才使用确定性 trace |
-| Enterprise Genesis 游戏入口 | `frontend/src/components/game/EnterpriseGenesisGame.tsx`、`BrandStudio.tsx`、`IsometricCanvas.tsx`、`frontend/src/game/`、`#enterprise-genesis?tenant=&case=`；PixiJS 2.5D、DOM/2D fallback、AI 名称候选、`incorporation.case.open`、IAOS 工作项深链、World Observation 和三层证据视图 |
-| Enterprise Genesis 素材与验收 | `frontend/public/assets/enterprise-genesis/manifest.json`、`frontend/e2e/enterprise-genesis.spec.ts`、`enterprise-genesis-live.spec.ts`、`docs/runbooks/enterprise-genesis-game.md`；原创素材 hash/许可、mock/live 三视口、刷新恢复 |
+| GameProjection 合同/API | `internal/gameprojection/`、`internal/iaosclient/incorporation.go`、`world-contracts/schemas/game-projection.schema.json`、`world-contracts/fixtures/game-projection.json`、`GET /api/aese/v1/game/incorporation/:case/projection?frame=`；配置 `aese-server --iaos-base-url` 后读取 IAOS verified evidence bundle、Agent Run output、23 个持久工作项（含 5 个财务开业节点）及 G1–G7 可审阅事项，离线时才使用确定性 trace |
+| Enterprise Genesis 游戏入口 | `frontend/src/components/game/EnterpriseGenesisGame.tsx`、`LocationScene.tsx`、`BrandStudio.tsx`、`WorkItemActionPanel.tsx`、`frontend/src/game/`、`#enterprise-genesis?tenant=&case=`；统一城市热点进入四类室内地点，主线通过建筑/NPC/资产推进，Work Item 降级到治理档案，并保留 G1–G7、登记/开户补正和虚构证照资产 |
+| Enterprise Genesis 素材与验收 | `frontend/public/assets/enterprise-genesis/manifest.json`、`locations/`、`sprites/`、`frontend/e2e/enterprise-genesis.spec.ts`、`enterprise-genesis-live.spec.ts`、`enterprise-genesis-interactive.spec.ts`、`docs/reports/genesis-rpg-and-multi-tenant-acceptance.md`、`docs/runbooks/enterprise-genesis-game.md`；场景/透明精灵 hash 与许可、三视口、Founder 多租户选择、cross-read 隔离和失败恢复 |
 | M9N 冻结合同、审计与风险 | `docs/contracts/m9-native-incorporation-contract.json`、`docs/reports/m9-native-asset-audit.json`、`docs/reports/m9-native-risk-register.json`；独立 IAOS worktree `/iaos/iaos-go-m9-native` |
 | M9N Bridge reconciliation | `internal/bridge/iaos/reconcile.go`、`aese reconcile <bridge-journal.json>` | 对持久 journal 按 message/correlation/hash 报告 missing、duplicate、lagging、hash_mismatch、terminal_conflict；稳定排序、只读、可离线复验 |
 | M9N IAOS lifecycle 联动页面 | `frontend/src/world/incorporation.ts`、`frontend/src/world/incorporationStepTrace.ts`、`frontend/src/components/world/IncorporationPlay.tsx`；`#world-incorporation?tenant=&case=&process_run=&world_run=&correlation=` | 按 D20 映射 8 个 World frame/15 次 transition；按 D22 默认只解锁 IAOS 已提交阶段，用户同步后查看下一已完成阶段，不能用本地播放制造业务进度 |

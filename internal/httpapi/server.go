@@ -24,6 +24,7 @@ import (
 	"github.com/industrial-ai/iaos-aese/internal/firstdelivery"
 	"github.com/industrial-ai/iaos-aese/internal/gameprojection"
 	"github.com/industrial-ai/iaos-aese/internal/genesis"
+	"github.com/industrial-ai/iaos-aese/internal/genesisworkspace"
 	"github.com/industrial-ai/iaos-aese/internal/iaosclient"
 	"github.com/industrial-ai/iaos-aese/internal/incorporation"
 	"github.com/industrial-ai/iaos-aese/internal/industrialization"
@@ -42,20 +43,24 @@ const (
 )
 
 type Config struct {
-	PackDir        string
-	IAOSBaseURL    string
-	RequestTimeout time.Duration
-	BodyLimit      int64
-	Logger         *log.Logger
+	PackDir                 string
+	IAOSBaseURL             string
+	RequestTimeout          time.Duration
+	BodyLimit               int64
+	Logger                  *log.Logger
+	CreativeProvider        creative.Provider
+	GenesisWorkspaceService *genesisworkspace.Service
 }
 
 type Server struct {
-	cfg   Config
-	mux   *http.ServeMux
-	logf  func(format string, args ...any)
-	mu    sync.RWMutex
-	runs  map[string]*runRecord
-	order []string
+	cfg                     Config
+	mux                     *http.ServeMux
+	logf                    func(format string, args ...any)
+	mu                      sync.RWMutex
+	runs                    map[string]*runRecord
+	order                   []string
+	creativeProvider        creative.Provider
+	genesisWorkspaceService *genesisworkspace.Service
 }
 
 type actionCache struct {
@@ -177,11 +182,16 @@ func New(cfg Config) *Server {
 	if cfg.Logger == nil {
 		cfg.Logger = log.Default()
 	}
+	if cfg.CreativeProvider == nil {
+		cfg.CreativeProvider = creative.DeterministicProvider{}
+	}
 	server := &Server{
-		cfg:  cfg,
-		runs: map[string]*runRecord{},
-		logf: cfg.Logger.Printf,
-		mux:  http.NewServeMux(),
+		cfg:                     cfg,
+		runs:                    map[string]*runRecord{},
+		logf:                    cfg.Logger.Printf,
+		mux:                     http.NewServeMux(),
+		creativeProvider:        cfg.CreativeProvider,
+		genesisWorkspaceService: cfg.GenesisWorkspaceService,
 	}
 	server.RegisterRoutes()
 	return server
@@ -250,6 +260,8 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/game/incorporation/:case/projection",
 			"/api/aese/v1/game/creative/intent",
 			"/api/aese/v1/game/creative/names",
+			"/api/aese/v1/genesis/workspaces",
+			"/api/aese/v1/genesis/workspaces/:workspace/session",
 			"/api/aese/v1/world/plant-build",
 			"/api/aese/v1/world/capability-build",
 			"/api/aese/v1/world/industrialization",
@@ -282,9 +294,62 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch rest[0] {
+	case "genesis":
+		if len(rest) < 2 || rest[1] != "workspaces" || s.genesisWorkspaceService == nil {
+			s.writeError(w, http.StatusNotFound, "not_found", "route not found", false, "", "")
+			return
+		}
+		playerID := strings.TrimSpace(r.Header.Get("X-Genesis-Player-Id"))
+		if playerID == "" {
+			s.writeError(w, http.StatusUnauthorized, "player_identity_required", "X-Genesis-Player-Id is required", false, "", "")
+			return
+		}
+		if len(rest) == 4 && rest[3] == "session" && r.Method == http.MethodPost {
+			result, err := s.genesisWorkspaceService.RefreshSession(ctx, playerID, rest[2])
+			if err != nil {
+				s.writeError(w, http.StatusBadGateway, "workspace_session_failed", err.Error(), true, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, result)
+			return
+		}
+		if len(rest) != 2 {
+			s.writeError(w, http.StatusNotFound, "not_found", "route not found", false, "", "")
+			return
+		}
+		switch r.Method {
+		case http.MethodGet:
+			items, err := s.genesisWorkspaceService.List(playerID)
+			if err != nil {
+				s.writeError(w, http.StatusInternalServerError, "workspace_list_failed", err.Error(), true, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, map[string]any{"items": items})
+			return
+		case http.MethodPost:
+			var request genesisworkspace.CreateRequest
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &request); err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_workspace_request", err.Error(), false, "", "")
+				return
+			}
+			if request.OwnerPlayerID != playerID {
+				s.writeError(w, http.StatusForbidden, "player_identity_mismatch", "workspace owner must match player identity", false, "", "")
+				return
+			}
+			result, err := s.genesisWorkspaceService.Create(ctx, request)
+			if err != nil {
+				s.writeError(w, http.StatusBadGateway, "workspace_provisioning_failed", err.Error(), true, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, result)
+			return
+		default:
+			s.writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "method not allowed", false, "", "")
+			return
+		}
 	case "game":
 		if len(rest) == 3 && rest[1] == "creative" && r.Method == http.MethodPost {
-			provider := creative.DeterministicProvider{}
+			provider := s.creativeProvider
 			switch rest[2] {
 			case "intent":
 				var request creative.FounderIntentRequest
@@ -294,7 +359,7 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				}
 				intent, err := provider.AnalyzeIntent(ctx, request)
 				if err != nil {
-					s.writeError(w, http.StatusUnprocessableEntity, "invalid_founder_intent", err.Error(), false, "", "")
+					s.writeError(w, http.StatusBadGateway, "creative_provider_failed", err.Error(), true, "", "")
 					return
 				}
 				s.writeJSON(w, http.StatusOK, intent)
@@ -307,7 +372,7 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				}
 				proposals, err := provider.GenerateNames(ctx, intent)
 				if err != nil {
-					s.writeError(w, http.StatusUnprocessableEntity, "invalid_founder_intent", err.Error(), false, "", "")
+					s.writeError(w, http.StatusBadGateway, "creative_provider_failed", err.Error(), true, "", "")
 					return
 				}
 				s.writeJSON(w, http.StatusOK, map[string]any{
@@ -337,6 +402,10 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			}
 			trace, err := client.IncorporationTrace(ctx, rest[2])
 			if err != nil {
+				if iaosclient.IsStatus(err, http.StatusNotFound) {
+					s.writeError(w, http.StatusNotFound, "incorporation_case_not_found", "incorporation case not found", false, "", "")
+					return
+				}
 				s.writeError(w, http.StatusBadGateway, "iaos_trace_unavailable", err.Error(), true, "", "")
 				return
 			}
@@ -348,6 +417,15 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			projection, err := gameprojection.FromIAOS(trace, items)
 			if err != nil {
 				s.writeError(w, http.StatusUnprocessableEntity, "iaos_projection_invalid", err.Error(), false, "", "")
+				return
+			}
+			opening, err := client.FinanceOpening(ctx, rest[2])
+			if err != nil {
+				s.writeError(w, http.StatusBadGateway, "iaos_finance_opening_unavailable", err.Error(), true, "", "")
+				return
+			}
+			if err := gameprojection.AttachFinanceOpening(&projection, opening); err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "iaos_finance_projection_invalid", err.Error(), false, "", "")
 				return
 			}
 			s.writeJSON(w, http.StatusOK, projection)

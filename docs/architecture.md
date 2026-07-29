@@ -29,6 +29,21 @@ AESE 不拥有 ERP/MES 运行时，也不复制 IAOS 的安全和治理能力。
 
 ADR-002 允许 AESE 拥有只读 2D 场景预览器，用于快速验证场景表达和回归。预览器不拥有业务写入、权限、流程和 Agent 运行时；在线模式的数据仍来自 IAOS 受治理 API 和事件流。
 
+Genesis 零起点遵循 ADR-006：IAOS 控制平面拥有 tenant、平台玩家身份、membership、
+Runtime provisioning 和激活；AESE 只在 tenant activated outcome 后创建独立 World Run。
+租户是公司成立前的隔离创业空间，不等于 legal entity。浏览器不直接持有平台管理员
+权限，根主页通过受限 Genesis provisioning contract 创建 workspace。
+
+```text
+Enterprise Genesis Home
+  -> IAOS GenesisWorkspace / tenant provisioning
+  -> tenant-scoped founder session
+  -> AESE World Run
+  -> MiniMax candidate-only CreativeJob
+  -> IAOS incorporation.case.open
+  -> M9 Process / Approval / Agent / World
+```
+
 ## 3. 目标运行链路
 
 ```text
@@ -310,6 +325,11 @@ Sales / Planning / Procurement / Production / Quality / Logistics / Finance
 ```
 
 客户正式需求/变更/接受/付款行为、供应/设备/运输现实、实际生产资源消耗和银行到账属于 AESE World State；订单、采购、工单、库存、发运、发票、应收、收款核销、成本和项目损益记录属于 IAOS；角色只通过权限和 observation 获得 Actor Knowledge。发运不等于客户接受，发票不等于现金，毛利不等于现金余额。
+
+DES-030 进一步冻结财务边界：AESE 只产生银行到账、客户接受、实物收发、设备投用和
+人员服务等可信 World Observation；IAOS 拥有会计政策、Accounting Event、Posting Rule、
+凭证、总账、子账、成本、固定资产、结账和报表。业务台账不等于会计凭证，预算不等于
+费用，认缴不等于实缴；已过账凭证只能冲销或更正，不由 World 或前端直接改写。
 
 M13 从 M12 release manifest 编译 Genesis-specific O2D 输入，期初可销售成品为零，并使用新交易/correlation code；旧 M3/M7 pack 继续作为回归 fixture，不能贡献库存或既成事件。M13 关闭 M9-M13 主纵向场景，长期多周期与参数化实验属于 M14。详细边界见 DES-014 和 PLAN-M13-001。
 

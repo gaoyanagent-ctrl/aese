@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.identity-double-502-fix.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "修复新案件投影与 MiniMax JSON 截断双 502",
+  "detail": "保持 IAOS missing case 的 404 语义；MiniMax M3 使用 8192 输出预算和一次严格 JSON repair，真实上游 502 不再被前端当作空案件。",
+  "status_after": "building",
+  "progress_after": 48,
+  "current_state": "identity creation path restored; CreativeJob persistence remains",
+  "evidence_ref": "docs/solutions/SOL-003-genesis-new-case-and-minimax-json-502.md",
+  "occurred_at": "2026-07-28T03:30:00Z"
+}

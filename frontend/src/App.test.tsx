@@ -1,9 +1,13 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import App from './App';
 
 describe('AESE sandbox', () => {
+  beforeEach(() => {
+    window.location.hash = 'sandbox';
+  });
+
   it('loads the HCTM scenario and advances deterministically', async () => {
     const user = userEvent.setup();
     render(<App />);
@@ -30,5 +34,37 @@ describe('AESE sandbox', () => {
     const atlasButton = screen.getByRole('button', { name: '打开系统全景' });
     expect(atlasButton.closest('.playback-controls')).not.toBeNull();
     expect(document.querySelector('.aese-atlas-launch')).toBeNull();
+  });
+});
+
+describe('AESE game home', () => {
+  beforeEach(() => {
+    window.history.replaceState(null, '', '/');
+    localStorage.clear();
+  });
+
+  it('opens the game user login at the root URL', () => {
+    render(<App />);
+
+    expect(
+      screen.getByRole('heading', { name: '回到你的企业世界' }),
+    ).toBeInTheDocument();
+    expect(screen.getByLabelText('游戏用户名')).toBeInTheDocument();
+  });
+
+  it('logs in before starting tenant provisioning', async () => {
+    const user = userEvent.setup();
+    render(<App />);
+
+    await user.type(screen.getByLabelText('游戏用户名'), 'founder-principal');
+    await user.click(screen.getByRole('button', { name: /进入企业世界/ }));
+    await user.click(screen.getAllByRole('button', { name: /创建新企业/ })[0]);
+
+    expect(
+      screen.getByRole('heading', { name: '先为你的企业建立独立运行空间' }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /创建空间并进入 AI 身份工作室/ }),
+    ).toBeInTheDocument();
   });
 });

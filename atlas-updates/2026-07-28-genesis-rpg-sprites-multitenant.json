@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.rpg-sprites-multitenant.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "完成全 M9 RPG、生成精灵、反馈系统和多租户验收",
+  "detail": "17 个工作项使用专属剧情；五名角色与三类资产使用透明生成精灵；增加移动、音效、奖励和大事记；Founder 多租户选择、cross-read 隔离及失败恢复通过。",
+  "status_after": "validating",
+  "progress_after": 95,
+  "current_state": "the full M9 loop is game-framed and multi-tenant founder access is verified",
+  "evidence_ref": "docs/reports/genesis-rpg-and-multi-tenant-acceptance.md",
+  "occurred_at": "2026-07-28T12:20:00Z"
+}

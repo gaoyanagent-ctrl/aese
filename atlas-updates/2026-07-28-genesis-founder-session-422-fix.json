@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.founder-session-422-fix.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "修复独立 Workspace 创建企业的 Founder 会话 422",
+  "detail": "Workspace provisioning 改为返回 founder-principal tenant session，并为历史管理员 token 增加 owner-scoped session refresh 和一次安全重放。",
+  "status_after": "building",
+  "progress_after": 52,
+  "current_state": "independent tenant can commit incorporation.case.open as governed founder",
+  "evidence_ref": "docs/solutions/SOL-004-genesis-founder-session-422.md",
+  "occurred_at": "2026-07-28T03:36:00Z"
+}

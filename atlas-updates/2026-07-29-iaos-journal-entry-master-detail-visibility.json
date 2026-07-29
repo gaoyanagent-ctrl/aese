@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.iaos-journal-entry-master-detail-visibility.2026-07-29",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M9 开业凭证在 IAOS 中恢复主从明细穿透",
+  "detail": "IAOS 修复 journal_entry 与 journal_line 投影关联，启动时回填历史父键，并让通用 Entity 详情始终展示当前 Metadata 发布的 child_list；AESE 继续只引用 IAOS committed 财务事实。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "Genesis 开业注资凭证可从 IAOS 会计凭证菜单查看凭证头及两条借贷分录。",
+  "evidence_ref": "/iaos/iaos-go/docs/solutions/SOL-040-journal-entry-master-detail-visibility.md",
+  "occurred_at": "2026-07-29T08:00:00Z"
+}

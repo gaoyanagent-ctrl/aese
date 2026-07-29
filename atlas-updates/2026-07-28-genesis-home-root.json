@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.home-root.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "Enterprise Genesis 根路径产品主页上线",
+  "detail": "根路径不再进入订单加急沙盘，新增创建企业、样板世界、M9 旅程和开发状态入口；旧沙盘保留在显式 #sandbox 路由。",
+  "status_after": "building",
+  "progress_after": 15,
+  "current_state": "PLAN-GXZ-001 Z24 complete; Z25-Z37 remain",
+  "evidence_ref": "frontend/e2e/genesis-home.spec.ts",
+  "occurred_at": "2026-07-28T02:12:00Z"
+}

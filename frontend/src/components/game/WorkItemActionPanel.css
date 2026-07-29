@@ -1,0 +1,62 @@
+.gx-header-actions{display:flex;align-items:center;gap:14px}
+.gx-header-actions>button{display:flex;align-items:center;gap:6px;padding:0 12px;border:1px solid #66becb;border-radius:8px;color:#dffbff;background:#123642}
+.gx-case-code{display:grid;justify-items:end;gap:3px}
+.gx-case-code small{color:#7ca0aa}.gx-case-code code{color:#a8e6ee}
+.gx-creation-intro{display:flex;gap:18px;max-width:1180px;margin:42px auto 20px;padding:0 24px}
+.gx-creation-intro>span{width:58px;height:58px;display:grid;place-items:center;flex:none;border:1px solid #6dc9d5;border-radius:16px;color:#87e1eb;background:#133944;font-size:22px;font-weight:800}
+.gx-creation-intro small{color:#79cbd7;letter-spacing:.12em}
+.gx-creation-intro h2{margin:3px 0 7px;font-size:28px}
+.gx-creation-intro p{max-width:780px;margin:0;color:#a2bbc2;line-height:1.6}
+.gx-task-ready{border-color:#4d96a7!important;box-shadow:inset 3px 0 #6ed4df}
+.gx-task-action{flex:none;align-self:center;padding:6px 9px;border:1px solid #62bdca;border-radius:7px;color:#dffbff;background:#16414e;font-size:10px}
+.gx-action-overlay{position:fixed;z-index:100;inset:0;display:grid;place-items:center;padding:20px}
+.gx-action-backdrop{position:absolute;inset:0;width:100%;height:100%;border:0;background:#02090dcc;backdrop-filter:blur(5px)}
+.gx-action-card{position:relative;z-index:1;width:min(620px,calc(100vw - 32px));max-height:calc(100dvh - 40px);overflow:auto;box-sizing:border-box;padding:22px;border:1px solid #4b7987;border-radius:16px;color:#e9fafb;background:#0b202a;box-shadow:0 24px 80px #000b}
+.gx-action-head{display:grid;grid-template-columns:auto 1fr auto;align-items:start;gap:13px}
+.gx-action-head>span{width:44px;height:44px;display:grid;place-items:center;border-radius:11px;color:#8be0e9;background:#173e49}
+.gx-action-head svg{width:21px}.gx-action-head small{color:#7dc9d4}
+.gx-action-head h3{margin:3px 0;font-size:21px}
+.gx-action-head>button{width:44px;border:0;border-radius:9px;color:#a8c2c8;background:#12313b}
+.gx-action-card>p{color:#b2c8ce;line-height:1.6}
+.gx-action-fields{display:grid;gap:10px}
+.gx-output-explainer{display:grid;gap:5px;margin:12px 0;padding:12px 14px;border-left:3px solid #76d4df;border-radius:6px;color:#c8e8eb;background:#12323c;line-height:1.55}
+.gx-output-explainer strong{color:#8ce3eb}.gx-output-explainer span{font-size:12px}
+.gx-review-sheet{margin:14px 0;padding:16px;border:1px solid #547b85;border-radius:12px;color:#dceff1;background:#f3eee6}
+.gx-review-sheet header{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding-bottom:12px;border-bottom:1px solid #cfc7ba;color:#233b42}
+.gx-review-sheet header small{color:#64767a}.gx-review-sheet h4{margin:4px 0 0;font-size:19px}
+.gx-review-sheet header>span{flex:none;padding:4px 8px;border-radius:99px;color:#6c4c13;background:#f0d492;font-size:11px;font-weight:800}
+.gx-review-sheet>p{color:#4e6064}
+.gx-review-sheet dl{display:grid;margin:12px 0;border-top:1px solid #d8d0c4}
+.gx-review-sheet dl div{display:grid;grid-template-columns:110px 1fr;gap:12px;padding:9px 0;border-bottom:1px solid #d8d0c4}
+.gx-review-sheet dt{color:#6f7c7d;font-size:11px}.gx-review-sheet dd{margin:0;color:#263c41;white-space:pre-wrap;line-height:1.5}
+.gx-review-sheet section{padding:10px;border-radius:7px;color:#673d25;background:#f0d9c9}
+.gx-review-sheet section p{margin:5px 0 0;line-height:1.5}
+.gx-review-sheet footer{display:grid;gap:4px;margin-top:12px;color:#31545a}.gx-review-sheet footer span{line-height:1.5}.gx-review-sheet footer small{overflow-wrap:anywhere;color:#718184}
+.gx-application-flow,.gx-application-package,.gx-external-review{display:grid;gap:12px}
+.gx-application-package,.gx-external-review{margin:14px 0;padding:14px;border:1px solid #426c78;border-radius:12px;background:#102d37}
+.gx-application-package>header,.gx-external-review>header{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px}
+.gx-application-package header svg,.gx-external-review header svg{color:#82d8e2}.gx-application-package h4,.gx-external-review h4{margin:0;font-size:16px}.gx-application-package header p{margin:3px 0 0;color:#87a6ae;font-size:11px}.gx-application-package header>span{padding:4px 7px;border-radius:99px;color:#a9edf2;background:#204650;font-size:11px;font-weight:800}
+.gx-application-package dl{display:grid;margin:0}.gx-application-package dl div{display:grid;grid-template-columns:95px 1fr;gap:10px;padding:7px 0;border-bottom:1px solid #294c56}.gx-application-package dt{color:#7898a0;font-size:11px}.gx-application-package dd{margin:0;color:#d9edf0;line-height:1.45}
+.gx-application-package fieldset,.gx-external-review fieldset{display:grid;gap:7px;margin:0;padding:11px;border:1px solid #315965;border-radius:8px}.gx-application-package legend{padding:0 6px;color:#9bcbd1;font-size:11px}.gx-application-package label,.gx-external-review label{display:flex;align-items:center;gap:9px;min-height:32px;color:#c8dfe2;font-size:12px}.gx-application-package input,.gx-external-review input{width:18px;height:18px;accent-color:#63cbd7}
+.gx-bank-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.gx-application-flow>h4{display:flex;align-items:center;gap:8px;margin:5px 0}.gx-bank-grid button{display:grid;gap:5px;min-height:110px;padding:11px;text-align:left;border:1px solid #345d68;border-radius:9px;color:#cfe3e6;background:#102a34}.gx-bank-grid button.selected{border-color:#7bdbe6;box-shadow:inset 0 0 0 1px #7bdbe6;background:#17404b}.gx-bank-grid span{color:#8ec3ca;font-size:11px}.gx-bank-grid small{color:#ac9890;line-height:1.4}
+.gx-external-review.rejected{border-color:#a55f4f;background:#3b211f}.gx-external-review.rejected header svg{color:#ef9a86}.gx-external-review>p{margin:0;color:#c0d4d8;line-height:1.55}
+.gx-reward-assets{display:grid;grid-template-columns:1.35fr .8fr;gap:10px;color:#293b3c}.gx-license,.gx-account-card,.gx-seal-kit,.gx-ukey{box-sizing:border-box;min-height:190px;padding:16px;border-radius:9px;background:#eee6d5;box-shadow:inset 0 0 0 4px #d7c7a8,0 10px 24px #0005}.gx-license small,.gx-account-card small{display:block;color:#9b584c;text-align:center}.gx-license>svg,.gx-account-card>svg{display:block;margin:10px auto 3px;color:#9f4037}.gx-license h5,.gx-account-card h5{margin:0;text-align:center;font:700 22px serif}.gx-license strong,.gx-account-card strong{display:block;margin:13px 0 7px;text-align:center}.gx-license span,.gx-account-card span{display:block;text-align:center;font-family:monospace}.gx-license p,.gx-account-card p{color:#4b5858;font-size:10px;text-align:center}
+.gx-seal-kit{background:#d8c6aa}.gx-seal-kit>small{color:#695b4c}.gx-seal-kit>div{display:grid;grid-template-columns:repeat(3,1fr);gap:5px;margin-top:25px}.gx-seal-kit span{display:grid;place-items:center;gap:4px;color:#a43730;font-size:9px;text-align:center}.gx-seal-kit svg{width:42px;height:42px;padding:7px;border:3px double #ad3b32;border-radius:50%}
+.gx-ukey{display:flex;align-items:center;gap:12px;min-height:130px;color:#dbeef0;background:linear-gradient(145deg,#153d48,#0a2028);box-shadow:inset 0 0 0 2px #4d8490,0 10px 24px #0005}.gx-ukey>svg{width:52px;height:52px;padding:10px;border-radius:8px;color:#97e3eb;background:#234f59}.gx-ukey div{display:grid;gap:5px}.gx-ukey span,.gx-ukey small{color:#85aab1;font-size:10px}
+.gx-capital-reconcile{display:grid;gap:10px;margin:12px 0;padding:13px;border:1px solid #437568;border-radius:10px;background:#12362e}.gx-capital-reconcile.mismatch{border-color:#a96351;background:#3c2521}.gx-capital-reconcile header{display:flex;justify-content:space-between;gap:12px}.gx-capital-reconcile header span{color:#a9d7c1;font-size:11px}.gx-capital-reconcile.mismatch header span{color:#ffc1b0}.gx-capital-reconcile dl{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0}.gx-capital-reconcile dl div{display:grid;gap:3px;padding:8px;border-radius:7px;background:#0b2822}.gx-capital-reconcile.mismatch dl div{background:#2e1c19}.gx-capital-reconcile dt{color:#84a69b;font-size:10px}.gx-capital-reconcile dd{margin:0;font-variant-numeric:tabular-nums}.gx-capital-reconcile button{display:flex;align-items:center;justify-content:center;gap:6px;min-height:44px;border:1px solid #da8d78;border-radius:8px;color:#ffe7df;background:#6a362d}.gx-capital-reconcile button svg{width:16px}
+.gx-action-fields label,.gx-money-input{display:grid;gap:6px;color:#b5cbd0;font-size:12px}
+.gx-action-fields textarea{min-height:70px;resize:vertical}
+.gx-action-fields textarea,.gx-money-input input{box-sizing:border-box;width:100%;padding:11px;border:1px solid #365f6c;border-radius:8px;color:#effcfd;background:#0f2b35;font:inherit}
+.gx-money-input>div{display:grid;grid-template-columns:42px 1fr}
+.gx-money-input>div span{display:grid;place-items:center;border:1px solid #365f6c;border-right:0;border-radius:8px 0 0 8px;color:#8cdae3;background:#153945}
+.gx-money-input input{border-radius:0 8px 8px 0;font-size:18px;font-variant-numeric:tabular-nums}
+.gx-money-input small{color:#77959d}
+.gx-governance-note{display:flex;gap:8px;margin:14px 0;padding:10px;border-radius:8px;color:#add5c0;background:#10362c;font-size:11px;line-height:1.5}
+.gx-governance-note svg{width:17px;flex:none;color:#6dd69d}
+.gx-action-error{padding:10px;border-radius:8px!important;color:#ffd0ca!important;background:#54251f!important}
+.gx-action-submit{width:100%;display:flex;align-items:center;justify-content:center;gap:8px;border:1px solid #7bdae5;border-radius:9px;color:#06191e;background:#79d5df;font-weight:800}
+.gx-action-submit svg{width:18px}
+@media(max-width:900px){.gx-header-actions>button{display:none}.gx-case-code{display:none}}
+@media(max-width:700px){.gx-bank-grid,.gx-reward-assets{grid-template-columns:1fr}.gx-bank-grid button{min-height:88px}}
+@media(max-width:560px){.gx-creation-intro{margin-top:24px;padding:0 14px}.gx-creation-intro h2{font-size:22px}.gx-panel{max-height:none;overflow:visible}.gx-panel article{display:grid;grid-template-columns:minmax(0,1fr) auto}.gx-panel article>div{min-width:0}.gx-task-action{position:relative;z-index:2;grid-column:1/-1;width:100%}.gx-action-overlay{padding:8px}.gx-action-card{width:100%;max-height:calc(100dvh - 16px);padding:16px}.gx-review-sheet dl div,.gx-application-package dl div{grid-template-columns:1fr;gap:3px}.gx-capital-reconcile dl{grid-template-columns:1fr}}
+.gx-reward-assets img{display:block;max-width:100%;height:120px;margin:0 auto 8px;object-fit:contain;filter:drop-shadow(0 8px 8px #0005)}.gx-ukey>img{width:110px;height:90px;flex:none}

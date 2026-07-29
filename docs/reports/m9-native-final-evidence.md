@@ -39,6 +39,8 @@ tags: [aese, m9, evidence]
 
 ## 最终回归
 
+以下是 2026-07-23 原始最终验收快照：
+
 - AESE Go：全通过。
 - AESE frontend：16 files、38 tests；production build 通过。
 - IAOS Go：全通过。
@@ -46,6 +48,29 @@ tags: [aese, m9, evidence]
 - IAOS frontend：52 files、332 tests（单 worker）；production build 通过。
 - IAOS UI Playwright：3/3；AESE UI Playwright：3/3。
 - Atlas declaration 与 JSON 格式检查通过。
+
+## 2026-07-29 运行边界与财务显式化复验
+
+- IAOS `main@a1cc21e` 已部署到本地联调环境，目标租户
+  `tenant-gx-f4b3ce3ce8e2712d` 已从 Runtime 1.6.0 升级到 1.7.0。
+- Runtime 1.7.0 的 `definitions_hash` 同时签名 25 项 Capability 合同和
+  8 个 Process 定义；仅修改流程图、输入输出或业务目的也会产生新的 Artifact，
+  不会再被安装器错误判断为 `no_op`。
+- 25 项 M9 Capability 均存在 active `incorporation_command` Implementation
+  Binding；正常交互路径为 23 个持久工作项，其中包括财务组织、账套与期间、
+  科目、资本过账和财务就绪 5 个显式节点。
+- PostgreSQL 定向全生命周期测试到达
+  `enterprise_operational_ready`，实测 23 个工作项、7 个审批门、3 个 World
+  wait、6 次 Agent Run 和 5 个不同 Agent。
+- IAOS `go test ./platform/... ./shared/...`、`go vet`、受治理业务写入检查、
+  Code Map 与 System Atlas 检查通过。
+- 目标租户 Outbox 43 条均为 `PROCESSED`；业务 payload 会按 Outbox 行中的
+  tenant/event routing 包装为完整 Event，World payload 自带 `tenant_id`
+  不再被误判为完整 envelope。
+
+当前复验没有重新宣称整个历史 IAOS frontend/Playwright 与共享数据库全量
+integration suite 均已复跑。共享库中其他测试租户的历史 FAILED Outbox 和
+全量 integration 隔离债务仍按风险登记保留，不能作为目标租户 M9 完成证据。
 
 已知限制记录在
 [M9 closed-loop runbook](../runbooks/m9-native-closed-loop.md)。

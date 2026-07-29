@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.login-company-lobby.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "增加游戏登录与我的企业续玩大厅",
+  "detail": "根入口先建立本机游戏用户身份，随后按 owner 列出已有 Workspace；选择企业刷新 Founder session 并继续原 tenant/case，新建企业仍走独立 provisioning。",
+  "status_after": "building",
+  "progress_after": 58,
+  "current_state": "local player can discover and resume owned enterprise workspaces",
+  "evidence_ref": "docs/designs/DES-029-genesis-zero-start-and-ai-identity.md",
+  "occurred_at": "2026-07-28T03:44:00Z"
+}

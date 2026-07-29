@@ -11,7 +11,12 @@
   "cursor":2,
   "world_scene":{"scene_id":"founder-office-v1","mode":"2.5d","theme":"industrial-warm"},
   "lifecycle":{"state":"incorporation_case_opened","current_step":"founder.resolution.prepare","progress":10,"blocked_by":"incorporation-agent"},
-  "buildings":[{"code":"BLD-FOUNDER-OFFICE","kind":"office","label":"创始办公室","state":"active","x":4,"y":3,"evidence_ref":"case:INC-DEMO-001","available":true}],
+  "buildings":[
+    {"code":"BLD-FOUNDER-OFFICE","kind":"office","label":"创始办公室","state":"active","x":4,"y":3,"evidence_ref":"case:INC-DEMO-001","available":true},
+    {"code":"BLD-CIVIC-CENTER","kind":"government","label":"政务服务中心","state":"locked","x":6,"y":2,"available":false},
+    {"code":"BLD-BANK","kind":"bank","label":"合作银行","state":"locked","x":8,"y":5,"available":false},
+    {"code":"BLD-HEADQUARTERS","kind":"headquarters","label":"企业总部","state":"locked","x":5,"y":8,"available":false}
+  ],
   "actors":[
     {"actor_id":"founder-principal","actor_type":"human","display_name":"创始治理者","position":"董事长","state":"waiting"},
     {"actor_id":"incorporation-agent","actor_type":"agent","display_name":"企业设立专员","position":"企业设立专员","state":"working","work_item_id":"WI-002"}
@@ -24,6 +29,16 @@
     "capital_paid":{"value":"0","currency":"CNY","scale":2},
     "budget_authorized":{"value":"0","currency":"CNY","scale":2},
     "risk_level":"low"
+  },
+  "finance_opening":{
+    "ready":false,
+    "roles":[],
+    "debit_minor":0,
+    "credit_minor":0,
+    "trial_balance":[],
+    "bank_journal":[],
+    "general_ledger":[],
+    "opening_balance_sheet":{"as_of":"","currency":"","assets":[],"liabilities":[],"equity":[],"total_assets_minor":0,"total_liabilities_minor":0,"total_equity_minor":0,"balanced":false}
   },
   "exchanges":[],
   "brand":{"status":"candidate","company_name":"华辰热管理系统集团有限公司","primary_color":"#2563EB"},

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.bank-opening-execute-400-fix.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "修复 G3 银行开户批准后 Execute 400",
+  "detail": "分离审批 intent 和严格 IAOS Execute Command；幂等重试取得已批准审批时跳过重复决定，直接恢复 Execute。",
+  "status_after": "building",
+  "progress_after": 77,
+  "current_state": "bank opening G3 approval can execute under the strict incorporation command contract",
+  "evidence_ref": "docs/solutions/SOL-006-bank-opening-execute-strict-input.md",
+  "occurred_at": "2026-07-28T10:02:30Z"
+}

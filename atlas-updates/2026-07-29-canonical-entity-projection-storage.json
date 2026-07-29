@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.canonical-entity-projection-storage.2026-07-29",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M9 Entity 投影迁移到里程碑无关存储",
+  "detail": "IAOS 将 19 张共享 m9_* 投影原位迁移为 entity_projection_*，保留全部记录身份、租户、RLS 与稳定业务编码；AESE DES-030 和财务计划明确 M10–M13 复用同一规范投影，禁止创建里程碑前缀平行表。",
+  "status_after": "completed",
+  "progress_after": 38,
+  "current_state": "Genesis M9 authoritative facts are exposed through milestone-independent IAOS Entity projections",
+  "evidence_ref": "docs/designs/DES-030-manufacturing-finance-operating-system.md",
+  "occurred_at": "2026-07-29T14:00:00Z"
+}

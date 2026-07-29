@@ -1,5 +1,41 @@
 # Enterprise Genesis 企业创生游戏
 
+## 从零创建独立企业空间
+
+打开 `http://192.168.50.222:4173/`：
+
+1. 输入游戏用户名登录。首次登录会关联当前浏览器此前创建企业所用的本机 player ID。
+2. 在“我的企业”点击“继续游戏”恢复已有企业；或点击“创建新企业”。
+3. 新建时输入创业项目名称。这里不是正式公司名称。
+4. 点击“创建空间并进入 AI 身份工作室”。
+5. 服务端自动分配 Workspace、IAOS tenant、World Run 和案件编号，建立 Founder，
+   安装 M9 Runtime 并激活租户。
+6. 成功后浏览器保存 `founder-principal` tenant-scoped token，自动进入 MiniMax M3
+   身份工作室；历史 Workspace 的管理员 token 会在首次创建案件遇到身份 422 时通过
+   owner-scoped session endpoint 自动刷新一次。
+
+进入新企业后不再直接填写设立表单：
+
+1. 在 PixiJS 创始办公室选择虚拟头像；
+2. 与数字员工“纪元”对话，依次选择产业、目标客户、核心产品和品牌性格；
+3. 补充创业宣言，让数字员工调用 MiniMax M3 形成四组身份提案；
+4. 选择名称并确认注册地址、经营范围；
+5. 签署创始人指令后才调用 IAOS `incorporation.case.open`。
+
+页面右侧主线任务显示当前目标；IAOS capability 与 evidence 属于治理层，不要求玩家
+先理解技术节点。
+
+本地状态保存在 `.aese-data/genesis-workspaces.json`，权限为 `0600`。同一玩家和
+idempotency key 重试返回同一个 tenant；不同创建动作得到不同 tenant。
+
+本地 IAOS 地址为 loopback 时可以使用 dev adapter。非 loopback 部署必须给 AESE
+服务端配置 `GENESIS_PLATFORM_TOKEN`；不得把 token 写进 Vite 环境变量或浏览器。
+
+当前限制：游戏用户名和 player ID 映射保存在浏览器 localStorage，只有本机体验意义，
+没有密码校验且不能跨设备找回。正式多人
+部署必须使用 IAOS DES-062 的 Player Account/OIDC 与服务端 membership 授权，不能把
+用户名或 localStorage player ID 当作安全身份。
+
 ## 1. 启动
 
 先启动 IAOS `:8082` 与前端 `:3000`，再让 AESE 以 live projection 模式连接 IAOS：
@@ -33,9 +69,9 @@ IAOS 的已校验 evidence bundle 和 18 个持久工作项；前端不访问数
 1. 在“企业身份工作室”输入创业构想，生成四组名称、英文名、口号、色彩与风险提示。
 2. 选择候选，补充注册地址和经营范围，点击“确认身份并创建企业”。正式写入复用
    IAOS `incorporation.case.open`；AI 候选本身不改变业务事实。
-3. 在任务页点击“在 IAOS 处理”，进入对应工作项业务表单。Agent task、G1–G7、
-   人工接管和审批均由 IAOS Runtime 治理。
-4. 到登记、开户或任命 World wait 时，可在游戏点击“模拟世界同意”。AESE 发送受治理
+3. 在任务页点击“进入操作”，直接在游戏内完成数字员工派遣、业务金额输入、G1–G7
+   审批和系统任务；所有写入仍由 IAOS Runtime 治理，不需要跳转其他页面。
+4. 到登记、开户或任命 World wait 时，在游戏进入政务、银行或任命办理。AESE 发送受治理
    Observation，再执行对应 commit Capability；刷新后只展示新的 committed projection。
 5. 18 个工作项完成后进入“经营世界”，必须显示
    `enterprise_operational_ready`、100%、五 Agent、资金与证据。
@@ -71,6 +107,7 @@ npm test -- --run
 npm run build
 npx eslint src/components/game src/game e2e/enterprise-genesis*.spec.ts --max-warnings 0
 npx playwright test e2e/enterprise-genesis.spec.ts
+npx playwright test e2e/enterprise-genesis-interactive.spec.ts
 
 GX_LIVE=1 \
 M9_EXPECT_READY=1 \
@@ -83,3 +120,37 @@ Playwright 固定验证 `1440×900`、`1280×720`、`390×844`，并在每个项
 `TestIntegrationInteractiveWorkItemsFiveAgentsSevenGatesThreeWorldWaitsAndRestart`：
 18 completed work items、G1–G7、三个 World wait、六次 Run/五个 distinct Agent，
 并在第二个 World wait 后重建 Server 继续执行。
+# RPG、精灵与多租户补充验收（2026-07-28）
+
+1. 从企业大厅进入任一进行中的企业，进入带事件标记的地点。
+2. 确认任务弹层显示地点、具名 NPC、三项经营选择和正式 IAOS 操作。
+3. 点击室内物件，确认创始人移动后才打开状态卡；开启/关闭顶部音效按钮。
+4. 完成任务后确认出现里程碑奖励；“治理档案”逐项显示 committed 企业大事记。
+5. 登记/开户获批时确认显示虚构营业执照、印章套装和 U 盾生成素材。
+6. 在 IAOS `http://127.0.0.1:3000/login` 使用 Founder 凭据登录，确认出现所有明确授权
+   企业；进入任一企业后 `/profile` tenant 与选择项一致。
+7. provisioning 失败后使用同一幂等键重试，workspace ID、tenant ID、world run 和 case
+   code 必须保持不变。
+
+完整证据见 `docs/reports/genesis-rpg-and-multi-tenant-acceptance.md`。
+# 开业财务验证
+
+完成“注入并核验实缴资本”后：
+
+1. 进入企业总部，检查“开业财务中心”物件，状态应为“账套已启用”。
+2. 打开右侧“治理档案”，应看到“实缴资本开业入账”。
+3. 凭证必须显示借 `1002 银行存款`、贷 `4001 实收资本`，两个合计相等。
+4. 证据引用必须以 `iaos:finance:` 开头；页面没有财务事实时会显示等待资本到账，不会根据公司现金伪造凭证。
+5. 同一档案继续检查银行日记账、总账和开业资产负债表：
+   - 银行日记账显示“实收资本到账”、本次收入和滚动余额；
+   - 总账显示 `1002` 与 `4001` 的期末余额；
+   - 开业资产负债表显示资产等于所有者权益、负债为零，并标记“资产 = 负债 + 所有者权益”。
+6. 这些视图必须来自同一 IAOS 已过账凭证；若报表不平，企业最终就绪节点应返回
+   `finance_opening_readiness_failed`，不得继续完成 M9。
+7. 点击总部“开业财务中心”，确认它不会遮挡“治理与经营会议桌”，并打开用途说明。
+8. 点击“查看系统账务”，应进入 IAOS `#finance_workspace` 的银行日记账/总账视图；
+   点击“查看财务报表”，应进入同一页面的开业资产负债表视图。两个入口自动携带当前
+   tenant 和 case，IAOS 仍会用当前登录身份做权限校验。
+9. 在 IAOS 数据模型工坊启用某 Entity 的“在侧边栏显示菜单”并发布：
+   `platform_super_admin` 应无需刷新看到菜单；普通角色须先在“角色与数据范围”授予
+   `menu.<entity_code>` READ。

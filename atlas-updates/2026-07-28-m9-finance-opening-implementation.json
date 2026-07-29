@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.finance-opening-implementation.2026-07-28",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "接入 M9 开业财务组织、资本凭证与游戏穿透展示",
+  "detail": "AESE GameProjection 新增 IAOS committed finance opening 合同；企业总部展示财务中心，治理档案展示账套、期间、凭证、1002/4001 分录和借贷合计，不再由游戏现金推测会计事实。",
+  "status_after": "validating",
+  "progress_after": 65,
+  "current_state": "M9 capital contribution can be inspected as an IAOS accounting journal from AESE",
+  "evidence_ref": "docs/designs/DES-030-manufacturing-finance-operating-system.md",
+  "occurred_at": "2026-07-28T15:22:00Z"
+}

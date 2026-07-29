@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.founder-office-rpg.2026-07-28",
+  "node_key": "aese.enterprise-genesis.game-experience",
+  "update_type": "implementation",
+  "summary": "交付对话驱动的 PixiJS 创始人办公室首章",
+  "detail": "玩家选择 FounderProfile 头像并与数字员工进行 RPG 对话，逐项形成产业、客户、产品和品牌选择；MiniMax 身份提案与 IAOS incorporation commit 被嵌入主线任务。",
+  "status_after": "building",
+  "progress_after": 66,
+  "current_state": "chapter one is playable; remaining M9 work items still require event conversion",
+  "evidence_ref": "docs/designs/DES-028-enterprise-genesis-game-experience.md",
+  "occurred_at": "2026-07-28T06:44:00Z"
+}

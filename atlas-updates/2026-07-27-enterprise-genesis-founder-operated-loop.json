@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.enterprise-genesis.founder-operated-loop.2026-07-27",
+  "node_key": "aese.enterprise-genesis",
+  "update_type": "implementation",
+  "summary": "Enterprise Genesis 从展示投影升级为玩家原生企业创建与 IAOS 全链操作",
+  "detail": "新案件从企业身份工作室创建；18 个 IAOS 工作项、G1-G7、Agent 派遣、金额输入和三个 World wait 均可在游戏界面执行，成功后只从 verified projection 恢复状态。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "founder-operated IAOS lifecycle completed in desktop and mobile browser acceptance",
+  "evidence_ref": "frontend/e2e/enterprise-genesis-interactive.spec.ts",
+  "occurred_at": "2026-07-27T15:30:00Z"
+}

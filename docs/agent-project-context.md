@@ -177,10 +177,15 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 - DES-012 与 PLAN-M11-001 已完成。`hctm-genesis@0.4.0` 覆盖资金补足、设备/实验室/仓储能力、核心团队招聘培训和一班制资格，输出 M12 可消费的 `industrialization_eligible`；IAOS revision `789b925`。产品/BOM/工艺、APQP、试生产、PPAP 和 SOP 不在 M11。
 - DES-013 与 PLAN-M12-001 已完成。`hctm-genesis@0.5.0` 覆盖 RFQ/报价/定点、产品/BOM/工艺版本、供应/工装/物料、APQP、两轮试制、质量整改和 PPAP，输出 M13 可消费的 `serial_production_eligible`；IAOS revision `50a46e2`。正式 O2D、交付、开票和回款不在 M12。
 - DES-014 与 PLAN-M13-001 已完成。`hctm-genesis@0.6.0` 从零可销售库存完成首张订单、MRP、采购生产、三批接受、开票/应收、银行回款、实际成本和项目毛利，输出 `first_commercial_cycle_closed`；IAOS revision `067bbb4`，Project Genesis M9-M13 主纵向场景完成。
+- DES-030 已批准制造企业财务扩展：M9 建立财务组织、账套、科目、期间、实收资本凭证
+  和开业报表，M10–M13 再按真实业务事件启用 AP、AR、资金、资产、制造成本、总账、
+  结账和报表。PLAN-M9-FIN-001 当前为 active；M9 已完成 5 个显式财务开业工作项，
+  M10–M13 子账仍未完成，现有开业账务不得描述为完整会计系统。
 - DES-015 与 PLAN-M14-001 已完成。`hctm-genesis@0.7.0` 从 M13 checkpoint 创建隔离 World 分支，以版本化参数、策略、PRNG/seed set 和共同随机数完成 60-run 多周期实验；`strategy_evidence_ready=true` 仅代表证据完整，不代表策略已批准或可自动投放。当前无 active 主计划。
 - DES-016 与 PLAN-M15-001 已完成。`hctm-genesis@0.8.0` 将 M14 candidate 绑定为 StrategyRelease，完成独立审批、零写入 shadow、有限 canonical pilot、guardrail、rollback 和 compensation；adopted 与 injected rolled_back 路径均输出 `strategy_change_cycle_closed=true`。当前无 active 主计划。
 - DES-017 与 PLAN-M16-001 已完成。M16 消费 M15 adopted release，完成 12 周 as-of dataset、质量优先 drift、8/4 calibration/holdout 与新祖先 60-run replay；三种 disposition 均可诚实关闭且不自动修改 release。当前无 active 主计划。
 - DES-018 至 DES-026 与 PLAN-M17-001 至 PLAN-M24-001 已逐个完成。`hctm-genesis@1.0.0` 通过统一 strict contract、八个 milestone evidence frame、API 和 Completion Room 输出 `industry_simulation_platform_ready=true`；IAOS DES-059 提供八类受治理动作，所有动作保留 evidence、独立审批、RLS、CAS、幂等、journal/Outbox 边界。当前无 active 主计划。
+- 2026-07-28 启动 PLAN-GXZ-001。ADR-006/DES-029 修正 Enterprise Genesis 的根入口、租户和 AI 语义：玩家先创建独立 GenesisWorkspace 和 IAOS tenant，再创建 World Run、FounderIntent 与企业设立案；`DeterministicProvider` 只允许作为明确 fallback，真实候选使用可审计 MiniMax provider。当前唯一 active 主计划为 PLAN-GXZ-001。
 
 ## 7. 后续 agent 必须维护的信息
 

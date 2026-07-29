@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.incorporation-legal-entity-master-data.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "补齐设立案件与正式企业主数据",
+  "detail": "IAOS 案件显式物化名称、地址和经营范围并完成历史 RLS 回填；登记 committed 后创建正式 m9_legal_entity。",
+  "status_after": "building",
+  "progress_after": 70,
+  "current_state": "game incorporation facts are queryable and registration produces official legal entity master data",
+  "evidence_ref": "docs/solutions/SOL-005-incorporation-and-legal-entity-master-data.md",
+  "occurred_at": "2026-07-28T07:41:00Z"
+}

@@ -98,3 +98,16 @@ tags: [m9, game, 2.5d, ai, agent]
 - DES-028 十项验收标准均有机器或浏览器证据。
 - 游戏画面没有独立业务真相，AI 没有未治理写路径。
 - M9N T83/T96 及 GX4 全链同时通过。
+
+## 9. GX6 — 玩家原生操作闭环
+
+- [x] GXT47 新案件不存在时进入创建态，不再因 projection 404/502 阻断。
+- [x] GXT48 增加“新建企业”，生成独立 case code 并从创业构想开始。
+- [x] GXT49 企业身份选择通过 `incorporation.case.open` 创建 IAOS 正式案件。
+- [x] GXT50 Agent task 在游戏内填写业务输入并调用 IAOS dispatch-agent。
+- [x] GXT51 G1–G7 在游戏内创建 Approval Request、由当前受派审批人决定并执行节点。
+- [x] GXT52 资本、实缴与预算使用人民币元输入，提交时转换为精确 minor unit。
+- [x] GXT53 三个 World wait 在游戏内产生受治理 Observation 后执行 commit 节点。
+- [x] GXT54 系统 Capability 在游戏内执行，完成后重新读取 IAOS verified projection。
+- [x] GXT55 超过 Agent 金额授权上限时展示 IAOS 治理拒绝，不生成前端假成功。
+- [x] GXT56 Playwright 在 1440、1280、390 三视口从空白 case 完成全部 18 个工作项。

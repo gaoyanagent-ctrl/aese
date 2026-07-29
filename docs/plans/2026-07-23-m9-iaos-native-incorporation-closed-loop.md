@@ -278,3 +278,35 @@ P0
 - [x] T96 完成新 G1 真实浏览器验收、Runtime 数据迁移与 Founder/五 Agent 全链 T83。
 - [x] T97 统一 Entity 生命周期动作与正式 Approval Runtime，补齐 Flow 下拉、编译期
       fail-closed、批准后状态提交与 consume 合同。
+
+## 18. D27 业务写入只能通过可执行 Capability
+
+> 2026-07-29 回查发现：M9 虽已登记 `capital.contribution.post`，但
+> `capital.contribution.verify` 曾直接调用记账内部函数。Capability 资产存在不等于
+> Capability 真实执行，这会让 Process、Agent、审批与审计链失真。IAOS 以
+> [DES-065](/iaos/iaos-go/docs/designs/DES-065-governed-capability-write-boundary.md)
+> 冻结平台约束；AESE 不复制执行器，只消费受治理 execution 和 committed 结果。
+
+- [x] T98 在 IAOS `AGENTS.md` 冻结规则：HTTP、Process、Agent Tool、事件消费者和
+      定时任务不得绕过 Capability Interface 直接实施业务 DML。
+- [x] T99 增加 `capability_implementation_binding` 与 tenant-RLS
+      `capability_execution`，区分“已设计、已发布、可执行”和每次真实执行。
+- [x] T100 为凭证主表与明细表安装 PostgreSQL 强制触发器；事务没有有效
+      Capability Execution Context、租户不一致或未声明该表时 fail-closed。
+- [x] T101 将 `capital.contribution.verify` 改为同事务执行已发布且有 active binding
+      的 `capital.contribution.post`；历史回填使用显式 `system_repair` 模式并幂等补登记。
+- [x] T102 案件 Trace 增加 `capability_executions`；CI 静态检查拒绝在 binding 外调用
+      资本记账 Implementation 或直接写凭证表。
+- [x] T103 将全部 25 个 M9 Capability 绑定到统一执行边界，20 个成立治理命令和
+      5 个财务开业命令均产生独立 execution。
+- [x] T104 将财务组织、账套与期间、科目、资本过账、财务就绪检查编译为资本核验后的
+      5 个显式工作项，正常路径由 18 项升级为 23 项。
+- [x] T105 修复 IAOS Outbox 对业务 payload 的 Event envelope 包装，使用行路由字段
+      生成合法 NATS subject，并对 envelope 不一致 fail-closed。
+
+验收：IAOS 定向 Go 测试和真实 PostgreSQL 交互测试通过；新案件编译 23 个工作项，
+依次经过 7 个审批门、3 个 World wait、6 次 Agent Run/5 个 Agent，并完成 5 个显式
+财务节点后达到 `enterprise_operational_ready`。25 个 M9 binding 均为 active；
+裸 `UPDATE finance_journal_entry` 继续返回 `governed_write_context_required`。
+后续 AP/AR、库存、资产、成本等表必须按
+IAOS DES-065 的风险顺序进入同一强制边界，不能把当前财务纵切误称为全平台迁移完成。

@@ -12,7 +12,7 @@
 | 当前里程碑和优先级 | `docs/roadmap.md` |
 | 任务到文件导航 | `docs/code-map.md` |
 | 历史进展 | `docs/progress-log.md` |
-| 当前实施任务 | 无；PLAN-M17 至 PLAN-M24 已完成 |
+| 当前实施任务 | PLAN-GXZ-001 active；PLAN-M9-FIN-001 active |
 
 若内容冲突，当前状态以 `docs/roadmap.md` 为准，长期架构决策以 ADR 为准。
 
@@ -65,6 +65,7 @@
 | ADR-003 | [AESE 无状态场景编排 API](decisions/ADR-003-thin-scenario-orchestration-api.md) | Accepted |
 | ADR-004 | [AESE 仿真世界事实所有权](decisions/ADR-004-aese-world-state-ownership.md) | Accepted |
 | ADR-005 | [Process Definition 是工作项运行时的唯一事实源](decisions/ADR-005-process-definition-as-runtime-source.md) | Accepted |
+| ADR-006 | [Genesis 创业空间先于企业法律主体](decisions/ADR-006-genesis-workspace-precedes-enterprise.md) | Accepted |
 | DES-001 | [M3 可执行场景包与重放架构](designs/DES-001-m3-executable-scenario-package.md) | Completed |
 | DES-002 | [快速 2D 企业沙盘设计](designs/DES-002-fast-track-2d-enterprise-sandbox.md) | Completed |
 | DES-003 | [M5 受治理 Agent Tracer 设计](designs/DES-003-governed-agent-tracers.md) | Completed |
@@ -92,7 +93,9 @@
 | DES-025 | [M23 受治理多 Agent 组织](designs/DES-025-governed-multi-agent-organization.md) | Completed |
 | DES-026 | [M24 场景平台产品化与行业交付](designs/DES-026-scenario-platform-productization.md) | Completed |
 | DES-027 | [M9 IAOS 原生语义驱动企业成立真实闭环](designs/DES-027-m9-iaos-native-incorporation-closed-loop.md) | Approved |
-| DES-028 | [Enterprise Genesis AI 原生企业创生游戏体验](designs/DES-028-enterprise-genesis-game-experience.md) | Approved |
+| DES-028 | [Enterprise Genesis AI 原生企业创生游戏体验](designs/DES-028-enterprise-genesis-game-experience.md) | Completed |
+| DES-029 | [Enterprise Genesis 零起点主页、独立租户与真实 AI 企业身份](designs/DES-029-genesis-zero-start-and-ai-identity.md) | Approved |
+| DES-030 | [M9–M13 制造企业财务运行体系](designs/DES-030-manufacturing-finance-operating-system.md) | Approved |
 | PLAN-M3 | [M3 实施计划](plans/2026-07-19-m3-executable-scenario-package.md) | Completed |
 | PLAN-M3V | [快速 2D 企业沙盘实施计划](plans/2026-07-19-fast-track-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Completed |
@@ -101,8 +104,10 @@
 | PLAN-M7 | [M7 受治理场景运行控制台实施计划](plans/2026-07-20-m7-governed-scenario-operations-console.md) | Completed |
 | PLAN-M8 | [M8 AESE 2.0 三态世界与仿真内核实施计划](plans/2026-07-22-m8-aese-2-foundation.md) | Completed |
 | PLAN-M9 | [M9 Project Genesis 企业成立与治理实施计划](plans/2026-07-22-m9-genesis-incorporation.md) | Completed |
-| PLAN-M9-NATIVE | [M9 IAOS 原生语义驱动企业成立真实闭环实施计划](plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md) | Active — D22 人机协同补强 |
+| PLAN-M9-NATIVE | [M9 IAOS 原生语义驱动企业成立真实闭环实施计划](plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md) | Completed |
 | PLAN-GX | [Enterprise Genesis 游戏体验实施计划](plans/2026-07-27-enterprise-genesis-game-experience.md) | Completed |
+| PLAN-GXZ | [Enterprise Genesis 零起点与真实 AI 身份实施计划](plans/2026-07-28-genesis-zero-start-and-ai-identity.md) | Active |
+| PLAN-M9-FIN | [M9 制造企业财务基础与 M10–M13 业财闭环实施计划](plans/2026-07-28-m9-manufacturing-finance-foundation.md) | Active |
 | PLAN-M10 | [M10 Project Genesis 工厂选址与设施建设实施计划](plans/2026-07-22-m10-genesis-plant-build.md) | Completed |
 | PLAN-M11 | [M11 Project Genesis 生产能力建设实施计划](plans/2026-07-22-m11-genesis-production-capability-build.md) | Completed |
 | PLAN-M12 | [M12 Project Genesis 产品工业化与量产批准实施计划](plans/2026-07-22-m12-genesis-product-industrialization.md) | Completed |
@@ -127,8 +132,14 @@
 | M9N Final Evidence | [IAOS-native M9 final evidence](reports/m9-native-final-evidence.md) | Completed |
 | M9N Closed-loop Runbook | [IAOS-native M9 operations](runbooks/m9-native-closed-loop.md) | Completed |
 | Enterprise Genesis Runbook | [AI 企业身份、2.5D M9 游戏与 live IAOS 验收](runbooks/enterprise-genesis-game.md) | Completed |
+| Enterprise Genesis RPG / Multi-tenant Evidence | [全 RPG、生成精灵、双租户与失败恢复验收](reports/genesis-rpg-and-multi-tenant-acceptance.md) | Completed |
 | SOL-001 | [M9 LAN lifecycle loading and SSE continuity](solutions/SOL-001-m9-lan-lifecycle-loading-and-sse.md) | Completed |
 | SOL-002 | [企业成立外部确认重复点击幂等](solutions/SOL-002-incorporation-observation-click-idempotency.md) | Completed |
+| SOL-003 | [Genesis 新案件投影与 MiniMax JSON 截断 502](solutions/SOL-003-genesis-new-case-and-minimax-json-502.md) | Completed |
+| SOL-004 | [Genesis 创建企业 Founder 会话 422](solutions/SOL-004-genesis-founder-session-422.md) | Completed |
+| SOL-005 | [设立案件与正式企业主数据物化](solutions/SOL-005-incorporation-and-legal-entity-master-data.md) | Completed |
+| SOL-006 | [银行开户审批后 Work Item Execute 400](solutions/SOL-006-bank-opening-execute-strict-input.md) | Completed |
+| SOL-007 | [实缴资本核验差异 422 与纠正审批](solutions/SOL-007-capital-contribution-mismatch-422.md) | Completed |
 | M9N Risk Register | [IAOS-native M9 risk register](reports/m9-native-risk-register.json) | Active |
 | M10 Runbook | [Genesis Plant Build Runbook](runbooks/genesis-plant-build.md) | Completed |
 | M10 Evidence | [Genesis Plant Build Evidence](reports/m10-genesis-plant-build-evidence.md) | Completed |

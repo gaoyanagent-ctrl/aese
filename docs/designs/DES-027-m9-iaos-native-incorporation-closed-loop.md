@@ -728,3 +728,35 @@ AESE 只展示上述 IAOS 事实和证据，不解释或复制 Entity 状态机�
 - 查询、Agent Tool、验收数据和最终迁移策略。
 
 DES-027 已获批准。开始实现前必须创建唯一 active 主实施计划，并为 IAOS 修改建立独立 branch/worktree。
+
+## 5. D26 — M9 财务开业扩展
+
+DES-027 原始闭环只区分认缴、实缴、现金和预算，没有建设完整会计内核。经用户批准，
+[DES-030](DES-030-manufacturing-finance-operating-system.md) 将财务组织、账套、科目、
+会计期间、实收资本凭证、开业试算平衡和资产负债基线加入 M9 扩展完成门。
+
+- 已验证资本到账必须生成借银行存款、贷实收资本的会计事件和凭证；
+- `finance_opening_ready` 是新版本 `enterprise_operational_ready` 的前置条件；
+- 历史案件通过显式版本迁移补建，不修改既有 Journal 和 terminal 证据；
+- M10–M13 仅在真实业务事实发生后启用应付、资产、成本、应收、收入和结账；
+- 原 D14 二十项成立 Capability 保持版本兼容，财务 Capability 作为新 Runtime Package
+  发布，不用修改旧 Artifact 冒充已交付。
+
+## 6. D27 — 全量可执行绑定与显式财务工作项
+
+M9 的“资产已登记”和“业务真实执行”必须严格区分。最终运行合同为：
+
+- 20 个成立治理 Capability 与 5 个财务开业 Capability 均有 active
+  `capability_implementation_binding`；
+- 人工、Agent、Process 和 AESE World Observation 只进入 IAOS
+  `incorporation_command` 深接口，不能调用内部写入函数；
+- 每次已接受执行形成 `capability_execution`，记录主体、模式、correlation、幂等键、
+  允许写入 Entity、状态和完成时间；
+- 原 18 个正常路径工作项增加为 23 个；资本核验后依次执行财务组织、账套与期间、
+  科目、资本过账、财务就绪检查；
+- `capital.contribution.verify` 只提交核验事实，不再把五项财务工作隐藏成一个同步副作用；
+- 历史迁移走 `system.finance.opening.repair`，不伪装为用户业务执行。
+
+Outbox 行的 `tenant_id` 与 `event_type` 是事件路由权威。AESE 仍只提交受治理
+Observation；IAOS 将业务 payload 包装为完整 Event，并拒绝 envelope 与行路由不一致，
+避免产生 `iaos..` 空 subject。

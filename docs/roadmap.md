@@ -2,7 +2,7 @@
 
 本文件是 AESE 当前里程碑状态和下一步优先级的权威来源。
 
-最后更新：2026-07-27。
+最后更新：2026-07-29。
 
 ## 1. 里程碑状态
 
@@ -20,8 +20,10 @@
 | M7 受治理场景运行控制台 | 浏览器预检、初始化、逐幕运行、分析、验证和复位 | Completed | ADR-003、DES-005、PLAN-M7-001、M7 evidence |
 | M8 AESE 2.0 基础 | 三态世界、确定性离散事件内核、IAOS 双向桥和最小 Genesis tracer | Completed | PLAN-M8-001、World Play runbook、两仓测试与部署证据 |
 | M9 Genesis Incorporation | 注资、法人登记、治理、管理岗位、初始组织与预算 | Completed | hctm-genesis@0.2.0、M9 evidence、IAOS DES-051 |
-| M9N IAOS-native Incorporation Closed Loop | 用三层语义、正式身份、Runtime Artifact、Capability/Process/Approval、持久工作项和 World Bridge 重建 M9 真实闭环 | Completed | IAOS Runtime 1.3.13；18 工作项、G1–G7、三个 World wait、六次 Run/五 Agent 与中途重启恢复真实集成通过 |
-| GX Enterprise Genesis Game Experience | AI 企业身份、人工/Agent 协作和 2.5D 世界中的 M9 游戏化开局 | Completed MVP | DES-028、GameProjection live evidence、企业身份工作室、PixiJS/2D fallback、原创素材、三视口 live 浏览器验收 |
+| M9N IAOS-native Incorporation Closed Loop | 用三层语义、正式身份、Runtime Artifact、Capability/Process/Approval、持久工作项和 World Bridge 重建 M9 真实闭环 | Completed | 25 个 Capability active binding；23 个显式工作项（含 5 个财务开业节点）、G1–G7、三个 World wait、六次 Run/五 Agent 与中途重启恢复真实集成通过 |
+| GX Enterprise Genesis Game Experience | AI 企业身份、人工/Agent 协作和 2.5D 世界中的 M9 游戏化开局 | Completed | DES-028、从空白 case 创建、23 工作项游戏内操作、G1–G7、三个 World wait、三视口 live 浏览器验收 |
+| GX-ZERO Zero-start Enterprise Genesis | 从产品主页创建独立 tenant、World Run、真实 AI 企业身份和 M9 企业 | Active | 全 17 RPG 事件、角色/资产透明精灵、室内移动、音效、奖励、大事记、Founder 多租户选择、双租户隔离与失败恢复已完成；剩余生产控制面持久 CreativeJob 与平台级 workspace API 后进入 M10 |
+| M9-FIN Manufacturing Finance Foundation | 在 M9 建立财务组织、账套、科目、期初资本会计和开业报表，并在 M10–M13 接通 AP/AR/资金/资产/成本/总账 | Active | M9 F1 已交付财务组织、账套、期间、资本双分录、就绪硬门、开业报表、穿透工作台及 5 个显式财务工作项；25 个 M9 Capability 全部进入 execution 边界；19 张历史投影已迁移为里程碑无关存储。完整职责矩阵、非 M9 业务写入迁移和 M10–M13 子账仍未完成 |
 | M10 Genesis Plant Build | 选址、场地控制、设施项目、公用工程、异常重排与验收 | Reference Replay Complete; D22 Pending | hctm-genesis@0.3.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
 | M11 Genesis Capability Build | 资金补足、设备/实验室/仓储能力、核心团队与岗位资格 | Reference Replay Complete; D22 Pending | hctm-genesis@0.4.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
 | M12 Genesis Industrialization | RFQ/定点、产品/工艺、供应商/工装、APQP、试制、PPAP 与量产批准 | Reference Replay Complete; D22 Pending | hctm-genesis@0.5.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
@@ -45,14 +47,14 @@ M3、M3V、M4、M5、M6、M7 和跨里程碑的 X1 System Atlas 已完成。联�
 
 PLAN-M8-001 至 PLAN-M24-001 均已完成。M17-M24 严格消费前一 terminal，统一证据输出 `industry_simulation_platform_ready=true`。
 
-`PLAN-M9-NATIVE-001` 曾因通用平台资产缺口恢复为 active remediation。专用状态机、
+当前唯一 active 主计划为 `PLAN-GXZ-001`。`PLAN-M9-NATIVE-001` 曾因通用平台资产缺口恢复为 active remediation。专用状态机、
 事务、身份、G1–G7、World Bridge 与 trace 证据保留；完成 D19–D21 的通用资产注册、
 十工作区、逐步骤追踪及可解释配置合同已经交付，但用户验收证明这些查看入口不能替代
 持久化工作项和真实参与者推进。M9N 因 DES-027 D22 再次打开；只有人工、Agent、审批、
 World wait 和断点恢复的交互式证据齐备后才能重新关闭。
 
 D23/T83 已完成完整交互主线：Runtime 1.3.13 将登记校验正式分派
-`legal-compliance-agent`，18 个持久工作项依次经过 Founder、五 Agent、G1–G7 和三个
+`legal-compliance-agent`，23 个持久工作项依次经过 Founder、五 Agent、G1–G7、三个
 World wait；集成测试在第二个 World wait 后重建 Server 并恢复至
 `enterprise_operational_ready`。当前 Agent 执行器仍明确为 IAOS 内置确定性 Runtime，
 未配置外部模型时不冒充已连接 LLM。
@@ -61,12 +63,22 @@ D25 已消除数据模型工坊 Entity 生命周期与正式审批运行时的�
 状态和受治理动作，需审批的动作引用租户版本化 Flow，审批决定来自冻结 assignment，
 批准后才提交状态并 consume。该平台收敛不替代 M9 T83/T96 的完整交互式验收。
 
-PLAN-GX-001 已完成 MVP：游戏从 IAOS verified evidence bundle 与 18 个工作项编译
-GameProjection；AI 企业身份候选通过 `incorporation.case.open` 才成为正式案件事实；
+PLAN-GX-001 已完成 MVP：游戏从 IAOS verified evidence bundle 与 23 个工作项编译
+GameProjection；当前 deterministic 企业身份候选通过 `incorporation.case.open` 才成为正式案件事实；
 PixiJS 2.5D、DOM/2D fallback、工作项深链、World Observation、治理证据和
 `enterprise_operational_ready` 已在 1440×900、1280×720、390×844 三视口通过 live
-浏览器恢复验收。按需外部 LLM/Logo connector 仍遵循 provider/密钥治理边界，不把凭据
-放入 AESE 仓库。
+浏览器恢复验收。它没有完成独立 tenant provisioning 或真实外部 LLM。PLAN-GXZ-001
+以根主页、独立 workspace/tenant/World Run、MiniMax CreativeJob 和双租户 RLS 证据
+关闭该缺口；凭据只从本地 secret/env 注入，不放入 AESE 仓库。
+
+DES-030 已批准把完整制造企业财务底座纳入 Project Genesis。该扩展不撤销现有 M9/M9N
+闭环证据，但新增 `finance_opening_ready` 完成门：M9 建立财务组织、账套、科目、期间、
+实收资本凭证和开业资产负债；M10–M13 再按真实工程、采购、资产、生产和销售事件启用
+AP、AR、固定资产、制造成本和总账。PLAN-M9-FIN-001 已进入 active：M9 已完成首批
+财务 Entity/Capability/Process、资本双分录、开业报表、就绪硬门和 IAOS 财务穿透页；
+25 个 M9 Capability 已按 M9 D27 进入统一执行边界；财务开业 5 个动作成为显式工作项，无 Capability Execution
+Context 的凭证 DML 由数据库拒绝。F10、F13 及 F15–F35 和非财务受治理写入迁移仍未
+完成，不得把当前开业切片描述为完整会计系统或全平台 Capability 强制迁移完成。
 
 M7 O0-O4 已完成。最终 `m7-acceptance-20260722-05` 从 clean reset 跑通编排 API 与 CLI 对照链：22 个事件、三 Agent、17 条离线业务断言、2 条在线 IAOS 断言和 M6 KPI 均通过；单 run 产生 9 次成功 Tool Call 与两套一致的 O2D Outbox 副作用，UI/CLI 均安全复位。AESE 8090/4173 与 IAOS 8082/3000 的本机部署和健康检查已记录在 M7 evidence。该基线由 M8 强制保留。
 

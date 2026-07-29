@@ -47,3 +47,8 @@
 ## M13 首次商业交付治理
 
 `genesis.delivery.order/plan/procure/produce/ship/accept/invoice/collect/cost/close` 已交付。客户接受、银行到账、实际成本和周期关闭强制引用 World evidence。完整总账、税务、售后、坏账和 M14 多周期实验仍为后续缺口。
+
+DES-030 已把完整制造财务底座登记为显式规划缺口：财务组织、账套、科目、会计事件、
+凭证、总账、AP/AR、资金、固定资产、制造成本、结账、报表和 KPI 由
+PLAN-M9-FIN-001 分阶段建设。设计批准不关闭缺口；只有通用 Registry、业务运行、对账、
+UI、游戏和机器验收同时通过后才能标记完成。

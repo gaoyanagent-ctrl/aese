@@ -2,6 +2,7 @@ package iaosclient
 
 import (
 	"context"
+	"encoding/json"
 	"net/url"
 )
 
@@ -19,6 +20,8 @@ type IncorporationState struct {
 	BudgetMinor       int64    `json:"budget_authorized_minor"`
 	Currency          string   `json:"currency"`
 	ProposedName      string   `json:"proposed_company_name"`
+	RegisteredAddress string   `json:"registered_address"`
+	BusinessScope     string   `json:"business_scope"`
 	Discrepancies     []string `json:"discrepancies"`
 }
 
@@ -46,7 +49,18 @@ type IncorporationTrace struct {
 	State          IncorporationState           `json:"state"`
 	Journal        []IncorporationJournalEntry  `json:"journal"`
 	WorldExchanges []IncorporationWorldExchange `json:"world_exchanges"`
+	AgentRuns      []IncorporationAgentRun      `json:"agent_runs"`
 	Verified       bool                         `json:"verified"`
+}
+
+type IncorporationAgentRun struct {
+	ID               string          `json:"id"`
+	WorkItemSequence int             `json:"work_item_sequence"`
+	AgentID          string          `json:"agent_id"`
+	Capability       string          `json:"capability_code"`
+	Output           json.RawMessage `json:"output"`
+	Status           string          `json:"status"`
+	CompletedAt      string          `json:"completed_at"`
 }
 
 type IncorporationWorkItem struct {
@@ -59,6 +73,77 @@ type IncorporationWorkItem struct {
 	Effective   string         `json:"effective_status"`
 	Correlation string         `json:"correlation_id"`
 	AgentAuth   map[string]any `json:"agent_authorization"`
+}
+
+type FinanceTrialBalanceLine struct {
+	AccountCode   string `json:"account_code"`
+	AccountName   string `json:"account_name"`
+	AccountClass  string `json:"account_class"`
+	NormalBalance string `json:"normal_balance"`
+	DebitMinor    int64  `json:"debit_minor"`
+	CreditMinor   int64  `json:"credit_minor"`
+	BalanceMinor  int64  `json:"balance_minor"`
+}
+
+type FinanceBankJournalLine struct {
+	EntryNo      string `json:"entry_no"`
+	BusinessDate string `json:"business_date"`
+	Description  string `json:"description"`
+	DebitMinor   int64  `json:"debit_minor"`
+	CreditMinor  int64  `json:"credit_minor"`
+	BalanceMinor int64  `json:"balance_minor"`
+	SourceType   string `json:"source_type"`
+	SourceRef    string `json:"source_ref"`
+	EvidenceRef  string `json:"evidence_ref"`
+}
+
+type FinanceGeneralLedgerLine struct {
+	AccountCode         string `json:"account_code"`
+	AccountName         string `json:"account_name"`
+	OpeningBalanceMinor int64  `json:"opening_balance_minor"`
+	DebitMinor          int64  `json:"debit_minor"`
+	CreditMinor         int64  `json:"credit_minor"`
+	ClosingBalanceMinor int64  `json:"closing_balance_minor"`
+}
+
+type FinanceStatementLine struct {
+	AccountCode string `json:"account_code"`
+	AccountName string `json:"account_name"`
+	AmountMinor int64  `json:"amount_minor"`
+}
+
+type FinanceOpeningBalanceSheet struct {
+	AsOf                  string                 `json:"as_of"`
+	Currency              string                 `json:"currency"`
+	Assets                []FinanceStatementLine `json:"assets"`
+	Liabilities           []FinanceStatementLine `json:"liabilities"`
+	Equity                []FinanceStatementLine `json:"equity"`
+	TotalAssetsMinor      int64                  `json:"total_assets_minor"`
+	TotalLiabilitiesMinor int64                  `json:"total_liabilities_minor"`
+	TotalEquityMinor      int64                  `json:"total_equity_minor"`
+	Balanced              bool                   `json:"balanced"`
+}
+
+type FinanceOpening struct {
+	CaseCode            string                     `json:"case_code"`
+	FinanceOpeningReady bool                       `json:"finance_opening_ready"`
+	OrganizationCode    string                     `json:"organization_code"`
+	OrganizationStatus  string                     `json:"organization_status"`
+	Roles               []string                   `json:"roles"`
+	BookCode            string                     `json:"book_code"`
+	AccountingStandard  string                     `json:"accounting_standard"`
+	FunctionalCurrency  string                     `json:"functional_currency"`
+	PeriodCode          string                     `json:"period_code"`
+	PeriodStatus        string                     `json:"period_status"`
+	JournalEntryNo      string                     `json:"journal_entry_no"`
+	JournalStatus       string                     `json:"journal_status"`
+	DebitMinor          int64                      `json:"debit_minor"`
+	CreditMinor         int64                      `json:"credit_minor"`
+	TrialBalance        []FinanceTrialBalanceLine  `json:"trial_balance"`
+	BankJournal         []FinanceBankJournalLine   `json:"bank_journal"`
+	GeneralLedger       []FinanceGeneralLedgerLine `json:"general_ledger"`
+	OpeningBalanceSheet FinanceOpeningBalanceSheet `json:"opening_balance_sheet"`
+	EvidenceRef         string                     `json:"evidence_ref"`
 }
 
 func (c *Client) IncorporationTrace(ctx context.Context, caseCode string) (IncorporationTrace, error) {
@@ -77,4 +162,10 @@ func (c *Client) IncorporationWorkItems(ctx context.Context, caseCode string) ([
 	}
 	err := c.request(ctx, "GET", "api/v1/incorporations/"+url.PathEscape(caseCode)+"/work-items", nil, &out)
 	return out.Items, err
+}
+
+func (c *Client) FinanceOpening(ctx context.Context, caseCode string) (FinanceOpening, error) {
+	var out FinanceOpening
+	err := c.request(ctx, "GET", "api/v1/finance/opening/"+url.PathEscape(caseCode), nil, &out)
+	return out, err
 }

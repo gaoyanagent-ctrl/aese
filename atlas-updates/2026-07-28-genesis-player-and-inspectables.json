@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.player-and-inspectables.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "增加城市玩家化身和可检查室内物件",
+  "detail": "玩家化身随旅行定位到城市地区；室内物件显示用途、状态、解锁条件和 committed 来源，不复制业务表单。",
+  "status_after": "building",
+  "progress_after": 88,
+  "current_state": "the founder is spatially present and can inspect governed scene objects",
+  "evidence_ref": "docs/designs/DES-028-enterprise-genesis-game-experience.md",
+  "occurred_at": "2026-07-28T11:10:00Z"
+}

@@ -26,6 +26,7 @@ type Projection struct {
 	Actors        []Actor        `json:"actors"`
 	WorkItems     []WorkItem     `json:"work_items"`
 	Resources     Resources      `json:"resources"`
+	Finance       FinanceOpening `json:"finance_opening"`
 	Exchanges     []Exchange     `json:"exchanges"`
 	Brand         Brand          `json:"brand"`
 	Notifications []Notification `json:"notifications"`
@@ -66,15 +67,34 @@ type Actor struct {
 }
 
 type WorkItem struct {
-	WorkItemID  string `json:"work_item_id"`
-	Title       string `json:"title"`
-	Kind        string `json:"kind"`
-	Status      string `json:"status"`
-	OwnerType   string `json:"owner_type"`
-	OwnerID     string `json:"owner_id"`
-	Capability  string `json:"capability"`
-	RequiresMe  bool   `json:"requires_me"`
-	EvidenceRef string `json:"evidence_ref"`
+	WorkItemID  string          `json:"work_item_id"`
+	Title       string          `json:"title"`
+	Kind        string          `json:"kind"`
+	Status      string          `json:"status"`
+	OwnerType   string          `json:"owner_type"`
+	OwnerID     string          `json:"owner_id"`
+	Capability  string          `json:"capability"`
+	Gate        string          `json:"gate,omitempty"`
+	RequiresMe  bool            `json:"requires_me"`
+	EvidenceRef string          `json:"evidence_ref"`
+	Review      *ApprovalReview `json:"approval_review,omitempty"`
+}
+
+type ApprovalReview struct {
+	DocumentType string        `json:"document_type"`
+	Title        string        `json:"title"`
+	Summary      string        `json:"summary"`
+	PreparedBy   string        `json:"prepared_by"`
+	Status       string        `json:"status"`
+	Fields       []ReviewField `json:"fields"`
+	Risks        []string      `json:"risks"`
+	Effect       string        `json:"approval_effect"`
+	EvidenceRef  string        `json:"evidence_ref"`
+}
+
+type ReviewField struct {
+	Label string `json:"label"`
+	Value string `json:"value"`
 }
 
 type Money struct {
@@ -90,6 +110,76 @@ type Resources struct {
 	CapitalPaid      Money  `json:"capital_paid"`
 	BudgetAuthorized Money  `json:"budget_authorized"`
 	RiskLevel        string `json:"risk_level"`
+}
+
+type FinanceOpening struct {
+	Ready               bool                       `json:"ready"`
+	OrganizationCode    string                     `json:"organization_code,omitempty"`
+	OrganizationStatus  string                     `json:"organization_status,omitempty"`
+	Roles               []string                   `json:"roles"`
+	BookCode            string                     `json:"book_code,omitempty"`
+	AccountingStandard  string                     `json:"accounting_standard,omitempty"`
+	FunctionalCurrency  string                     `json:"functional_currency,omitempty"`
+	PeriodCode          string                     `json:"period_code,omitempty"`
+	PeriodStatus        string                     `json:"period_status,omitempty"`
+	JournalEntryNo      string                     `json:"journal_entry_no,omitempty"`
+	JournalStatus       string                     `json:"journal_status,omitempty"`
+	DebitMinor          int64                      `json:"debit_minor"`
+	CreditMinor         int64                      `json:"credit_minor"`
+	TrialBalance        []FinanceTrialBalanceLine  `json:"trial_balance"`
+	BankJournal         []FinanceBankJournalLine   `json:"bank_journal"`
+	GeneralLedger       []FinanceGeneralLedgerLine `json:"general_ledger"`
+	OpeningBalanceSheet FinanceOpeningBalanceSheet `json:"opening_balance_sheet"`
+	EvidenceRef         string                     `json:"evidence_ref,omitempty"`
+}
+
+type FinanceTrialBalanceLine struct {
+	AccountCode   string `json:"account_code"`
+	AccountName   string `json:"account_name"`
+	AccountClass  string `json:"account_class"`
+	NormalBalance string `json:"normal_balance"`
+	DebitMinor    int64  `json:"debit_minor"`
+	CreditMinor   int64  `json:"credit_minor"`
+	BalanceMinor  int64  `json:"balance_minor"`
+}
+
+type FinanceBankJournalLine struct {
+	EntryNo      string `json:"entry_no"`
+	BusinessDate string `json:"business_date"`
+	Description  string `json:"description"`
+	DebitMinor   int64  `json:"debit_minor"`
+	CreditMinor  int64  `json:"credit_minor"`
+	BalanceMinor int64  `json:"balance_minor"`
+	SourceType   string `json:"source_type"`
+	SourceRef    string `json:"source_ref"`
+	EvidenceRef  string `json:"evidence_ref"`
+}
+
+type FinanceGeneralLedgerLine struct {
+	AccountCode         string `json:"account_code"`
+	AccountName         string `json:"account_name"`
+	OpeningBalanceMinor int64  `json:"opening_balance_minor"`
+	DebitMinor          int64  `json:"debit_minor"`
+	CreditMinor         int64  `json:"credit_minor"`
+	ClosingBalanceMinor int64  `json:"closing_balance_minor"`
+}
+
+type FinanceStatementLine struct {
+	AccountCode string `json:"account_code"`
+	AccountName string `json:"account_name"`
+	AmountMinor int64  `json:"amount_minor"`
+}
+
+type FinanceOpeningBalanceSheet struct {
+	AsOf                  string                 `json:"as_of"`
+	Currency              string                 `json:"currency"`
+	Assets                []FinanceStatementLine `json:"assets"`
+	Liabilities           []FinanceStatementLine `json:"liabilities"`
+	Equity                []FinanceStatementLine `json:"equity"`
+	TotalAssetsMinor      int64                  `json:"total_assets_minor"`
+	TotalLiabilitiesMinor int64                  `json:"total_liabilities_minor"`
+	TotalEquityMinor      int64                  `json:"total_equity_minor"`
+	Balanced              bool                   `json:"balanced"`
 }
 
 type Exchange struct {
@@ -142,6 +232,18 @@ func (p *Projection) Validate() error {
 	for _, item := range p.WorkItems {
 		if item.WorkItemID == "" || item.OwnerID == "" || item.Capability == "" || item.EvidenceRef == "" {
 			return fmt.Errorf("work item %q is not traceable", item.WorkItemID)
+		}
+	}
+	if p.Finance.Ready {
+		if p.Finance.OrganizationCode == "" || p.Finance.BookCode == "" || p.Finance.JournalEntryNo == "" {
+			return fmt.Errorf("ready finance opening is missing organization, book, or journal identity")
+		}
+		if p.Finance.DebitMinor <= 0 || p.Finance.DebitMinor != p.Finance.CreditMinor {
+			return fmt.Errorf("ready finance opening is not balanced")
+		}
+		if len(p.Finance.BankJournal) == 0 || len(p.Finance.GeneralLedger) < 2 ||
+			!p.Finance.OpeningBalanceSheet.Balanced {
+			return fmt.Errorf("ready finance opening is missing reconciled journal, ledger, or balance sheet")
 		}
 	}
 	return nil

@@ -1,0 +1,379 @@
+.gx-location-scene {
+  position: absolute;
+  z-index: 12;
+  inset: 0;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  overflow: hidden;
+  color: #edf7f4;
+  background: #10282b;
+}
+.gx-location-scene > header {
+  position: relative;
+  z-index: 4;
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid #ffffff20;
+  background: #0b1d20e8;
+  backdrop-filter: blur(8px);
+}
+.gx-location-scene > header > div {
+  min-width: 0;
+}
+.gx-location-scene > header button {
+  padding: 0 13px;
+  border: 1px solid #628078;
+  border-radius: 8px;
+  color: #e8f5f1;
+  background: #183632;
+}
+.gx-location-scene > header small {
+  color: #86b9a9;
+  letter-spacing: 0.12em;
+}
+.gx-location-scene > header h2 {
+  margin: 3px 0;
+  font-size: 22px;
+}
+.gx-location-scene > header p {
+  max-width: 680px;
+  margin: 0;
+  color: #a8bdb7;
+  font-size: 11px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+.gx-location-scene > header > span {
+  padding: 6px 9px;
+  border-radius: 99px;
+  color: #bce8d1;
+  background: #24513e;
+  font-size: 10px;
+}
+.gx-room {
+  position: relative;
+  overflow: hidden;
+  --gx-npc-width: clamp(122px, 10vw, 154px);
+  --gx-npc-height: clamp(230px, 31vh, 284px);
+  --gx-player-width: clamp(104px, 8.5vw, 132px);
+  --gx-player-height: clamp(198px, 27vh, 246px);
+  background-color: #1b282a;
+  background-position: center;
+  background-size: cover;
+}
+.gx-location-office .gx-room {
+  background-image: url("/assets/enterprise-genesis/locations/founder-office-v1.png");
+}
+.gx-location-government .gx-room {
+  background-image: url("/assets/enterprise-genesis/locations/government-service-v1.png");
+}
+.gx-location-bank .gx-room {
+  background-image: url("/assets/enterprise-genesis/locations/commercial-bank-v1.png");
+}
+.gx-location-headquarters .gx-room {
+  background-image: url("/assets/enterprise-genesis/locations/enterprise-headquarters-v1.png");
+}
+.gx-room:before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, #08191b1a 35%, #0714158f 100%);
+  pointer-events: none;
+}
+.gx-room-window {
+  position: absolute;
+  top: 10%;
+  left: 8%;
+  width: 28%;
+  height: 28%;
+  border: 8px solid #745f48;
+  background: linear-gradient(#8ec5d4aa, #d9e8dbaa 55%, #77947daa 56%);
+  box-shadow: inset 0 0 0 2px #d7c6a5;
+  opacity: 0;
+  pointer-events: none;
+}
+.gx-room-desk,
+.gx-room-agent,
+.gx-room-asset,
+.gx-counter,
+.gx-certificate-desk,
+.gx-bank-room,
+.gx-ukey-desk,
+.gx-hq-board,
+.gx-board-table {
+  position: absolute;
+  box-sizing: border-box;
+  display: grid;
+  place-items: center;
+  gap: 6px;
+  padding: 14px;
+  border: 1px solid #6d5944;
+  border-radius: 9px;
+  color: #352d25;
+  background: #d9c39ce6;
+  box-shadow: 0 18px 28px #4a352755;
+}
+.gx-room-desk span,
+.gx-room-asset span,
+.gx-counter span,
+.gx-counter strong,
+.gx-certificate-desk strong,
+.gx-bank-room span,
+.gx-ukey-desk strong,
+.gx-hq-board strong,
+.gx-hq-board span,
+.gx-board-table span {
+  max-width: 100%;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+.gx-room-desk {
+  right: 25%;
+  bottom: 18%;
+  width: 180px;
+  height: 78px;
+}
+.gx-room-agent {
+  right: 8%;
+  bottom: 30%;
+  width: 110px;
+}
+.gx-room-asset {
+  top: 12%;
+  right: 8%;
+  width: 145px;
+  opacity: 0.45;
+}
+.gx-room-asset.seal {
+  top: 34%;
+}
+.gx-room-asset.unlocked,
+.gx-certificate-desk.unlocked,
+.gx-ukey-desk.unlocked {
+  opacity: 1;
+  border-color: #a83e33;
+  color: #8b2f29;
+  background: #efdbc0;
+}
+.gx-room svg {
+  width: 28px;
+}
+.gx-counter {
+  top: 11%;
+  right: auto;
+  left: 50%;
+  width: min(640px, calc(100% - 40px));
+  min-height: 112px;
+  height: auto;
+  padding: 18px 28px;
+  transform: translateX(-50%);
+  color: #e9f0ed;
+  background: #38524ed9;
+}
+.gx-counter strong,
+.gx-counter span {
+  width: 100%;
+  box-sizing: border-box;
+  line-height: 1.45;
+  white-space: normal;
+}
+.gx-counter strong {
+  font-size: 14px;
+}
+.gx-counter span {
+  font-size: 11px;
+}
+.gx-counter.bank {
+  background: #263f58df;
+}
+.gx-queue {
+  position: absolute;
+  bottom: 18%;
+  left: 12%;
+  display: flex;
+  align-items: end;
+  gap: 16px;
+  color: #4c4034;
+}
+.gx-queue i {
+  width: 28px;
+  height: 58px;
+  border-radius: 50% 50% 10px 10px;
+  background: #36534ec9;
+}
+.gx-queue span {
+  margin-left: 10px;
+}
+.gx-certificate-desk,
+.gx-ukey-desk {
+  right: 12%;
+  bottom: 17%;
+  width: 190px;
+  opacity: 0.55;
+}
+.gx-bank-room {
+  bottom: 18%;
+  left: 12%;
+  width: 190px;
+}
+.gx-hq-board {
+  top: 10%;
+  left: 10%;
+  width: 260px;
+  color: #eef4f3;
+  background: #425c59;
+}
+.gx-board-table {
+  right: 8%;
+  bottom: 12%;
+  width: 240px;
+  height: 92px;
+}
+.gx-exec-seats {
+  position: absolute;
+  bottom: 17%;
+  left: 12%;
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  opacity: 0.4;
+}
+.gx-exec-seats.unlocked {
+  opacity: 1;
+}
+.gx-exec-seats i {
+  width: 46px;
+  height: 70px;
+  border-radius: 50% 50% 8px 8px;
+  background: #526f69;
+}
+.gx-exec-seats span {
+  color: #3b3229;
+}
+.gx-location-scene .gx-mission {
+  bottom: 18px;
+}
+.gx-location-empty {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  left: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid #58756c;
+  border-radius: 12px;
+  background: #0b201de8;
+}
+.gx-location-empty svg {
+  color: #75c39f;
+}
+.gx-location-empty p {
+  margin: 4px 0 0;
+  color: #8ca49b;
+  font-size: 11px;
+}
+.gx-scene-npc{position:absolute;z-index:3;left:43%;bottom:24%;display:flex;align-items:flex-end;gap:10px}.gx-scene-npc>i{position:relative;width:52px;height:94px;display:block;border-radius:48% 48% 12px 12px;background:linear-gradient(#332a24 0 25%,#c89168 26% 48%,#315966 49%);box-shadow:0 13px 15px #4a352755}.gx-scene-npc>i span{position:absolute;right:-7px;bottom:7px;width:20px;height:42px;border-radius:12px;background:#315966;transform:rotate(-18deg);transform-origin:top}.gx-scene-npc.active>i{animation:gx-npc-working 1.8s ease-in-out infinite}.gx-scene-npc>div{position:relative;width:210px;box-sizing:border-box;margin-bottom:70px;padding:10px 12px;border:1px solid #79938a;border-radius:10px;color:#eaf4f1;background:#122c28e8;box-shadow:0 10px 24px #0005}.gx-scene-npc>div:after{content:"";position:absolute;bottom:-9px;left:18px;width:16px;height:16px;border-right:1px solid #79938a;border-bottom:1px solid #79938a;background:#122c28;transform:rotate(45deg)}.gx-scene-npc small,.gx-scene-npc strong{display:block;max-width:100%;overflow-wrap:anywhere}.gx-scene-npc p{max-width:100%;margin:5px 0 0;color:#bdd0ca;font-size:10px;line-height:1.45;overflow-wrap:anywhere}
+.gx-trophy-shelf{position:absolute;top:58%;left:7%;display:grid;grid-template-columns:repeat(4,70px);gap:6px;padding:9px;border:1px solid #665440;border-radius:8px;background:#8d704e;box-shadow:0 14px 20px #4a352755}.gx-trophy-shelf>small{grid-column:1/-1;color:#f0dfbf}.gx-trophy-shelf span{display:grid;place-items:center;gap:3px;padding:6px;border-radius:5px;color:#695c4c;background:#bba581;opacity:.38;font-size:8px}.gx-trophy-shelf span[data-on=true]{color:#6f241f;background:#efcfac;opacity:1}.gx-trophy-shelf svg{width:18px}
+.gx-object-actions{position:absolute;z-index:5;top:12px;right:12px;display:flex;gap:6px}.gx-object-actions button{min-height:38px;display:flex;align-items:center;gap:5px;padding:0 9px;border:1px solid #6f8279;border-radius:7px;color:#eef5f2;background:#223b35d9;font-size:9px}.gx-object-actions svg{width:14px}.gx-object-detail{position:absolute;z-index:10;top:62px;right:14px;width:min(290px,calc(100% - 28px));box-sizing:border-box;padding:15px;border:1px solid #8da79d;border-radius:11px;color:#eaf4f0;background:#102823f2;box-shadow:0 18px 45px #0008}.gx-object-detail>button{position:absolute;top:7px;right:7px;width:36px;min-height:36px;border:0;border-radius:7px;color:#c9ddd6;background:#28433b}.gx-object-detail small{color:#7fa99b;letter-spacing:.1em}.gx-object-detail h3{margin:5px 0}.gx-object-detail strong{display:inline-block;padding:3px 7px;border-radius:99px;color:#c9eedc;background:#265440;font-size:10px}.gx-object-detail p{color:#b8cbc5;line-height:1.55}.gx-object-detail code{display:block;overflow-wrap:anywhere;color:#78958b;font-size:9px}
+.gx-object-detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:12px 0}.gx-object-detail-actions a{min-height:42px;display:grid;place-items:center;padding:0 10px;border:1px solid #5e9aa6;border-radius:8px;color:#dff8fa;background:#163e48;text-decoration:none;font-size:11px;font-weight:700}.gx-object-detail-actions a:hover,.gx-object-detail-actions a:focus-visible{border-color:#9ce8f2;background:#205361;outline:2px solid #9ce8f266;outline-offset:2px}
+.gx-room-player{position:absolute;z-index:4;left:24%;bottom:13%;display:grid;place-items:center;transition:transform .42s cubic-bezier(.2,.8,.2,1)}.gx-room-player i{display:block;width:34px;height:58px;border:2px solid #f0d9a6;border-radius:48% 48% 12px 12px;background:linear-gradient(#392d28 0 25%,#bd825d 26% 47%,#1f5c68 48%);box-shadow:0 10px 15px #0006}.gx-room-player span{margin-top:3px;padding:2px 6px;border-radius:99px;color:#fff6dc;background:#182c28d9;font-size:8px}.gx-room-player.target-1{transform:translate(140px,-40px)}.gx-room-player.target-2{transform:translate(310px,-115px)}.gx-room-player.target-3{transform:translate(30px,-150px)}
+@keyframes gx-npc-working{50%{transform:translateY(-3px)}}
+@media (max-width: 700px) {
+  .gx-location-scene > header {
+    grid-template-columns: auto 1fr;
+    padding: 10px;
+  }
+  .gx-location-scene > header > span,
+  .gx-location-scene > header p {
+    display: none;
+  }
+  .gx-room-desk {
+    right: 8%;
+    bottom: 22%;
+  }
+  .gx-room-agent {
+    display: none;
+  }
+  .gx-room-asset {
+    right: auto;
+    left: 6%;
+  }
+  .gx-counter {
+    right: auto;
+    left: 50%;
+    width: calc(100% - 20px);
+    min-height: 104px;
+    padding: 14px 18px;
+  }
+  .gx-bank-room {
+    left: 6%;
+    width: 140px;
+  }
+  .gx-certificate-desk,
+  .gx-ukey-desk {
+    right: 6%;
+    width: 150px;
+  }
+  .gx-hq-board {
+    right: 6%;
+    left: 6%;
+    width: auto;
+  }
+  .gx-exec-seats {
+    left: 6%;
+  }
+  .gx-board-table {
+    right: 6%;
+    bottom: 10%;
+    width: 170px;
+  }
+  .gx-scene-npc{left:40%;bottom:21%}.gx-scene-npc>div{width:145px}.gx-trophy-shelf{display:none}.gx-object-actions{right:6px;left:6px;overflow:auto}.gx-object-actions button{flex:none}.gx-object-detail{top:58px}
+}
+@media(prefers-reduced-motion:reduce){.gx-scene-npc.active>i{animation:none}}
+@media(prefers-reduced-motion:reduce){.gx-room-player{transition:none}}
+
+/* Generated sprite layer; size is calibrated against the room furniture. */
+.gx-scene-npc{bottom:13%}
+.gx-scene-npc>i{width:var(--gx-npc-width);height:var(--gx-npc-height);border:0;border-radius:0;background-image:url("/assets/enterprise-genesis/sprites/ji-yuan-v1.png");background-position:center bottom;background-repeat:no-repeat;background-size:contain;background-color:transparent;filter:drop-shadow(0 16px 10px #0008);box-shadow:none;transform-origin:center bottom}
+.gx-location-government .gx-scene-npc>i{background-image:url("/assets/enterprise-genesis/sprites/lin-lan-v1.png")}
+.gx-location-bank .gx-scene-npc>i{background-image:url("/assets/enterprise-genesis/sprites/zhou-heng-v1.png")}
+.gx-location-headquarters .gx-scene-npc>i{background-image:url("/assets/enterprise-genesis/sprites/gu-yuan-v1.png")}
+.gx-scene-npc>i span{display:none}
+.gx-scene-npc>div{margin-bottom:clamp(130px,18vh,166px);background:#122c28f2}
+.gx-room-player{bottom:9%}
+.gx-room-player i{width:var(--gx-player-width);height:var(--gx-player-height);border:0;border-radius:0;background:url("/assets/enterprise-genesis/sprites/founder-v1.png") center bottom/contain no-repeat;filter:drop-shadow(0 15px 9px #0008);box-shadow:none;transform-origin:center bottom}
+
+@media (max-width: 700px) {
+  .gx-room {
+    --gx-npc-width: clamp(92px, 28vw, 112px);
+    --gx-npc-height: clamp(174px, 31vh, 210px);
+    --gx-player-width: clamp(78px, 23vw, 96px);
+    --gx-player-height: clamp(148px, 27vh, 180px);
+  }
+  .gx-scene-npc {
+    left: 34%;
+    bottom: 12%;
+  }
+  .gx-scene-npc > div {
+    width: 140px;
+    margin-bottom: clamp(96px, 16vh, 126px);
+  }
+  .gx-room-player {
+    left: 15%;
+    bottom: 8%;
+  }
+  .gx-room-player.target-1 {
+    transform: translate(70px, -24px);
+  }
+  .gx-room-player.target-2 {
+    transform: translate(170px, -72px);
+  }
+  .gx-room-player.target-3 {
+    transform: translate(20px, -96px);
+  }
+}

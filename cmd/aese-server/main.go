@@ -12,6 +12,8 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/industrial-ai/iaos-aese/internal/creative"
+	"github.com/industrial-ai/iaos-aese/internal/genesisworkspace"
 	"github.com/industrial-ai/iaos-aese/internal/httpapi"
 )
 
@@ -70,12 +72,36 @@ func run(args []string) int {
 	}
 
 	logger := log.New(os.Stdout, "[aese-server] ", log.LstdFlags|log.Lshortfile)
+	var creativeProvider creative.Provider = creative.DeterministicProvider{}
+	if key := strings.TrimSpace(os.Getenv("MINMAX_API_KEY")); key != "" {
+		provider, err := creative.NewMiniMaxProvider(creative.MiniMaxConfig{
+			BaseURL: os.Getenv("MINMAX_API_BASE"),
+			APIKey:  key,
+			Model:   os.Getenv("MINMAX_MODEL"),
+		})
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "invalid MiniMax configuration: %v\n", err)
+			return 2
+		}
+		creativeProvider = provider
+		logger.Printf("creative provider enabled (provider=MiniMax model=%s)", os.Getenv("MINMAX_MODEL"))
+	} else {
+		logger.Printf("creative provider fallback enabled (provider=deterministic)")
+	}
 	server := httpapi.New(httpapi.Config{
-		PackDir:        *packDir,
-		IAOSBaseURL:    *iaosBaseURL,
-		RequestTimeout: *timeout,
-		BodyLimit:      *bodyLimit,
-		Logger:         logger,
+		PackDir:          *packDir,
+		IAOSBaseURL:      *iaosBaseURL,
+		RequestTimeout:   *timeout,
+		BodyLimit:        *bodyLimit,
+		Logger:           logger,
+		CreativeProvider: creativeProvider,
+		GenesisWorkspaceService: &genesisworkspace.Service{
+			Store: genesisworkspace.NewStore(envOrDefault("GENESIS_WORKSPACE_STORE", ".aese-data/genesis-workspaces.json")),
+			Provisioner: genesisworkspace.IAOSClient{
+				BaseURL:       *iaosBaseURL,
+				PlatformToken: os.Getenv("GENESIS_PLATFORM_TOKEN"),
+			},
+		},
 	})
 
 	httpServer := &http.Server{
@@ -110,4 +136,11 @@ func run(args []string) int {
 		return 1
 	}
 	return 0
+}
+
+func envOrDefault(key, fallback string) string {
+	if value := strings.TrimSpace(os.Getenv(key)); value != "" {
+		return value
+	}
+	return fallback
 }

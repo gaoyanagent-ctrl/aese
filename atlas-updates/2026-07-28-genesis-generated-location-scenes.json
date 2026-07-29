@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.generated-location-scenes.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "接入 OpenAI 生成的四类 2.5D 室内场景",
+  "detail": "创始办公室、政务服务中心、合作银行和企业总部使用版本化生成图片；交互、状态和 evidence 继续由 DOM 与 IAOS Projection 承载。",
+  "status_after": "building",
+  "progress_after": 90,
+  "current_state": "four distinct generated location environments are active in the playable M9 world",
+  "evidence_ref": "docs/designs/DES-028-enterprise-genesis-game-experience.md",
+  "occurred_at": "2026-07-28T12:00:00Z"
+}

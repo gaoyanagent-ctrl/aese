@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.approval-subject-review.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "补齐 M9 起草结果与 G1-G7 审批对象审阅",
+  "detail": "GameProjection 读取 IAOS Agent Run output；节点 2 解释创始决议产物，全部审批在执行前展示事项、关键字段、风险、效果和证据。",
+  "status_after": "building",
+  "progress_after": 73,
+  "current_state": "M9 approvals now expose reviewable committed subjects before player decisions",
+  "evidence_ref": "docs/designs/DES-028-enterprise-genesis-game-experience.md",
+  "occurred_at": "2026-07-28T07:49:29Z"
+}

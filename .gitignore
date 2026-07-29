@@ -9,6 +9,7 @@
 *.log
 *.pid
 tmp/
+.aese-data/
 dist/
 build/
 

@@ -1,6 +1,6 @@
 {
   "schema_version": "1.0",
-  "updated_at": "2026-07-23T06:45:00Z",
+  "updated_at": "2026-07-29T12:18:00Z",
   "plan": "PLAN-M9-NATIVE-001",
   "risks": [
     {
@@ -8,8 +8,8 @@
       "severity": "high",
       "status": "mitigating",
       "risk": "Bridge duplicate, delay, restart or out-of-order delivery diverges",
-      "mitigation": "durable journal, idempotency keys, trusted correlation and five-class offline reconciliation",
-      "exit_evidence": "restart and poller recovery matrix"
+      "mitigation": "durable journal, idempotency keys, trusted correlation, five-class offline reconciliation and Outbox business-payload normalization; the active GX tenant backlog was replayed successfully",
+      "exit_evidence": "restart and poller recovery matrix plus target-tenant PROCESSED-only Outbox query; historical non-target test-tenant backlog remains quarantined"
     },
     {
       "key": "M9N-R2",
@@ -22,10 +22,10 @@
     {
       "key": "M9N-R3",
       "severity": "medium",
-      "status": "mitigating",
+      "status": "mitigated",
       "risk": "UI projection diverges from installed Runtime Artifact",
-      "mitigation": "artifact projection plus permission resources; final menu/action projection tests pending",
-      "exit_evidence": "T13/T50 authorization and projection matrix"
+      "mitigation": "artifact projection plus permission resources; Runtime 1.7.0 signs capability contracts and process definitions in definitions_hash",
+      "exit_evidence": "T13/T50 authorization and projection matrix plus target-tenant Runtime 1.7.0 installation"
     },
     {
       "key": "M9N-R4",
@@ -34,6 +34,22 @@
       "risk": "IAOS frontend legacy unit baseline is not fully green",
       "mitigation": "M9 production build and Playwright are green; isolate and repair pre-existing Vitest failures before T63",
       "exit_evidence": "full frontend test report"
+    },
+    {
+      "key": "M9N-R5",
+      "severity": "high",
+      "status": "mitigating",
+      "risk": "Business handlers outside the M9 incorporation boundary may still write without a persisted Capability Execution",
+      "mitigation": "DES-065 defines the platform-wide migration order; all 25 M9 commands are bound and governed, finance journal writes additionally fail closed at the database boundary",
+      "exit_evidence": "platform-wide governed-write inventory and migration completion, not the M9-only static check"
+    },
+    {
+      "key": "M9N-R6",
+      "severity": "medium",
+      "status": "open",
+      "risk": "The shared PostgreSQL full integration suite is sensitive to test ordering and residual fixtures",
+      "mitigation": "the M9 23-work-item tracer runs green in isolation; move suites to per-test database or schema and deterministic cleanup",
+      "exit_evidence": "repeatable full integration suite from a clean isolated database"
     }
   ]
 }

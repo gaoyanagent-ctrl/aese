@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.entity-runtime-data-recovery.2026-07-29",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "恢复 M9 财务权威数据与 IAOS Entity 菜单投影",
+  "detail": "IAOS 保留人工 INC-INTERACTIVE 案件参与幂等财务回填，修复回填 prepared statement 与平台 Entity m9_* 物理绑定漂移；tenant-gx-f4b3ce3ce8e2712d 已升级到 Runtime 1.6.0 并恢复 19 个 M9 Entity 的租户内投影；AESE DES-030 明确权威账务、通用投影和菜单读取必须同源。",
+  "status_after": "validating",
+  "progress_after": 34,
+  "current_state": "Genesis finance facts are visible through both the finance workspace and canonical IAOS Entity projections",
+  "evidence_ref": "docs/designs/DES-030-manufacturing-finance-operating-system.md",
+  "occurred_at": "2026-07-29T13:30:00Z"
+}

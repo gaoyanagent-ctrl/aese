@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.character-room-scale.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "校准 Enterprise Genesis 室内人物与房间尺度",
+  "detail": "创始人与地点 NPC 使用桌面和移动端响应式尺寸，按家具标尺统一同景深身高、脚底原点和接触阴影，并由三视口端到端测试约束最小可见身高与角色比例。",
+  "status_after": "validating",
+  "progress_after": 96,
+  "current_state": "M9 room characters are visually calibrated against furniture across desktop and mobile viewports",
+  "evidence_ref": "docs/designs/DES-028-enterprise-genesis-game-experience.md",
+  "occurred_at": "2026-07-28T12:00:00Z"
+}

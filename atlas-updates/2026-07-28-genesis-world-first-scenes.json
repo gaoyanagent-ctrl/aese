@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.world-first-scenes.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "Enterprise Genesis 改为世界优先城市与室内场景导航",
+  "detail": "四个城市热点进入独立室内地点，建筑/NPC 承载主线；Work Item 降级治理档案并移除伪时间和历史帧控件。",
+  "status_after": "building",
+  "progress_after": 82,
+  "current_state": "M9 is navigated through a coherent city and committed location scenes instead of a workflow dashboard",
+  "evidence_ref": "docs/designs/DES-028-enterprise-genesis-game-experience.md",
+  "occurred_at": "2026-07-28T10:51:30Z"
+}

@@ -56,6 +56,13 @@ func FromIncorporationTrace(trace incorporation.Trace, caseCode string, frameInd
 			BudgetAuthorized: fromMoney(frame.Budget.Amount),
 			RiskLevel:        "low",
 		},
+		Finance: FinanceOpening{
+			Roles: []string{}, TrialBalance: []FinanceTrialBalanceLine{},
+			BankJournal: []FinanceBankJournalLine{}, GeneralLedger: []FinanceGeneralLedgerLine{},
+			OpeningBalanceSheet: FinanceOpeningBalanceSheet{
+				Assets: []FinanceStatementLine{}, Liabilities: []FinanceStatementLine{}, Equity: []FinanceStatementLine{},
+			},
+		},
 		Exchanges:     exchangesForFrame(frame, caseCode),
 		Brand:         Brand{Status: "candidate", CompanyName: "华辰热管理系统集团有限公司", PrimaryColor: "#2563EB"},
 		Notifications: []Notification{{NotificationID: fmt.Sprintf("notice-%d", frame.IAOSCursor), Severity: "info", Message: frame.Title}},
@@ -122,29 +129,29 @@ func actorsForFrame(_ incorporation.Frame, frameIndex int) []Actor {
 	return actors
 }
 
-type workItemSpec struct{ capability, kind, owner string }
+type workItemSpec struct{ capability, kind, owner, gate string }
 
 var workItemRangeByFrame = [8][2]int{{1, 3}, {4, 7}, {8, 9}, {10, 10}, {11, 14}, {15, 15}, {16, 17}, {18, 18}}
 
 var incorporationWorkItems = []workItemSpec{
-	{"incorporation.case.open", "human_task", "founder-principal"},
-	{"founder.resolution.prepare", "agent_task", "incorporation-agent"},
-	{"founder.resolution.approve", "approval", "founder-principal"},
-	{"capital.commitment.record", "agent_task", "finance-agent"},
-	{"registration.package.validate", "agent_task", "legal-compliance-agent"},
-	{"registration.submit", "approval", "founder-principal"},
-	{"registration.observation.commit", "world_wait", "world-registry"},
-	{"bank.account.opening.submit", "approval", "founder-principal"},
-	{"bank.account.observation.commit", "world_wait", "world-bank"},
-	{"capital.contribution.verify", "agent_task", "finance-agent"},
-	{"organization.establish", "agent_task", "governance-agent"},
-	{"executive.appointment.propose", "agent_task", "governance-agent"},
-	{"executive.appointment.acceptance.commit", "world_wait", "world-talent"},
-	{"executive.appointment.approve", "approval", "founder-principal"},
-	{"operating.mandate.grant", "approval", "founder-principal"},
-	{"initial.budget.prepare", "agent_task", "finance-agent"},
-	{"initial.budget.approve", "approval", "founder-principal"},
-	{"enterprise.readiness.evaluate", "agent_task", "audit-agent"},
+	{"incorporation.case.open", "human_task", "founder-principal", ""},
+	{"founder.resolution.prepare", "agent_task", "incorporation-agent", ""},
+	{"founder.resolution.approve", "approval", "founder-principal", "G1"},
+	{"capital.commitment.record", "agent_task", "finance-agent", ""},
+	{"registration.package.validate", "agent_task", "legal-compliance-agent", ""},
+	{"registration.submit", "approval", "founder-principal", "G2"},
+	{"registration.observation.commit", "world_wait", "world-registry", ""},
+	{"bank.account.opening.submit", "approval", "founder-principal", "G3"},
+	{"bank.account.observation.commit", "world_wait", "world-bank", ""},
+	{"capital.contribution.verify", "agent_task", "finance-agent", "G4"},
+	{"organization.establish", "capability", "iaos-runtime", ""},
+	{"executive.appointment.propose", "agent_task", "governance-agent", ""},
+	{"executive.appointment.acceptance.commit", "world_wait", "world-talent", ""},
+	{"executive.appointment.approve", "approval", "founder-principal", "G5"},
+	{"operating.mandate.grant", "approval", "founder-principal", "G6"},
+	{"initial.budget.prepare", "agent_task", "finance-agent", ""},
+	{"initial.budget.approve", "approval", "founder-principal", "G7"},
+	{"enterprise.readiness.evaluate", "agent_task", "audit-agent", ""},
 }
 
 func workItemsForFrame(frame incorporation.Frame, caseCode string, frameIndex int) []WorkItem {
@@ -161,7 +168,7 @@ func workItemsForFrame(frame incorporation.Frame, caseCode string, frameIndex in
 		id := fmt.Sprintf("WI-%02d", sequence)
 		out = append(out, WorkItem{
 			WorkItemID: id, Title: spec.capability, Kind: spec.kind, Status: status,
-			OwnerType: ownerType(spec.owner), OwnerID: spec.owner, Capability: spec.capability,
+			OwnerType: ownerType(spec.owner), OwnerID: spec.owner, Capability: spec.capability, Gate: spec.gate,
 			RequiresMe:  status == "active" && spec.owner == "founder-principal",
 			EvidenceRef: "trace:" + caseCode + "#" + id,
 		})

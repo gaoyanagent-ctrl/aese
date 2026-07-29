@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.zero-start-design.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "design",
+  "summary": "重构 Enterprise Genesis 为根主页、独立租户和真实 MiniMax 企业身份",
+  "detail": "ADR-006 与 DES-029 将 tenant 定义为法律主体成立前的隔离创业空间，新增 GenesisWorkspace provisioning saga、平台玩家身份、独立 World Run、真实 MiniMax CreativeJob 与明确 fallback 边界。",
+  "status_after": "designed",
+  "progress_after": 10,
+  "current_state": "PLAN-GXZ-001 active; implementation not yet started",
+  "evidence_ref": "docs/designs/DES-029-genesis-zero-start-and-ai-identity.md",
+  "occurred_at": "2026-07-28T00:00:00Z"
+}

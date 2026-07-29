@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.capital-contribution-mismatch-ux.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "补齐 G4 实缴资本差异核对与纠正审批",
+  "detail": "G4 展示认缴、到账和差额，不一致时阻止核验；金额变化生成新的治理 correlation 和审批。",
+  "status_after": "building",
+  "progress_after": 78,
+  "current_state": "capital contribution mismatch is explained and corrected before a fresh governed approval",
+  "evidence_ref": "docs/solutions/SOL-007-capital-contribution-mismatch-422.md",
+  "occurred_at": "2026-07-28T10:17:30Z"
+}

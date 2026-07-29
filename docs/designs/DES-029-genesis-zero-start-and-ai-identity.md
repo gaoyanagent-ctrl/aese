@@ -1,0 +1,282 @@
+---
+id: DES-029
+title: Enterprise Genesis 零起点主页、独立租户与真实 AI 企业身份
+date: 2026-07-28
+status: approved
+author: Codex + User
+tags: [genesis, homepage, tenant-provisioning, minimax, ai, onboarding]
+---
+
+# Enterprise Genesis 零起点主页、独立租户与真实 AI 企业身份
+
+## 1. 修正的问题
+
+当前实现有三个根本缺口：
+
+1. `DeterministicProvider.GenerateNames` 返回四组代码模板；“AI 候选”标签不准确。
+2. 用户必须持有 tenant、case 和 token 拼成的复杂 hash URL，缺少产品主页。
+3. “新建企业”只在 `tenant-hctm-genesis` 中创建新案件，不会创建新的租户、身份、
+   Runtime 和 World Run，因此不是从零开始。
+
+DES-029 替代 DES-028 中关于默认入口、租户前置和外部模型已连接状态的假设；已经完成
+的 2.5D 投影、18 工作项和 IAOS 治理链继续复用。
+
+## 2. 产品入口
+
+局域网和正式部署只公布根地址：
+
+```text
+http://192.168.50.222:4173/
+```
+
+根页面是 Enterprise Genesis Home，不要求用户理解 hash 参数。页面包含：
+
+- 主行动：“创建新企业”；
+- “继续经营”：列出当前玩家拥有的 workspace、企业名称、阶段和最后活动时间；
+- “体验样板企业”：明确标记 demo，进入 HCTM fixture；
+- 服务状态：IAOS、World、AI Provider，不能把 fallback 显示为在线 AI；
+- 功能说明：解释 tenant、企业、World 和 AI 的边界。
+
+深链仍保留为恢复和支持入口，但由应用生成：
+
+```text
+/#genesis/workspaces/{workspace_id}
+/#genesis/workspaces/{workspace_id}/incorporation
+```
+
+tenant ID、case code 和 token 不出现在主导航 URL；token 不放 query/hash。
+
+## 3. 零起点 onboarding
+
+### Step 0 — 玩家身份
+
+玩家先登录或创建平台级账号。首版单机可以使用本机 owner 账号，但它仍是平台身份，
+不能复用通用 `founder-principal` 作为所有玩家的全局主体。
+
+当前私人开发纵切使用显式“游戏用户名 → 本机 player ID”映射：第一个用户名会认领
+浏览器中已有的未绑定 player ID，以便找回此前创建的 Workspace；后续用户名使用独立
+player ID。它只解决本机体验和企业选择，不是可信认证，服务端仍必须在正式多人版本用
+IAOS DES-062 PlayerAccount/OIDC 替换。租户内 M9 执行主体暂为该租户自己的
+`founder-principal`，不能据此把不同玩家视作同一个平台主体。
+
+### Step 1 — 创建创业空间
+
+玩家只输入：
+
+- 创业项目临时名称，例如“我的第一家制造企业”；
+- 行业模板或空白模板；
+- 业务区域与时区；
+- 难度/真实性等级；
+- 数据保留确认。
+
+此时不要求公司正式名称、注册地址或经营范围。
+
+### Step 2 — IAOS provisioning
+
+IAOS `GenesisProvisioningSaga` 服务端执行：
+
+1. 生成 `workspace_id`、opaque `tenant_id` 和 provisioning key；
+2. 创建 `tenant_account(status=provisioning)` 和 tenant directory；
+3. 建立当前玩家的 owner membership 与 tenant-scoped founder subject；
+4. 安装 M9 Semantic、Entity、Capability、Policy、Approval、Process 和 Agent Runtime；
+5. 创建五个 service-only Genesis Assistant，但不把它们冒充公司正式员工；
+6. 执行 RLS 跨租户、登录、Capability Registry 和 Process compiler smoke check；
+7. 激活 tenant 并签发 tenant-scoped session；
+8. 通知 AESE 创建对应 World Run。
+
+进度页以八个可恢复 checkpoint 展示，不使用无限 spinner。失败显示阶段、原因、重试和
+支持证据 ID。
+
+### Step 3 — 创业构想
+
+只有 workspace active 后才进入 FounderIntent。AI 输入不再要求前端提供 tenant；
+服务端从 workspace membership 解析 tenant 和 case identity。
+
+### Step 4 — 企业身份与正式案件
+
+真实 AI 生成候选，玩家选择或编辑后，才通过 IAOS `incorporation.case.open` 创建
+正式设立案。此时产生 proposed company name，后续登记成功才产生 legal entity。
+
+## 4. 控制平面合同
+
+### 4.0 当前可运行纵切与生产边界
+
+AESE 已实现 loopback local adapter：
+
+```text
+根主页
+-> 创建隔离创业空间
+-> 服务端生成 workspace/tenant/world/case 标识
+-> IAOS tenant_account(provisioning)
+-> Founder bootstrap
+-> tenant-scoped session
+-> M9 Runtime install
+-> tenant active
+-> MiniMax M3 企业身份工作室
+```
+
+Workspace 映射以 `0600` 本地状态文件幂等保存，浏览器只提交 player ID、项目显示名和
+idempotency key，不能提交 tenant ID。非 loopback IAOS 必须配置
+`GENESIS_PLATFORM_TOKEN`，不会尝试 dev token。
+
+该 adapter 用于当前单机产品验收。多玩家生产形态以 IAOS DES-062 为权威：玩家必须由
+IAOS/OIDC 认证；workspace owner 取服务端 subject；平台凭据不进入浏览器；Founder
+bootstrap 不得继续使用全局固定 subject；World committed outcome 和 RLS/login smoke
+通过后才激活 tenant。
+
+### 4.1 对外 API
+
+```text
+POST /api/v1/genesis/workspaces
+GET  /api/v1/genesis/workspaces
+GET  /api/v1/genesis/workspaces/{workspace_id}
+POST /api/v1/genesis/workspaces/{workspace_id}/retry
+POST /api/v1/genesis/workspaces/{workspace_id}/session
+```
+
+调用者只需 `genesis.workspace.create/read`；平台内部服务身份才拥有 tenant create、
+identity bootstrap、runtime install 和 activate 权限。
+
+### 4.2 Provisioning record
+
+记录至少包含：
+
+- workspace ID、owner subject、tenant ID、world run ID；
+- requested template/version、region、timezone；
+- current checkpoint、status、attempt、error code；
+- idempotency key、input hash、created/updated/completed time；
+- tenant/runtime/world evidence refs。
+
+创建重试必须返回同一 workspace；相同幂等键不同输入返回冲突。激活前任何失败不得留下
+可登录但未完整安装的 tenant。
+
+### 4.3 AESE 边界
+
+AESE 只接收 `tenant_activated` committed outcome 后创建 World Run。主页聚合展示可以
+由 AESE BFF 返回，但租户、身份和 Runtime 事实都来自 IAOS。AESE 不保存密码、平台
+管理员 token 或租户业务表。
+
+## 5. MiniMax 真实 AI Provider
+
+### 5.1 Provider 选择
+
+`creative.Provider` 增加：
+
+- `MiniMaxProvider`：生产首选；
+- `DeterministicProvider`：离线测试和显式 fallback；
+- `ProviderRouter`：按配置、健康、额度和请求模式选择。
+
+本项目 Coding Plan 账户的 `GET /v1/models` 于 2026-07-28 返回
+`MiniMax-M3`，产品版本称 M3.0；代码必须使用账户返回的精确模型 ID，而不能把
+“M3.0”直接作为请求值。该账户的 OpenAI-compatible endpoint
+`https://api.minimax.chat/v1/chat/completions` 已完成真实 smoke。MiniMax 公开文档
+当前仍主要列出 M2.7，因此启动和发布验收必须以账户 models API 与真实 completion
+为准，并在主页显示实际 endpoint、model 和状态，不显示密钥。
+
+### 5.2 调用链
+
+```text
+FounderIntent
+-> PromptTemplate(versioned)
+-> MiniMax chat completion
+-> strip/separate reasoning
+-> strict JSON decode
+-> JSON Schema validation
+-> business validation + duplicate/risk checks
+-> NamingProposal[]
+-> CreativeJob audit
+```
+
+模型不得直接写 IAOS。返回必须包含 4–6 个差异化候选：
+
+- 中文全称、简称、英文名；
+- 命名理由、品牌承诺、口号；
+- 关键词和主色建议；
+- 与行业/客户/产品输入的依据；
+- 现实工商核名和商标风险提示。
+
+禁止从 `<think>` 内容提取业务结果。无法得到合法 JSON 时最多一次修复调用；仍失败则
+显示“AI 暂不可用”，由玩家明确选择重试或 deterministic fallback，不能把 fallback
+继续标成“AI 生成”。
+
+### 5.3 CreativeJob 与可观察性
+
+每次调用记录 provider、model、base URL host、prompt version、input hash、request ID、
+latency、token usage、finish reason、validation result、fallback reason 和 content hash。
+不记录 API key；创业原文按 tenant 的数据保留策略处理。
+
+限流和超时：
+
+- 单 workspace 同时一个 naming job；
+- 15 秒软超时、30 秒硬超时；
+- 429/5xx 指数退避，最多一次自动重试；
+- 用户点击使用稳定 idempotency key；
+- 模型额度不可用时主页与工作室显示 degraded。
+
+MiniMax 官方公布文本模型的 RPM/TPM 限制，但实际账户额度和 Token Plan 还可能受滚动窗口
+影响，因此不能硬编码“可用”结论。
+
+## 6. Logo 与 Embedding 的边界
+
+- MiniMax M3 是文本模型，本阶段用于意图结构化、名称、品牌 brief 和解释。
+- Logo 需要独立 image provider/模型；没有图像 provider 时只显示“几何字标 fallback”，
+  不能称为 AI Logo。
+- Qwen Embedding 用于未来知识检索，不参与公司命名，也不是 provisioning 前置条件。
+- 名称和 Logo 资产仍为 candidate；只有玩家选择及 IAOS Capability 才能成为正式引用。
+
+## 7. 主页信息架构
+
+桌面：
+
+```text
+顶部：Enterprise Genesis / 我的企业 / 样板世界 / 功能说明 / 服务状态
+Hero：从一个想法，创建一家真正运行在 IAOS 上的企业
+主按钮：创建新企业
+继续经营：workspace cards
+创建过程：创业空间 -> AI 身份 -> 登记 -> 资本 -> 团队 -> 开业
+验证 IAOS：租户隔离、流程审批、数字员工、事件审计
+```
+
+移动端保留一个主 CTA；workspace card 提供“继续”而不是整卡隐藏点击。所有触点至少
+44×44 px，表单可返回且自动保存草稿。Provisioning 和 AI 调用分别显示进度，不混为
+同一 loading 状态。
+
+登录成功后，“我的企业”紧跟 Hero 展示；列表由 owner-scoped Workspace API 返回。
+点击“继续游戏”必须先取得该 Workspace 的 Founder tenant session，再用服务端返回的
+tenant/case/workspace 绑定进入游戏，不允许由玩家手填 tenant ID。
+
+## 8. 安全和隔离验收
+
+必须证明：
+
+1. 两次“创建新企业”产生不同 tenant、workspace、World Run 和 case。
+2. 两个 tenant 可使用相同 company short name，但互不可见。
+3. 玩家 A 不能读取玩家 B 的 workspace/provisioning 状态。
+4. 浏览器 token 没有 `platform.manage`、`platform.identity.bootstrap` 权限。
+5. provisioning 任一步失败后 tenant 不可写、不可普通登录；重试无重复资产。
+6. 只有 active tenant 能创建 FounderIntent 和 incorporation case。
+7. CreativeJob、IAOS case 和 World Run 均携带同一 workspace correlation。
+
+## 9. 完成标准
+
+- 根地址进入产品主页，不需要复杂 URL。
+- 从平台玩家身份创建全新的 IAOS tenant 和 AESE World Run。
+- MiniMax 实际调用证据可见，fallback 明确标记。
+- 玩家从空白 workspace 完成公司身份选择和 18 个 M9 工作项。
+- 第二个独立 tenant 重复全链并通过 RLS 隔离验证。
+- 主页、provisioning、身份工作室和游戏在 1440、1280、390 三视口通过。
+
+## 10. 非目标
+
+- 把 tenant 当成现实工商注册主体。
+- 允许匿名用户无限创建租户。
+- 从浏览器调用 SaaS Ops 管理员 API。
+- 在创建失败时自动删除已激活 tenant。
+- 首版复杂集团多租户、租户合并或跨租户交易。
+- 用 Qwen Embedding 替代 LLM，或用文本模型冒充 Logo 生成器。
+
+## 11. 外部接口依据
+
+- [MiniMax Text Generation](https://platform.minimax.io/docs/guides/text-generation)
+- [MiniMax OpenAI-compatible API](https://platform.minimax.io/docs/api-reference/text-openai-api)
+- [MiniMax Rate Limits](https://platform.minimax.io/docs/guides/rate-limits)

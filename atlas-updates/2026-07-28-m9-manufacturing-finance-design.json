@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.manufacturing-finance-design.2026-07-28",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "批准 M9–M13 制造企业财务运行体系",
+  "detail": "M9 建立财务组织、账套、科目、期间、实收资本凭证和开业报表；M10–M13 按真实业务事件启用应付、应收、资金、固定资产、制造成本、总账、结账、报表和 KPI。设计与 planned plan 已登记，尚未实现。",
+  "status_after": "designed",
+  "progress_after": 10,
+  "current_state": "DES-030 approved and PLAN-M9-FIN-001 planned; finance runtime and UI implementation have not started",
+  "evidence_ref": "docs/designs/DES-030-manufacturing-finance-operating-system.md",
+  "occurred_at": "2026-07-28T14:30:00Z"
+}

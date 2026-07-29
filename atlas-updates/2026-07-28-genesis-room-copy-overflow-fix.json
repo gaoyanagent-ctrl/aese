@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.room-copy-overflow-fix.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "修复室内介绍文字超出背景横幅",
+  "detail": "地点标题、剧情横幅、NPC 对话和场景说明卡统一使用可收缩、自动换行和 border-box 边界。",
+  "status_after": "building",
+  "progress_after": 90,
+  "current_state": "room introduction copy remains within its visual containers across supported viewports",
+  "evidence_ref": "frontend/e2e/enterprise-genesis.spec.ts",
+  "occurred_at": "2026-07-28T12:30:00Z"
+}

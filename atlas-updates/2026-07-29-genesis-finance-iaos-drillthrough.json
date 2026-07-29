@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.finance-iaos-drillthrough.2026-07-29",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "将企业总部财务摘要穿透到 IAOS 权威账务与报表工作台",
+  "detail": "开业财务中心改为可访问对象并避开治理会议桌；对象详情和治理档案提供系统账务/财务报表链接，携带 tenant/case 进入 IAOS #finance_workspace。",
+  "status_after": "validating",
+  "progress_after": 75,
+  "current_state": "Genesis shows concise opening-finance evidence and drills into IAOS for scalable accounting and reporting",
+  "evidence_ref": "docs/designs/DES-028-enterprise-genesis-game-experience.md",
+  "occurred_at": "2026-07-29T02:00:00Z"
+}

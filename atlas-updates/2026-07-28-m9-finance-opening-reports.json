@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.finance-opening-reports.2026-07-28",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "在 AESE 穿透展示 M9 银行日记账、总账和开业资产负债表",
+  "detail": "Enterprise Genesis 治理档案读取 IAOS committed 开业财务模型，展示银行日记账滚动余额、总账期末余额、试算平衡和资产负债表等式；不从游戏现金推测或伪造会计事实。",
+  "status_after": "validating",
+  "progress_after": 72,
+  "current_state": "Players can inspect reconciled M9 opening accounting views from the enterprise world",
+  "evidence_ref": "docs/designs/DES-030-manufacturing-finance-operating-system.md",
+  "occurred_at": "2026-07-28T17:12:00Z"
+}

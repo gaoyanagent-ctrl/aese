@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.finance-voucher-fx-model.2026-07-29",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "纠正 M9 会计凭证聚合并补齐多币种汇率模型",
+  "detail": "DES-030 明确 journal_entry/document_with_lines 与 journal_line/document_line 的主子聚合、交易币和本位币双金额、日期化汇率及不可变汇率快照，并要求全部已发布财务 Entity 具有 IAOS 左侧数据菜单。",
+  "status_after": "validating",
+  "progress_after": 32,
+  "current_state": "M9 finance design now defines a governed voucher header-line aggregate, currency and exchange-rate masters, and discoverable IAOS data menus",
+  "evidence_ref": "docs/designs/DES-030-manufacturing-finance-operating-system.md",
+  "occurred_at": "2026-07-29T12:00:00Z"
+}

@@ -66,7 +66,8 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M15 受治理策略发布与经营试点：Completed；M14 candidate 已通过独立审议、零写入 shadow、有限 canonical pilot，并以 adopted/rolled_back 双路径验证回滚与补偿闭环。
 - M16 持续策略保障与假设校准：Completed；12 周封存数据、质量优先 drift、8/4 校准/holdout 和三种保障 disposition 已验收。
 - AESE 3.0 完成体：M17-M24 已逐个完成，覆盖滚动 IBP、组合扩展、多基地网络、售后质量、工厂韧性、集团价值、多 Agent 组织和场景平台产品化。
-- `hctm-genesis@1.0.0` 和 `#world-aese3` 输出八个可审计 terminal，最终 `industry_simulation_platform_ready=true`；当前无 active 主计划。
+- `hctm-genesis@1.0.0` 和 `#world-aese3` 输出八个可审计 terminal，最终 `industry_simulation_platform_ready=true`。
+- 当前 active 主计划为 PLAN-GXZ-001：从根主页创建独立 IAOS tenant、AESE World Run 与真实 MiniMax 企业身份，不再把 `tenant-hctm-genesis` 当作玩家新企业默认容器。
 
 当前同一页面可运行 Preview 或 IAOS Live 沙盘，并可在联动中心通过无业务数据库的 AESE 薄编排 API 受治理运行和复位场景；浏览器不直接调用 IAOS 写接口。
 

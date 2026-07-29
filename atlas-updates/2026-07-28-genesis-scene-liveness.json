@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.scene-liveness.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "增加城市旅行、室内 NPC 与 committed trophy",
+  "detail": "当前事件拥有城市路线和可跳过转场，四类地点显示具名 NPC/工作状态，企业资产柜由 committed Projection 恢复。",
+  "status_after": "building",
+  "progress_after": 85,
+  "current_state": "the M9 city now has causal travel, living location actors and persistent visual rewards",
+  "evidence_ref": "docs/designs/DES-028-enterprise-genesis-game-experience.md",
+  "occurred_at": "2026-07-28T11:01:00Z"
+}

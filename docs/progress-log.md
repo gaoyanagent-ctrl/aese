@@ -1256,3 +1256,274 @@
 - 影响：`#enterprise-genesis?tenant=&case=` 读取 IAOS verified evidence bundle，不建立第二业务真相；AI 候选只有经现有 Capability 创建案件后才生效。M9N 与 PLAN-GX-001 均达到完成门，终态可移交 M10。
 - 验证：AESE `go test ./...`；前端 17 files/42 tests、TypeScript、production build；mock 与 live Playwright 在 1440×900、1280×720、390×844 各 3/3 通过；live case `INC-WORK-ITEM-E2E-1785163319408212558` 为 18 completed、G1–G7、三个 World wait、六次 Agent Run/五个 distinct Agent、100% `enterprise_operational_ready`；IAOS 集成测试包含中途 Server 重建恢复。
 - 后续：外部按需 LLM/Logo connector 需另行配置受治理 provider 与密钥；未配置时继续使用明确标记的 deterministic/文字几何 fallback。
+
+## 2026-07-27 - Enterprise Genesis 玩家原生创建与操作闭环
+
+- 变更：新案件不存在时进入企业创建态；增加“新建企业”、游戏内 Agent 派遣、G1–G7 审批决定、资本/实缴/预算输入、系统 Capability 和三个 World wait 操作卡；GameProjection 增加 Gate；新增从空白 case 完成 18 工作项的三视口 Playwright。
+- 原因：旧页面以已完成案件投影和 IAOS 外链为主，玩家不能只通过游戏界面创建并经营自己的企业，无法验证 IAOS 的实际可操作性。
+- 影响：玩家选择的名称、地址和经营范围通过 `incorporation.case.open` 成为 IAOS 事实；后续每次操作进入 IAOS Process、Approval、Agent Run、Journal 与 Outbox，前端仅在成功后重新读取 verified evidence。财务 Agent 100 万元授权上限由真实治理拒绝暴露并成为默认金额边界。
+- 验证：Go gameprojection/httpapi test 与 vet；TypeScript、17 files/42 tests、production build；Playwright 在 1440×900、1280×720、390×844 从空白案件完成企业创建、18 工作项、G1–G7、三个 World wait 和 `enterprise_operational_ready`。
+- 后续：MiniMax/Qwen 已配置为本地密钥，真实 LLM 名称与 Logo provider 仍需在 provider-neutral CreativeJob 后端接入；当前确定性 fallback 不影响企业创建闭环。
+
+## 2026-07-28 - Enterprise Genesis 零起点与真实 AI 方案重构
+
+- 变更：新增 ADR-006、DES-029 和 active PLAN-GXZ-001；将产品入口改为根主页，把 PlayerAccount、GenesisWorkspace、IAOS tenant provisioning、AESE World Run、MiniMax CreativeJob 和 incorporation case 拆成明确阶段；补充双租户隔离、失败恢复、权限和三视口验收门。
+- 原因：代码审计确认当前 `DeterministicProvider` 只返回四组固定名称模板；“新建企业”也只在 `tenant-hctm-genesis` 内新增 case，既未调用真实 AI，也未创建独立租户和世界，无法满足真正从零创建企业的产品目标。
+- 影响：`tenant-hctm-genesis` 降级为 demo fixture；新企业必须拥有独立 tenant、founder membership、M9 Runtime 和 World Run。浏览器不得调用平台管理员 tenant API；IAOS 需提供受限、幂等、可恢复的 Genesis provisioning saga。MiniMax 调用失败时 fallback 必须显式标记。
+- 验证：核对 AESE creative provider 实现、IAOS SaaS Ops tenant lifecycle、Founder bootstrap 和 Runtime 安装边界；对照 MiniMax 官方 M2.7 Text/OpenAI-compatible/rate-limit 文档；DES-029 定义 Z0–Z5、Z1–Z37 和双租户完成门。
+- 后续：从 Z0 合同与 provider health 开始；所有 IAOS 代码在独立 worktree 实现和提交。
+
+## 2026-07-28 - Enterprise Genesis 根主页上线
+
+- 变更：修正根路径默认落入旧订单沙盘的问题；新增响应式 Enterprise Genesis 产品主页，提供创建新企业、华辰样板世界、世界地图和 M9 四阶段入口；旧订单演示迁移为显式 `#sandbox` 样板入口。
+- 原因：`App.tsx` 将初始模式硬编码为 `preview`，空 hash 未映射到独立路由，而且场景加载状态会抢占根页面，导致对外地址始终显示旧“交付承诺重算”Demo。
+- 影响：`http://192.168.50.222:4173/` 现在是游戏主页；主页准确标注当前创建按钮进入 M9 交互开发版，独立租户通道仍按 PLAN-GXZ-001 建设，不把 HCTM fixture 冒充新租户。
+- 验证：新增 Vitest 根路由回归和 Playwright 根主页/样板入口验收；前端生产构建通过。
+- 后续：继续 Z25–Z30，将“创建新企业”从 M9 开发版切换到真实 GenesisWorkspace provisioning 与独立 tenant。
+
+## 2026-07-28 - MiniMax M3 企业身份真实生成接入
+
+- 变更：新增 MiniMax OpenAI-compatible provider、M3 配置、版本化命名 prompt、响应上限、超时、严格 JSON 与业务字段校验；创意 API 从硬编码 `DeterministicProvider` 切换为服务启动时注入的 provider，上游失败明确返回错误而不静默冒充 AI。
+- 原因：企业身份工作室虽然标为 AI，但服务端每次都实例化固定模板 provider，且 `.env` 仍指向 M2.7；选择候选只在既有 tenant 内执行 `incorporation.case.open`，并不创建新 tenant。
+- 影响：当前 8090 服务使用账户实际返回的模型 ID `MiniMax-M3`；真实 smoke 生成四个动态公司身份候选。tenant provisioning 仍是独立的前置 saga，不能由公司身份选择隐式完成。
+- 验证：MiniMax provider 单元测试覆盖模型、鉴权、reasoning 分离、候选治理字段和 429 显式失败；真实 `/models` 与 completion smoke 通过；creative/httpapi/cmd 测试通过。
+- 后续：完成 CreativeJob 持久证据、一次 JSON repair、provider 状态 API，以及 GenesisWorkspace → 独立 IAOS tenant → M9 case 全链。
+
+## 2026-07-28 - Genesis Workspace 独立租户创建纵切
+
+- 变更：新增根主页后的独立空间 onboarding、`/api/aese/v1/genesis/workspaces` BFF、幂等本地 Workspace store 和 IAOS provisioning client；服务端自动生成 workspace、tenant、World Run 和 case 标识，依次创建 tenant、Founder、tenant session、M9 Runtime 并激活后才进入 MiniMax M3 身份工作室。IAOS 新增 DES-062 生产多玩家控制面设计。
+- 原因：玩家选择公司身份时才创建 tenant 会混淆隔离边界；由浏览器或 URL 指定 tenant 又会造成串租户风险。tenant 必须在创意身份阶段之前由平台服务端分配。
+- 影响：当前本机游戏已经可以从根主页创建真正独立的 IAOS tenant，`tenant-hctm-genesis` 不再是新建主路径。loopback adapter 仍使用本地 dev service identity；正式多人部署必须迁移到 IAOS DES-062 的认证 subject、membership 和 session exchange。
+- 验证：真实创建 `tenant-gx-efe42b90684620ce`，状态 active，绑定 `gxw-efe42b90684620ce`、独立 World Run/case、M9 20 项 Capability 资产和 tenant token；同幂等键重放返回同一 tenant。真实浏览器又创建 `tenant-gx-70de7d954e9dbb18` 并自动进入 AI 身份工作室。Go 全量测试、前端 5 项根路由测试、9 项三视口主页/onboarding 测试、1 项 live provisioning 和生产构建通过。
+- 后续：实现 IAOS 三张 Genesis 控制面表、普通玩家授权 API、World committed checkpoint、生产 token exchange 和两玩家越权集成测试。
+
+## 2026-07-28 - 修复新企业身份工作室双 502
+
+- 变更：IAOS 新案件 evidence 404 在 AESE 保持 404；前端不再把任意 502 当作“尚未创建”；MiniMax M3 输出预算提升至 8192，非法/截断 JSON 允许一次严格重新生成。
+- 原因：新 case 的预期 404 被网关误包装为 502；M3 reasoning 与四组候选超过 2048 token，导致 JSON 中途截断。
+- 影响：新 Workspace 能稳定进入身份创建态；MiniMax 上游或 IAOS 真故障仍会显式展示，不会被伪装为空案件或固定候选。
+- 验证：两条失败测试修复后通过；原始创业构想真实 M3 请求返回 200 和四个动态公司身份；新 case projection 返回 404。
+- 后续：将 CreativeJob request ID、usage、finish reason 和 repair 次数持久化为可见证据。
+
+## 2026-07-28 - 修复创建企业 Founder 会话 422
+
+- 变更：Genesis provisioning 改为 Founder 普通登录后安装 M9 Runtime并返回 Founder token；新增 owner-scoped Workspace session refresh，前端仅对认证主体不匹配的特定 422 自动刷新并重放一次。
+- 原因：原流程把 `/dev/switch-tenant` 的管理员 token 交给浏览器，但 `incorporation.case.open` 的 acting subject 固定为 `founder-principal`，IAOS 因认证主体不一致正确拒绝。
+- 影响：新旧 Workspace 都能在不新建第二个 tenant、不放宽 IAOS 治理规则的前提下创建企业案件；其他玩家不能刷新该 Workspace 会话。
+- 验证：原请求复现 422；同一 Workspace 刷新 Founder session 后案件创建返回 201 committed；AESE 全量 Go 测试、前端 5 项测试和生产构建通过。
+- 后续：生产多人环境仍需按 IAOS DES-062 用真实 PlayerAccount/OIDC 替代本机玩家标识和 loopback adapter。
+
+## 2026-07-28 - 增加游戏登录与我的企业大厅
+
+- 变更：根入口增加游戏用户名登录；首次用户名认领浏览器已有 player ID；登录后在 Hero 下方列出 owner 拥有的 Workspace，并可刷新 Founder session 后继续原 case，或创建新企业。
+- 原因：原主页只有创建入口，玩家无法发现和恢复之前创建的独立租户，每次只能从零开始。
+- 影响：本机玩家拥有明确的“登录 → 我的企业 → 继续游戏/创建新企业”路径；用户名切换使用独立本地 player ID。界面明确说明它不是正式多人认证。
+- 验证：前端单元测试覆盖首次登录迁移和登录前置；生产构建与桌面 Playwright 主页、样板、新建路径通过；Workspace list/session 继续复用 owner-scoped 后端测试。
+- 后续：按 IAOS DES-062 将本机用户名映射替换为 PlayerAccount/OIDC、服务端 membership 和跨设备会话。
+
+## 2026-07-28 - 创始人办公室 RPG 首章
+
+- 变更：新企业入口从 BrandStudio 表单替换为 PixiJS 创始办公室；增加四个 FounderProfile 头像、数字员工“纪元”、七段主线任务和 RPG 对话选择，在故事中完成产业、客户、产品、品牌性格、MiniMax 身份提案及 IAOS 设立提交；其余 17 个节点增加董事会、政务、银行、人才与经营会议的地点、NPC 和剧情简报。
+- 原因：原操作只是 IAOS Work Item 的视觉换皮，玩家缺少角色、场景、任务目标、对话引导和决策反馈，不知道正在扮演谁或为什么操作。
+- 影响：玩家先以创始人身份进入世界，通过经营选择形成 command draft，最终签署才写入 IAOS；技术 Capability 留在治理证据层。通用 WorkItem 面板暂保留为后续节点 fallback。
+- 验证：Founder Office 桌面 Playwright 完整走过头像、四轮对话、AI 名称、地址/范围和 IAOS commit；前端 7 项单元测试、TypeScript 与生产构建通过。
+- 后续：按 D26 将剩余 17 个 M9 节点依次改造成董事会、政务大厅、银行谈判、CEO 会面和经营会议事件。
+
+## 2026-07-28 - 设立案件与正式企业主数据补齐
+
+- 变更：IAOS `incorporation_case` 增加案件名称、拟设企业名称、注册地址和经营范围显式列并按 tenant/RLS 回填历史数据；登记成功时创建正式 `m9_legal_entity` 主数据。
+- 原因：第一章输入原先只在 JSONB 快照中，无法直接检索；登记后也没有从拟设资料转成正式企业主体。
+- 影响：拟设案件与正式法律主体职责分离；游戏创建信息可直接查询，登记完成后成为可被后续银行、组织和经营流程引用的企业主数据。
+- 验证：IAOS 单元测试、完整 18 节点 integration tracer、线上部署通过；三个现存 Genesis 案件已真实回填，正式 tracer 法律主体字段一致。
+- 后续：玩家继续当前案件；到登记成功节点后检查其租户内 `m9_legal_entity` active 记录。
+
+## 2026-07-28 - M9 起草结果与审批对象可视化
+
+- 变更：节点 2 明确说明三项对话输入会形成 IAOS 持久化《创始人设立决议草案》；GameProjection 开始读取 Agent Run output，G1 展示原始决议，G2–G7 统一展示待审议文件、关键内容、风险限制、起草人、批准效果和证据引用。
+- 原因：原界面丢弃 Agent 输出，只显示通用 Capability 说明，玩家不知道第二步产出了什么，也会在看不到审批对象时直接批准。
+- 影响：M9 形成“输入 → 起草文件 → 审阅 → 批准执行”的业务链；审批投影来自 IAOS committed evidence，缺少审阅对象时前端禁止盲目批准。
+- 验证：GameProjection 新增 G1 原始 Agent output 与 G1–G7 审阅对象测试；相关 Go tests、18 个前端测试文件/46 项测试、TypeScript 和生产构建通过。
+- 后续：把当前治理审阅卡继续融入董事会、政务、银行、人才和经营会议的专用 RPG 场景。
+
+## 2026-07-28 - 登记与银行开户可失败经营事件
+
+- 变更：登记提交增加五项申请资料和审查重点；外部登记支持缺件退回、补正重申及营业执照/三枚印章领取。银行开户增加三家虚拟银行选择、五项尽调资料、拒绝原因、补件重申及基本账户/U 盾领取。
+- 原因：原 `registration.submit` 和两个 observation 节点是一键动作，玩家不知道提交内容，也看不到外部反馈、失败恢复或成功后的企业资产。
+- 影响：缺件会先写入 `rejected` World Observation，IAOS 案件不推进；补齐后以不同结果幂等重申。证照与账户资产明确标注为虚构沙盘内容，不冒充真实证件。
+- 验证：前端 18 个测试文件/46 项测试、TypeScript 与生产构建通过；图像生成服务网络失败，当前交付使用可替换的代码原生虚构凭证卡。
+- 后续：图像服务恢复后生成并替换营业执照、公章、账户通知和 U 盾 raster 素材；增加浏览器拒绝—补正—获批专项回归。
+
+## 2026-07-28 - 修复银行开户 Execute 400
+
+- 变更：审批提交输入与 Work Item Execute 输入分离；开户银行和资料说明保留在 G3 intent，严格执行命令只携带 correlation 及受支持的金额字段；重试时若幂等审批已 approved，则跳过重复决定直接恢复 Execute。
+- 原因：前端把审批专用 `business_note` 原样传给 IAOS `incorporation.Command`，严格 JSON 解码正确返回 400。
+- 影响：当前案件已成功完成的 G3 审批可以直接重试第 8 步，不需重建企业或重新审批；IAOS 严格合同保持不变。
+- 验证：真实日志确认 G3 submit/approve 成功、Execute 400，以及重试重复 approve 403；API 回归测试锁定请求体边界和已批准恢复路径，TypeScript 和生产构建通过。
+- 后续：继续测试银行外部反馈与开户资产领取。
+
+## 2026-07-28 - 实缴资本差异核对与纠正审批
+
+- 变更：G4 增加认缴、本次到账、差额三栏核对；不一致时禁止提交并可一键修正；金额加入审批 correlation，纠正后的金额必须获得新的 G4 批准。
+- 原因：当前案件认缴 100 万、玩家输入实缴 80 万，IAOS 正确提交差异证据并返回 `capital_contribution_mismatch`，但游戏提交前没有清楚暴露该约束。
+- 影响：玩家能在批准前理解并纠正资本差异；旧 80 万审批不会被用于 100 万实缴，审批内容与执行事实继续一致。
+- 验证：数据库核对认缴 100,000,000 分、拒绝实缴 80,000,000 分及 approved G4 intent；API 测试覆盖金额相关 correlation，TypeScript 和生产构建通过。
+- 后续：继续当前案件，按认缴金额 100 万发起新的 G4 审批并完成核验。
+
+## 2026-07-28 - Enterprise Genesis 世界优先场景改造
+
+- 变更：DES-028 新增 D29；城市写实背景中的四个实际区域改为创始办公室、政务中心、合作银行和企业总部热点，点击进入各自室内地点；主线改由建筑事件和 NPC 场景触发，Work Item 降级为治理档案；章节改为只读旅程，移除上一步、后续 Frame 和无 World Tick 的暂停/倍率控件。
+- 原因：原通用蓝色房子与城市背景无空间关系，点击只改变文字；技术任务列表和伪时间控件主导体验，使 M9 仍像流程工作台。
+- 影响：地点具有独立图形语言、室内家具/NPC/资料台和 committed 资产反馈；登记后办公室显示执照/印章，开户后银行显示账户/U 盾，组织建立后总部显示管理层工位。移动端保留可触摸地点入口。
+- 验证：GameProjection/HTTP Go tests、18 个前端测试文件/49 项测试、TypeScript 与生产构建通过；世界优先 Playwright 在 1440×900、1280×720、390×844 验证城市热点、室内进入/返回、三标签和伪控件移除，3/3 通过。
+- 后续：为四个室内场景补版本化 raster/atlas 素材、人物行走和地点间转场；M10 开始后再接入真实 World Tick 与时间倍率。
+
+## 2026-07-28 - 城市旅行、室内 NPC 与永久资产反馈
+
+- 变更：DES-028 新增 D30；当前事件在城市中绘制基地到目的地的动态路线，进入地点播放可跳过旅行转场；四类室内场景增加具名 NPC、岗位、工作状态和对白；创始办公室增加执照、印章、账户和团队 trophy 柜。
+- 原因：仅能点击地点仍缺少从城市到室内的空间连续性、人物生命感和完成事项后的长期奖励。
+- 影响：玩家能够看到“去哪里、见谁、对方在做什么”，刷新后 trophy 仍由 committed Projection 重建；转场和动效不推进 IAOS 事实，减弱动效模式自动停用循环动画。
+- 验证：前端 18 个测试文件/49 项测试、TypeScript、生产构建通过；三视口 Playwright 验证旅行状态、室内 NPC、进入/返回和伪控件缺失，3/3 通过。
+- 后续：图像生成服务恢复后，用版本化 raster atlas 替换代码原生人物和家具，同时保持 DOM 低性能 fallback。
+
+## 2026-07-28 - 玩家地图化身与场景物件检查
+
+- 变更：DES-028 新增 D31；顶部 FounderProfile 延伸为城市中的玩家化身，旅行时移动到目标地区并支持减弱动效；四类室内地点新增可检查物件和详情卡，展示用途、状态、解锁条件及 IAOS/World committed 来源。
+- 原因：旅行转场仍缺少玩家在地图中的持续存在，室内家具也只是背景，不能回答“这个物件现在是什么状态、从哪里来的”。
+- 影响：玩家位置与视角位置一致，检查物件不会推进 Capability；正式动作继续从 NPC 当前事件进入，避免再产生一套场景表单。
+- 验证：前端 18 个测试文件/49 项测试、TypeScript 和生产构建通过；三视口 Playwright 验证玩家位置、旅行、NPC、物件详情和返回地图，3/3 通过。
+- 后续：将角色和物件 fallback 接入版本化 atlas manifest，并为 M10 工厂区域扩展相同地点交互合同。
+
+## 2026-07-28 - OpenAI 生成四类 2.5D 室内场景
+
+- 变更：使用 OpenAI 图片生成功能创建创始办公室、政务服务中心、合作银行和企业总部四张统一风格 2.5D 场景；接入地点背景，并把尺寸、SHA-256、来源和许可写入素材 manifest。
+- 原因：代码原生家具只能表达交互结构，缺少经营游戏需要的空间质感、建筑身份和氛围连续性。
+- 影响：玩家进入不同建筑后可立即识别地点；NPC、任务和 committed 物件状态继续由 DOM/IAOS 投影驱动，生成图片不成为业务事实。
+- 验证：18 个前端测试文件/49 项测试和生产构建通过；三视口 Playwright 3/3 通过；素材 manifest/Atlas JSON、Markdown 链接和 System Atlas tracking 检查通过。
+- 后续：生成角色、证照、印章、U 盾等透明 atlas，并为 M10 工厂场景延续同一美术规范。
+
+## 2026-07-28 - 修复室内介绍文字横幅溢出
+
+- 变更：为地点标题、剧情横幅、NPC 对话和场景说明卡补充 border-box、可收缩列、自动换行和最大宽度约束。
+- 原因：介绍文字长度变化时，Grid/Flex 子元素的默认最小内容宽度可能超过自身半透明背景。
+- 影响：桌面和移动端的介绍文字保持在对应背景条或对话卡内，不改变任务与 IAOS 交互。
+- 验证：Playwright 增加房间横幅边界和文字容器无水平溢出断言；前端测试与构建通过。
+- 后续：后续新增场景文案继续复用相同文字容器约束。
+
+补充修正：用户指出目标是政务与银行室内的柜台标牌；已将 `.gx-counter` 改为居中、
+响应式固定边界，增加最小高度和水平内边距，使“企业登记综合窗口/受理·审查·补正·发照”
+及“企业金融服务柜台/开户·尽调·网银·资本金”完整包含在标牌背景内。
+
+## 2026-07-28 - M9 全 RPG、生成精灵与多租户验收
+
+- 变更：17 个工作项增加专属剧情与经营选项；生成并接入五名角色及执照/印章/U 盾透明精灵；增加室内移动、音效开关、里程碑奖励和逐项企业大事记；workspace 失败重试复用原 identity；IAOS 独立 worktree 修复 Founder 多租户发现。
+- 原因：通用任务面板、CSS 人物和只有数量的大事记仍不足以形成经营游戏闭环；历史 workspace 密码差异导致 IAOS 登录只能看到一个租户。
+- 影响：玩家从剧情进入正式治理动作，完成事项获得可持续反馈；同一 Founder 可选择所有显式授权企业，跨租户 M9 数据仍隔离；失败重试不再创建孤儿 tenant。
+- 验证：AESE 49 项前端测试、生产构建、三视口 Playwright 3/3、workspace/HTTP Go tests；IAOS API Go tests、前端 TypeScript/production build；真实登录返回 8 个授权租户，抽查两租户 profile claim 一致且交叉案件读取均 404。
+- 后续：实现 IAOS 生产级 `/genesis/workspaces` saga 与持久 CreativeJob；当前 AESE 本机 store 仍是 loopback adapter。
+
+## 2026-07-28 - 校准室内人物与房间尺度
+
+- 变更：创始人与四类地点 NPC 改用响应式室内尺寸，按家具尺度统一身高、脚底缩放原点和接触阴影；移动端单独约束尺寸、位置和热点移动距离。
+- 原因：1672×941 房间背景中原玩家仅 64×116、NPC 仅 92×180，透明边距进一步缩小可见身形，人物与椅子、门和室内景深明显失调。
+- 影响：常用桌面视口中人物约 200–230px 高，玩家与同景深 NPC 比例小于 1.3；移动端人物保持可辨识且不会因放大越界。
+- 验证：TypeScript typecheck 通过；Enterprise Genesis Playwright 在 1440×900、1280×720、390×844 三视口 3/3 通过，并增加最小身高、玩家/NPC 比例和房间截图证据。
+- 后续：新增 M10 工厂室内背景时沿用 D32 的家具标尺与三视口比例验收。
+
+## 2026-07-28 - 修复组织节点推进剧情无响应
+
+- 变更：把 `capital_contribution_verified` 的场景章节从银行资本切换为人才治理，使下一项 `organization.establish` 出现时同步开放企业总部；补充当前任务目的地必须开放的设计约束。
+- 原因：任务已指向企业总部，但状态章节仍只开放到合作银行；“推进剧情”调用受锁地点导航后被静默返回，表现为按钮无反应。
+- 影响：资本核验完成后可正常进入企业总部、打开建立初始组织的受治理操作面板；不改变 IAOS Capability 执行或 committed 状态。
+- 验证：先由 Go 回归测试稳定复现“organization mission points to a locked headquarters”，修复后 `internal/gameprojection` 通过；Playwright 验证城市推进剧情、到达总部、室内推进剧情及操作面板打开通过；AESE 后端已重建并在 8090 健康运行。
+- 后续：其余章节边界继续遵循“首个可执行 Work Item 的目的地必须开放”不变量。
+
+## 2026-07-28 - 批准 M9–M13 制造企业财务运行体系
+
+- 变更：新增 approved DES-030 和 planned PLAN-M9-FIN-001；将财务组织、账套、科目、会计事件、凭证、总账、AP/AR、资金、固定资产、制造成本、结账、报表和 KPI 纳入 Project Genesis，并更新 DES-027/028、Architecture、Roadmap、Code Map、Gap Ledger 和文档索引。
+- 原因：现有 M9–M13 只有现金、预算、承诺、应付、应收、回款、实际成本和项目毛利等经营台账，银行注资没有形成实收资本凭证和开业财务报表，不能满足制造企业业财一体化要求。
+- 影响：M9 新增财务组织与七个开业会计工作项，以 `finance_opening_ready` 作为新版本开业条件；M10–M13 按真实工程、采购、资产、生产和销售事实逐步启用财务子账，避免在 M9 虚构未发生交易。
+- 验证：设计覆盖财政部企业会计准则、预算/成本管理会计应用指引和 COSO 内控基线；Markdown 链接、计划状态、Atlas JSON 和文档导航检查通过。
+- 后续：在独立 IAOS worktree 执行 F0 合同审计和历史案件迁移设计；所有 F1–F35 未实现项保持未勾选。
+
+## 2026-07-28 - M9 开业财务第一纵切
+
+- 变更：IAOS 新增六个财务 Entity、五项 Capability、一个开业财务 Process 和四项 Policy；`capital.contribution.verify` 同事务建立财务组织、CAS-BE/CNY 账套、开放期间、1002/4001 科目及借贷平衡凭证。AESE Projection、企业总部和治理档案接入财务组织、凭证与试算余额。
+- 原因：公司现金不是会计账，实缴资本必须形成可审计、可对账的开业凭证，后续费用、资产和制造成本才能有合法起点。
+- 影响：原 18 个玩家/Agent/审批/World 工作项顺序保持兼容；财务子步骤作为资本核验的原子编排展开，不重复推进案件状态。数据模型工坊、能力语义工作室和流程编排控制台可发现新增资产。
+- 验证：IAOS 离线合同/语义/流程测试通过；PostgreSQL 完整 M9 tracer 验证一组织、一账套、一凭证、两分录及借贷均为 100 万元；AESE Go tests、49 项前端测试和 TypeScript 通过。
+- 后续：完成历史案件受治理回填、显式财务工作项/职责 Mandate、开业资产负债表，并进入 M10/M11 AP/资产纵切。
+
+## 2026-07-28 - M9 财务就绪硬门与开业报表
+
+- 变更：IAOS 将财务组织、账套、开放期间、已过账资本凭证和借贷平衡纳入企业运营就绪硬门；开业财务 API 增加银行日记账、总账、试算平衡与资产负债表。AESE 治理档案同步展示这些 committed 视图。
+- 原因：仅创建凭证但不参与最终就绪判断，仍可能出现“案件已完成、财务未开业”；只有试算余额也不足以让业务用户理解银行余额、科目余额与开业财务状况。
+- 影响：缺失、草稿、零金额或借贷不平的开业凭证会 fail-closed；历史真实案件按租户 RLS 幂等补建。所有报表从同一已过账分录派生，不生成虚构采购、销售或利润。
+- 验证：单元测试覆盖缺凭证、零金额与借贷不平；PostgreSQL 全生命周期测试先破坏凭证并确认 422 和状态不推进，再恢复并验证银行日记账 1 条、总账 2 条、资产 100 万元、权益 100 万元且报表平衡。
+- 后续：发布两个显式财务 Process，配置 CFO/Controller/GL/出纳/成本/审计 Mandate 与职责冲突，并把七个财务工作项接入持久流程和通知。
+
+补充：IAOS artifact 已升级到 1.5.0，并发布 `finance.foundation.setup.v1` 与
+`capital.accounting.v1`；五个现存 `tenant-gx-*` 企业已幂等迁移到 1.5.0，两个流程均为
+published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排保留。
+
+## 2026-07-29 - 总部财务穿透与 Entity 菜单发布恢复
+
+- 变更：修复总部开业财务中心与治理会议桌重叠，把财务中心改为可访问交互对象；治理档案和对象详情增加 IAOS 系统账务/财务报表穿透。IAOS 新增财务账务与报表工作台，并恢复 Entity 发布后的即时菜单刷新和 platform_super_admin 菜单可见性。
+- 原因：AESE 财务对象只有装饰没有用途，财务明细继续堆在治理档案无法扩展；动态 Entity 菜单虽然成功生成，却被未识别的平台管理员角色和未刷新 Sidebar 隐藏。
+- 影响：AESE 保持经营摘要，长期账务和报表回到 IAOS 权威入口；普通角色仍需显式 menu READ 授权。M9 当前开业切片与未来完整报表系统边界在 DES-030/DES-063 中明确。
+- 验证：AESE 18 个测试文件/49 项测试、TypeScript 和总部三视口 Playwright 3/3；IAOS auth/api Go tests 与 Next.js production build。
+- 后续：完成财务职责矩阵、七个显式财务工作项、月结/三表/管理 KPI 与全金额证据穿透。
+
+## 2026-07-29 - 会计凭证聚合、多币种与财务数据菜单纠偏
+
+- 变更：DES-030 明确会计凭证必须采用 `document_with_lines`/`document_line` 主子聚合；新增币种定义、日期化汇率、交易币金额、本位币金额与不可变汇率快照合同；要求全部 M9 已发布 Entity 同步发布左侧数据菜单。IAOS 独立 worktree 已实现对应 Entity、RLS 表、历史 CNY 回填和“财务管理”菜单分组。
+- 原因：原设计把凭证头和凭证明细都注册成普通 `document`，父子关系仅停留在语义图；同时缺少汇率主数据及运行数据菜单，无法支撑可审计的多币种凭证或让用户发现已创建数据。
+- 影响：凭证可在同一聚合中表达任意多行借贷，明细明确保存交易币、本位币和采用汇率；M9 仍限定 CNY，不会未经外币流程治理直接放开资本到账。模型工坊与运行数据入口职责分离。
+- 验证：IAOS incorporation/api 定向测试、全平台 Go tests、go vet 和前端 TypeScript 通过；运行安装器后 19/19 个 M9 Entity 均有菜单，币种与汇率各仅保留 1 条有效 CNY 基础记录；DES-030 与 IAOS DES-063 合同一致。
+- 后续：完成真实外币银行 Observation、汇兑损益、期末重估和多币种报表折算流程。
+
+## 2026-07-29 - 恢复 M9 Entity 运行数据与财务投影
+
+- 变更：IAOS 修复人工 `INC-INTERACTIVE-*` 案件被夹具清理、启动回填 prepared statement 失败和模型再次发布后 `m9_*` 物理表绑定漂移；DES-030 补充权威账务、通用 Entity 投影与菜单读取的一致性合同。
+- 原因：当前租户的财务工作台已有开业语义，但财务 Entity 菜单为空；权威数据被清理、回填整体回滚以及元数据指向空 `bo_*` 表共同造成“模型存在但数据不可见”。
+- 影响：实际操作租户 `tenant-gx-f4b3ce3ce8e2712d` 已升级到 M9 Runtime 1.6.0，并从已提交实缴资本事实恢复 1 个财务组织、1 个账套、2 个总账科目、1 个期间、1 张凭证和 2 条分录；19 个 M9 Entity 菜单均能读取该租户自己的投影，模型重新发布不再丢失数据绑定。
+- 验证：IAOS 全平台 Go tests、定向 vet、Atlas 检查通过；目标租户安装写入/修复 485 项平台资产；API 验证八个财务 Entity 全部绑定 `m9_*` 且数量为 1/1/2/1/1/1/1/2，开业 API 借贷各 80000000、ready=true；1002 银行存款与 4001 实收资本字段完整，凭证明细分别引用这两个科目。
+- 后续：后续 M10–M13 Entity 只在真实业务事实发生后生成数据；实施验收继续区分“业务尚未发生”与“投影/绑定故障”。
+
+## 2026-07-29 - M9 投影迁移为里程碑无关存储
+
+- 变更：IAOS 新增 `entityprojection` 深模块，将 19 张共享 `m9_*` 投影原位迁移为 `entity_projection_*`；Runtime、设立与财务写入统一切换，逐租户修复 118 个 metadata 版本并规范化 RLS policy。
+- 原因：M9 是交付阶段，不应成为法律主体、账套、凭证等长期 Entity 的物理命名空间；继续扩散 `m10_*` 会形成平行数据真相。
+- 影响：权威 `finance_*`/`incorporation_*` 表不变；全部 UUID、租户、稳定业务编码和业务行保留，M10–M13 复用稳定 Entity code 和同一规范投影。
+- 验证：迁移前后 19 张表的行数及 `id:tenant:business_code` 哈希逐项一致；每表 RLS/FORCE RLS 与单一策略有效；目标租户 19 个 records API、80 万元借贷平衡和 Runtime 1.6.0 no-op 通过。
+- 后续：M10 新增对象必须遵守 IAOS DES-064，不得创建里程碑前缀投影；继续实施 AP、资产、成本、AR 和结账子账。
+## 2026-07-29 - 修复 IAOS 会计凭证主从明细可见性
+
+- 变更：IAOS 修复 `journal_entry → journal_line` 投影父键，启动时幂等回填历史关联；通用业务数据浏览器将当前 Metadata 的 `child_list` 合并进旧 Formily 布局，并明确显示“查看主表及明细”。
+- 原因：目标 Genesis 租户已有一张凭证和两条分录，但分录没有引用 Entity 投影凭证头，旧 UI 布局又遗漏 `lines`，导致菜单只能看到主表。
+- 影响：AESE M9 银行注资形成的会计凭证可在 IAOS 左侧“会计凭证”菜单穿透查看两条借贷分录；AESE 不复制账务数据或主从渲染逻辑。
+- 验证：目标租户 `tenant-gx-f4b3ce3ce8e2712d` 查询得到 `line_count=2`、`all_linked=true`；IAOS 全量 Go、Go vet、前端单测、TypeScript、生产构建和 PostgreSQL 生命周期集成测试通过。
+- 后续：M10 及后续业务记账继续复用 `document_with_lines` 主从合同，验收必须检查详情 API 的 `children.lines`，不能只检查头、行分别存在。
+
+## 2026-07-29 - 建立 Capability 唯一业务写入边界
+
+- 变更：IAOS 新增可执行 Implementation Binding、tenant-RLS Capability Execution、事务身份和财务凭证数据库触发器；资本核验改为执行 `capital.contribution.post`，案件 Trace 暴露真实执行，CI 拒绝凭证直写。AESE M9 主计划增加 D24 约束与双仓责任边界。
+- 原因：仅在 Catalog、DSL 和 Process 中登记 Capability，不能阻止 Handler 直接调用内部方法，执行、权限、审批、审计和幂等链会因此失真。
+- 影响：M9 实缴资本记账现在只能在已发布、已绑定的 Capability Context 中完成；历史修复也必须留下 `system_repair` execution。首个数据库强制范围是凭证头与分录，AESE 继续只消费 IAOS committed 结果。
+- 验证：IAOS `main@887c39b` 已部署并推送；完整 PostgreSQL M9 生命周期验证 1 次 execution、1 张凭证、2 条平衡分录；目标租户已有 succeeded execution；无 Context 的裸凭证 UPDATE 被 `governed_write_context_required` 拒绝；Go API、vet、静态治理、Code Map 与 Atlas 检查通过。
+- 后续：按 IAOS DES-065 顺序迁移凭证审批/冲销、订单库存、AP/AR、固定资产、制造成本、审批最终决定和 Agent 可写 Tool；共享开发库的既有 Outbox/全量集成测试隔离债务另行治理。
+
+## 2026-07-29 - M9 全量执行绑定、显式财务节点与 Outbox 修复
+
+- 变更：IAOS 将 25 个 M9 Capability 全部绑定到统一执行边界；主流程在资本核验后新增财务组织、账套与期间、科目、资本过账、财务就绪 5 个显式节点，正常路径从 18 项升级为 23 项；Outbox 以行租户和事件类型包装业务 payload。
+- 原因：只治理资本过账仍允许其余 M9 命令缺少统一 execution；把完整财务开业隐藏在资本核验内部不符合可解释、可人工/Agent 协作的流程原则；旧 Poller 会把普通业务 JSON 发布为 `iaos..` 空 subject。
+- 影响：人工、Agent、Process 和 World Observation 均进入同一 Capability Interface；用户能逐项观察和推进财务开业；Outbox 路由恢复为合法、可重放的完整 Event。AESE 不复制 IAOS 执行器和财务数据库。
+- 验证：IAOS API/incorporation/outbox 单元测试通过；真实 PostgreSQL 交互测试以 23 个工作项、7 个审批门、3 个 World wait、6 次 Agent Run/5 个 Agent 到达 `enterprise_operational_ready`；Outbox 测试覆盖 payload 包装、envelope 保留及路由不一致拒绝。
+- 后续：部署后只重放活跃业务租户的历史失败 Outbox；继续完成 M9-FIN 职责矩阵，以及 M10–M13 AP/AR、资产、成本和结账子账。
+
+## 2026-07-29 - M9 Runtime 1.7.0 部署与证据校准
+
+- 变更：IAOS `main@a1cc21e` 部署后，为目标 GX 租户安装 Runtime 1.7.0；Artifact 新增 Capability 合同与 Process 定义联合签名。同步更新 M9 最终证据、风险登记，并把财务 F13 拆为显式流程节点与尚未完成的人机协作两项。
+- 原因：旧 Artifact hash 只覆盖资产名称，流程图实际变化仍会被安装器误判为 no-op；旧证据也没有区分历史全量验收与本次定向复验。
+- 影响：目标租户已获得 25 个 active 执行绑定和新版财务子流程；新建设立案使用 23 个持久工作项，历史已完成案件保持原事实不被改写。文档不再把通知、Mandate 和游戏交互误标为已完成。
+- 验证：目标租户 Runtime 1.7.0 为 active、1.6.0 为 superseded；25 个 M9 binding 均 active；目标 Outbox 43/43 `PROCESSED`；PostgreSQL tracer 以 23 工作项、7 门、3 World wait、6 Agent Run/5 Agent 到达运营就绪；IAOS Go、vet、治理检查、Code Map 和 Atlas 检查通过。
+- 后续：完成 F10/F13B 财务职责、Mandate、通知和游戏交互；隔离全量 PostgreSQL integration 测试数据库，并按 DES-065 继续扩展非 M9 业务写入治理。

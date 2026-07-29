@@ -28,6 +28,11 @@ import { StrategyControlRoom } from "./components/world/StrategyControlRoom";
 import { AssuranceObservatory } from "./components/world/AssuranceObservatory";
 import { AESE3CompletionRoom } from "./components/world/AESE3CompletionRoom";
 import { WorldJourneyBar, WorldLifecycleHub } from "./components/world/WorldLifecycleHub";
+import { GenesisOnboarding } from "./components/game/GenesisOnboarding";
+import { GenesisLogin } from "./components/game/GenesisLogin";
+import { GenesisCompanyLobby } from "./components/game/GenesisCompanyLobby";
+import { currentGenesisUsername } from "./game/api";
+import type { GenesisWorkspaceResult } from "./game/types";
 const EnterpriseGenesisGame=lazy(()=>import("./components/game/EnterpriseGenesisGame").then(module=>({default:module.EnterpriseGenesisGame})));
 
 const SCENARIO_KEY = "order-expedite-01";
@@ -229,6 +234,8 @@ export default function App() {
   const [scenario, setScenario] = useState<SandboxScenario | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<
+    | "home"
+    | "genesis-onboarding"
     | "preview"
     | "live"
     | "atlas"
@@ -244,15 +251,18 @@ export default function App() {
     | "world-assurance"
     | "world-aese3"
     | "enterprise-genesis"
-  >("preview");
+  >("home");
   const [integrationOpen, setIntegrationOpen] = useState(false);
   const [connectionVersion, setConnectionVersion] = useState(0);
   const [runContext, setRunContext] = useState<OrchestrationRunContext | null>(
     () => getStoredRunContext(),
   );
+  const [genesisUsername, setGenesisUsername] = useState(() => currentGenesisUsername());
 
   const navigate = (
     target:
+      | "home"
+      | "genesis-onboarding"
       | "preview"
       | "live"
       | "atlas"
@@ -270,12 +280,18 @@ export default function App() {
       | "enterprise-genesis",
   ) => {
     setMode(target);
+    if (target === "home") {
+      window.history.pushState(null, "", window.location.pathname);
+      return;
+    }
     window.location.hash = target === "preview" ? "sandbox" : target;
   };
 
   useEffect(() => {
     const applyHash = () => {
       const target = window.location.hash.replace(/^#/, "").split("?")[0];
+      if (!target || target === "home") setMode("home");
+      if (target === "genesis-onboarding") setMode("genesis-onboarding");
       if (target === "atlas") setMode("atlas");
       if (target === "live") setMode("live");
       if (target === "world") setMode("world");
@@ -318,6 +334,31 @@ export default function App() {
     };
   }, []);
 
+  const enterWorkspace=(workspace:GenesisWorkspaceResult)=>{
+    setMode("enterprise-genesis");
+    window.location.hash=`enterprise-genesis?tenant=${encodeURIComponent(workspace.tenant_id)}&case=${encodeURIComponent(workspace.case_code)}&workspace=${encodeURIComponent(workspace.workspace_id)}`;
+  };
+  if (mode === "home"&&!genesisUsername)
+    return <GenesisLogin onSignedIn={setGenesisUsername}/>;
+  if (mode === "home")
+    return (
+      <GenesisCompanyLobby
+        username={genesisUsername}
+        onCreateEnterprise={() => navigate("genesis-onboarding")}
+        onOpenDemo={() => navigate("preview")}
+        onOpenWorld={() => navigate("world")}
+        onSignedOut={()=>setGenesisUsername("")}
+        onResume={enterWorkspace}
+      />
+    );
+  if (mode === "genesis-onboarding")
+    return (
+      <GenesisOnboarding
+        onBack={() => navigate("home")}
+        onReady={enterWorkspace}
+      />
+    );
+
   if (error)
     return (
       <main className="error-state">
@@ -356,7 +397,7 @@ export default function App() {
   const journey = (current: string, content: React.ReactNode) => <><WorldJourneyBar current={current} />{content}</>;
   if (mode === "world") return <WorldLifecycleHub onExit={() => navigate("preview")} />;
   if (mode === "enterprise-genesis")
-    return <Suspense fallback={<main className="loading-state">正在加载企业创生世界…</main>}><EnterpriseGenesisGame onExit={() => navigate("world")} /></Suspense>;
+    return <Suspense fallback={<main className="loading-state">正在加载企业创生世界…</main>}><EnterpriseGenesisGame onExit={() => navigate("home")} /></Suspense>;
   if (mode === "world-tristate")
     return journey("world-tristate", <WorldPlay onExit={() => navigate("world")} />);
   if (mode === "world-incorporation")

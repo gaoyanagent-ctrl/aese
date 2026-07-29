@@ -1176,7 +1176,7 @@ func TestRunActionRejectsExpiredResetToken(t *testing.T) {
 		UpdatedAt:           time.Now().UTC(),
 		Cursor:              0,
 		ResetToken:          "reset-token-expired",
-		ResetTokenExpiresAt:  time.Now().UTC().Add(-time.Minute),
+		ResetTokenExpiresAt: time.Now().UTC().Add(-time.Minute),
 		ActionCache:         map[string]actionCache{},
 	}
 

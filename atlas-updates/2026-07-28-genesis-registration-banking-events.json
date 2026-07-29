@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.registration-banking-events.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "将企业登记与银行开户升级为可失败经营事件",
+  "detail": "登记和开户新增机构选择、资料清单、外部拒绝、补正重申及虚构证照、印章、账户与 U 盾资产领取。",
+  "status_after": "building",
+  "progress_after": 76,
+  "current_state": "registration and banking now expose submissions, rejection feedback, recovery and reward assets",
+  "evidence_ref": "docs/designs/DES-028-enterprise-genesis-game-experience.md",
+  "occurred_at": "2026-07-28T09:07:30Z"
+}

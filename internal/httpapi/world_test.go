@@ -95,6 +95,8 @@ func TestGameProjectionConsumesLiveIAOSCommittedState(t *testing.T) {
 			_, _ = w.Write([]byte(`{"verified":true,"trace":{"schema_version":"1.0","case_code":"INC-LIVE","state":{"case_code":"INC-LIVE","tenant_id":"tenant-live","state":"incorporation_case_opened","commitment_minor":0,"contribution_minor":0,"budget_authorized_minor":0,"currency":"CNY","proposed_company_name":"澄流热管理有限公司"},"journal":[{"sequence":1,"capability_code":"incorporation.case.open","actor_type":"human","actor_id":"founder-principal","correlation_id":"corr-live","created_at":"2026-07-27T10:00:00Z"}],"world_exchanges":[]}}`))
 		case strings.HasSuffix(r.URL.Path, "/work-items"):
 			_, _ = w.Write([]byte(`{"items":[{"sequence":1,"capability_code":"incorporation.case.open","task_type":"human_task","participant_id":"founder-principal","status":"completed","effective_status":"completed"},{"sequence":2,"capability_code":"founder.resolution.prepare","task_type":"agent_task","participant_id":"incorporation-agent","status":"ready","effective_status":"ready"}]}`))
+		case strings.Contains(r.URL.Path, "/finance/opening/"):
+			_, _ = w.Write([]byte(`{"case_code":"INC-LIVE","finance_opening_ready":false,"roles":[],"debit_minor":0,"credit_minor":0,"trial_balance":[]}`))
 		default:
 			http.NotFound(w, r)
 		}
@@ -113,6 +115,22 @@ func TestGameProjectionConsumesLiveIAOSCommittedState(t *testing.T) {
 		if !strings.Contains(res.Body.String(), want) {
 			t.Fatalf("missing %s in %s", want, res.Body.String())
 		}
+	}
+}
+
+func TestGameProjectionPreservesMissingCaseAsNotFound(t *testing.T) {
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		http.NotFound(w, r)
+	}))
+	defer iaos.Close()
+	server := New(Config{IAOSBaseURL: iaos.URL})
+	req := httptest.NewRequest(http.MethodGet, "/api/aese/v1/game/incorporation/INC-NEW/projection", nil)
+	req.Header.Set("Authorization", "Bearer founder-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-new")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusNotFound {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
 	}
 }
 

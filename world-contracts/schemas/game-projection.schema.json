@@ -3,7 +3,7 @@
   "$id": "https://aese.local/world/v1/game-projection.schema.json",
   "type": "object",
   "additionalProperties": false,
-  "required": ["schema_version","projection_id","tenant_id","case_code","world_run_id","chapter","sim_time","time_scale","paused","cursor","world_scene","lifecycle","buildings","actors","work_items","resources","exchanges","brand","notifications","evidence_refs"],
+  "required": ["schema_version","projection_id","tenant_id","case_code","world_run_id","chapter","sim_time","time_scale","paused","cursor","world_scene","lifecycle","buildings","actors","work_items","resources","finance_opening","exchanges","brand","notifications","evidence_refs"],
   "properties": {
     "schema_version": {"const":"1.0"},
     "projection_id": {"type":"string","minLength":1},
@@ -19,15 +19,43 @@
     "lifecycle": {"type":"object","additionalProperties":false,"required":["state","current_step","progress"],"properties":{"state":{"type":"string","minLength":1},"current_step":{"type":"string","minLength":1},"progress":{"type":"integer","minimum":0,"maximum":100},"blocked_by":{"type":"string"}}},
     "buildings": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["code","kind","label","state","x","y","available"],"properties":{"code":{"type":"string","minLength":1},"kind":{"type":"string","minLength":1},"label":{"type":"string","minLength":1},"state":{"type":"string","minLength":1},"x":{"type":"integer"},"y":{"type":"integer"},"evidence_ref":{"type":"string"},"available":{"type":"boolean"}}}},
     "actors": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["actor_id","actor_type","display_name","position","state"],"properties":{"actor_id":{"type":"string","minLength":1},"actor_type":{"enum":["human","agent","runtime","world"]},"display_name":{"type":"string","minLength":1},"position":{"type":"string","minLength":1},"state":{"type":"string","minLength":1},"work_item_id":{"type":"string"}}}},
-    "work_items": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["work_item_id","title","kind","status","owner_type","owner_id","capability","requires_me","evidence_ref"],"properties":{"work_item_id":{"type":"string","minLength":1},"title":{"type":"string","minLength":1},"kind":{"enum":["human_task","agent_task","approval","world_wait","capability"]},"status":{"type":"string","minLength":1},"owner_type":{"enum":["human","agent","runtime","world"]},"owner_id":{"type":"string","minLength":1},"capability":{"type":"string","minLength":1},"requires_me":{"type":"boolean"},"evidence_ref":{"type":"string","minLength":1}}}},
+    "work_items": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["work_item_id","title","kind","status","owner_type","owner_id","capability","requires_me","evidence_ref"],"properties":{"work_item_id":{"type":"string","minLength":1},"title":{"type":"string","minLength":1},"kind":{"enum":["human_task","agent_task","approval","world_wait","capability"]},"status":{"type":"string","minLength":1},"owner_type":{"enum":["human","agent","runtime","world"]},"owner_id":{"type":"string","minLength":1},"capability":{"type":"string","minLength":1},"gate":{"type":"string"},"requires_me":{"type":"boolean"},"evidence_ref":{"type":"string","minLength":1},"approval_review":{"$ref":"#/$defs/approval_review"}}}},
     "resources": {"$ref":"#/$defs/resources"},
+    "finance_opening": {"$ref":"#/$defs/finance_opening"},
     "exchanges": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["exchange_id","kind","status","correlation_id","evidence_ref","occurred_at"],"properties":{"exchange_id":{"type":"string","minLength":1},"kind":{"enum":["intent","observation","committed_outcome","discrepancy"]},"status":{"type":"string","minLength":1},"correlation_id":{"type":"string","minLength":1},"evidence_ref":{"type":"string","minLength":1},"occurred_at":{"type":"string","format":"date-time"}}}},
     "brand": {"type":"object","additionalProperties":false,"required":["status"],"properties":{"status":{"enum":["empty","candidate","selected","approved","retired"]},"company_name":{"type":"string"},"logo_asset_id":{"type":"string"},"primary_color":{"type":"string","pattern":"^#[0-9A-Fa-f]{6}$"}}},
     "notifications": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["notification_id","severity","message"],"properties":{"notification_id":{"type":"string","minLength":1},"severity":{"enum":["info","success","warning","error"]},"message":{"type":"string","minLength":1},"action_ref":{"type":"string"}}}},
     "evidence_refs": {"type":"array","items":{"type":"object","additionalProperties":false,"required":["ref","kind"],"properties":{"ref":{"type":"string","minLength":1},"kind":{"type":"string","minLength":1}}}}
   },
   "$defs": {
+    "approval_review": {"type":"object","additionalProperties":false,"required":["document_type","title","summary","prepared_by","status","fields","risks","approval_effect","evidence_ref"],"properties":{"document_type":{"type":"string","minLength":1},"title":{"type":"string","minLength":1},"summary":{"type":"string","minLength":1},"prepared_by":{"type":"string","minLength":1},"status":{"type":"string","minLength":1},"fields":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["label","value"],"properties":{"label":{"type":"string","minLength":1},"value":{"type":"string"}}}},"risks":{"type":"array","items":{"type":"string","minLength":1}},"approval_effect":{"type":"string","minLength":1},"evidence_ref":{"type":"string","minLength":1}}},
     "money": {"type":"object","additionalProperties":false,"required":["value","currency","scale"],"properties":{"value":{"type":"string","pattern":"^-?[0-9]+$"},"currency":{"const":"CNY"},"scale":{"const":2}}},
+    "finance_opening": {
+      "type":"object",
+      "additionalProperties":false,
+      "required":["ready","roles","debit_minor","credit_minor","trial_balance","bank_journal","general_ledger","opening_balance_sheet"],
+      "properties":{
+        "ready":{"type":"boolean"},
+        "organization_code":{"type":"string"},
+        "organization_status":{"type":"string"},
+        "roles":{"type":"array","items":{"type":"string","minLength":1}},
+        "book_code":{"type":"string"},
+        "accounting_standard":{"type":"string"},
+        "functional_currency":{"type":"string"},
+        "period_code":{"type":"string"},
+        "period_status":{"type":"string"},
+        "journal_entry_no":{"type":"string"},
+        "journal_status":{"type":"string"},
+        "debit_minor":{"type":"integer","minimum":0},
+        "credit_minor":{"type":"integer","minimum":0},
+        "trial_balance":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["account_code","account_name","account_class","normal_balance","debit_minor","credit_minor","balance_minor"],"properties":{"account_code":{"type":"string","minLength":1},"account_name":{"type":"string","minLength":1},"account_class":{"enum":["asset","liability","equity","revenue","expense"]},"normal_balance":{"enum":["debit","credit"]},"debit_minor":{"type":"integer","minimum":0},"credit_minor":{"type":"integer","minimum":0},"balance_minor":{"type":"integer"}}}},
+        "bank_journal":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["entry_no","business_date","description","debit_minor","credit_minor","balance_minor","source_type","source_ref","evidence_ref"],"properties":{"entry_no":{"type":"string","minLength":1},"business_date":{"type":"string","format":"date"},"description":{"type":"string","minLength":1},"debit_minor":{"type":"integer","minimum":0},"credit_minor":{"type":"integer","minimum":0},"balance_minor":{"type":"integer"},"source_type":{"type":"string","minLength":1},"source_ref":{"type":"string","minLength":1},"evidence_ref":{"type":"string","minLength":1}}}},
+        "general_ledger":{"type":"array","items":{"type":"object","additionalProperties":false,"required":["account_code","account_name","opening_balance_minor","debit_minor","credit_minor","closing_balance_minor"],"properties":{"account_code":{"type":"string","minLength":1},"account_name":{"type":"string","minLength":1},"opening_balance_minor":{"type":"integer"},"debit_minor":{"type":"integer","minimum":0},"credit_minor":{"type":"integer","minimum":0},"closing_balance_minor":{"type":"integer"}}}},
+        "opening_balance_sheet":{"type":"object","additionalProperties":false,"required":["as_of","currency","assets","liabilities","equity","total_assets_minor","total_liabilities_minor","total_equity_minor","balanced"],"properties":{"as_of":{"type":"string"},"currency":{"type":"string"},"assets":{"type":"array","items":{"$ref":"#/$defs/finance_statement_line"}},"liabilities":{"type":"array","items":{"$ref":"#/$defs/finance_statement_line"}},"equity":{"type":"array","items":{"$ref":"#/$defs/finance_statement_line"}},"total_assets_minor":{"type":"integer"},"total_liabilities_minor":{"type":"integer"},"total_equity_minor":{"type":"integer"},"balanced":{"type":"boolean"}}},
+        "evidence_ref":{"type":"string"}
+      }
+    },
+    "finance_statement_line": {"type":"object","additionalProperties":false,"required":["account_code","account_name","amount_minor"],"properties":{"account_code":{"type":"string","minLength":1},"account_name":{"type":"string","minLength":1},"amount_minor":{"type":"integer"}}},
     "resources": {"type":"object","additionalProperties":false,"required":["founder_cash","company_cash","capital_committed","capital_paid","budget_authorized","risk_level"],"properties":{"founder_cash":{"$ref":"#/$defs/money"},"company_cash":{"$ref":"#/$defs/money"},"capital_committed":{"$ref":"#/$defs/money"},"capital_paid":{"$ref":"#/$defs/money"},"budget_authorized":{"$ref":"#/$defs/money"},"risk_level":{"enum":["low","medium","high","critical"]}}}
   }
 }

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.workspace-local-provisioning.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "跑通 Genesis Workspace 独立 IAOS 租户创建纵切",
+  "detail": "根主页 onboarding 由 AESE 服务端生成 workspace/tenant/world/case 标识，并真实完成 IAOS tenant、Founder、tenant session、M9 Runtime 和 active；同一幂等键返回同一租户。",
+  "status_after": "building",
+  "progress_after": 45,
+  "current_state": "loopback local adapter verified; IAOS DES-062 production multiplayer control-plane remains",
+  "evidence_ref": "internal/genesisworkspace/service_test.go",
+  "occurred_at": "2026-07-28T03:05:00Z"
+}

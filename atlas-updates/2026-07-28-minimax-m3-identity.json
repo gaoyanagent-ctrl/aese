@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.minimax-m3-identity.2026-07-28",
+  "node_key": "aese.enterprise-genesis.zero-start",
+  "update_type": "implementation",
+  "summary": "接入 MiniMax M3 真实企业身份候选生成",
+  "detail": "创意 API 使用启动配置注入的 MiniMax-M3 provider，加入版本化 prompt、超时、响应上限、reasoning 分离、严格 JSON 与候选业务校验；上游失败不静默回落固定模板。",
+  "status_after": "building",
+  "progress_after": 25,
+  "current_state": "PLAN-GXZ-001 Z4 Z17 Z18 complete; tenant provisioning remains",
+  "evidence_ref": "internal/creative/minimax_provider_test.go",
+  "occurred_at": "2026-07-28T02:38:00Z"
+}
