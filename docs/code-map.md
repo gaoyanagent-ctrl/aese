@@ -229,7 +229,7 @@ F0 合同入口已创建；F1-F5 目标路径仍须在实现时更新为实际�
 | M7 World Event adapter | `internal/legacyprojection/` |
 | World Play UI | `frontend/src/components/world/`、`frontend/src/world/` |
 | 企业生命周期首页与全程导航 | `frontend/src/components/world/WorldLifecycleHub.tsx`、`WorldLifecycleHub.css`、`#world`；M8 tracer 独立为 `#world-tristate` |
-| M9 IAOS 原生真实闭环设计 | `docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md`；D19 通用资产可发现性、D20 逐步骤追踪、D21 可解释合同、D22 持久工作项与逐节点参与、D23 Agent Runtime/工具/运行证据及外部模型边界、D24 配置驱动审批路由/工作分发/通知、D25 Entity 生命周期与正式审批单一语义、D26 财务开业、D27 全量 Capability 执行边界与 23 项显式正常路径；通用实现见 IAOS DES-053/DES-065 |
+| M9 IAOS 原生真实闭环设计 | `docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md`；D19 通用资产可发现性、D20 逐步骤追踪、D21 可解释合同、D22 持久工作项与逐节点参与、D23 Agent Runtime/工具/运行证据及外部模型边界、D24 配置驱动审批路由/工作分发/通知、D25 Entity 生命周期与正式审批单一语义、D26 页面功能说明与配置依赖图及财务开业、D27 全量 Capability 执行边界与 23 项显式正常路径；通用实现见 IAOS DES-053/DES-060/DES-065 |
 | M9 IAOS 原生真实闭环 active remediation plan | `docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md`；原完成结论因通用注册中心/工作区缺口撤回，当前以 11/20/5/8/8/5/10 数量、records API、十工作区和重复安装 no-op 为关闭门 |
 | M9 游戏化企业创生体验设计 | `docs/designs/DES-028-enterprise-genesis-game-experience.md`；AI 企业身份工作室、2.5D 世界、人工/Agent 协作、GameProjection、CreativeJob 与 GX0–GX5 |
 | Genesis 零起点与真实 AI 设计 | `docs/decisions/ADR-006-genesis-workspace-precedes-enterprise.md`、`docs/designs/DES-029-genesis-zero-start-and-ai-identity.md`、`docs/plans/2026-07-28-genesis-zero-start-and-ai-identity.md`；根主页 → PlayerAccount → GenesisWorkspace → IAOS tenant provisioning → AESE World Run → MiniMax naming → incorporation case；当前 active |
@@ -243,6 +243,7 @@ F0 合同入口已创建；F1-F5 目标路径仍须在实现时更新为实际�
 | M9N IAOS lifecycle 联动页面 | `frontend/src/world/incorporation.ts`、`frontend/src/world/incorporationStepTrace.ts`、`frontend/src/components/world/IncorporationPlay.tsx`；`#world-incorporation?tenant=&case=&process_run=&world_run=&correlation=` | 按 D20 映射 8 个 World frame/15 次 transition；按 D22 默认只解锁 IAOS 已提交阶段，用户同步后查看下一已完成阶段，不能用本地播放制造业务进度 |
 | M9N World 人工 Observation | `frontend/src/world/incorporation.ts::submitIncorporationObservation`、`IncorporationPlay.tsx`、`docs/solutions/SOL-002-incorporation-observation-click-idempotency.md` | 登记、开户、任命三个外部参与者按钮通过受治理 `/api/v1/world-bridge/observations` 写 Observation；同一案件/类型/结果使用稳定 transport identity；不直接推进 IAOS，用户仍需执行对应 world_wait 工作项 |
 | M9N 局域网加载与 SSE 排障 | `docs/solutions/SOL-001-m9-lan-lifecycle-loading-and-sse.md` | 最近 case 自动发现、浏览器 hostname 双向链接、60 秒 SSE write deadline 续期与 BFCache/HMR 边界 |
+| M9N 失效案件深链恢复 | `frontend/src/world/incorporation.ts`、`frontend/src/components/world/IncorporationPlay.tsx`、`docs/solutions/SOL-002-aese-world-stale-incorporation-case-recovery.md` | trace 404 保留 AESE World 基线并查询 recent cases；401/403/5xx 仍失败关闭 |
 | World Play API | `internal/httpapi/server.go`（`/api/aese/v1/world/genesis`） |
 | 验收 runbook / 能力缺口 | `docs/runbooks/aese-world-play.md`、`docs/capability-gap-ledger.md` |
 | Atlas planned 投影 | `atlas/system-atlas-planned.json` |

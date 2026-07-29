@@ -1217,6 +1217,28 @@
   tracking 检查通过。
 - 后续：部署在线版本并继续 T83/T96 Founder、五 Agent、G1–G7 与 World wait 全链验收。
 
+## 2026-07-25 - 新功能可解释性与配置关系治理
+
+- 变更：DES-027 新增 D26，要求 System Atlas 展示从语义默认生命周期到运行证据的细粒度
+  关系；AGENTS.md 增加功能目的、配置、使用、关系和页面“功能说明”的强制交付规则；
+  active M9N 计划增加并完成 T98。
+- 原因：现有全景图只连接顶层工作台，页面也缺少设计目的和实施步骤，客户仍需询问开发者
+  才能理解 Entity 审批、Approval Flow 和 Process 的职责与配置顺序。
+- 影响：规则生效后的新功能必须同时交付权威设计、业务表单、页面说明和 Atlas 关系；
+  旧页面按后续切片渐进补齐。IAOS 通用实现由 DES-060 承载。
+- 验证：Markdown 链接、Atlas 声明、Code Map 与文档治理脚本。
+- 后续：完成 M9 T83/T85/T96 全链验收，并为 AESE World 页面补同类功能说明。
+
+## 2026-07-27 - AESE World 失效设立案深链恢复
+
+- 变更：M9 lifecycle trace 返回 404 时不再终止 World；页面保留本地基线、显示结构化警告
+  并列出 IAOS recent cases。E2E 改为动态选择真实案件，World Hub 测试更新为当前入口。
+- 原因：旧深链固定引用已清理的 `INC-HCTM-001`，IAOS 404 被错误提升为整个 campaign 失败。
+- 影响：用户能打开 World 并切换有效案件；401/403/5xx 仍失败关闭，正式进度不会由本地
+  frame 冒充。
+- 验证：Unit、TypeScript、生产构建与三视口 Playwright。
+- 后续：M9 T83/T85/T96 继续使用动态真实案件完成全链验收。
+
 ## 2026-07-27 - 企业成立外部确认幂等修复
 
 - 变更：登记、开户和任命外部确认按案件、payload type、result 生成稳定 transport identity；IAOS 同步增加业务事实级去重和案件绑定的可信存在性校验。
@@ -1224,7 +1246,6 @@
 - 影响：重复点击不再增长 Journal；已有重复历史 Observation 的案件也能继续对应 world_wait 节点；其他案件证据不能冒用。
 - 验证：IAOS 完整 lifecycle 与 World Bridge recovery 集成测试通过；AESE TypeScript 测试和生产构建。
 - 后续：继续按三个 World wait 分别验收登记、开户与任命外部参与者交互。
-
 ## 2026-07-27 - Enterprise Genesis 游戏化企业创生体验设计
 
 - 变更：新增 draft DES-028，将 M9 设计为玩家、五个数字员工、IAOS Runtime 与 World 共同推进的企业创生游戏；定义创业构想、AI 命名与 Logo、创始办公室、登记、银行资本、人才治理、开业准备七章，以及世界沙盘、经营桌面、治理证据三层界面、GameProjection、CreativeJob 和 GX0–GX5 交付切片。

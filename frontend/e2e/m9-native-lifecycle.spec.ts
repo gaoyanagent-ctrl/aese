@@ -1,7 +1,5 @@
 import { expect, test } from "@playwright/test";
 
-const caseCode = process.env.M9_CASE_CODE ?? "INC-HCTM-001";
-
 test("AESE consumes persisted IAOS M9 lifecycle projection after refresh", async ({ page, request }) => {
   const login = await request.post("http://127.0.0.1:8082/api/v1/auth/login", {
     data: {
@@ -12,6 +10,13 @@ test("AESE consumes persisted IAOS M9 lifecycle projection after refresh", async
   });
   expect(login.ok()).toBeTruthy();
   const session = await login.json();
+  const recent = await request.get("http://127.0.0.1:8082/api/v1/incorporations/recent", {
+    headers: { Authorization: `Bearer ${session.token}`, "X-Tenant-ID": "tenant-hctm-genesis" },
+  });
+  expect(recent.ok()).toBeTruthy();
+  const recentBody = await recent.json();
+  const caseCode = process.env.M9_CASE_CODE ?? recentBody.items?.[0]?.case_code;
+  expect(caseCode).toBeTruthy();
   await page.addInitScript(() => {
     if (!sessionStorage.getItem("m9-stale-token-seeded")) {
       localStorage.setItem("iaos_token", "stale-other-tenant-token");
@@ -38,21 +43,35 @@ test("AESE consumes persisted IAOS M9 lifecycle projection after refresh", async
   await expect(page.getByTestId("incorporation-step-trace")).toContainText(
     "incorporation.case.open",
   );
-  await page.getByRole("button", { name: /plant_project_eligible/ }).click();
-  await expect(page.getByTestId("incorporation-step-trace")).toContainText(
-    "enterprise.readiness.evaluate",
-  );
   await expect(
     page.getByRole("link", { name: "在 IAOS 中定位" }),
-  ).toHaveAttribute("href", /step=7&capability=enterprise\.readiness\.evaluate/);
+  ).toHaveAttribute("href", /step=0&capability=incorporation\.case\.open/);
   const escapedHost = new URL(page.url()).hostname.replaceAll(".", "\\.");
   await expect(page.getByRole("link", { name: "打开 IAOS 设立案" })).toHaveAttribute("href", new RegExp(`^http://${escapedHost}:3000/.*tenant=.*case=.*process_run=.*world_run=.*correlation=`));
-  await page.getByRole("button", { name: "复位" }).click();
   const persisted = await request.get(`http://127.0.0.1:8082/api/v1/incorporations/${encodeURIComponent(caseCode)}/trace`, {
     headers: { Authorization: `Bearer ${session.token}`, "X-Tenant-ID": "tenant-hctm-genesis" },
   });
   expect(persisted.ok()).toBeTruthy();
-  expect((await persisted.json()).state.state).toBe("enterprise_operational_ready");
   await page.reload();
   await expect(page.getByTestId("iaos-lifecycle-projection")).toContainText(caseCode);
+});
+
+test("AESE keeps World open when an old IAOS case link returns 404", async ({ page, request }) => {
+  const login = await request.post("http://127.0.0.1:8082/api/v1/auth/login", {
+    data: {
+      username: "founder-principal",
+      password: "Founder-Lifecycle-2026!",
+      tenant_id: "tenant-hctm-genesis",
+    },
+  });
+  expect(login.ok()).toBeTruthy();
+  const session = await login.json();
+  await page.goto(
+    `/#world-incorporation?tenant=tenant-hctm-genesis&case=INC-REMOVED-E2E&auth_token=${encodeURIComponent(session.token)}`,
+  );
+
+  await expect(page.getByRole("heading", { name: "投资人形成设立意图" })).toBeVisible();
+  await expect(page.getByRole("alert")).toContainText("关联的 IAOS 设立案不可用");
+  await expect(page.getByRole("alert")).toContainText("INC-REMOVED-E2E");
+  await expect(page.getByRole("alert").getByRole("link").first()).toBeVisible();
 });

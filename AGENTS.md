@@ -138,3 +138,18 @@ tags: [aese]
 - 主分支部署通过 `scripts/sync_system_atlas_updates.sh` 幂等同步声明；`scripts/record_system_atlas_update.sh` 仅用于修复和历史补录。
 - 更新必须引用设计文档、测试证据或 commit；完成度是架构判断，不得按提交数量自动计算。
 - 如果 IAOS API 暂时不可用，先在进展日志记录待补登记项，服务恢复后立即补录。
+
+## 11. 功能可解释性与交付说明
+
+- 每个新增或实质变更的客户功能，完成前必须在设计文档中说明业务问题、设计意图、非目标、
+  用户角色、前置条件、配置步骤、操作步骤、验证与失败恢复。
+- 设计必须说明该功能与 Semantic、Entity、Capability、Policy、Approval、Process、
+  Agent、Event、World 和业务数据的上下游关系；不能只列菜单入口。
+- 每个新增客户菜单或主要功能页必须提供可见的“功能说明”入口，说明目的、如何使用、
+  相关模块/数据以及权威设计文档。正常实施路径不得要求用户阅读源码、手写原始 JSON、
+  查询数据库或再次询问 agent。
+- System Atlas 必须登记有业务意义的配置和运行依赖边。例如流程与审批不仅连接工作台，
+  还要表达 Semantic 默认生命周期 → Entity 生命周期 → Capability → Approval Flow →
+  Process → Approval Request/业务事实的关系。
+- 交付测试和最终说明必须主动给出“如何配置、如何操作、如何验证”、关系说明和已知限制，
+  不得等待用户追问。旧功能渐进补齐；本规则生效后的新功能必须同时满足。

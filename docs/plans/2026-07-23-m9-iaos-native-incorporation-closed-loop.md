@@ -278,6 +278,8 @@ P0
 - [x] T96 完成新 G1 真实浏览器验收、Runtime 数据迁移与 Founder/五 Agent 全链 T83。
 - [x] T97 统一 Entity 生命周期动作与正式 Approval Runtime，补齐 Flow 下拉、编译期
       fail-closed、批准后状态提交与 consume 合同。
+- [x] T98 按 D26 补齐流程/审批/Entity 配置关系、System Atlas 细粒度依赖和首批页面
+      “功能说明”；新增功能落实可解释性项目规则。
 
 ## 18. D27 业务写入只能通过可执行 Capability
 
@@ -287,21 +289,21 @@ P0
 > [DES-065](/iaos/iaos-go/docs/designs/DES-065-governed-capability-write-boundary.md)
 > 冻结平台约束；AESE 不复制执行器，只消费受治理 execution 和 committed 结果。
 
-- [x] T98 在 IAOS `AGENTS.md` 冻结规则：HTTP、Process、Agent Tool、事件消费者和
+- [x] T99 在 IAOS `AGENTS.md` 冻结规则：HTTP、Process、Agent Tool、事件消费者和
       定时任务不得绕过 Capability Interface 直接实施业务 DML。
-- [x] T99 增加 `capability_implementation_binding` 与 tenant-RLS
+- [x] T100 增加 `capability_implementation_binding` 与 tenant-RLS
       `capability_execution`，区分“已设计、已发布、可执行”和每次真实执行。
-- [x] T100 为凭证主表与明细表安装 PostgreSQL 强制触发器；事务没有有效
+- [x] T101 为凭证主表与明细表安装 PostgreSQL 强制触发器；事务没有有效
       Capability Execution Context、租户不一致或未声明该表时 fail-closed。
-- [x] T101 将 `capital.contribution.verify` 改为同事务执行已发布且有 active binding
+- [x] T102 将 `capital.contribution.verify` 改为同事务执行已发布且有 active binding
       的 `capital.contribution.post`；历史回填使用显式 `system_repair` 模式并幂等补登记。
-- [x] T102 案件 Trace 增加 `capability_executions`；CI 静态检查拒绝在 binding 外调用
+- [x] T103 案件 Trace 增加 `capability_executions`；CI 静态检查拒绝在 binding 外调用
       资本记账 Implementation 或直接写凭证表。
-- [x] T103 将全部 25 个 M9 Capability 绑定到统一执行边界，20 个成立治理命令和
+- [x] T104 将全部 25 个 M9 Capability 绑定到统一执行边界，20 个成立治理命令和
       5 个财务开业命令均产生独立 execution。
-- [x] T104 将财务组织、账套与期间、科目、资本过账、财务就绪检查编译为资本核验后的
+- [x] T105 将财务组织、账套与期间、科目、资本过账、财务就绪检查编译为资本核验后的
       5 个显式工作项，正常路径由 18 项升级为 23 项。
-- [x] T105 修复 IAOS Outbox 对业务 payload 的 Event envelope 包装，使用行路由字段
+- [x] T106 修复 IAOS Outbox 对业务 payload 的 Event envelope 包装，使用行路由字段
       生成合法 NATS subject，并对 envelope 不一致 fail-closed。
 
 验收：IAOS 定向 Go 测试和真实 PostgreSQL 交互测试通过；新案件编译 23 个工作项，

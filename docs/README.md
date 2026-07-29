@@ -28,6 +28,7 @@
 | [Code Map](code-map.md) | 任务到文件、跨仓库集成点 | Active |
 | [Progress Log](progress-log.md) | 只追加的历史记录 | Active |
 | [MVP Blueprint](AESE_MVP_Blueprint.md) | MVP 产品与业务范围 | Approved |
+| [SOL-002 AESE World 失效设立案恢复](solutions/SOL-002-aese-world-stale-incorporation-case-recovery.md) | 旧 case 深链 404 时保留 World 并引导切换有效案件 | Completed |
 
 ### 华辰场景文档
 

@@ -62,6 +62,11 @@ World wait；集成测试在第二个 World wait 后重建 Server 并恢复至
 D25 已消除数据模型工坊 Entity 生命周期与正式审批运行时的语义分叉：Entity 只声明
 状态和受治理动作，需审批的动作引用租户版本化 Flow，审批决定来自冻结 assignment，
 批准后才提交状态并 consume。该平台收敛不替代 M9 T83/T96 的完整交互式验收。
+D26 进一步要求 System Atlas 展示 Semantic → Entity → Capability → Approval Flow →
+Process → Runtime Evidence 的配置与运行依赖，并为新菜单/主要页面提供“功能说明”。
+IAOS DES-060 已交付流程/审批/Entity 首批入口；AESE World 后续按同一合同渐进补齐。
+M9 World 深链已补充失效案件恢复：trace 404 时保留 World 基线并列出当前 recent cases，
+不再让已清理的旧 case 阻断页面；身份、权限和平台错误仍失败关闭。
 
 PLAN-GX-001 已完成 MVP：游戏从 IAOS verified evidence bundle 与 23 个工作项编译
 GameProjection；当前 deterministic 企业身份候选通过 `incorporation.case.open` 才成为正式案件事实；

@@ -176,6 +176,29 @@ export function IncorporationPlay({ onExit }: { onExit: () => void }) {
         </span>
       </nav>
       <main className="world-main">
+        {trace.iaos_lifecycle_warning && (
+          <section className="world-recovery-warning" role="alert">
+            <div>
+              <strong>关联的 IAOS 设立案不可用</strong>
+              <p>{trace.iaos_lifecycle_warning.message}</p>
+              <small>
+                这不会阻止查看 AESE World；正式进度仍必须来自一个有效的 IAOS 设立案。
+              </small>
+            </div>
+            {trace.iaos_lifecycle_warning.available_cases.length > 0 && (
+              <nav aria-label="可用的 IAOS 设立案">
+                {trace.iaos_lifecycle_warning.available_cases.map((availableCase) => (
+                  <a
+                    key={availableCase}
+                    href={`#world-incorporation?tenant=${encodeURIComponent(tenant)}&case=${encodeURIComponent(availableCase)}`}
+                  >
+                    打开 {availableCase}
+                  </a>
+                ))}
+              </nav>
+            )}
+          </section>
+        )}
         <section className="world-status">
           <span
             className={`world-state-badge ${f.plant_project_eligible ? "closed" : "active"}`}
