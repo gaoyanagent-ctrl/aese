@@ -36,6 +36,11 @@ Compiler；M9 Runtime 2.4.0 只消费平台基础包。`business_partner → par
 新增语义必须先检索现有目录、记录不可复用原因并取得产品所有者批准，场景包不得覆盖
 foundation-owned 资产。
 
+2026-07-30 Effective Runtime Artifact 权威闭环：IAOS DES-072 已将 Entity
+Schema/UI/Agent Context、Capability API/Agent Tool 和 Process Run 收敛到同一不可变
+编译产物；Process 发布冻结 Capability version/hash，缺失、过期、编译器或哈希不一致
+均失败关闭。M9 不再允许从 authoring DSL、metadata 表或旧运行回执做正式路径兜底。
+
 ## 1. 里程碑状态
 
 | 里程碑 | 目标 | 状态 | 完成证据 |

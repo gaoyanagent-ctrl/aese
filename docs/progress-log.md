@@ -1714,3 +1714,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：87 个 Concept、51 个 Archetype 成为版本化机器权威；跨根族、循环、非 active 父类、Core→Domain 和重复 canonical slot 不能安装或发布；新增语义必须先检索并与产品所有者协商，AESE 场景不能覆盖平台资产。
 - 验证：IAOS 全量 Go/vet、基础包校验、前端生产构建、真实 PostgreSQL 安装及 Atlas/Code Map/治理写入检查通过；数据库确认 `business_partner → party`、`organization → party`、`product → material`。
 - 后续：递归 Effective Archetype Artifact 编译和 Semantic Change Proposal 审批 UI 作为后续平台切片；M10 先复用目录，不得建立同义 seed。
+
+## 2026-07-30 - M9 Effective Runtime Artifact 执行权威闭环
+
+- 变更：IAOS 新增 DES-072 和 Effective Runtime Artifact 深模块，将 Entity Schema/UI/Agent Context、Capability API/Agent Tool、Process 发布与运行统一到不可变编译产物；流程发布冻结能力 artifact version/hash，AESE 的 DES-027、M9 计划、路线图和 Code Map 同步引用该跨仓合同。
+- 原因：DES-023 原先只部分实现，正式路径仍可能回读 metadata、authoring DSL 或最新能力版本，无法保证用户看到的配置就是 Runtime 和 Agent 实际执行的合同。
+- 影响：缺失、stale、编译器不匹配、哈希不一致和未解析依赖均失败关闭；升级回填按对象隔离，坏对象不再阻断同租户其他有效对象；实施人员可在数据模型工坊和流程编排控制台穿透查看运行权威。
+- 验证：IAOS 全量 Go/vet、前端 23 项定向测试、TypeScript、生产构建、语义基础包、Atlas 和 diff 检查通过；真实 PostgreSQL 验证 FORCE RLS、跨租户不可见、350 个 active Entity Artifact 与 128 个 active Process Artifact；IAOS main `945a05b` 已推送，8082/3000 已重建并通过健康检查。
+- 后续：M10 及后续场景只声明对 artifact version/hash 的依赖，不得新增 authoring 表或场景 JSON 运行兜底。

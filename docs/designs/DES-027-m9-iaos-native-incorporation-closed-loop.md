@@ -797,3 +797,23 @@ M9 的“资产已登记”和“业务真实执行”必须严格区分。最�
 Outbox 行的 `tenant_id` 与 `event_type` 是事件路由权威。AESE 仍只提交受治理
 Observation；IAOS 将业务 payload 包装为完整 Event，并拒绝 envelope 与行路由不一致，
 避免产生 `iaos..` 空 subject。
+
+## 7. D28 — Effective Runtime Artifact 执行权威
+
+M9 的“Runtime Artifact”不再只是发布产物或检查页面。IAOS DES-072 已把它实现为正式
+运行路径的唯一输入：
+
+- Entity 发布把有效字段、生命周期、能力、AI Context、OpenAPI、权限、依赖、漂移和 UI
+  编译为一个不可变 artifact；Schema/UI/Agent Context 不得回读 authoring 表补齐结果。
+- Capability 执行只读取 active snapshot；用户不能通过版本参数执行历史 DSL，Agent Tool
+  也不能直接读取 `capability_registry.dsl_definition`。
+- Process 发布把图和每个 Capability 的 artifact version/hash 一起冻结；运行节点必须执行
+  这组精确依赖，不得静默切换到后来发布的能力版本。
+- 缺失、stale、compiler mismatch、hash mismatch 和未解析依赖均失败关闭。升级回填按对象
+  隔离，坏对象不会回滚同租户已经成功编译的其他对象。
+- 实施人员可从数据模型工坊和流程编排控制台查看 artifact version、hash、compiler、
+  source lineage 及编译结果，不需要通过源码猜测运行合同。
+
+AESE 只引用 IAOS 编译后的版本与业务证据，不缓存或重新解释 authoring DSL。M9 的场景
+包仍负责稳定业务编码和仿真输入，但不能成为 Schema、权限、流程节点或 Agent 上下文的
+备用权威。

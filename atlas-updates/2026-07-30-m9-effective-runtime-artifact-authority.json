@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "m9.effective-runtime-artifact-authority.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M9 正式运行路径统一消费 IAOS Effective Runtime Artifact",
+  "detail": "Entity、Capability、Process 与 Agent 正式路径不再从 authoring metadata 或 DSL 兜底；Process 发布冻结 Capability artifact version/hash，缺失、stale、compiler/hash mismatch 失败关闭。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "AESE 只引用 IAOS DES-072 编译权威和 committed evidence，场景包不复制运行时解释。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md"
+}

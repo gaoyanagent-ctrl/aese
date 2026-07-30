@@ -121,6 +121,11 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T22 发布前执行引用、继承、relation、状态、权限、职责分离、菜单和 seed 完整性检查；`conflict` 必须阻断。
 - [x] T23 实现默认 dry-run、显式 apply、重复 apply no-op、版本升级、stale artifact 阻断和安全回退策略。
 - [x] T24 验证 `tenant-hctm-genesis` 与 `tenant-other` 的安装隔离，确认 `tenant-hctm` 未被迁移或清理。
+- [x] T24A 关闭 Runtime 旁路：Entity Schema/UI/Agent Context、Capability API/Agent
+      Tool、Process Run 均只读取不可变 Effective Runtime Artifact；Process 发布冻结每个
+      Capability 的 artifact version/hash，缺失、stale、编译器不匹配或 hash 不一致一律
+      失败关闭。IAOS 权威设计与运维入口为 DES-072 和
+      `docs/runbooks/effective-runtime-artifact.md`。
 
 验收：D18.1、D18.3 的资产部分通过；Runtime 只能消费已发布且未 stale 的 Effective Runtime Artifact。
 
