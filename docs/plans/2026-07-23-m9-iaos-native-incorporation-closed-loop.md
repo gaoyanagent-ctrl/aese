@@ -367,3 +367,28 @@ IAOS DES-065 的风险顺序进入同一强制边界，不能把当前财务纵�
 `business_partner → party`、`organization → party`、`product → material`，旧污染字段
 和错误 extends 关系已由包级精确 reconciliation 清理。AESE 后续场景新增语义必须先
 消费该平台目录，不得在 M10 或行业 seed 中复制同义概念。
+
+## 21. D30 M9 可复用资产平台 Edition
+
+- [x] T119 IAOS 建立全局不可变 platform package/Edition catalog 和 FORCE RLS
+      tenant installation evidence。
+- [x] T120 将 M9 通用资产分类为 `enterprise-governance`、
+      `finance-foundation`、`genesis-incorporation` 三个签名包，覆盖 Semantic、
+      Entity、Capability、Process、Policy、Menu 和 Agent Template。
+- [x] T121 发布 `genesis-m9@1.0.0`，让 M9 Runtime Artifact 显式携带 Edition、
+      package dependency 和 content hash。
+- [x] T122 `tenant-001` 安装同一参考 Edition；安装不创建用户、Agent 实例、Mandate、
+      设立案、审批、凭证或 World 数据。
+- [x] T123 Genesis Workspace provisioning 从同一 Agent Template 和 Runtime
+      installer 创建租户实例，不再维护散落的第二套 Agent/能力数组。
+- [x] T124 IAOS 增加 catalog/status/dry-run/upgrade API 和“配置包控制台 → 平台基础包”
+      UI，旧租户可检测 `upgrade_required` 并由有权主体显式升级。
+- [x] T125 修复 Foundation 精确 reconciliation：空生命周期、默认能力和默认事件也以
+      版本包为权威，清除 `party` 旧种子的悬空能力声明。
+- [x] T126 完成 Go/TypeScript/Vitest、真实数据库资产与零业务复制、前后端发布、
+      Code Map、Atlas、runbook 和双仓引用验证。
+
+验收：平台目录返回三个 package、七类资产和稳定 SHA-256；tenant-001 的三个
+installation 均 active，Runtime 为 2.4.0；参考租户有 0 个设立案、0 个审批、0 个凭证
+和 0 条 World Journal；历史 Genesis 租户返回 `upgrade_required=true`。后续 M10 及行业
+包只能依赖或扩展明确 Edition，不能复制 M9 seed 后另行漂移。

@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "m9.platform-baseline-edition.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M9 可复用资产提升为版本化 IAOS 平台基础包",
+  "detail": "genesis-m9@1.0.0 组合企业治理、财务基础和成立编排三个不可变包；tenant-001 参考安装、Genesis 新租户开通和历史租户升级消费同一 Edition，不复制身份与业务事实。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "AESE 只引用 IAOS Edition/hash 和 committed evidence；M9 场景不再维护独立 Semantic、Entity、Capability、Process、Policy、Menu 或 Agent 模板副本。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md"
+}

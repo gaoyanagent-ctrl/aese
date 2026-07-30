@@ -817,3 +817,30 @@ M9 的“Runtime Artifact”不再只是发布产物或检查页面。IAOS DES-0
 AESE 只引用 IAOS 编译后的版本与业务证据，不缓存或重新解释 authoring DSL。M9 的场景
 包仍负责稳定业务编码和仿真输入，但不能成为 Schema、权限、流程节点或 Agent 上下文的
 备用权威。
+
+## 8. D29 — 版本化平台基础包与租户 Edition
+
+M9 已验证可复用的企业治理与开业财务资产，不得继续作为某个场景租户安装器的隐式
+副作用。IAOS [DES-073](/iaos/iaos-go/docs/designs/DES-073-platform-baseline-package-and-tenant-editions.md)
+将其提升为 `genesis-m9@1.0.0` Edition：
+
+```text
+iaos_foundation_semantics@1.0.0
+  → enterprise-governance@1.0.0
+  → finance-foundation@1.0.0
+  → genesis-incorporation@1.0.0
+  → tenant Effective Runtime Artifact
+```
+
+三个不可变包共同声明 Semantic、Entity、Capability、Process、Policy、Menu 和
+Agent Template，并由 SemVer 与 SHA-256 锁定。同一包版本不得覆盖内容；任何资产变化
+必须发布新版本和新 Edition。
+
+`tenant-001` 只安装同一 Edition 作为参考版本，不是新租户的数据库模板。Genesis
+Workspace 的 `runtime_installed` checkpoint、tenant-001 启动校准以及既有租户显式升级
+都调用同一个清单和安装服务。禁止从 tenant-001 复制用户、Membership、任职、Mandate、
+Agent 实例、案件、审批、凭证或 World Journal。
+
+AESE 只保存场景参数和稳定业务编码，并从 IAOS 读取目标租户的 Edition/hash 与业务
+证据。新 World/tenant 不得维护另一套 M9 资产数组；历史租户版本差异必须通过 IAOS
+“配置包控制台 → 平台基础包”查询和受治理升级。

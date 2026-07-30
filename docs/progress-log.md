@@ -1722,3 +1722,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：缺失、stale、编译器不匹配、哈希不一致和未解析依赖均失败关闭；升级回填按对象隔离，坏对象不再阻断同租户其他有效对象；实施人员可在数据模型工坊和流程编排控制台穿透查看运行权威。
 - 验证：IAOS 全量 Go/vet、前端 23 项定向测试、TypeScript、生产构建、语义基础包、Atlas 和 diff 检查通过；真实 PostgreSQL 验证 FORCE RLS、跨租户不可见、350 个 active Entity Artifact 与 128 个 active Process Artifact；IAOS main `945a05b` 已推送，8082/3000 已重建并通过健康检查。
 - 后续：M10 及后续场景只声明对 artifact version/hash 的依赖，不得新增 authoring 表或场景 JSON 运行兜底。
+
+## 2026-07-30 - M9 通用资产平台基础包与租户 Edition
+
+- 变更：IAOS 发布 `genesis-m9@1.0.0`，把 M9 Semantic、Entity、Capability、Process、Policy、Menu 和五个 Agent Template 分为三个不可变签名包；tenant-001 安装参考 Edition，Genesis provisioning 和历史租户升级复用同一清单；AESE 的 DES-027、计划、路线图和 Code Map 同步跨仓合同。
+- 原因：通用资产过去只是某个 M9 Runtime 安装器的隐式副作用，平台租户、新租户和旧租户无法对账同一产品版本，也容易把 tenant-001 错当成业务数据母租户。
+- 影响：平台定义按 SemVer/SHA-256 发布，Agent Template 与租户 Agent/Mandate 实例分离；任何新企业只安装定义并自行形成身份与业务事实，不复制其他租户记录。
+- 验证：IAOS 全量 Go、TypeScript、Vitest、Semantic/Foundation、治理写入、Code Map、Atlas 检查通过；真实 PostgreSQL 确认 tenant-001 三个 active installation、Runtime 2.4.0，案件/审批/凭证/World Journal 均为 0；旧 Genesis 租户正确返回 `upgrade_required`，8082/3000 已生产重建。
+- 后续：M10 及后续通用资产必须发布新 package/Edition SemVer；历史租户由有权主体在 IAOS 平台基础包页面显式升级。
