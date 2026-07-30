@@ -326,6 +326,9 @@ IAOS DES-065 的风险顺序进入同一强制边界，不能把当前财务纵�
 - [x] T111 将 `capital.commitment.record` 从误配的 `finance-agent` 自主任务改为
       `founder-principal` 以 `chair` 岗位执行的 `human_task`；保留 Agent 金额授权作为
       明确委托动作的治理硬门，并以 IAOS Runtime 1.9.0 刷新既有未完成案件。
+- [x] T112 修复 Founder 全局登录发现：同一 platform principal 在源租户使用
+      `founder-principal`、Genesis 租户使用 `genesis-owner` 时，仍按有效 access/binding
+      返回新企业租户选择项；tenant-local username 不作为跨租户身份键。
 
 验收：目标租户安装 Runtime 1.9.0 后返回 6 个岗位、4 条 SoD 和 5 个财务节点；
 财务负责人、内审为 active，Controller/总账/资金/成本为 vacant；同一主体兼任资金与

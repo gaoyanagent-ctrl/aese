@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.founder-tenant-discovery.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "Founder 登录可发现新建 Genesis 企业租户",
+  "detail": "IAOS 全局登录改为按 platform principal、有效 tenant access assignment 和 active principal user binding 展开租户，不再要求目标 tenant-local username 等于 founder-principal。目标 tenant-gx-bfe7c4374e9340319017 已通过部署后真实登录 API 验证可见。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "AESE 创建的新企业可以由其 Founder 从 IAOS 登录租户选择器重新进入。",
+  "evidence_ref": "/iaos/iaos-go/docs/solutions/SOL-036-founder-multi-tenant-login-discovery.md",
+  "occurred_at": "2026-07-30T06:00:00Z"
+}

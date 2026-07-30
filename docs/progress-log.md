@@ -1636,3 +1636,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：Agent 金额上限继续对明确委托的自主金额动作失败关闭，但不再充当企业注册资本或人工资本承诺上限；财务 Agent 负责方案测算、规则校验、到账核验和后续会计处理。
 - 验证：IAOS 全量 `go test ./... -count=1`、`go vet ./...`、交互式生命周期和 Agent 授权 PostgreSQL 集成测试、Atlas/Code Map/治理写入检查通过；目标租户已安装 Runtime 1.9.0，节点 4 API 与数据库均显示 `human_task / founder-principal / chair / ready`。未代替用户提交 50,000,000 CNY 的治理决定。
 - 后续：法域、行业、股东协议和资本结构的金额约束应进入 Policy Profile；不得通过提高通用 Agent 授权上限绕过责任主体修正。
+
+## 2026-07-30 - 恢复 Founder 对 Genesis 新租户的登录发现
+
+- 变更：IAOS 全局登录租户发现移除目标 tenant-local username 相等条件，按 platform principal 的有效 access assignment、principal binding 和 active user 返回选择项；新增源 `founder-principal`、目标 `genesis-owner` 的真实 PostgreSQL 回归。
+- 原因：Genesis Workspace 为租户创建 `genesis-owner` 本地用户，但目标 Workspace 的 owner subject 仍是 `founder-principal`；旧查询错误比较本地用户名，导致正式 owner access 已存在却不显示企业。
+- 影响：Founder 重新登录 IAOS 时可以看到并进入自己从 AESE 创建的新企业；每张选择卡仍使用目标 tenant-scoped JWT 与目标角色，同名无授权账户不会被合并。
+- 验证：修复前回归稳定遗漏目标租户，修复后通过；IAOS 全量 Go、vet、Atlas、Code Map 与治理写入检查通过。后端部署后真实登录 API 返回 200/multiple，并确认包含 `tenant-gx-bfe7c4374e9340319017`（“还是要赚钱啊”）；健康检查为 UP。
+- 后续：正式 Player/OIDC 接入继续使用不可变 platform subject 关联 Workspace，不使用用户名、邮箱或显示名作为跨租户身份键。
