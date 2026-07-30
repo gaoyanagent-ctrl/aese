@@ -55,7 +55,7 @@ test("new enterprise starts with server-assigned tenant provisioning", async ({
   ).toBeVisible();
 });
 
-test("AI creative officer is an accessible non-overlapping creation entry", async ({
+test("AI creative officer is an explained contextual creation entry", async ({
   page,
 }) => {
   await page.route("**/api/aese/v1/genesis/workspaces", route =>
@@ -67,19 +67,25 @@ test("AI creative officer is an accessible non-overlapping creation entry", asyn
 
   const creativeOfficer = page.getByRole("button", { name: /AI 创意官/ });
   await expect(creativeOfficer).toBeVisible();
+  await expect(
+    page.getByText("把你的行业、区域和经营目标整理成创业项目草案"),
+  ).toBeVisible();
   const commandCenter = page.locator(".genesis-home__command-card");
-  const [officerBox, commandBox] = await Promise.all([
+  const miniFlow = page.locator(".genesis-home__mini-flow");
+  const [officerBox, commandBox, flowBox] = await Promise.all([
     creativeOfficer.boundingBox(),
     commandCenter.boundingBox(),
+    miniFlow.boundingBox(),
   ]);
   expect(officerBox).not.toBeNull();
   expect(commandBox).not.toBeNull();
-  const overlaps =
-    officerBox!.x < commandBox!.x + commandBox!.width &&
-    officerBox!.x + officerBox!.width > commandBox!.x &&
-    officerBox!.y < commandBox!.y + commandBox!.height &&
-    officerBox!.y + officerBox!.height > commandBox!.y;
-  expect(overlaps).toBe(false);
+  expect(flowBox).not.toBeNull();
+  expect(officerBox!.x).toBeGreaterThanOrEqual(commandBox!.x);
+  expect(officerBox!.x + officerBox!.width).toBeLessThanOrEqual(
+    commandBox!.x + commandBox!.width,
+  );
+  expect(officerBox!.y).toBeGreaterThan(commandBox!.y);
+  expect(officerBox!.y + officerBox!.height).toBeLessThanOrEqual(flowBox!.y);
 
   await creativeOfficer.click();
   await expect(

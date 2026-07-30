@@ -107,6 +107,21 @@ export function GenesisHome({
                 <strong>等待被创造</strong>
               </div>
             </div>
+            <button
+              type="button"
+              className="genesis-home__agent-card"
+              onClick={onCreateEnterprise}
+              aria-label="与 AI 创意官开始构想新企业"
+            >
+              <span className="genesis-home__agent-icon"><Bot aria-hidden="true" /></span>
+              <span>
+                <span className="genesis-home__agent-label">第一步 · 创业构想助手</span>
+                <strong>与 AI 创意官开始构想</strong>
+                <small>把你的行业、区域和经营目标整理成创业项目草案</small>
+                <em>引导进入身份工作室，不代替注册、审批或经营决策。</em>
+              </span>
+              <ArrowRight aria-hidden="true" />
+            </button>
             <ol className="genesis-home__mini-flow">
               <li className="active"><span>01</span><div><strong>企业构想</strong><small>由你发起</small></div></li>
               <li><span>02</span><div><strong>AI 身份工作室</strong><small>名称与品牌</small></div></li>
@@ -114,16 +129,6 @@ export function GenesisHome({
               <li><span>04</span><div><strong>开始经营</strong><small>人、财、事协同</small></div></li>
             </ol>
           </article>
-          <button
-            type="button"
-            className="genesis-home__agent-card"
-            onClick={onCreateEnterprise}
-            aria-label="打开 AI 创意官，开始创建新企业"
-          >
-            <Bot aria-hidden="true" />
-            <span><strong>AI 创意官</strong><small>准备接收你的企业构想</small></span>
-            <ArrowRight aria-hidden="true" />
-          </button>
         </div>
       </section>
 
