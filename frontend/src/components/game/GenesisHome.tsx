@@ -114,10 +114,16 @@ export function GenesisHome({
               <li><span>04</span><div><strong>开始经营</strong><small>人、财、事协同</small></div></li>
             </ol>
           </article>
-          <div className="genesis-home__agent-card">
+          <button
+            type="button"
+            className="genesis-home__agent-card"
+            onClick={onCreateEnterprise}
+            aria-label="打开 AI 创意官，开始创建新企业"
+          >
             <Bot aria-hidden="true" />
             <span><strong>AI 创意官</strong><small>准备接收你的企业构想</small></span>
-          </div>
+            <ArrowRight aria-hidden="true" />
+          </button>
         </div>
       </section>
 

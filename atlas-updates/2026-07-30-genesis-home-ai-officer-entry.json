@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.home-ai-officer-entry.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "修复 Enterprise Genesis 首页 AI 创意官入口",
+  "detail": "AI 创意官由绝对定位的装饰元素改为可访问创建入口，并以正常网格流避免覆盖首页指挥卡、企业列表和相邻页面区块。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "首页 AI 创意官可通过鼠标、触摸和键盘进入创业项目定义，三种目标视口均无布局重叠。",
+  "evidence_ref": "docs/designs/DES-029-genesis-zero-start-and-ai-identity.md",
+  "occurred_at": "2026-07-30T02:00:00Z"
+}

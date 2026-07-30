@@ -125,7 +125,7 @@ AESE 不直接修改下列文件；需要集成时在独立 IAOS worktree 中按
 | --- | --- |
 | 前端工程与依赖 | `frontend/` |
 | 应用壳和根路由 | `frontend/src/App.tsx`；根路径进入 Enterprise Genesis Home，`#sandbox` 保留旧样板沙盘 |
-| Enterprise Genesis 产品主页 | `frontend/src/components/game/GenesisHome.tsx`、`GenesisHome.css`；创建企业、样板世界、M9 旅程和开发状态入口 |
+| Enterprise Genesis 产品主页 | `frontend/src/components/game/GenesisHome.tsx`、`GenesisHome.css`；创建企业、可访问且不重叠的 AI 创意官入口、样板世界、M9 旅程和开发状态入口 |
 | Genesis Workspace onboarding | `frontend/src/components/game/GenesisOnboarding.tsx`、`frontend/src/game/api.ts`；五步向导、草稿自动保存、生产 Player session 转发，先创建隔离空间再进入身份工作室 |
 | Genesis 游戏登录与企业大厅 | `frontend/src/components/game/GenesisLogin.tsx`、`GenesisCompanyLobby.tsx`、`frontend/src/game/api.ts`；本机用户名映射 owner player ID，owner-scoped 列表与 Founder session 恢复 |
 | Genesis Workspace BFF | `internal/genesisworkspace/`、`/api/aese/v1/genesis/workspaces`、`POST /api/aese/v1/genesis/workspaces/:workspace/session`；转发当前 Player session 到 IAOS DES-062 生产控制面，绑定 Workspace/Tenant/World/Case 并兑换 tenant-only owner session；旧 local adapter Workspace 在 session 404 时通过 IAOS `legacy-adoptions` 做一次 owner/tenant 前置条件核验接管；无 Player Token 的 loopback active tenant 只允许 login 刷新 session，禁止重复 bootstrap/Runtime install |

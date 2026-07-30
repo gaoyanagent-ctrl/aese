@@ -43,11 +43,47 @@ test("new enterprise starts with server-assigned tenant provisioning", async ({
   await page.getByRole("button", { name: /创建新企业/ }).first().click();
 
   await expect(
-    page.getByRole("heading", { name: "先为你的企业建立独立运行空间" }),
+    page.getByRole("heading", { name: "先定义创业项目" }),
   ).toBeVisible();
-  await expect(page.getByText("你不需要填写或选择 tenant ID。")).toBeVisible();
   await expect(
-    page.getByRole("button", { name: /创建空间并进入 AI 身份工作室/ }),
+    page.getByText("Tenant 由 IAOS 服务端分配，浏览器不能指定。", {
+      exact: false,
+    }),
+  ).toBeVisible();
+  await expect(
+    page.getByRole("button", { name: "下一步" }),
+  ).toBeVisible();
+});
+
+test("AI creative officer is an accessible non-overlapping creation entry", async ({
+  page,
+}) => {
+  await page.route("**/api/aese/v1/genesis/workspaces", route =>
+    route.fulfill({ status: 200, json: { items: [] } }),
+  );
+  await page.goto("/");
+  await page.getByLabel("游戏用户名").fill("creative-founder");
+  await page.getByRole("button", { name: /进入企业世界/ }).click();
+
+  const creativeOfficer = page.getByRole("button", { name: /AI 创意官/ });
+  await expect(creativeOfficer).toBeVisible();
+  const commandCenter = page.locator(".genesis-home__command-card");
+  const [officerBox, commandBox] = await Promise.all([
+    creativeOfficer.boundingBox(),
+    commandCenter.boundingBox(),
+  ]);
+  expect(officerBox).not.toBeNull();
+  expect(commandBox).not.toBeNull();
+  const overlaps =
+    officerBox!.x < commandBox!.x + commandBox!.width &&
+    officerBox!.x + officerBox!.width > commandBox!.x &&
+    officerBox!.y < commandBox!.y + commandBox!.height &&
+    officerBox!.y + officerBox!.height > commandBox!.y;
+  expect(overlaps).toBe(false);
+
+  await creativeOfficer.click();
+  await expect(
+    page.getByRole("heading", { name: "先定义创业项目" }),
   ).toBeVisible();
 });
 

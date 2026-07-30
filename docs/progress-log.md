@@ -1596,3 +1596,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：旧本地企业可以在开发环境继续游戏，同时既有身份、Runtime、流程和业务数据不会被点击操作改写；active tenant 登录失败将直接失败关闭。
 - 验证：回归测试先稳定复现 active tenant 触发 1 次 bootstrap 和 1 次 Runtime install，修复后两者均为 0 且 session 成功签发；AESE 全量 Go 测试通过。现场通过 `:4173` 发起与浏览器一致的无 Authorization session 请求返回 200 和 tenant token；IAOS 日志只出现 tenant GET 与 auth login，未再出现 bootstrap、Runtime install 或 activate。
 - 后续：生产部署继续要求正式 Player Account/OIDC；确定性 Founder 凭据仅保留于 loopback 迁移期。
+
+## 2026-07-30 - 修复首页 AI 创意官入口与布局重叠
+
+- 变更：把首页“AI 创意官”从装饰性 `div` 改为可点击、可键盘聚焦的创建企业入口；移除覆盖指挥卡的绝对定位，改为正常网格流布局，并补充悬停、按下和焦点状态。
+- 原因：原组件没有交互处理或可访问语义，且 `right: -8px`、`bottom: 50px` 的绝对定位会在桌面和窄屏压住相邻页面区域。
+- 影响：点击“AI 创意官”与“创建新企业”进入同一个“先定义创业项目”流程；入口不再覆盖主行动卡或“我的企业”区块。
+- 验证：前端 20 个测试文件/58 项测试、TypeScript 类型检查和生产构建通过；Genesis 首页 Playwright 在 1440、1280 和 390 三种视口验证按钮可见、可点击且与指挥卡边界不相交。
+- 后续：后续首页角色入口继续复用同一可访问交互和正常流布局规则。
