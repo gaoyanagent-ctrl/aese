@@ -34,8 +34,10 @@ IAOS 实现必须在独立 worktree 中完成。所有未实现项保持未勾�
   IAOS DES-067 提供四张 FORCE RLS 权威表、复合租户外键、两项业务 Capability、
   历史账套幂等迁移和财务工作台表单，AESE `finance-governance-baseline.json`
   固定 HCTM 确定性组织/Data Set/访问模板并由离线校验器检查引用完整性。
-- [ ] F5C 重构账套原型、科目表/法人扩展、财政日历和多账簿关系，并迁移现有 M9 数据；
-  禁止用空字符串或 `other` 通过必填校验。
+- [x] F5C 重构账套原型、科目表/法人扩展、财政日历和多账簿关系，并迁移现有 M9 数据；
+  IAOS DES-068 交付七张通用权威表及增强账簿、受治理 Capability、查询/配置 UI 和
+  原位幂等迁移；AESE baseline 1.2 固定 HCTM 账簿/科目/自然年模板并拒绝空值、
+  `other`、断裂期间和未知引用。
 - [ ] F5D 实现 Business Partner、客户/供应商及产品的全局身份和组织扩展。
 - [ ] F5E 模块级期间开启/关闭已记录，留待关账阶段实现。
 

@@ -37,8 +37,21 @@ F5B 已由 IAOS
 - AESE `scenario-packs/hctm/finance-governance-baseline.json` 只保存确定性场景模板，
   不复制 IAOS 权威数据，position access template 在应用时解析为平台 subject。
 
-F5C 账套/科目/财政日历重构和 F5D Business Partner/产品组织扩展仍未实现，
-不能因 F5B 完成而标记为完整集团财务。
+### 1.2 第二实施切片（F5C，2026-07-30）
+
+F5C 已由 IAOS
+`docs/designs/DES-068-finance-ledger-chart-calendar-foundation.md` 实现：
+
+- 财政日历/期间、共享科目表/科目定义、法人科目扩展、账簿与账簿集合权威表；
+- `finance.ledger.foundation.configure` 受治理 Capability、FORCE RLS、复合 tenant
+  外键和数据库写入硬门；
+- 财务工作台“账簿与科目”查询和业务配置表单；
+- M9 历史 `BOOK-*`、凭证关系、1002/4001 科目和 12 期日历的原位幂等迁移；
+- 目标租户 `tenant-gx-f4b3ce3ce8e2712d` 已迁移为 1 账簿、1 科目表、2 科目定义、
+  2 法人扩展、1 日历/12 期间和 1 账簿集。
+
+AESE baseline 1.2 固定同构的 HCTM 确定性模板并离线校验所有引用和期间连续性。
+F5D Business Partner/产品组织扩展仍未实现，不能因 F5C 完成而标记为完整集团财务。
 
 ## 2. 设计原则
 
@@ -224,7 +237,7 @@ status = future | open | soft_closed | closed | reopened
 
 本轮只冻结该模型和状态机，不实现 UI、Capability、Process 或数据库迁移。
 
-## 8. 当前账套模型问题与迁移要求
+## 8. 原账套模型问题与已完成迁移
 
 `tenant-gx-f4b3ce3ce8e2712d` 的权威账套行已有编码、名称、法人、本位币、准则、启用时间、
 年度起始月和状态；但通用投影存在以下结构性问题：
@@ -236,7 +249,7 @@ status = future | open | soft_closed | closed | reopened
 4. 缺少集团、法人 ID、共享科目表、财政日历及多账簿关系；
 5. “字段非空”不等于模型正确，不能继续用默认值掩盖错误原型。
 
-迁移必须：
+F5C 已按以下合同完成迁移：
 
 - 新建正确的 `accounting_book` 财务配置原型，不复用银行/总账账户原型；
 - 先补组织、科目表、财政日历和账簿 assignment，再迁移现有行；

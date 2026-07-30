@@ -1682,3 +1682,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：F5B 形成集团财务和后续采购/销售/制造主数据共同依赖的组织与共享边界；AESE 保持场景模板所有权，IAOS 保持运行数据所有权。
 - 验证：IAOS 后端单元/Runtime 测试、真实 PostgreSQL 治理/幂等/RLS/跨租户外键/完整回填集成测试、TypeScript 检查和生产构建；目标租户升级 Runtime 2.0.0 后由真实身份 API 读到 5 个组织、2 个 Data Set、9 个分配和 6 个访问授权；AESE `financebaseline` 引用/闭集/稳定编码测试、场景包离线校验、JSON、Atlas 和 Code Map 检查。
 - 后续：F5C 重构账套原型、科目表法人扩展、财政日历和多账簿并迁移 M9 数据；F5D 实现 Business Partner 及客户/供应商/产品组织扩展。
+
+## 2026-07-30 - 财务账簿、共享科目表与财政日历 F5C
+
+- 变更：IAOS 新增共享科目表/科目定义、法人科目扩展、财政日历/期间、账簿和账簿集权威模型，发布 `finance.ledger.foundation.configure`、财务工作台“账簿与科目”入口及 M9 数据幂等迁移；AESE baseline 升级到 1.2，固定 HCTM 账簿、1002/4001 科目、自然年 12 期和账簿集模板。
+- 原因：M9 临时账套和逐账簿科目不能支撑多法人共享定义、多账簿、法定余额隔离及 M10 后持续经营。
+- 影响：稳定 `BOOK-*`、凭证关系和历史事实不变；共享科目定义与法人启用属性分离，账簿明确绑定法人、准则、本位币、科目表和日历；所有变更继续经过 Capability、RLS 和数据库写入硬门。
+- 验证：IAOS 全量 Go、真实 PostgreSQL 迁移、治理写入/Atlas、TypeScript、组件测试和生产构建通过；目标租户 API 返回 1 账簿、1 科目表、2 科目定义、2 法人扩展、1 日历、12 期间和 1 账簿集，Runtime 升级到 2.1.0；AESE 离线校验覆盖未知法人、断裂期间和控制矩阵。
+- 后续：实施 F5D Business Partner、客户/供应商及产品 canonical identity 和组织扩展；F5E 模块期间控制保持关账阶段范围。

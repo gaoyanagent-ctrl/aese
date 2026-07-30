@@ -1,5 +1,5 @@
 {
-  "schema_version": "1.1",
+  "schema_version": "1.2",
   "currency": "CNY",
   "amount_scale": 2,
   "timezone": "Asia/Shanghai",
@@ -31,6 +31,40 @@
       {"subject_ref":"position:finance-lead","organization_code":"GRP-HCTM","access_scope":"subtree","permissions":["read","reference","extend","manage"]},
       {"subject_ref":"position:finance-controller","organization_code":"GRP-HCTM","access_scope":"subtree","permissions":["read","reference"]},
       {"subject_ref":"position:internal-audit","organization_code":"GRP-HCTM","access_scope":"subtree","permissions":["read"]}
+    ]
+  },
+  "ledger_foundation": {
+    "charts": [
+      {"chart_code":"COA-OPERATING-CAS","chart_name":"华辰企业会计准则运营科目表","data_set_code":"GROUP-FINANCE","chart_role":"operating","accounting_standard_code":"CAS-BE","status":"active","version":1}
+    ],
+    "accounts": [
+      {"chart_code":"COA-OPERATING-CAS","account_code":"1002","account_name":"银行存款","account_class":"asset","normal_balance":"debit","status":"active"},
+      {"chart_code":"COA-OPERATING-CAS","account_code":"4001","account_name":"实收资本","account_class":"equity","normal_balance":"credit","status":"active"}
+    ],
+    "calendars": [
+      {
+        "calendar_code":"CAL-NATURAL","calendar_name":"自然月会计日历","calendar_type":"natural_month","fiscal_year":2026,"status":"active",
+        "periods":[
+          {"period_code":"2026-01","period_number":1,"starts_on":"2026-01-01","ends_on":"2026-01-31","status":"closed"},
+          {"period_code":"2026-02","period_number":2,"starts_on":"2026-02-01","ends_on":"2026-02-28","status":"closed"},
+          {"period_code":"2026-03","period_number":3,"starts_on":"2026-03-01","ends_on":"2026-03-31","status":"closed"},
+          {"period_code":"2026-04","period_number":4,"starts_on":"2026-04-01","ends_on":"2026-04-30","status":"closed"},
+          {"period_code":"2026-05","period_number":5,"starts_on":"2026-05-01","ends_on":"2026-05-31","status":"closed"},
+          {"period_code":"2026-06","period_number":6,"starts_on":"2026-06-01","ends_on":"2026-06-30","status":"closed"},
+          {"period_code":"2026-07","period_number":7,"starts_on":"2026-07-01","ends_on":"2026-07-31","status":"open"},
+          {"period_code":"2026-08","period_number":8,"starts_on":"2026-08-01","ends_on":"2026-08-31","status":"future"},
+          {"period_code":"2026-09","period_number":9,"starts_on":"2026-09-01","ends_on":"2026-09-30","status":"future"},
+          {"period_code":"2026-10","period_number":10,"starts_on":"2026-10-01","ends_on":"2026-10-31","status":"future"},
+          {"period_code":"2026-11","period_number":11,"starts_on":"2026-11-01","ends_on":"2026-11-30","status":"future"},
+          {"period_code":"2026-12","period_number":12,"starts_on":"2026-12-01","ends_on":"2026-12-31","status":"future"}
+        ]
+      }
+    ],
+    "books": [
+      {"book_code":"BOOK-HCTM-PRIMARY","book_name":"华辰上海主要账簿","legal_entity_code":"LE-HCTM-SH","book_role":"primary","accounting_standard_code":"CAS-BE","functional_currency_code":"CNY","chart_code":"COA-OPERATING-CAS","calendar_code":"CAL-NATURAL","balancing_segment_rule":"legal_entity","status":"active","effective_from":"2026-01-01","version":1}
+    ],
+    "ledger_sets": [
+      {"ledger_set_code":"LEDGERSET-PRIMARY","ledger_set_name":"华辰主要账簿集","status":"active","members":[{"book_code":"BOOK-HCTM-PRIMARY","member_role":"primary"}]}
     ]
   },
   "objects": [
@@ -66,6 +100,17 @@
       "data_classification":"confidential",
       "sod_conflicts":["internal-audit"],
       "compensation":"inactivate the incorrect assignment and publish a corrected effective-dated Data Set assignment"
+    },
+    {
+      "capability":"finance.ledger.foundation.configure",
+      "responsible_position":"finance-controller",
+      "executor":"finance-agent",
+      "permission":"finance.foundation.manage",
+      "approval_gate":"accounting-policy-governance",
+      "amount_limit_minor":"0",
+      "data_classification":"confidential",
+      "sod_conflicts":["internal-audit"],
+      "compensation":"publish a corrected effective-dated ledger foundation version; never rewrite posted journals or reuse stable BOOK codes"
     },
     {
       "capability":"finance.organization.configure",

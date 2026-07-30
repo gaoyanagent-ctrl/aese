@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.finance.ledger-chart-calendar-f5c.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "完成 F5C 账簿、共享科目表与财政日历基础",
+  "detail": "IAOS 交付受治理账簿、科目表/法人扩展、财政日历和账簿集并原位迁移 M9 数据；AESE baseline 1.2 增加确定性 HCTM 账簿模板、12 期日历和离线引用校验。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "F5C completed and deployed; F5D business partner and product organization extensions are next",
+  "evidence_ref": "docs/designs/finance/DES-031-multi-organization-and-shared-master-data-foundation.md",
+  "commit_sha": "db8b104",
+  "occurred_at": "2026-07-30T10:45:00Z"
+}
