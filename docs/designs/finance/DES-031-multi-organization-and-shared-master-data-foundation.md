@@ -66,6 +66,25 @@ F5D 已由 IAOS
 AESE baseline 1.3 增加 3 个虚构伙伴、2 个产品及对应组织扩展，继续保持场景模板与 IAOS
 运行事实的仓库边界。F5E 模块期间控制仍留待关账阶段。
 
+### 1.4 资产发布与菜单拆分（Runtime 2.3.0，2026-07-30）
+
+IAOS `docs/designs/DES-070-finance-navigation-and-semantic-assets.md` 关闭了“权威表存在，
+但数据模型工坊不可发现”的交付缺口：
+
+- 多组织、Data Set、组织授权、财政日历/期间、科目表/科目、账簿集、Business Partner、
+  客户/供应商角色、伙伴组织扩展、产品和产品组织扩展共 16 类模型均发布为
+  Semantic/Entity 资产；Runtime catalog 总计 35 个 Entity、33 条语义关系；
+- 权威 `finance_*` 表仍是写模型，`entity_projection_*` 只作为模型工坊和通用运行菜单
+  的读取投影；两者在同一受治理 Capability 事务中同步，既有数据由 Runtime 安装幂等回填；
+- `finance.business.partner.configure` 写入 canonical partner、role 和组织扩展；
+  `finance.product.master.configure` 写入 canonical product 和工厂扩展，不再声明不存在的
+  平行 customer/supplier/product 表；
+- 业务入口拆为“多组织与共享数据”“账簿与会计基础”“客户主数据”“供应商主数据”
+  和“产品主数据”；客户与供应商页面是同一 Business Partner 身份的角色视图，
+  不是两份重复主体数据；
+- 每个 Entity 仍可通过模型工坊检查字段、枚举、关系和菜单发布设置；业务用户通过独立
+  工作台配置，不能用直接编辑投影替代 Capability。
+
 ## 2. 设计原则
 
 1. **Tenant 是客户安全边界，不等于法人公司。** 一个集团及其受控分子公司通常位于同一
@@ -294,6 +313,9 @@ M10 业务模型不得在第 1–5 步未形成稳定合同前继续复制单法
 - 跨法人业务不混账，集团查询和合并不改写成员公司法定凭证；
 - 现有 M9 账套不再出现错误账户原型字段或静默默认值；
 - 不需要读取数据库或 JSON 才能理解组织归属和共享来源。
+- 数据模型工坊可发现 §1.4 的 16 类模型及其字段、枚举和关系，发布后左侧 Entity 菜单
+  读取与权威表一致的投影；
+- 客户和供应商入口按角色过滤同一 Business Partner，不能生成重复 canonical identity。
 
 ## 11. 参考实践
 

@@ -1698,3 +1698,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：Data Set 决定集团共享定义，法人/BU/工厂扩展保存本地财务、商业、MRP 和估价属性；相同主体可同时承担客户和供应商角色并保留唯一身份。
 - 验证：IAOS 全量 Go/vet、真实 PostgreSQL canonical/role/组织扩展集成测试、治理写入/Atlas、TypeScript、组件测试和生产构建通过；启动历史开业回填无错误；AESE 全量 Go 与 baseline 未知组织、无效成本批量、稳定编码和控制矩阵校验通过。
 - 后续：F5E 模块期间控制按关账阶段实施；M10/M11 从该伙伴和产品基础接入 AP、资产、采购和工厂扩展，不再复制单法人主数据。
+
+## 2026-07-30 - 财务菜单拆分与 Semantic/Entity 资产发布 F5D2
+
+- 变更：IAOS 将“财务账务与报表”收敛为账务查询和报表输出，新增财务组织与待办、多组织与共享数据、账簿与会计基础、客户、供应商和产品独立入口；Runtime 2.3.0 把 F5B–F5D 的 16 类权威模型注册到数据模型工坊，并在受治理 Capability 事务内同步 `entity_projection_*`。
+- 原因：原财务页混合账务、组织、待办和主数据，且权威 `finance_*` 表虽已实现，却没有完整的 Semantic/Entity 发布，用户无法从数据模型工坊理解字段、关系和菜单。
+- 影响：业务工作台与模型工坊各司其职；客户/供应商成为同一 Business Partner 的角色视图，产品和组织扩展不复制身份；通用 Entity 菜单读取权威数据投影，不能绕过 Capability 写入。
+- 验证：IAOS 全量 Go/vet、真实 PostgreSQL Runtime 集成、前端 TypeScript/组件测试/生产构建及 Atlas/Code Map/治理写入检查通过；目标租户安装 Runtime 2.3.0 返回 201 和 782 项资产写入，API 可见 35 个 Entity、七个独立工作台，组织 5/5、科目 2/2 权威/投影对账一致。
+- 后续：目标租户当前尚无 Business Partner/产品运行记录，后续必须由相应配置 Capability 或 AESE 场景应用创建，不能为了填充菜单直接写投影；F5E 与 F15–F35 按计划继续。

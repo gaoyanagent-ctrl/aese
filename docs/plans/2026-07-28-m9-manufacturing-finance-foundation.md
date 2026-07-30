@@ -41,6 +41,10 @@ IAOS 实现必须在独立 worktree 中完成。所有未实现项保持未勾�
 - [x] F5D 实现 Business Partner、客户/供应商及产品的全局身份和组织扩展；
   IAOS DES-069 提供五张权威表、两项 Capability 和“伙伴与产品”表单；AESE baseline
   1.3 固定三个虚构伙伴、两个产品及其法人/BU/工厂扩展并离线校验引用。
+- [x] F5D2 将 F5B–F5D 权威模型完整发布为 Semantic/Entity 资产，并拆分财务业务入口；
+  IAOS DES-070 / Runtime 2.3.0 注册 16 个多组织、账簿、伙伴与产品 Entity，累计形成
+  35 个 Runtime Entity 和 33 条语义关系；七个职责单一工作台替代混合财务页，
+  权威表与只读 Entity 投影由受治理 Capability 同事务同步。
 - [ ] F5E 模块级期间开启/关闭已记录，留待关账阶段实现。
 
 - [x] F6 注册 M9 财务领域语义和 7 条 relation graph；完整 Core/HCTM 扩展继续随子账增加。
