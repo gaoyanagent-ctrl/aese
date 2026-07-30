@@ -3,6 +3,7 @@ package financebaseline
 import (
 	"encoding/json"
 	"fmt"
+	"math/big"
 	"os"
 	"regexp"
 	"strconv"
@@ -17,6 +18,7 @@ type Baseline struct {
 	Timezone               string                 `json:"timezone"`
 	OrganizationFoundation OrganizationFoundation `json:"organization_foundation"`
 	LedgerFoundation       LedgerFoundation       `json:"ledger_foundation"`
+	MasterDataFoundation   MasterDataFoundation   `json:"master_data_foundation"`
 	Objects                []Object               `json:"objects"`
 	Controls               []Control              `json:"controls"`
 }
@@ -123,6 +125,54 @@ type LedgerSetMember struct {
 	BookCode string `json:"book_code"`
 	Role     string `json:"member_role"`
 }
+type MasterDataFoundation struct {
+	BusinessPartners []BusinessPartner `json:"business_partners"`
+	Products         []ProductMaster   `json:"products"`
+}
+type BusinessPartner struct {
+	Code               string                `json:"partner_code"`
+	LegalName          string                `json:"legal_name"`
+	IdentityType       string                `json:"identity_type"`
+	CountryCode        string                `json:"country_code"`
+	RegistrationNumber string                `json:"registration_number"`
+	DataSetCode        string                `json:"data_set_code"`
+	Status             string                `json:"status"`
+	EffectiveFrom      string                `json:"effective_from"`
+	Roles              []BusinessPartnerRole `json:"roles"`
+}
+type BusinessPartnerRole struct {
+	Role                      string `json:"partner_role"`
+	LegalEntityCode           string `json:"legal_entity_code"`
+	BusinessUnitCode          string `json:"business_unit_code"`
+	PaymentTermsCode          string `json:"payment_terms_code"`
+	TransactionCurrencyCode   string `json:"transaction_currency_code"`
+	ReconciliationAccountCode string `json:"reconciliation_account_code"`
+	CreditLimitMinor          string `json:"credit_limit_minor"`
+	WithholdingTaxCode        string `json:"withholding_tax_code"`
+	IncotermCode              string `json:"incoterm_code"`
+	DeliveryPriority          int    `json:"delivery_priority"`
+}
+type ProductMaster struct {
+	Code             string             `json:"product_code"`
+	Name             string             `json:"product_name"`
+	Type             string             `json:"product_type"`
+	BaseUnitCode     string             `json:"base_unit_code"`
+	ProductGroupCode string             `json:"product_group_code"`
+	DataSetCode      string             `json:"data_set_code"`
+	Status           string             `json:"status"`
+	EffectiveFrom    string             `json:"effective_from"`
+	Extensions       []ProductExtension `json:"extensions"`
+}
+type ProductExtension struct {
+	PlantCode         string `json:"plant_code"`
+	BusinessUnitCode  string `json:"business_unit_code"`
+	MRPType           string `json:"mrp_type"`
+	ValuationClass    string `json:"valuation_class"`
+	CostingLotSize    string `json:"costing_lot_size"`
+	InventoryEnabled  bool   `json:"inventory_enabled"`
+	SalesEnabled      bool   `json:"sales_enabled"`
+	PurchasingEnabled bool   `json:"purchasing_enabled"`
+}
 type Object struct {
 	Code             string `json:"code"`
 	Milestone        string `json:"milestone"`
@@ -143,7 +193,7 @@ type Control struct {
 	Compensation        string   `json:"compensation"`
 }
 
-var requiredCapabilities = []string{"finance.enterprise.structure.configure", "finance.reference.data.configure", "finance.ledger.foundation.configure", "finance.organization.configure", "accounting.book.activate", "chart.of.accounts.activate", "capital.contribution.post", "finance.opening.readiness.evaluate"}
+var requiredCapabilities = []string{"finance.enterprise.structure.configure", "finance.reference.data.configure", "finance.ledger.foundation.configure", "finance.business.partner.configure", "finance.product.master.configure", "finance.organization.configure", "accounting.book.activate", "chart.of.accounts.activate", "capital.contribution.post", "finance.opening.readiness.evaluate"}
 var stableCode = regexp.MustCompile(`^[A-Z][A-Z0-9_-]{1,79}$`)
 var accountCode = regexp.MustCompile(`^[A-Z0-9][A-Z0-9._-]{1,39}$`)
 
@@ -159,13 +209,16 @@ func Load(path string) (Baseline, error) {
 	return b, Validate(b)
 }
 func Validate(b Baseline) error {
-	if b.SchemaVersion != "1.2" || b.Currency != "CNY" || b.AmountScale != 2 || b.Timezone != "Asia/Shanghai" {
+	if b.SchemaVersion != "1.3" || b.Currency != "CNY" || b.AmountScale != 2 || b.Timezone != "Asia/Shanghai" {
 		return fmt.Errorf("invalid finance baseline header")
 	}
 	if err := validateOrganizationFoundation(b.OrganizationFoundation); err != nil {
 		return err
 	}
 	if err := validateLedgerFoundation(b.LedgerFoundation, b.OrganizationFoundation); err != nil {
+		return err
+	}
+	if err := validateMasterDataFoundation(b.MasterDataFoundation, b.OrganizationFoundation, b.LedgerFoundation); err != nil {
 		return err
 	}
 	objects := map[string]bool{}
@@ -205,6 +258,84 @@ func Validate(b Baseline) error {
 	for _, capability := range requiredCapabilities {
 		if !controls[capability] {
 			return fmt.Errorf("missing M9 finance control %s", capability)
+		}
+	}
+	return nil
+}
+
+func validateMasterDataFoundation(f MasterDataFoundation, organizationFoundation OrganizationFoundation, ledgerFoundation LedgerFoundation) error {
+	organizations := map[string]Organization{}
+	for _, organization := range organizationFoundation.Organizations {
+		organizations[organization.Code] = organization
+	}
+	dataSets := map[string]ReferenceDataSet{}
+	for _, set := range organizationFoundation.DataSets {
+		dataSets[set.Code] = set
+	}
+	accounts := map[string]bool{}
+	for _, account := range ledgerFoundation.Accounts {
+		accounts[account.Code] = true
+	}
+	partners := map[string]bool{}
+	for _, partner := range f.BusinessPartners {
+		set, setExists := dataSets[partner.DataSetCode]
+		if !stableCode.MatchString(partner.Code) || strings.TrimSpace(partner.LegalName) == "" ||
+			(partner.IdentityType != "organization" && partner.IdentityType != "person") ||
+			len(partner.CountryCode) != 2 || !setExists ||
+			!contains(set.DataTypes, "business_partner") || partner.Status != "active" ||
+			len(partner.Roles) == 0 || partners[partner.Code] {
+			return fmt.Errorf("invalid business partner %q", partner.Code)
+		}
+		if _, err := time.Parse("2006-01-02", partner.EffectiveFrom); err != nil {
+			return fmt.Errorf("invalid business partner effective date %s", partner.Code)
+		}
+		partners[partner.Code] = true
+		roleKeys := map[string]bool{}
+		for _, role := range partner.Roles {
+			legal, legalExists := organizations[role.LegalEntityCode]
+			bu, buExists := organizations[role.BusinessUnitCode]
+			credit, creditErr := strconv.ParseInt(role.CreditLimitMinor, 10, 64)
+			if (role.Role != "customer" && role.Role != "supplier") ||
+				!contains(set.DataTypes, role.Role) || !legalExists || legal.Type != "legal_entity" ||
+				!buExists || bu.Type != "business_unit" || strings.TrimSpace(role.PaymentTermsCode) == "" ||
+				len(role.TransactionCurrencyCode) != 3 || creditErr != nil || credit < 0 ||
+				role.DeliveryPriority < 1 || role.DeliveryPriority > 99 ||
+				(role.ReconciliationAccountCode != "" && !accounts[role.ReconciliationAccountCode]) {
+				return fmt.Errorf("invalid business partner role %s/%s", partner.Code, role.Role)
+			}
+			key := role.Role + "/" + role.LegalEntityCode + "/" + role.BusinessUnitCode
+			if roleKeys[key] {
+				return fmt.Errorf("duplicate business partner role %s/%s", partner.Code, key)
+			}
+			roleKeys[key] = true
+		}
+	}
+	productTypes := map[string]bool{"finished_good": true, "semi_finished": true, "raw_material": true, "purchased_part": true, "service": true}
+	products := map[string]bool{}
+	for _, product := range f.Products {
+		set, setExists := dataSets[product.DataSetCode]
+		if !stableCode.MatchString(product.Code) || strings.TrimSpace(product.Name) == "" ||
+			!productTypes[product.Type] || strings.TrimSpace(product.BaseUnitCode) == "" ||
+			strings.TrimSpace(product.ProductGroupCode) == "" || !setExists ||
+			!contains(set.DataTypes, "product") || product.Status != "active" ||
+			len(product.Extensions) == 0 || products[product.Code] {
+			return fmt.Errorf("invalid product %q", product.Code)
+		}
+		if _, err := time.Parse("2006-01-02", product.EffectiveFrom); err != nil {
+			return fmt.Errorf("invalid product effective date %s", product.Code)
+		}
+		products[product.Code] = true
+		plants := map[string]bool{}
+		for _, extension := range product.Extensions {
+			plant, plantExists := organizations[extension.PlantCode]
+			bu, buExists := organizations[extension.BusinessUnitCode]
+			lotSize, lotOK := new(big.Rat).SetString(extension.CostingLotSize)
+			if !plantExists || plant.Type != "plant" || !buExists || bu.Type != "business_unit" ||
+				strings.TrimSpace(extension.MRPType) == "" || strings.TrimSpace(extension.ValuationClass) == "" ||
+				!lotOK || lotSize.Sign() <= 0 || plants[extension.PlantCode] {
+				return fmt.Errorf("invalid product extension %s/%s", product.Code, extension.PlantCode)
+			}
+			plants[extension.PlantCode] = true
 		}
 	}
 	return nil

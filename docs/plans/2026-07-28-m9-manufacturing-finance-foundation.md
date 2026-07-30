@@ -38,7 +38,9 @@ IAOS 实现必须在独立 worktree 中完成。所有未实现项保持未勾�
   IAOS DES-068 交付七张通用权威表及增强账簿、受治理 Capability、查询/配置 UI 和
   原位幂等迁移；AESE baseline 1.2 固定 HCTM 账簿/科目/自然年模板并拒绝空值、
   `other`、断裂期间和未知引用。
-- [ ] F5D 实现 Business Partner、客户/供应商及产品的全局身份和组织扩展。
+- [x] F5D 实现 Business Partner、客户/供应商及产品的全局身份和组织扩展；
+  IAOS DES-069 提供五张权威表、两项 Capability 和“伙伴与产品”表单；AESE baseline
+  1.3 固定三个虚构伙伴、两个产品及其法人/BU/工厂扩展并离线校验引用。
 - [ ] F5E 模块级期间开启/关闭已记录，留待关账阶段实现。
 
 - [x] F6 注册 M9 财务领域语义和 7 条 relation graph；完整 Core/HCTM 扩展继续随子账增加。

@@ -51,7 +51,20 @@ F5C 已由 IAOS
   2 法人扩展、1 日历/12 期间和 1 账簿集。
 
 AESE baseline 1.2 固定同构的 HCTM 确定性模板并离线校验所有引用和期间连续性。
-F5D Business Partner/产品组织扩展仍未实现，不能因 F5C 完成而标记为完整集团财务。
+
+### 1.3 第三实施切片（F5D，2026-07-30）
+
+F5D 已由 IAOS
+`docs/designs/DES-069-finance-business-partner-product-foundation.md` 实现：
+
+- 集团唯一 Business Partner、客户/供应商角色和法人/BU 扩展；
+- 共享产品定义和工厂 MRP/估价/库存/销售/采购扩展；
+- `finance.business.partner.configure`、`finance.product.master.configure` 两项受治理 Capability；
+- FORCE RLS、Data Set/组织/科目复合 tenant 外键和数据库写入硬门；
+- 财务工作台“伙伴与产品”查询及业务表单。
+
+AESE baseline 1.3 增加 3 个虚构伙伴、2 个产品及对应组织扩展，继续保持场景模板与 IAOS
+运行事实的仓库边界。F5E 模块期间控制仍留待关账阶段。
 
 ## 2. 设计原则
 

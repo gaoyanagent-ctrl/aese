@@ -10,7 +10,7 @@ func TestHCTMFinanceGovernanceBaseline(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(baseline.Objects) != 9 || len(baseline.Controls) != 8 {
+	if len(baseline.Objects) != 9 || len(baseline.Controls) != 10 {
 		t.Fatalf("unexpected inventory: %d objects %d controls", len(baseline.Objects), len(baseline.Controls))
 	}
 	if len(baseline.OrganizationFoundation.Organizations) != 6 ||
@@ -26,6 +26,30 @@ func TestHCTMFinanceGovernanceBaseline(t *testing.T) {
 		len(baseline.LedgerFoundation.Books) != 1 ||
 		len(baseline.LedgerFoundation.LedgerSets) != 1 {
 		t.Fatalf("unexpected ledger foundation: %#v", baseline.LedgerFoundation)
+	}
+	if len(baseline.MasterDataFoundation.BusinessPartners) != 3 ||
+		len(baseline.MasterDataFoundation.Products) != 2 {
+		t.Fatalf("unexpected master data foundation: %#v", baseline.MasterDataFoundation)
+	}
+}
+func TestFinanceBaselineRejectsUnknownPartnerOrganization(t *testing.T) {
+	baseline, err := Load(filepath.Join("..", "..", "scenario-packs", "hctm", "finance-governance-baseline.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	baseline.MasterDataFoundation.BusinessPartners[0].Roles[0].LegalEntityCode = "LE-MISSING"
+	if err := Validate(baseline); err == nil {
+		t.Fatal("business partner extension with unknown legal entity was accepted")
+	}
+}
+func TestFinanceBaselineRejectsInvalidProductLotSize(t *testing.T) {
+	baseline, err := Load(filepath.Join("..", "..", "scenario-packs", "hctm", "finance-governance-baseline.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	baseline.MasterDataFoundation.Products[0].Extensions[0].CostingLotSize = "0"
+	if err := Validate(baseline); err == nil {
+		t.Fatal("product extension with zero costing lot size was accepted")
 	}
 }
 func TestFinanceBaselineRejectsPeriodGap(t *testing.T) {
