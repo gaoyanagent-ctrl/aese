@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.finance-provisioning-recovery.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "test",
+  "summary": "恢复 Genesis 新企业财务治理安装",
+  "detail": "IAOS 修正共享财务治理 schema 所有权边界后，AESE 创建全新 Workspace 与原失败幂等 Workspace 均通过 BFF 完成 8/8 provisioning checkpoint。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "Enterprise Genesis 五步向导可创建独立 tenant 并进入身份工作室，财务治理 Runtime 保持 RLS 与 SoD 硬门。",
+  "evidence_ref": "docs/designs/DES-029-genesis-zero-start-and-ai-identity.md",
+  "occurred_at": "2026-07-30T03:30:00Z"
+}

@@ -310,6 +310,14 @@ tenant/case/workspace 绑定进入游戏，不允许由玩家手填 tenant ID。
 - 第二个独立 tenant 重复全链并通过 RLS 隔离验证。
 - 主页、provisioning、身份工作室和游戏在 1440、1280、390 三视口通过。
 
+### 9.1 财务治理 Runtime 安装恢复证据
+
+新企业 provisioning 曾在 IAOS `runtime_installed` 检查点因共享财务治理表由数据库
+初始化所有者持有、普通 Runtime 重复执行 owner-only DDL 而返回 502。IAOS
+`main@732a9b1` 将既有 schema 路径改为只读验证 FORCE RLS、tenant policy 与 SoD
+trigger，tenant Runtime 只执行 DML；全新和原失败幂等请求均已通过 AESE BFF 完成
+8/8 checkpoint。详细根因和恢复步骤见 IAOS `SOL-042`。
+
 ## 10. 非目标
 
 - 把 tenant 当成现实工商注册主体。
