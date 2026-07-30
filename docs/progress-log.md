@@ -1594,5 +1594,5 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 变更：AESE loopback adapter 对已有 active tenant 先执行 Founder login 并直接返回 session；不再调用 identity bootstrap、Runtime install 或 tenant activate。
 - 原因：浏览器没有 IAOS Player Token 时会进入本地 fallback；旧实现把 session refresh 当成首次 provisioning，每次点击都重复 bootstrap，随后 Runtime 1.8.0 重装失败并被包装成 502。
 - 影响：旧本地企业可以在开发环境继续游戏，同时既有身份、Runtime、流程和业务数据不会被点击操作改写；active tenant 登录失败将直接失败关闭。
-- 验证：回归测试先稳定复现 active tenant 触发 1 次 bootstrap 和 1 次 Runtime install，修复后两者均为 0 且 session 成功签发；现场无 Authorization 请求与全量回归随提交记录。
+- 验证：回归测试先稳定复现 active tenant 触发 1 次 bootstrap 和 1 次 Runtime install，修复后两者均为 0 且 session 成功签发；AESE 全量 Go 测试通过。现场通过 `:4173` 发起与浏览器一致的无 Authorization session 请求返回 200 和 tenant token；IAOS 日志只出现 tenant GET 与 auth login，未再出现 bootstrap、Runtime install 或 activate。
 - 后续：生产部署继续要求正式 Player Account/OIDC；确定性 Founder 凭据仅保留于 loopback 迁移期。
