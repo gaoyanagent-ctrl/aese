@@ -1620,3 +1620,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：创建企业仍保留 FORCE RLS、tenant policy 和 SoD trigger 硬门，不需要向普通 Runtime 授予共享表所有权；部分 schema 合同仍失败关闭。
 - 验证：普通 Founder 会话通过 AESE BFF 创建全新 Workspace 返回 201、8/8 checkpoint 完成；原 502 Workspace 使用原幂等键重试后复用同一 Workspace 并恢复 active。前端回归验证页面 remount 复用原键、成功清除后生成新键；IAOS 全量 Go 测试、vet、Code Map、治理写入和 Atlas 检查通过。
 - 后续：历史全量 Atlas 同步中个别旧声明仍可能因已废弃节点返回 404；本次声明已单独幂等登记。
+
+## 2026-07-30 - 恢复 MiniMax-M3 真实企业名称生成
+
+- 变更：新增 AESE 标准部署脚本，安全加载权限为 0600 的 `.env`，完整校验 MiniMax key/base/model，重建重启服务并验证 Provider；同步增加无密钥模板、设计约束、运行手册和解决方案。
+- 原因：本机已有 MiniMax 配置，但旧手工启动进程没有继承环境变量，名称生成因此明确回退到 deterministic。
+- 影响：Enterprise Genesis 身份工作室重新使用真实 MiniMax-M3 生成企业名称；配置缺项、secret 权限过宽或启动状态异常会失败关闭，密钥不进入命令行、日志、证据或提交。
+- 验证：直接端点与 4173 BFF 均返回 connected/MiniMax/MiniMax-M3；有效 Workspace tenant session 完成真实调用，CreativeJob 为 completed，耗时 31,805 ms、共 1,903 tokens、校验 valid、无 fallback，并返回 4 个动态候选。
+- 后续：正式环境把 MINMAX 配置迁移到 Secret Manager/编排器注入，并为 Provider 增加独立 readiness 和额度告警。

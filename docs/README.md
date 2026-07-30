@@ -142,6 +142,7 @@
 | SOL-005 | [设立案件与正式企业主数据物化](solutions/SOL-005-incorporation-and-legal-entity-master-data.md) | Completed |
 | SOL-006 | [银行开户审批后 Work Item Execute 400](solutions/SOL-006-bank-opening-execute-strict-input.md) | Completed |
 | SOL-007 | [实缴资本核验差异 422 与纠正审批](solutions/SOL-007-capital-contribution-mismatch-422.md) | Completed |
+| SOL-008 | [MiniMax 企业名称生成未启用](solutions/SOL-008-minimax-provider-startup-config.md) | Completed |
 | M9N Risk Register | [IAOS-native M9 risk register](reports/m9-native-risk-register.json) | Active |
 | M10 Runbook | [Genesis Plant Build Runbook](runbooks/genesis-plant-build.md) | Completed |
 | M10 Evidence | [Genesis Plant Build Evidence](reports/m10-genesis-plant-build-evidence.md) | Completed |

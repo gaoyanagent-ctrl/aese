@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.minimax-provider-deployment.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "恢复 MiniMax-M3 真实企业名称生成",
+  "detail": "AESE 新增安全部署入口加载 0600 本机配置、完整校验 MiniMax 参数并验证 connected 状态；真实 Workspace 调用的 CreativeJob 记录 MiniMax-M3、非零 token 与 latency、valid 且无 fallback。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "Enterprise Genesis 身份工作室通过 MiniMax-M3 生成企业名称，deterministic 仅在未配置时明确标记为 fallback。",
+  "evidence_ref": "docs/solutions/SOL-008-minimax-provider-startup-config.md",
+  "occurred_at": "2026-07-30T03:00:00Z"
+}

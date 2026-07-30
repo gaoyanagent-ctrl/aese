@@ -44,20 +44,26 @@ AESE 版本，应先更新服务，而不是反复点击。
 
 ## 1. 启动
 
-先启动 IAOS `:8082` 与前端 `:3000`，再让 AESE 以 live projection 模式连接 IAOS：
+先启动 IAOS `:8082` 与前端 `:3000`，再使用受控部署入口启动 AESE。该脚本安全解析
+权限为 `0600` 的 `.env`，校验 MiniMax 三项配置必须同时存在，密钥只进入子进程环境，
+不会进入命令行、日志或提交：
 
 ```bash
-go run ./cmd/aese-server \
-  --listen :8090 \
-  --pack-dir scenario-packs/hctm \
-  --iaos-base-url http://127.0.0.1:8082
+cp .env.example .env
+chmod 600 .env
+# 填写 MINMAX_API_KEY 后：
+scripts/deploy_aese_server.sh
+
+curl -s http://127.0.0.1:8090/api/aese/v1/game/creative/status | jq
 
 cd frontend
 npm run dev
 ```
 
-不传 `--iaos-base-url` 时，AESE 只提供确定性离线演示投影；它不会伪装成 IAOS
-持久业务状态。
+启用真实模型时状态必须是 `state=connected`、`provider=MiniMax`、
+`model=MiniMax-M3`。没有配置 MiniMax 时脚本允许明确的 deterministic fallback；
+配置缺一项或 `.env` 权限过宽时启动失败关闭。不传 `--iaos-base-url` 时，AESE 只提供
+确定性离线演示投影；它不会伪装成 IAOS 持久业务状态。
 
 ## 2. 进入游戏
 

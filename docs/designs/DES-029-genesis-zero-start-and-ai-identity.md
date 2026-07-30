@@ -260,6 +260,28 @@ latency、token usage、finish reason、validation result、fallback reason 和 
 MiniMax 官方公布文本模型的 RPM/TPM 限制，但实际账户额度和 Token Plan 还可能受滚动窗口
 影响，因此不能硬编码“可用”结论。
 
+### 5.4 部署配置与启用判定
+
+Provider 配置只从 AESE 服务进程环境读取。开发机使用仓库根目录 `.env` 保存
+`MINMAX_API_KEY`、`MINMAX_API_BASE` 和 `MINMAX_MODEL`，文件权限必须为 `0600`；
+`.env` 不提交。标准启动入口是 `scripts/deploy_aese_server.sh`，它以非执行式解析器
+加载配置，三项缺一项、权限过宽或启动后 Provider 状态不符合预期时失败关闭，且不得把
+密钥放入命令行、日志或状态响应。
+
+启用验收分为两层，不能只凭配置文件或 UI 标签判定：
+
+1. `GET /api/aese/v1/game/creative/status` 返回 `state=connected`、
+   `provider=MiniMax` 和账户实际模型 ID；
+2. 用有效 Workspace tenant session 完成一次名称生成，并在 CreativeJob 中看到
+   MiniMax provider/model/host、非零 latency 与 token usage、`validation_result=valid`
+   且没有 `fallback_reason`。
+
+`AnalyzeIntent` 当前仍由确定性逻辑完成输入规范化和合同校验；外部 MiniMax 只负责
+`GenerateNames`。页面应准确说明这一边界，不能把整个 onboarding 都描述成模型生成。
+详细启动和恢复步骤见
+[Enterprise Genesis Runbook](../runbooks/enterprise-genesis-game.md)，故障根因见
+[SOL-008](../solutions/SOL-008-minimax-provider-startup-config.md)。
+
 ## 6. Logo 与 Embedding 的边界
 
 - MiniMax M3 是文本模型，本阶段用于意图结构化、名称、品牌 brief 和解释。
