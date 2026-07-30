@@ -120,6 +120,13 @@ checkpoint 以 IAOS 为权威。浏览器只提交项目配置和幂等键，不
 AESE 转发当前 Player session，不保存平台凭据或 Founder 密码。loopback dev adapter
 仅在明确缺少生产 session 的本地开发路径保留。
 
+Player 控制面会话和 Workspace tenant 会话必须使用两个独立浏览器存储键。列表、创建和
+恢复 Workspace 时先使用 Player session；如果该凭据过期但当前 IAOS session 已刷新，
+前端只允许用当前 IAOS session 重试一次，并在成功后更新 Player session。两者都被 IAOS
+拒绝时，AESE BFF 必须透传为 `401 player_session_expired`，前端清除失效 Player
+session 并提示用户重新登录 IAOS；不得把身份失效包装成可重试的 `500`，也不得降级为
+仅凭 localStorage player ID 访问生产控制面。
+
 ### 4.1 对外 API
 
 ```text
@@ -158,7 +165,7 @@ AESE 只接收 `tenant_activated` committed outcome 后创建 World Run。主页
 
 | 事实/动作 | 权威仓库 | 浏览器权限 | 失败状态与恢复 |
 |---|---|---|---|
-| Workspace、member、checkpoint | IAOS | 当前 Player membership | 保持 provisioning/failed；同幂等键 retry |
+| Workspace、member、checkpoint | IAOS | 当前 Player membership | 保持 provisioning/failed；同幂等键 retry；401 清理旧会话并要求重新登录 |
 | Tenant create/activate | IAOS SaaS Ops | 无 platform 权限 | World/smoke 前不可 active |
 | Owner user/role/position/Mandate | IAOS Identity/Governance | `genesis_owner` | 幂等 upsert；绑定失败不签 session |
 | M9 Runtime | IAOS Runtime | 只读/执行已授权资产 | content hash no-op；失败停在 runtime checkpoint |

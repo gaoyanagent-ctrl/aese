@@ -1572,3 +1572,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：GX-ZERO 状态从 Validating 更新为 Completed；M9 完成口径包含 8/8 provisioning checkpoint、23/23 工作项、7/7 正式审批门、3/3 可信 World wait、6 次 Agent run/5 类 Agent 和最终 `enterprise_operational_ready`。
 - 验证：全新租户经真实 HTTP API 验收；AESE `go test ./...`、前端 20 files/56 tests、生产构建通过；IAOS `go test ./...` 与 System Atlas tracking 通过。
 - 后续：进入 M10 的订单、采购和应付闭环；F15–F35 继续按 M10–M13 财务路线图实施，不回写为 M9 欠项。
+
+## 2026-07-30 - 修复 Genesis 企业列表失效会话误报
+
+- 变更：AESE BFF 保留 IAOS 控制面 HTTP 状态，将上游 401 映射为 `player_session_expired`；前端在持久 Player Token 失效时使用当前 IAOS Token 重试一次，成功后更新 Player Token，两者均失效则清理旧凭据并给出重新登录指引。
+- 原因：企业大厅总是优先读取持久 `aese_genesis_player_token`，该 Token 过期或 IAOS 重启后仍被重复转发；BFF 又把上游 401 包装成可重试 500，导致用户误以为后端未启动。
+- 影响：服务健康与身份失效被明确区分；有效的当前 IAOS 会话可以无感恢复企业列表，真正过期时不会循环重试、泄露上游响应或绕过 owner membership。
+- 验证：curl 稳定复现旧 500；新增 Go 控制面状态保留和 BFF 401 回归测试、前端双 Token 恢复与清理测试；全量验证见本次提交证据。
+- 后续：正式多人环境接入 IAOS Player Account/OIDC refresh token，替换当前私人开发环境的本机游戏用户名。

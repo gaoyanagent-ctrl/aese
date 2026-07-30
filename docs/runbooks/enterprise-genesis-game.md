@@ -10,8 +10,8 @@
 4. 点击“创建空间并进入身份工作室”。
 5. IAOS 服务端分配 Workspace、tenant、World Run 和案件编号，绑定真实 Player
    subject，安装 M9 Runtime；AESE 写入 World binding evidence 后才完成 smoke 和激活。
-6. 成功后浏览器只保存 `genesis_owner` tenant-scoped token；它没有
-   `platform_super_admin` 或平台管理权限。
+6. 成功后浏览器分别保存 Player 控制面会话与 `genesis_owner` tenant-scoped 会话；
+   两者都没有 `platform_super_admin` 或平台管理权限。
 
 进入新企业后不再直接填写设立表单：
 
@@ -92,6 +92,9 @@ IAOS 的已校验 evidence bundle 和 23 个持久工作项；前端不访问数
 
 - 刷新或重新打开相同 URL：按 evidence bundle + work items 重建，不依赖前端内存。
 - AESE 重启：重新带 token 请求 projection；cursor 取 IAOS Journal/World 最大值。
+- “我的企业”返回 `player_session_expired`：页面会先使用当前 IAOS 会话重试一次；成功
+  后自动更新 Player 会话。若仍失败，返回 IAOS 重新登录并再次打开 Enterprise Genesis。
+  不需要删除企业数据，也不要反复点击“刷新”。
 - 重复 World Observation：IAOS 业务事实级幂等返回同一事实，不新增业务变化。
 - 登记/开户/任命拒绝、资本差异、Agent 越权或停用：业务状态保持在原节点；从 IAOS
   工作项进入补正、人工接管或重新审批，不在游戏画面私自跳步。

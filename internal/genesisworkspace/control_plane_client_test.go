@@ -2,11 +2,32 @@ package genesisworkspace
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
 )
+
+func TestControlPlanePreservesUpstreamUnauthorizedStatus(t *testing.T) {
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		http.Error(w, `{"error":"invalid authorization token"}`, http.StatusUnauthorized)
+	}))
+	defer server.Close()
+
+	client := ControlPlaneClient{BaseURL: server.URL}
+	_, err := client.List(WithIAOSToken(context.Background(), "expired-token"), "player-local-001")
+	if err == nil {
+		t.Fatal("expected upstream authorization error")
+	}
+	var statusError interface{ UpstreamStatusCode() int }
+	if !errors.As(err, &statusError) {
+		t.Fatalf("error does not preserve upstream status: %T %v", err, err)
+	}
+	if statusError.UpstreamStatusCode() != http.StatusUnauthorized {
+		t.Fatalf("status=%d want=%d", statusError.UpstreamStatusCode(), http.StatusUnauthorized)
+	}
+}
 
 func TestControlPlaneCreateConfirmsWorldAndExchangesSession(t *testing.T) {
 	var paths []string

@@ -1,5 +1,51 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { approveAndExecuteWorkItem, createIncorporationCase, signInGenesisPlayer } from "./api";
+import { approveAndExecuteWorkItem, createIncorporationCase, listGenesisWorkspaces, signInGenesisPlayer } from "./api";
+
+describe("Genesis workspace player session recovery", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    localStorage.setItem("aese_genesis_player_id", "player-local-test");
+    localStorage.setItem("aese_genesis_player_token", "expired-player-token");
+    localStorage.setItem("iaos_token", "current-iaos-token");
+  });
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it("retries the current IAOS session when the persisted player token expired", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        error: "IAOS player session expired",
+        code: "player_session_expired",
+      }), { status: 401 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        items: [{ workspace_id: "gxw-test", status: "active" }],
+      }), { status: 200 }));
+
+    const items = await listGenesisWorkspaces();
+
+    expect(items).toHaveLength(1);
+    expect((fetchMock.mock.calls[0][1]?.headers as Record<string, string>).Authorization)
+      .toBe("Bearer expired-player-token");
+    expect((fetchMock.mock.calls[1][1]?.headers as Record<string, string>).Authorization)
+      .toBe("Bearer current-iaos-token");
+    expect(localStorage.getItem("aese_genesis_player_token")).toBe("current-iaos-token");
+  });
+
+  it("clears an expired player token and reports a login action when no session works", async () => {
+    vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        error: "IAOS player session expired",
+        code: "player_session_expired",
+      }), { status: 401 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        error: "IAOS player session expired",
+        code: "player_session_expired",
+      }), { status: 401 }));
+
+    await expect(listGenesisWorkspaces()).rejects.toThrow("IAOS 登录已过期");
+    expect(localStorage.getItem("aese_genesis_player_token")).toBeNull();
+  });
+});
 
 describe("createIncorporationCase", () => {
   beforeEach(() => {

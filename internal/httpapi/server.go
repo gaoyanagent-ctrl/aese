@@ -316,7 +316,7 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 		if len(rest) == 4 && rest[3] == "session" && r.Method == http.MethodPost {
 			result, err := s.genesisWorkspaceService.RefreshSession(ctx, playerID, rest[2])
 			if err != nil {
-				s.writeError(w, http.StatusBadGateway, "workspace_session_failed", err.Error(), true, "", "")
+				s.writeGenesisWorkspaceError(w, err, "workspace_session_failed")
 				return
 			}
 			s.writeJSON(w, http.StatusOK, result)
@@ -330,7 +330,7 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 		case http.MethodGet:
 			items, err := s.genesisWorkspaceService.List(ctx, playerID)
 			if err != nil {
-				s.writeError(w, http.StatusInternalServerError, "workspace_list_failed", err.Error(), true, "", "")
+				s.writeGenesisWorkspaceError(w, err, "workspace_list_failed")
 				return
 			}
 			s.writeJSON(w, http.StatusOK, map[string]any{"items": items})
@@ -347,7 +347,7 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			}
 			result, err := s.genesisWorkspaceService.Create(ctx, request)
 			if err != nil {
-				s.writeError(w, http.StatusBadGateway, "workspace_provisioning_failed", err.Error(), true, "", "")
+				s.writeGenesisWorkspaceError(w, err, "workspace_provisioning_failed")
 				return
 			}
 			s.writeJSON(w, http.StatusCreated, result)
@@ -426,9 +426,9 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				started := time.Now().UTC()
 				job := creative.CreativeJob{
 					JobID: jobID, TenantID: intent.TenantID, CaseCode: intent.CaseCode,
-					WorkspaceID: strings.TrimSpace(r.Header.Get("X-Genesis-Workspace-Id")),
+					WorkspaceID:   strings.TrimSpace(r.Header.Get("X-Genesis-Workspace-Id")),
 					CorrelationID: "corr-" + intent.CaseCode,
-					Kind: "company_naming", Status: "running", Provider: providerStatus.Provider,
+					Kind:          "company_naming", Status: "running", Provider: providerStatus.Provider,
 					Model: providerStatus.Model, ModelVersion: providerStatus.Model,
 					Prompt: providerStatus.PromptVersion, PromptVersion: providerStatus.PromptVersion,
 					BaseURLHost: providerStatus.BaseURLHost, InputHash: inputHash,
@@ -1522,6 +1522,26 @@ func (s *Server) writeErrorFromAPI(w http.ResponseWriter, err error, runID strin
 		return
 	}
 	s.writeError(w, http.StatusConflict, "conflict", err.Error(), false, runID, "")
+}
+
+func (s *Server) writeGenesisWorkspaceError(w http.ResponseWriter, err error, fallbackCode string) {
+	var upstream *genesisworkspace.ControlPlaneHTTPError
+	if !errors.As(err, &upstream) {
+		s.writeError(w, http.StatusBadGateway, fallbackCode, err.Error(), true, "", "")
+		return
+	}
+	switch upstream.StatusCode {
+	case http.StatusUnauthorized:
+		s.writeError(w, http.StatusUnauthorized, "player_session_expired",
+			"IAOS player session expired; sign in to IAOS again and reopen Enterprise Genesis",
+			false, "", "")
+	case http.StatusForbidden:
+		s.writeError(w, http.StatusForbidden, "workspace_access_denied",
+			"current IAOS account cannot access this Genesis workspace",
+			false, "", "")
+	default:
+		s.writeError(w, http.StatusBadGateway, fallbackCode, err.Error(), upstream.StatusCode >= 500, "", "")
+	}
 }
 
 func (s *Server) claimRun(run *runRecord) error {

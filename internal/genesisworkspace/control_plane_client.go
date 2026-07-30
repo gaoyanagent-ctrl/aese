@@ -28,6 +28,18 @@ type ControlPlaneClient struct {
 	HTTPClient *http.Client
 }
 
+type ControlPlaneHTTPError struct {
+	Path       string
+	StatusCode int
+	Body       string
+}
+
+func (e *ControlPlaneHTTPError) Error() string {
+	return fmt.Sprintf("IAOS Genesis control plane %s returned %d: %s", e.Path, e.StatusCode, e.Body)
+}
+
+func (e *ControlPlaneHTTPError) UpstreamStatusCode() int { return e.StatusCode }
+
 type controlPlaneWorkspace struct {
 	WorkspaceID       string             `json:"workspace_id"`
 	TenantID          string             `json:"tenant_id"`
@@ -140,7 +152,9 @@ func (c ControlPlaneClient) doJSON(ctx context.Context, method, path string, inp
 		return err
 	}
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
-		return fmt.Errorf("IAOS Genesis control plane %s returned %d: %s", path, resp.StatusCode, strings.TrimSpace(string(raw)))
+		return &ControlPlaneHTTPError{
+			Path: path, StatusCode: resp.StatusCode, Body: strings.TrimSpace(string(raw)),
+		}
 	}
 	if output != nil && len(raw) > 0 {
 		return json.Unmarshal(raw, output)

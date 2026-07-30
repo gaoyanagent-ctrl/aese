@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.player-session-recovery.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "修复 Genesis 企业列表失效会话误报",
+  "detail": "AESE BFF 将 IAOS 控制面 401 映射为 player_session_expired；前端使用当前 IAOS 会话进行一次受控恢复，失败时清理旧 Player Token 并提示重新登录。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "企业列表能够区分服务故障与身份过期，不再把无效 Token 循环包装成可重试 500。",
+  "evidence_ref": "docs/designs/DES-029-genesis-zero-start-and-ai-identity.md",
+  "occurred_at": "2026-07-30T01:05:00Z"
+}
