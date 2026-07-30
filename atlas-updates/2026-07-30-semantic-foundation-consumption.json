@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.semantic-foundation-consumption.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M9 改为消费 IAOS 版本化基础语义包",
+  "detail": "IAOS foundation v1 和 Governance Compiler 成为平台语义权威；AESE/M9 场景只引用，不覆盖，并把新增前检索与产品所有者批准写入实施合同。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "evidence_ref": "docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-30T13:00:00Z"
+}

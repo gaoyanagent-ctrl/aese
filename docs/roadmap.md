@@ -29,6 +29,13 @@ baseline 1.3 固定星河客户、两家铝材供应商、冷却板成品和铝�
 收敛为查询与输出，组织待办、多组织共享、账簿基础、客户、供应商、产品成为独立入口，
 权威表与 Entity 投影由受治理 Capability 同事务同步。
 
+2026-07-30 平台基础语义治理：IAOS 已发布
+`iaos_foundation_semantics@1.0.0`（87 Concept/51 Archetype）和 Semantic Governance
+Compiler；M9 Runtime 2.4.0 只消费平台基础包。`business_partner → party`、
+`organization → party`、`product → material` 成为机器校验合同。后续 AESE/M10
+新增语义必须先检索现有目录、记录不可复用原因并取得产品所有者批准，场景包不得覆盖
+foundation-owned 资产。
+
 ## 1. 里程碑状态
 
 | 里程碑 | 目标 | 状态 | 完成证据 |

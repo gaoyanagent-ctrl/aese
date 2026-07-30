@@ -336,3 +336,29 @@ IAOS DES-065 的风险顺序进入同一强制边界，不能把当前财务纵�
 `human_task / founder-principal / chair`，提交 50,000,000 CNY 不再触发
 `finance-agent` 的 1,000,000 CNY 自主授权上限；尚未代替用户执行该治理决定。AESE
 前端 20 个测试文件/56 项测试与生产构建通过。
+
+## 20. D29 平台基础语义包与场景消费边界
+
+> M9 的 `enterprise_governance` Domain Package 不是平台 Core 的所有者。平台通用
+> Concept、Archetype、根族、规范字段槽位和继承约束以 IAOS
+> [DES-071](/iaos/iaos-go/docs/designs/DES-071-semantic-governance-and-foundation-seed.md)
+> 及其机器清单为准；AESE 场景包只能引用，不能重新定义或覆盖。
+
+- [x] T113 审计 IAOS 旧 Archetype catalog、bootstrap 和 M9 安装器之间的前后不一致，
+      将 `business_partner` 收敛到 `party` 根族，将 `product` 收敛到 `material` 根族。
+- [x] T114 IAOS 建立版本化 `iaos_foundation_semantics@1.0.0` 基础包，包含跨模块稳定
+      Concept、Archetype、根族、canonical slot、判别值、关系和 package provenance。
+- [x] T115 IAOS Semantic Governance Compiler 对不存在/非 active 父类、跨根族继承、
+      Core 继承 Domain、循环继承、重复 canonical slot 和非法引用失败关闭。
+- [x] T116 M9 Runtime 升级到 2.4.0，场景安装器跳过 foundation-owned 资产，Entity 分别
+      绑定正确的平台语义根，不再反向覆盖 Core。
+- [x] T117 Semantic Studio 显示 Concept 领域/包版本和 Archetype 根族/包版本；基础包
+      资产只读，通用 API 同时以 409 阻断静默覆盖。
+- [x] T118 项目规则要求新增语义前先检索既有目录，说明不能复用的理由，并与产品所有者
+      协商批准 Semantic Change Proposal 后才允许升级基础包。
+
+验收：IAOS 基础包离线校验返回 87 个 Concept、51 个 Archetype；全量 Go 测试、vet、
+前端生产构建、Atlas/Code Map/治理写入检查通过。真实 PostgreSQL 安装记录为 active，
+`business_partner → party`、`organization → party`、`product → material`，旧污染字段
+和错误 extends 关系已由包级精确 reconciliation 清理。AESE 后续场景新增语义必须先
+消费该平台目录，不得在 M10 或行业 seed 中复制同义概念。

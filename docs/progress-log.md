@@ -1706,3 +1706,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：业务工作台与模型工坊各司其职；客户/供应商成为同一 Business Partner 的角色视图，产品和组织扩展不复制身份；通用 Entity 菜单读取权威数据投影，不能绕过 Capability 写入。
 - 验证：IAOS 全量 Go/vet、真实 PostgreSQL Runtime 集成、前端 TypeScript/组件测试/生产构建及 Atlas/Code Map/治理写入检查通过；目标租户安装 Runtime 2.3.0 返回 201 和 782 项资产写入，API 可见 35 个 Entity、七个独立工作台，组织 5/5、科目 2/2 权威/投影对账一致。
 - 后续：目标租户当前尚无 Business Partner/产品运行记录，后续必须由相应配置 Capability 或 AESE 场景应用创建，不能为了填充菜单直接写投影；F5E 与 F15–F35 按计划继续。
+
+## 2026-07-30 - 建立平台基础语义包与 M9 消费边界
+
+- 变更：IAOS 发布 `iaos_foundation_semantics@1.0.0`、Semantic Governance Compiler 和检索 CLI；M9 Runtime 升级到 2.4.0，只消费基础包并修正 Business Partner/Product 继承；AESE 计划、路线图和 Code Map 增加跨仓合同。
+- 原因：旧参考目录、Metadata bootstrap、M9 安装器和租户 Entity 各自定义语义，导致 `business_partner`、`organization`、`party`、`product` 的继承和字段前后不一致，Agent 也缺少发布期硬约束。
+- 影响：87 个 Concept、51 个 Archetype 成为版本化机器权威；跨根族、循环、非 active 父类、Core→Domain 和重复 canonical slot 不能安装或发布；新增语义必须先检索并与产品所有者协商，AESE 场景不能覆盖平台资产。
+- 验证：IAOS 全量 Go/vet、基础包校验、前端生产构建、真实 PostgreSQL 安装及 Atlas/Code Map/治理写入检查通过；数据库确认 `business_partner → party`、`organization → party`、`product → material`。
+- 后续：递归 Effective Archetype Artifact 编译和 Semantic Change Proposal 审批 UI 作为后续平台切片；M10 先复用目录，不得建立同义 seed。
