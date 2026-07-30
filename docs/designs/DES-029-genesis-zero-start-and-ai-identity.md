@@ -316,7 +316,9 @@ tenant/case/workspace 绑定进入游戏，不允许由玩家手填 tenant ID。
 初始化所有者持有、普通 Runtime 重复执行 owner-only DDL 而返回 502。IAOS
 `main@732a9b1` 将既有 schema 路径改为只读验证 FORCE RLS、tenant policy 与 SoD
 trigger，tenant Runtime 只执行 DML；全新和原失败幂等请求均已通过 AESE BFF 完成
-8/8 checkpoint。详细根因和恢复步骤见 IAOS `SOL-042`。
+8/8 checkpoint。Onboarding 将 provisioning 幂等键与草稿一同保存在浏览器，失败或
+刷新后继续使用原键恢复同一 Workspace，仅在创建成功后清除。详细根因和恢复步骤见
+IAOS `SOL-042`。
 
 ## 10. 非目标
 

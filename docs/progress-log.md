@@ -1615,8 +1615,8 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 
 ## 2026-07-30 - 恢复 Genesis 新企业财务治理安装
 
-- 变更：IAOS 将 M9 财务治理安装拆分为既有共享 schema 的只读合同验证和当前 tenant 的 DML；不再在每次新企业 Runtime 安装时重复执行表所有者 DDL。
+- 变更：IAOS 将 M9 财务治理安装拆分为既有共享 schema 的只读合同验证和当前 tenant 的 DML；不再在每次新企业 Runtime 安装时重复执行表所有者 DDL。AESE 将 onboarding 幂等键持久化到浏览器，失败刷新后仍恢复同一 Workspace，成功后才清除。
 - 原因：`finance_duty_definition` 等共享对象由数据库初始化所有者持有，普通 `iaos_app` Runtime 执行 `ALTER TABLE` 被 PostgreSQL 拒绝，AESE 创建 Workspace 因而返回 502。
 - 影响：创建企业仍保留 FORCE RLS、tenant policy 和 SoD trigger 硬门，不需要向普通 Runtime 授予共享表所有权；部分 schema 合同仍失败关闭。
-- 验证：普通 Founder 会话通过 AESE BFF 创建全新 Workspace 返回 201、8/8 checkpoint 完成；原 502 Workspace 使用原幂等键重试后复用同一 Workspace 并恢复 active。IAOS 全量 Go 测试、vet、Code Map、治理写入和 Atlas 检查通过。
+- 验证：普通 Founder 会话通过 AESE BFF 创建全新 Workspace 返回 201、8/8 checkpoint 完成；原 502 Workspace 使用原幂等键重试后复用同一 Workspace 并恢复 active。前端回归验证页面 remount 复用原键、成功清除后生成新键；IAOS 全量 Go 测试、vet、Code Map、治理写入和 Atlas 检查通过。
 - 后续：历史全量 Atlas 同步中个别旧声明仍可能因已废弃节点返回 404；本次声明已单独幂等登记。

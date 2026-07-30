@@ -13,6 +13,7 @@ type Draft={
   data_retention_confirmed:boolean;
 };
 const draftKey="aese_genesis_onboarding_draft";
+const idempotencyKey="aese_genesis_onboarding_idempotency_key";
 const initialDraft:Draft={display_name:"我的新企业",template_key:"manufacturing-enterprise",region:"CN-JS",timezone:"Asia/Shanghai",realism_level:"standard",data_retention_confirmed:false};
 const steps=["创业项目","行业模板","区域与时区","真实性与数据","确认创建"];
 
@@ -20,11 +21,23 @@ function restoreDraft():Draft{
   try{return{...initialDraft,...JSON.parse(localStorage.getItem(draftKey)??"{}") as Partial<Draft>}}catch{return initialDraft}
 }
 
+export function restoreGenesisOnboardingIdempotencyKey(){
+  const existing=localStorage.getItem(idempotencyKey)?.trim();
+  if(existing)return existing;
+  const created=`genesis-create-${Date.now()}-${crypto.randomUUID?.()??Math.random().toString(16).slice(2)}`;
+  localStorage.setItem(idempotencyKey,created);
+  return created;
+}
+
+export function clearGenesisOnboardingIdempotencyKey(){
+  localStorage.removeItem(idempotencyKey);
+}
+
 export function GenesisOnboarding({onBack,onReady}:{onBack:()=>void;onReady:(workspace:GenesisWorkspaceResult)=>void}){
   const[draft,setDraft]=useState<Draft>(restoreDraft);
   const[step,setStep]=useState(0),[busy,setBusy]=useState(false),[error,setError]=useState("");
   const[provisioned,setProvisioned]=useState<GenesisWorkspaceResult|null>(null);
-  const key=useRef(`genesis-create-${Date.now()}-${Math.random().toString(16).slice(2)}`);
+  const key=useRef(restoreGenesisOnboardingIdempotencyKey());
   useEffect(()=>{localStorage.setItem(draftKey,JSON.stringify(draft))},[draft]);
   const valid=[
     draft.display_name.trim().length>=2,
@@ -37,7 +50,7 @@ export function GenesisOnboarding({onBack,onReady}:{onBack:()=>void;onReady:(wor
     setBusy(true);setError("");
     try{
       const workspace=await createGenesisWorkspace({...draft,idempotency_key:key.current});
-      localStorage.removeItem(draftKey);setProvisioned(workspace);
+      localStorage.removeItem(draftKey);clearGenesisOnboardingIdempotencyKey();setProvisioned(workspace);
     }catch(reason){setError(reason instanceof Error?reason.message:String(reason))}
     finally{setBusy(false)}
   };
