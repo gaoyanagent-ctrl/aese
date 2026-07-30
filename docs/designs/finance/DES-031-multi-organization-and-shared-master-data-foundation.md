@@ -262,4 +262,3 @@ M10 业务模型不得在第 1–5 步未形成稳定合同前继续复制单法
 - [Oracle：Reference Data Set 在 BU 之间共享或隔离参考数据](https://docs.oracle.com/en/cloud/saas/financials/26b/faigl/reference-data-sets.html)
 - [Oracle：Business Unit 用于交易处理、数据安全和参考数据共享](https://docs.oracle.com/en/cloud/saas/financials/25d/fafcf/business-units.html)
 - [Oracle：Supplier Site 保存采购 BU 与供应商的组织特有关系](https://docs.oracle.com/en/cloud/saas/procurement/25c/oaprc/supplier-sites-and-supplier-site-assignments.html)
-

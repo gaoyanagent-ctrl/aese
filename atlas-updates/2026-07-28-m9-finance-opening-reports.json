@@ -8,6 +8,6 @@
   "status_after": "validating",
   "progress_after": 72,
   "current_state": "Players can inspect reconciled M9 opening accounting views from the enterprise world",
-  "evidence_ref": "docs/designs/DES-030-manufacturing-finance-operating-system.md",
+  "evidence_ref": "docs/designs/finance/DES-030-manufacturing-finance-operating-system.md",
   "occurred_at": "2026-07-28T17:12:00Z"
 }

@@ -234,7 +234,7 @@ F0 合同入口已创建；F1-F5 目标路径仍须在实现时更新为实际�
 | M9 IAOS 原生真实闭环 active remediation plan | `docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md`；原完成结论因通用注册中心/工作区缺口撤回，当前以 11/20/5/8/8/5/10 数量、records API、十工作区和重复安装 no-op 为关闭门 |
 | M9 游戏化企业创生体验设计 | `docs/designs/DES-028-enterprise-genesis-game-experience.md`；AI 企业身份工作室、2.5D 世界、人工/Agent 协作、GameProjection、CreativeJob 与 GX0–GX5 |
 | Genesis 零起点与真实 AI 设计 | `docs/decisions/ADR-006-genesis-workspace-precedes-enterprise.md`、`docs/designs/DES-029-genesis-zero-start-and-ai-identity.md`、`docs/plans/2026-07-28-genesis-zero-start-and-ai-identity.md`；根主页 → PlayerAccount → GenesisWorkspace → IAOS tenant provisioning → AESE World Run → MiniMax naming → incorporation case；生产控制面已实现，剩余全 23 节点新租户验收 |
-| M9–M13 制造企业财务运行体系 | `docs/designs/DES-030-manufacturing-finance-operating-system.md`、`docs/plans/2026-07-28-m9-manufacturing-finance-foundation.md`、`scenario-packs/hctm/finance-governance-baseline.json`、`internal/financebaseline/`、`docs/reports/m9-m13-finance-object-inventory.md`；IAOS `platform/internal/entityprojection/storage.go`、`platform/internal/api/finance_opening.go`、`platform/internal/incorporation/{platform_assets,finance_governance}.go`、`platform/internal/compiler/entity.go`、`frontend/src/components/finance/FinanceWorkspace.tsx`、DES-063/DES-064 与 SOL-039；AESE `internal/iaosclient/incorporation.go`、`internal/gameprojection/iaos.go`、`frontend/src/components/game/{LocationScene,EnterpriseGenesisGame,WorkItemActionPanel}.tsx`、`frontend/src/game/iaosLinks.ts` | M9 已实现 6 财务岗位、2 active Mandate、4 阻断 SoD、5 个责任工作项/通知与游戏逐项执行；财务组织、账套、期间、1002/4001、实收资本双分录、就绪硬门、银行日记账、总账、试算平衡和开业资产负债表均可从 AESE 穿透 IAOS；财务对象与历史数据盘点、权限/额度/敏感度/SoD/补偿矩阵已机器校验；19 张历史投影已迁移为 `entity_projection_*`；M10/M11 AP/资产、M12/M13 成本/O2C、完整月结和经营报表仍按后续里程碑交付 |
+| 制造企业财务运行体系 | `docs/designs/finance/README.md`（DES-030–036 模块索引）、`docs/plans/2026-07-28-m9-manufacturing-finance-foundation.md`、`scenario-packs/hctm/finance-governance-baseline.json`、`internal/financebaseline/`、`docs/reports/m9-m13-finance-object-inventory.md`；IAOS `platform/internal/entityprojection/storage.go`、`platform/internal/api/finance_opening.go`、`platform/internal/incorporation/{platform_assets,finance_governance}.go`、`platform/internal/compiler/entity.go`、`frontend/src/components/finance/FinanceWorkspace.tsx`、DES-063/DES-064 与 SOL-039；AESE `internal/iaosclient/incorporation.go`、`internal/gameprojection/iaos.go`、`frontend/src/components/game/{LocationScene,EnterpriseGenesisGame,WorkItemActionPanel}.tsx`、`frontend/src/game/iaosLinks.ts` | DES-030 只保留总览；DES-031 多组织共享数据；DES-032 会计内核；DES-033 子账资金；DES-034 成本资产；DES-035 预算关账报表；DES-036 治理 Agent。M9 已实现开业纵切，后续模块按计划独立交付 |
 | Enterprise Genesis active subplan | `docs/plans/2026-07-27-enterprise-genesis-game-experience.md`；M9N 下的并行 AESE owner，GX0–GX5 / GXT1–GXT46 |
 | GameProjection 合同/API | `internal/gameprojection/`、`internal/iaosclient/incorporation.go`、`world-contracts/schemas/game-projection.schema.json`、`world-contracts/fixtures/game-projection.json`、`GET /api/aese/v1/game/incorporation/:case/projection?frame=`；配置 `aese-server --iaos-base-url` 后读取 IAOS verified evidence bundle、Agent Run output、23 个持久工作项（含 5 个财务开业节点）及 G1–G7 可审阅事项，离线时才使用确定性 trace |
 | Enterprise Genesis 游戏入口 | `frontend/src/components/game/EnterpriseGenesisGame.tsx`、`LocationScene.tsx`、`BrandStudio.tsx`、`WorkItemActionPanel.tsx`、`frontend/src/game/`、`#enterprise-genesis?tenant=&case=`；统一城市热点进入四类室内地点，主线通过建筑/NPC/资产推进，Work Item 降级到治理档案，并保留 G1–G7、登记/开户补正和虚构证照资产 |
@@ -412,8 +412,8 @@ B0-B7 实现后必须把“目标路径”更新为实际入口：
 
 ## 22. 导航更新触发器
 
-多组织财务、Data Set 共享、科目表/法人扩展、Business Partner 分层和模块期间控制的
-权威目标设计为 `docs/designs/DES-031-multi-organization-and-shared-master-data-foundation.md`；
+财务文档导航以 `docs/designs/finance/README.md` 为准。多组织财务、Data Set 共享、
+科目表/法人扩展和 Business Partner 分层以 DES-031 为准；模块期间控制以 DES-035 为准；
 其实现将跨 IAOS Organization、Metadata Entity、RLS、Capability、Approval 与财务运行时。
 
 M9 账套/期间交互入口：`frontend/src/components/game/WorkItemActionPanel.tsx` 采集账套名称、

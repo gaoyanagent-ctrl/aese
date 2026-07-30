@@ -8,6 +8,6 @@
   "status_after": "validating",
   "progress_after": 32,
   "current_state": "M9 finance design now defines a governed voucher header-line aggregate, currency and exchange-rate masters, and discoverable IAOS data menus",
-  "evidence_ref": "docs/designs/DES-030-manufacturing-finance-operating-system.md",
+  "evidence_ref": "docs/designs/finance/DES-030-manufacturing-finance-operating-system.md",
   "occurred_at": "2026-07-29T12:00:00Z"
 }

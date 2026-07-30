@@ -96,8 +96,14 @@
 | DES-027 | [M9 IAOS 原生语义驱动企业成立真实闭环](designs/DES-027-m9-iaos-native-incorporation-closed-loop.md) | Approved |
 | DES-028 | [Enterprise Genesis AI 原生企业创生游戏体验](designs/DES-028-enterprise-genesis-game-experience.md) | Completed |
 | DES-029 | [Enterprise Genesis 零起点主页、独立租户与真实 AI 企业身份](designs/DES-029-genesis-zero-start-and-ai-identity.md) | Approved |
-| DES-030 | [M9–M13 制造企业财务运行体系](designs/DES-030-manufacturing-finance-operating-system.md) | Approved |
-| DES-031 | [IAOS 多组织财务与共享主数据基础](designs/DES-031-multi-organization-and-shared-master-data-foundation.md) | Active |
+| DES-030 | [M9–M13 制造企业财务运行体系](designs/finance/DES-030-manufacturing-finance-operating-system.md) | Approved |
+| DES-031 | [IAOS 多组织财务与共享主数据基础](designs/finance/DES-031-multi-organization-and-shared-master-data-foundation.md) | Active |
+| FINANCE | [财务设计模块索引](designs/finance/README.md) | Active |
+| DES-032 | [会计内核与总账](designs/finance/DES-032-accounting-kernel-and-general-ledger.md) | Active |
+| DES-033 | [子账、应收应付与资金](designs/finance/DES-033-subledgers-receivables-payables-and-treasury.md) | Active |
+| DES-034 | [制造成本、存货与固定资产](designs/finance/DES-034-manufacturing-cost-inventory-and-assets.md) | Active |
+| DES-035 | [预算、期间关账、报表与 KPI](designs/finance/DES-035-budget-close-reporting-and-kpi.md) | Active |
+| DES-036 | [财务治理、审批、职责分离与 Agent](designs/finance/DES-036-finance-governance-approval-and-agents.md) | Active |
 | PLAN-M3 | [M3 实施计划](plans/2026-07-19-m3-executable-scenario-package.md) | Completed |
 | PLAN-M3V | [快速 2D 企业沙盘实施计划](plans/2026-07-19-fast-track-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Completed |

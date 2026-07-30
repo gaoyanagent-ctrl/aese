@@ -8,6 +8,6 @@
   "status_after": "completed",
   "progress_after": 38,
   "current_state": "Genesis M9 authoritative facts are exposed through milestone-independent IAOS Entity projections",
-  "evidence_ref": "docs/designs/DES-030-manufacturing-finance-operating-system.md",
+  "evidence_ref": "docs/designs/finance/DES-030-manufacturing-finance-operating-system.md",
   "occurred_at": "2026-07-29T14:00:00Z"
 }

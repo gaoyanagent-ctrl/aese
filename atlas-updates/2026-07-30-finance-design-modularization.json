@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.finance.design-modularization.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "财务设计迁入独立目录并按功能模块拆分",
+  "detail": "建立 docs/designs/finance 索引；DES-030 缩为总览，DES-031–036 分别维护多组织共享数据、会计内核、子账资金、制造成本资产、预算关账报表和财务治理 Agent；M9 只引用相关模块。",
+  "status_after": "designed",
+  "progress_after": 80,
+  "current_state": "Finance design is modular; runtime implementation status remains tracked independently",
+  "evidence_ref": "docs/designs/finance/README.md",
+  "occurred_at": "2026-07-30T09:15:00Z"
+}

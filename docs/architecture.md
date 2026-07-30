@@ -326,7 +326,8 @@ Sales / Planning / Procurement / Production / Quality / Logistics / Finance
 
 客户正式需求/变更/接受/付款行为、供应/设备/运输现实、实际生产资源消耗和银行到账属于 AESE World State；订单、采购、工单、库存、发运、发票、应收、收款核销、成本和项目损益记录属于 IAOS；角色只通过权限和 observation 获得 Actor Knowledge。发运不等于客户接受，发票不等于现金，毛利不等于现金余额。
 
-DES-030 进一步冻结财务边界：AESE 只产生银行到账、客户接受、实物收发、设备投用和
+`docs/designs/finance/README.md` 是财务架构入口；DES-030–036 按模块冻结财务边界。
+AESE 只产生银行到账、客户接受、实物收发、设备投用和
 人员服务等可信 World Observation；IAOS 拥有会计政策、Accounting Event、Posting Rule、
 凭证、总账、子账、成本、固定资产、结账和报表。业务台账不等于会计凭证，预算不等于
 费用，认缴不等于实缴；已过账凭证只能冲销或更正，不由 World 或前端直接改写。

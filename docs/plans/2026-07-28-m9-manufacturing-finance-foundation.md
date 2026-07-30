@@ -10,7 +10,8 @@ parent_plan: PLAN-GXZ-001
 
 # M9 制造企业财务基础与 M10–M13 业财闭环实施计划
 
-本计划实施 DES-030，是当前 `PLAN-GXZ-001` 下的并行规划，不替代唯一 active 主计划。
+本计划实施 `docs/designs/finance/README.md` 所列 DES-030–036；DES-030 只提供总览，
+各任务引用对应模块设计。本计划是当前 `PLAN-GXZ-001` 下的并行规划，不替代唯一 active 主计划。
 IAOS 实现必须在独立 worktree 中完成。所有未实现项保持未勾选。
 
 ## F0 — 合同与迁移基线
@@ -28,7 +29,7 @@ IAOS 实现必须在独立 worktree 中完成。所有未实现项保持未勾�
 ## F1 — M9 财务组织与开业会计
 
 - [x] F5A 完成多组织财务、Data Set 共享、科目表两段式、Business Partner
-  canonical/组织扩展及模块期间状态机设计（DES-031）。
+  canonical/组织扩展设计（DES-031）及模块期间状态机设计（DES-035）。
 - [ ] F5B 实现集团/法人/BU/基地/共享中心、Data Set 和组织数据权限基础。
 - [ ] F5C 重构账套原型、科目表/法人扩展、财政日历和多账簿关系，并迁移现有 M9 数据；
   禁止用空字符串或 `other` 通过必填校验。

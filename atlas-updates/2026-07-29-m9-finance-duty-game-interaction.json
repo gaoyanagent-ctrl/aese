@@ -8,6 +8,6 @@
   "status_after": "completed",
   "progress_after": 100,
   "current_state": "M9 玩家可逐项推进财务开业，并从游戏穿透查看 IAOS 权威责任和执行证据；M10–M13 财务子账仍按后续里程碑建设。",
-  "evidence_ref": "docs/designs/DES-030-manufacturing-finance-operating-system.md",
+  "evidence_ref": "docs/designs/finance/DES-030-manufacturing-finance-operating-system.md",
   "occurred_at": "2026-07-29T15:25:00Z"
 }

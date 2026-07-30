@@ -8,6 +8,6 @@
   "status_after": "validating",
   "progress_after": 34,
   "current_state": "Genesis finance facts are visible through both the finance workspace and canonical IAOS Entity projections",
-  "evidence_ref": "docs/designs/DES-030-manufacturing-finance-operating-system.md",
+  "evidence_ref": "docs/designs/finance/DES-030-manufacturing-finance-operating-system.md",
   "occurred_at": "2026-07-29T13:30:00Z"
 }

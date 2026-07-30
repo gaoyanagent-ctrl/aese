@@ -177,7 +177,9 @@ Agent 不能只是聊天窗口。它们必须逐步具备：
 - DES-012 与 PLAN-M11-001 已完成。`hctm-genesis@0.4.0` 覆盖资金补足、设备/实验室/仓储能力、核心团队招聘培训和一班制资格，输出 M12 可消费的 `industrialization_eligible`；IAOS revision `789b925`。产品/BOM/工艺、APQP、试生产、PPAP 和 SOP 不在 M11。
 - DES-013 与 PLAN-M12-001 已完成。`hctm-genesis@0.5.0` 覆盖 RFQ/报价/定点、产品/BOM/工艺版本、供应/工装/物料、APQP、两轮试制、质量整改和 PPAP，输出 M13 可消费的 `serial_production_eligible`；IAOS revision `50a46e2`。正式 O2D、交付、开票和回款不在 M12。
 - DES-014 与 PLAN-M13-001 已完成。`hctm-genesis@0.6.0` 从零可销售库存完成首张订单、MRP、采购生产、三批接受、开票/应收、银行回款、实际成本和项目毛利，输出 `first_commercial_cycle_closed`；IAOS revision `067bbb4`，Project Genesis M9-M13 主纵向场景完成。
-- DES-030 已批准制造企业财务扩展：M9 建立财务组织、账套、科目、期间、实收资本凭证
+- `docs/designs/finance/README.md` 是财务设计入口；DES-030 只保留总览，DES-031–036
+  分别维护多组织共享数据、会计内核、子账资金、制造成本资产、预算关账报表和治理 Agent。
+  M9 建立财务组织、账套、科目、期间、实收资本凭证
   和开业报表，M10–M13 再按真实业务事件启用 AP、AR、资金、资产、制造成本、总账、
   结账和报表。PLAN-M9-FIN-001 当前为 active；M9 已完成 5 个显式财务开业工作项，
   M10–M13 子账仍未完成，现有开业账务不得描述为完整会计系统。

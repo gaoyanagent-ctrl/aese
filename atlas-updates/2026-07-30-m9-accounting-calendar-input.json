@@ -7,6 +7,6 @@
   "detail": "AESE 采集账套名称、当前会计年度及 12 个默认自然月期间；IAOS 校验连续覆盖并持久化权威账套、期间和 Entity 投影。",
   "status_after": "completed",
   "progress_after": 100,
-  "evidence_ref": "docs/designs/DES-030-manufacturing-finance-operating-system.md",
+  "evidence_ref": "docs/designs/finance/DES-030-manufacturing-finance-operating-system.md",
   "occurred_at": "2026-07-30T12:00:00Z"
 }

@@ -1666,3 +1666,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：明确 Tenant 不等于法人、共享配置不共享法定余额、全局身份加组织扩展、消费者只读引用和跨法人双边单据原则；模块期间控制本轮只记录不实现。
 - 验证：对照 SAP Company Code/CoA/Controlling Area/MDG 与 Oracle Enterprise Structure/Reference Data Set/BU/Supplier Site 官方实践；检查目标租户权威账套与 Entity 投影字段。
 - 后续：先实现组织与 Data Set，再重构账套/科目表/财政日历并迁移 M9 数据，随后实现 Business Partner 和产品组织扩展。
+
+## 2026-07-30 - 财务设计文档模块化
+
+- 变更：建立 `docs/designs/finance/` 独立目录；将 620 行 DES-030 缩为 108 行总览，迁移 DES-031，并新增 DES-032–036 分别承载会计内核、子账资金、制造成本资产、预算关账报表和财务治理 Agent；M9 改为只引用财务模块。
+- 原因：财务需求已跨越 M9–M13 和持续经营，单文件继续膨胀会降低阅读、维护、实现追踪和后续 Agent 定位效率。
+- 影响：财务规格按稳定功能模块维护，里程碑只描述业务事实和完成门；实现状态仍由路线图和财务计划管理，文档拆分不改变已实现范围。
+- 验证：检查 DES frontmatter、目录索引、仓库内旧路径、Markdown 相对链接、Atlas 声明、code map freshness 和 `git diff --check`。
+- 后续：实现 DES-031 的组织/Data Set，随后按 DES-032–036 独立推进账套迁移、子账、成本资产、关账报表和治理 UI。

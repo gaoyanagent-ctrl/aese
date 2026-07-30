@@ -767,16 +767,17 @@ DES-027 已获批准。开始实现前必须创建唯一 active 主实施计划�
 
 ## 5. D26 — M9 财务开业扩展
 
-DES-027 原始闭环只区分认缴、实缴、现金和预算，没有建设完整会计内核。经用户批准，
-[DES-030](DES-030-manufacturing-finance-operating-system.md) 将财务组织、账套、科目、
-会计期间、实收资本凭证、开业试算平衡和资产负债基线加入 M9 扩展完成门。
+财务规格不在 M9 文档内展开。权威文件：
 
-- 已验证资本到账必须生成借银行存款、贷实收资本的会计事件和凭证；
-- `finance_opening_ready` 是新版本 `enterprise_operational_ready` 的前置条件；
-- 历史案件通过显式版本迁移补建，不修改既有 Journal 和 terminal 证据；
-- M10–M13 仅在真实业务事实发生后启用应付、资产、成本、应收、收入和结账；
-- 原 D14 二十项成立 Capability 保持版本兼容，财务 Capability 作为新 Runtime Package
-  发布，不用修改旧 Artifact 冒充已交付。
+- 总索引：[`docs/designs/finance/README.md`](finance/README.md)
+- 财务总览：[DES-030](finance/DES-030-manufacturing-finance-operating-system.md)
+- 多组织与共享主数据：[DES-031](finance/DES-031-multi-organization-and-shared-master-data-foundation.md)
+- 会计内核与 M9 开业凭证：[DES-032](finance/DES-032-accounting-kernel-and-general-ledger.md)
+- 财务岗位、审批、SoD 与 Agent：[DES-036](finance/DES-036-finance-governance-approval-and-agents.md)
+- 实施状态：[`docs/plans/2026-07-28-m9-manufacturing-finance-foundation.md`](../plans/2026-07-28-m9-manufacturing-finance-foundation.md)
+
+M9 只消费上述设计定义的 `finance_opening_ready` 完成门和五个显式财务工作项。财务字段、
+Entity、凭证、期间、报表、后续子账与多组织细节只在财务目录维护。
 
 ## 6. D27 — 全量可执行绑定与显式财务工作项
 

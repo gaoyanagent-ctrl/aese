@@ -8,6 +8,6 @@
   "status_after": "designed",
   "progress_after": 10,
   "current_state": "DES-030 approved and PLAN-M9-FIN-001 planned; finance runtime and UI implementation have not started",
-  "evidence_ref": "docs/designs/DES-030-manufacturing-finance-operating-system.md",
+  "evidence_ref": "docs/designs/finance/DES-030-manufacturing-finance-operating-system.md",
   "occurred_at": "2026-07-28T14:30:00Z"
 }
