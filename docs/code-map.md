@@ -412,6 +412,10 @@ B0-B7 实现后必须把“目标路径”更新为实际入口：
 
 ## 22. 导航更新触发器
 
+多组织财务、Data Set 共享、科目表/法人扩展、Business Partner 分层和模块期间控制的
+权威目标设计为 `docs/designs/DES-031-multi-organization-and-shared-master-data-foundation.md`；
+其实现将跨 IAOS Organization、Metadata Entity、RLS、Capability、Approval 与财务运行时。
+
 M9 账套/期间交互入口：`frontend/src/components/game/WorkItemActionPanel.tsx` 采集账套名称、
 年度和 12 期日历，经 `frontend/src/game/api.ts` 传入 IAOS `accounting.book.activate`。
 

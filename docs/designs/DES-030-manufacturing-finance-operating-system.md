@@ -28,7 +28,10 @@ tags: [m9, finance, accounting, costing, treasury, manufacturing]
 
 ## 2. 规范基线与适用边界
 
-首个参考实现以中国境内、单法人、人民币本位币、权责发生制和借贷记账法为基线：
+首个 M9 参考实现以中国境内、单法人、人民币本位币、权责发生制和借贷记账法为基线；
+目标多组织、共享主数据、科目表/法人扩展和多账簿架构由
+[DES-031](DES-031-multi-organization-and-shared-master-data-foundation.md) 定义。单法人是首个
+tracer 的实现约束，不是长期产品架构：
 
 - [财政部《企业会计准则——基本准则》](https://xj.mof.gov.cn/caizhengjiancha/200805/t20080524_40447.htm)；
 - [财政部企业会计准则专题](https://kjs.mof.gov.cn/zt/kjzzss/kuaijizhunzeshishi/)；

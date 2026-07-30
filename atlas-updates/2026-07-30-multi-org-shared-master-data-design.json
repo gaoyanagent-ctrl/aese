@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.finance.multi-org-shared-master-data-design.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "design",
+  "summary": "建立多组织财务与共享主数据目标架构",
+  "detail": "定义集团、法人、业务单元、基地、共享服务中心、多账簿、科目表两段式、Data Set、Business Partner canonical/组织扩展及模块期间状态机，并记录现有账套原型迁移要求。",
+  "status_after": "designed",
+  "progress_after": 75,
+  "current_state": "Target design frozen; organization, sharing, ledger refactor and M9 migration remain implementation work",
+  "evidence_ref": "docs/designs/DES-031-multi-organization-and-shared-master-data-foundation.md",
+  "occurred_at": "2026-07-30T08:30:00Z"
+}

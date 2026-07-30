@@ -97,6 +97,7 @@
 | DES-028 | [Enterprise Genesis AI 原生企业创生游戏体验](designs/DES-028-enterprise-genesis-game-experience.md) | Completed |
 | DES-029 | [Enterprise Genesis 零起点主页、独立租户与真实 AI 企业身份](designs/DES-029-genesis-zero-start-and-ai-identity.md) | Approved |
 | DES-030 | [M9–M13 制造企业财务运行体系](designs/DES-030-manufacturing-finance-operating-system.md) | Approved |
+| DES-031 | [IAOS 多组织财务与共享主数据基础](designs/DES-031-multi-organization-and-shared-master-data-foundation.md) | Active |
 | PLAN-M3 | [M3 实施计划](plans/2026-07-19-m3-executable-scenario-package.md) | Completed |
 | PLAN-M3V | [快速 2D 企业沙盘实施计划](plans/2026-07-19-fast-track-2d-enterprise-sandbox.md) | Completed |
 | PLAN-M4 | [M4 受治理异常事件入口实施计划](plans/2026-07-19-m4-governed-simulation-ingress.md) | Completed |

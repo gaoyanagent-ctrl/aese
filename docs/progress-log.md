@@ -1659,3 +1659,10 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：新账套必须具名；12 期必须连续、无重叠并覆盖当前会计年度，当前业务日期所在期间开放，其余期间为未来。
 - 验证：Go 单元测试覆盖自然月和期间间隙拒绝；前端类型检查、单测、构建及三服务健康检查。
 - 后续：13 期制、4-4-5 日历、跨年预建和独立期间开关留给后续 Fiscal Calendar 配置能力。
+## 2026-07-30 - 多组织财务与共享主数据基础设计
+
+- 变更：新增 DES-031，定义集团/法人/BU/基地/共享服务中心、多账簿、科目表两段式、Data Set、Business Partner canonical/组织扩展和模块期间状态机；审计目标租户现有账套投影。
+- 原因：单法人 M9 tracer 不能支撑集团分子公司、跨组织共享科目/客户/供应商，也无法正确表达共享数据所有权和组织扩展。
+- 影响：明确 Tenant 不等于法人、共享配置不共享法定余额、全局身份加组织扩展、消费者只读引用和跨法人双边单据原则；模块期间控制本轮只记录不实现。
+- 验证：对照 SAP Company Code/CoA/Controlling Area/MDG 与 Oracle Enterprise Structure/Reference Data Set/BU/Supplier Site 官方实践；检查目标租户权威账套与 Entity 投影字段。
+- 后续：先实现组织与 Data Set，再重构账套/科目表/财政日历并迁移 M9 数据，随后实现 Business Partner 和产品组织扩展。
