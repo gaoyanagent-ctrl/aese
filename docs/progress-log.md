@@ -1586,5 +1586,5 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 变更：IAOS 增加旧 Workspace 安全接管 API；AESE 在 session 兑换收到 404 时，仅对当前本地玩家拥有的旧 Workspace 发起接管，随后走正常 session API。
 - 原因：`gxw-f4b3ce3ce8e2712d` 已有 active tenant、M9 Runtime、World 和完成的设立案，但创建于新版 Genesis 控制面之前，缺少 `genesis_workspace` 行，继续游戏因此被错误包装成 502。
 - 影响：旧企业无需删除、重建或重跑 23 个 M9 节点即可恢复；tenant 和 owner 不由 AESE 声明，IAOS 必须验证 owner access、chair、Founder Mandate、Runtime 与 case 后才登记。
-- 验证：Go 单元测试覆盖 404 专用恢复、当前玩家本地所有权、请求不含 tenant claim、接管后 session 兑换；双仓全量验证与目标企业现场验证随提交记录。
+- 验证：IAOS 三个 Go module 全量测试、Code Map、治理写入和 Atlas 检查通过；AESE `go test ./...`、20 个前端测试文件/58 项测试及生产构建通过。目标 `gxw-f4b3ce3ce8e2712d` 经 `:4173` 代理兑换返回 200、8/8 checkpoint completed、tenant token 已签发；重复调用后数据库仍为 1 Workspace、1 member、8 step，原设立案保持 `enterprise_operational_ready`。
 - 后续：正式多人环境迁移完成后移除 loopback local adapter 的创建能力，保留只读迁移审计期。
