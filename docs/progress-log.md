@@ -1652,3 +1652,10 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：新玩家先注册平台身份，登录后再独立创建企业；现有 Founder 可用原 IAOS 凭据首次提升并保持历史 Workspace；错误密码、锁定、过期/伪造 Token 和跨玩家读取均失败关闭，AESE 不保存密码。
 - 验证：IAOS 全量 Go 测试与 vet、Player 真实 PostgreSQL 注册/登录/session/重复账号/五次失败锁定/双 Player Workspace 隔离通过；真实 `founder-principal` 提升后恢复 5 个原 Workspace，伪造 Player Header 且无 Token 返回 401。AESE Go 全量测试、前端 21 文件/61 项测试、TypeScript、定向 ESLint 与生产构建通过；Genesis Home 15 项三视口 Playwright 及真实 Founder 3 项三视口 Playwright 通过且无控制台错误。IAOS 8082 与 AESE 8090 已重建部署。
 - 后续：正式互联网部署把短期 Bearer 升级为 HttpOnly/Secure/SameSite Cookie，并补 refresh/revoke、邮箱验证、找回密码、MFA、OIDC 与设备会话管理。
+## 2026-07-30 - M9 账套与年度期间可配置
+
+- 变更：AESE“启用会计账套与期间”新增账套名称、会计年度和 12 期可编辑自然月表单；IAOS 能力合同持久化完整期间并在财务开业投影中返回明细。
+- 原因：原实现无参数创建编码账套且只生成当前月，用户无法确认账套身份、年度边界或期间范围。
+- 影响：新账套必须具名；12 期必须连续、无重叠并覆盖当前会计年度，当前业务日期所在期间开放，其余期间为未来。
+- 验证：Go 单元测试覆盖自然月和期间间隙拒绝；前端类型检查、单测、构建及三服务健康检查。
+- 后续：13 期制、4-4-5 日历、跨年预建和独立期间开关留给后续 Fiscal Calendar 配置能力。

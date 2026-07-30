@@ -570,6 +570,13 @@ IAOS 目标菜单：
 组织视图来自 `GET /api/v1/finance/opening/:case_code/operations`，账务和报表来自
 `GET /api/v1/finance/opening/:case_code` 的同一已过账凭证，不是游戏投影的复制。
 
+`accounting.book.activate` 不得无参数静默创建账套。玩家必须确认账套名称和当前会计年度；
+界面默认生成 12 个自然月期间，并允许逐期修改编码、开始日和结束日。提交时 IAOS 校验
+恰好 12 期、编码唯一、日期有效、无重叠/间隙且覆盖完整年度；当前业务日期所在期间为
+`open`，其余为 `future`。账套名称和全部期间同时写入权威财务表与 Entity 投影，并由
+财务开业 API 返回给 AESE 治理档案。M9 资本凭证使用当前业务日期，因此开业年度必须
+包含当前日期；跨年预建、13 期制和 4-4-5 日历属于后续 Fiscal Calendar 配置能力。
+
 Runtime 1.8.0 安装六条 `finance_duty_definition`、四条阻断型
 `finance_sod_rule`，并只为已有任职主体的 `finance-agent@finance-lead` 与
 `audit-agent@internal-audit` 保留 active Mandate。其余岗位明确为 vacant；工作项激活时

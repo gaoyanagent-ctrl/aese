@@ -51,6 +51,20 @@
 .gx-money-input>div span{display:grid;place-items:center;border:1px solid #365f6c;border-right:0;border-radius:8px 0 0 8px;color:#8cdae3;background:#153945}
 .gx-money-input input{border-radius:0 8px 8px 0;font-size:18px;font-variant-numeric:tabular-nums}
 .gx-money-input small{color:#77959d}
+.gx-accounting-calendar{display:grid;gap:14px;margin:0;padding:16px;border:1px solid #365f6c;border-radius:12px;background:#0d2731}
+.gx-accounting-calendar legend{padding:0 8px;color:#e9fafb;font-weight:700}
+.gx-accounting-book-fields{display:grid;grid-template-columns:minmax(0,2fr) minmax(140px,1fr);gap:12px}
+.gx-accounting-book-fields label{display:grid;gap:5px;color:#d4e8eb;font-size:13px}
+.gx-accounting-book-fields label span,.gx-accounting-calendar header small{color:#77959d;font-size:11px;line-height:1.5}
+.gx-accounting-book-fields input,.gx-period-table input{box-sizing:border-box;min-height:44px;width:100%;padding:9px 10px;border:1px solid #365f6c;border-radius:8px;color:#effcfd;background:#0b202a;font:inherit}
+.gx-accounting-book-fields input:focus,.gx-period-table input:focus{outline:2px solid #59c7d4;outline-offset:2px}
+.gx-accounting-calendar header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.gx-accounting-calendar header div{display:grid;gap:3px}
+.gx-accounting-calendar header button{display:flex;min-height:44px;align-items:center;gap:6px;padding:8px 12px;border:1px solid #4b7987;border-radius:8px;color:#bdeaf0;background:#153945;cursor:pointer}
+.gx-accounting-calendar header button svg{width:16px}
+.gx-period-table{display:grid;gap:5px}
+.gx-period-table>div{display:grid;grid-template-columns:minmax(90px,.7fr) minmax(130px,1fr) minmax(130px,1fr);gap:7px;align-items:center}
+.gx-period-table b{padding:0 4px;color:#8fb1b8;font-size:11px}
 .gx-governance-note{display:flex;gap:8px;margin:14px 0;padding:10px;border-radius:8px;color:#add5c0;background:#10362c;font-size:11px;line-height:1.5}
 .gx-governance-note svg{width:17px;flex:none;color:#6dd69d}
 .gx-action-error{padding:10px;border-radius:8px!important;color:#ffd0ca!important;background:#54251f!important}
@@ -58,5 +72,5 @@
 .gx-action-submit svg{width:18px}
 @media(max-width:900px){.gx-header-actions>button{display:none}.gx-case-code{display:none}}
 @media(max-width:700px){.gx-bank-grid,.gx-reward-assets{grid-template-columns:1fr}.gx-bank-grid button{min-height:88px}}
-@media(max-width:560px){.gx-creation-intro{margin-top:24px;padding:0 14px}.gx-creation-intro h2{font-size:22px}.gx-panel{max-height:none;overflow:visible}.gx-panel article{display:grid;grid-template-columns:minmax(0,1fr) auto}.gx-panel article>div{min-width:0}.gx-task-action{position:relative;z-index:2;grid-column:1/-1;width:100%}.gx-action-overlay{padding:8px}.gx-action-card{width:100%;max-height:calc(100dvh - 16px);padding:16px}.gx-review-sheet dl div,.gx-application-package dl div{grid-template-columns:1fr;gap:3px}.gx-capital-reconcile dl{grid-template-columns:1fr}}
+@media(max-width:560px){.gx-creation-intro{margin-top:24px;padding:0 14px}.gx-creation-intro h2{font-size:22px}.gx-panel{max-height:none;overflow:visible}.gx-panel article{display:grid;grid-template-columns:minmax(0,1fr) auto}.gx-panel article>div{min-width:0}.gx-task-action{position:relative;z-index:2;grid-column:1/-1;width:100%}.gx-action-overlay{padding:8px}.gx-action-card{width:100%;max-height:calc(100dvh - 16px);padding:16px}.gx-review-sheet dl div,.gx-application-package dl div{grid-template-columns:1fr;gap:3px}.gx-capital-reconcile dl{grid-template-columns:1fr}.gx-accounting-book-fields{grid-template-columns:1fr}.gx-accounting-calendar{padding:12px}.gx-accounting-calendar header{align-items:flex-start;flex-direction:column}.gx-period-table{overflow-x:auto}.gx-period-table>div{min-width:440px}}
 .gx-reward-assets img{display:block;max-width:100%;height:120px;margin:0 auto 8px;object-fit:contain;filter:drop-shadow(0 8px 8px #0005)}.gx-ukey>img{width:110px;height:90px;flex:none}

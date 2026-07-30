@@ -131,6 +131,9 @@ type FinanceOpening struct {
 	OrganizationStatus  string                     `json:"organization_status"`
 	Roles               []string                   `json:"roles"`
 	BookCode            string                     `json:"book_code"`
+	BookName            string                     `json:"book_name"`
+	FiscalYear          int                        `json:"fiscal_year"`
+	AccountingPeriods   []FinanceAccountingPeriod  `json:"accounting_periods"`
 	AccountingStandard  string                     `json:"accounting_standard"`
 	FunctionalCurrency  string                     `json:"functional_currency"`
 	PeriodCode          string                     `json:"period_code"`
@@ -144,6 +147,13 @@ type FinanceOpening struct {
 	GeneralLedger       []FinanceGeneralLedgerLine `json:"general_ledger"`
 	OpeningBalanceSheet FinanceOpeningBalanceSheet `json:"opening_balance_sheet"`
 	EvidenceRef         string                     `json:"evidence_ref"`
+}
+
+type FinanceAccountingPeriod struct {
+	PeriodCode string `json:"period_code"`
+	StartsOn string `json:"starts_on"`
+	EndsOn string `json:"ends_on"`
+	Status string `json:"status"`
 }
 
 func (c *Client) IncorporationTrace(ctx context.Context, caseCode string) (IncorporationTrace, error) {

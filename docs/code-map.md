@@ -412,6 +412,9 @@ B0-B7 实现后必须把“目标路径”更新为实际入口：
 
 ## 22. 导航更新触发器
 
+M9 账套/期间交互入口：`frontend/src/components/game/WorkItemActionPanel.tsx` 采集账套名称、
+年度和 12 期日历，经 `frontend/src/game/api.ts` 传入 IAOS `accounting.book.activate`。
+
 以下改动必须更新本文件：
 
 - 新增命令、核心 package、场景包、schema 或脚本。

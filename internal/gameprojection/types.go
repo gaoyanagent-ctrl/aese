@@ -118,6 +118,9 @@ type FinanceOpening struct {
 	OrganizationStatus  string                     `json:"organization_status,omitempty"`
 	Roles               []string                   `json:"roles"`
 	BookCode            string                     `json:"book_code,omitempty"`
+	BookName            string                     `json:"book_name,omitempty"`
+	FiscalYear          int                        `json:"fiscal_year,omitempty"`
+	AccountingPeriods   []FinanceAccountingPeriod  `json:"accounting_periods"`
 	AccountingStandard  string                     `json:"accounting_standard,omitempty"`
 	FunctionalCurrency  string                     `json:"functional_currency,omitempty"`
 	PeriodCode          string                     `json:"period_code,omitempty"`
@@ -131,6 +134,13 @@ type FinanceOpening struct {
 	GeneralLedger       []FinanceGeneralLedgerLine `json:"general_ledger"`
 	OpeningBalanceSheet FinanceOpeningBalanceSheet `json:"opening_balance_sheet"`
 	EvidenceRef         string                     `json:"evidence_ref,omitempty"`
+}
+
+type FinanceAccountingPeriod struct {
+	PeriodCode string `json:"period_code"`
+	StartsOn string `json:"starts_on"`
+	EndsOn string `json:"ends_on"`
+	Status string `json:"status"`
 }
 
 type FinanceTrialBalanceLine struct {

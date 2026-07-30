@@ -199,6 +199,12 @@ func AttachFinanceOpening(projection *Projection, opening iaosclient.FinanceOpen
 		Ready: opening.FinanceOpeningReady, OrganizationCode: opening.OrganizationCode,
 		OrganizationStatus: opening.OrganizationStatus, Roles: append([]string(nil), opening.Roles...),
 		BookCode: opening.BookCode, AccountingStandard: opening.AccountingStandard,
+		BookName: opening.BookName, FiscalYear: opening.FiscalYear,
+		AccountingPeriods: func() []FinanceAccountingPeriod {
+			out:=make([]FinanceAccountingPeriod,0,len(opening.AccountingPeriods))
+			for _, period:=range opening.AccountingPeriods { out=append(out,FinanceAccountingPeriod{PeriodCode:period.PeriodCode,StartsOn:period.StartsOn,EndsOn:period.EndsOn,Status:period.Status}) }
+			return out
+		}(),
 		FunctionalCurrency: opening.FunctionalCurrency, PeriodCode: opening.PeriodCode,
 		PeriodStatus: opening.PeriodStatus, JournalEntryNo: opening.JournalEntryNo,
 		JournalStatus: opening.JournalStatus, DebitMinor: opening.DebitMinor,
