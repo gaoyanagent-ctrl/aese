@@ -186,10 +186,18 @@ M9 的日常工作由不同 AI Agent 承担。Agent 是 IAOS 中的正式行动�
 | `incorporation-agent` | 企业设立专员 | 开设设立案、协调材料、提交登记、处理补正 | 不得批准创始人决议或自行确认登记成功 |
 | `governance-agent` | 公司治理秘书 | 决议草案、岗位方案、任命和 Mandate 建议 | 不得批准自己的建议或代替候选人接受任命 |
 | `legal-compliance-agent` | 法务合规负责人 | 登记/章程/授权合法性与职责冲突检查 | 不得伪造外部机构 Observation |
-| `finance-agent` | 财务负责人 | 出资承诺、到账核验、银行账户资料、初始预算 | 不得批准自己编制的预算或自行制造到账事实 |
+| `finance-agent` | 财务负责人 | 资本方案测算与校验、到账核验、银行账户资料、初始预算 | 不得代替创始人/投资人作出或提交出资承诺，不得批准自己编制的预算或自行制造到账事实 |
 | `audit-agent` | 内部审计负责人 | 独立核对越权、异常、证据、Journal/Outbox 完整性 | 只读，不得代办业务或修改被审计记录 |
 
 `founder-principal` 担任董事长/最高管理者并保留最终治理权：任免 Agent，最终批准创始人决议、核心高管任命、重大 Mandate 和初始预算，以及执行有理由、有审计的人工接管或特批。
+
+资本承诺属于创始人/投资人的治理与所有者责任，不是财务 Agent 的自主经营动作。正常主链中的
+`capital.commitment.record` 必须编译为 `human_task`，由有效 `chair` 岗位的
+`founder-principal` 输入和提交；金额只受正数、币种、精度、资本结构和适用法域 Policy
+约束，并随企业实际情况变化。`incorporation_agent.max_amount_minor` 只限制明确委托给
+Agent 的自主金额动作，不是企业注册资本、计划投入资本或人工治理决定的全局上限。Agent
+可以另行生成资本方案草稿、执行规则校验和提示风险，但最终承诺必须保留明确的自然人
+acting principal、岗位、Mandate 和审计证据。
 
 登记机构、银行、候选人和资金结算环境属于 World 外部参与者，不创建为 IAOS Agent。它们只能通过受治理 World Bridge 返回 Observation。
 

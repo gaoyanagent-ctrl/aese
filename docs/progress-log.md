@@ -1628,3 +1628,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：Enterprise Genesis 身份工作室重新使用真实 MiniMax-M3 生成企业名称；配置缺项、secret 权限过宽或启动状态异常会失败关闭，密钥不进入命令行、日志、证据或提交。
 - 验证：直接端点与 4173 BFF 均返回 connected/MiniMax/MiniMax-M3；有效 Workspace tenant session 完成真实调用，CreativeJob 为 completed，耗时 31,805 ms、共 1,903 tokens、校验 valid、无 fallback，并返回 4 个动态候选。
 - 后续：正式环境把 MINMAX 配置迁移到 Secret Manager/编排器注入，并为 Provider 增加独立 readiness 和额度告警。
+
+## 2026-07-30 - 恢复资本承诺的创始人治理责任
+
+- 变更：IAOS Runtime 1.9.0 将 `capital.commitment.record` 从 `finance-agent` 自主任务修正为 `founder-principal` 以 `chair` 岗位执行的人工任务；Runtime 公共升级同时按租户解析 `platform_super_admin` 或 `genesis_owner` discovery role。AESE 同步补强 M9 设计、实施计划和路线图。
+- 原因：计划投入资本是创始人/投资人的所有者决定，金额因企业而异；原流程编译错误地把该节点交给财务 Agent，导致 50,000,000 CNY 被 Agent 的 1,000,000 CNY 自主授权上限拒绝。
+- 影响：Agent 金额上限继续对明确委托的自主金额动作失败关闭，但不再充当企业注册资本或人工资本承诺上限；财务 Agent 负责方案测算、规则校验、到账核验和后续会计处理。
+- 验证：IAOS 全量 `go test ./... -count=1`、`go vet ./...`、交互式生命周期和 Agent 授权 PostgreSQL 集成测试、Atlas/Code Map/治理写入检查通过；目标租户已安装 Runtime 1.9.0，节点 4 API 与数据库均显示 `human_task / founder-principal / chair / ready`。未代替用户提交 50,000,000 CNY 的治理决定。
+- 后续：法域、行业、股东协议和资本结构的金额约束应进入 Policy Profile；不得通过提高通用 Agent 授权上限绕过责任主体修正。

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.capital-commitment-founder-accountability.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "恢复 M9 资本承诺的创始人治理责任",
+  "detail": "IAOS Runtime 1.9.0 将 capital.commitment.record 从 finance-agent 自主任务改为 founder-principal 以 chair 岗位执行的 human_task；Agent 金额上限继续约束明确委托的自主金额动作，不再充当企业计划投入资本上限。既有目标租户已刷新未完成工作项，IAOS main 提交为 875a931 与 2ead1cc。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "资本承诺金额由创始人或投资人按企业实际情况输入，并由资本结构与适用 Policy 治理；财务 Agent 只提供测算、校验和后续核验。",
+  "evidence_ref": "docs/designs/DES-027-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-30T04:30:00Z"
+}

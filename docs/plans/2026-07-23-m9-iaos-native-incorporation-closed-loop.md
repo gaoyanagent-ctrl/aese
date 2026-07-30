@@ -158,7 +158,7 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T44 验证开户拒绝：原 G3 失效，修改受益所有人材料后重新审批。
 - [x] T45 验证出资差异：禁止自动确认，生成 Discrepancy 并升级 `founder-principal`。
 - [x] T46 验证 Agent 越权：finance Agent 自批预算被职责分离拒绝，业务状态不变且 Tool Call/Decision/Journal 完整。
-- [x] T47 验证 Agent 暂停、Mandate 撤销/过期、金额超限、跨租户和工具禁用均在 dispatch 前失败关闭。
+- [x] T47 验证 Agent 暂停、Mandate 撤销/过期、Agent 自主金额动作超限、跨租户和工具禁用均在 dispatch 前失败关闭；Agent 金额上限不得误用于创始人/投资人的人工资本承诺。
 - [x] T48 对五 Agent 执行权限矩阵、知识可见范围、幂等、并发和审计回归。
 
 验收：D18.5 通过；Agent 是正式 acting principal，不使用 `founder-principal` 或 `dev-user` token 冒充人工主体。
@@ -323,8 +323,13 @@ IAOS DES-065 的风险顺序进入同一强制边界，不能把当前财务纵�
       和案件五个财务责任节点。
 - [x] T110 AESE 将五个财务节点路由到企业总部，补齐业务说明和玩家逐项执行入口；开业
       财务中心在建设期即可穿透 IAOS 组织与待办，完成后再开放账务和报表入口。
+- [x] T111 将 `capital.commitment.record` 从误配的 `finance-agent` 自主任务改为
+      `founder-principal` 以 `chair` 岗位执行的 `human_task`；保留 Agent 金额授权作为
+      明确委托动作的治理硬门，并以 IAOS Runtime 1.9.0 刷新既有未完成案件。
 
-验收：目标租户安装 Runtime 1.8.0 后返回 6 个岗位、4 条 SoD 和 5 个财务节点；
+验收：目标租户安装 Runtime 1.9.0 后返回 6 个岗位、4 条 SoD 和 5 个财务节点；
 财务负责人、内审为 active，Controller/总账/资金/成本为 vacant；同一主体兼任资金与
-总账被数据库 `finance_sod_violation` 阻断且无残留。AESE 前端 20 个测试文件/56 项测试
-与生产构建通过。
+总账被数据库 `finance_sod_violation` 阻断且无残留。资本承诺节点显示
+`human_task / founder-principal / chair`，提交 50,000,000 CNY 不再触发
+`finance-agent` 的 1,000,000 CNY 自主授权上限；尚未代替用户执行该治理决定。AESE
+前端 20 个测试文件/56 项测试与生产构建通过。
