@@ -2,7 +2,9 @@ package genesisworkspace
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -70,5 +72,48 @@ func TestControlPlaneIsDisabledWithoutPlayerToken(t *testing.T) {
 	client := ControlPlaneClient{BaseURL: "http://127.0.0.1:8082"}
 	if client.enabled(context.Background()) {
 		t.Fatal("control plane enabled without authenticated player token")
+	}
+}
+
+func TestControlPlaneAdoptsLegacyWorkspaceThenExchangesSession(t *testing.T) {
+	var adoptionSeen bool
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/v1/genesis/workspaces/legacy-adoptions":
+			adoptionSeen = true
+			if r.Header.Get("Authorization") != "Bearer player-token" {
+				t.Fatalf("missing player token")
+			}
+			var body map[string]any
+			if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+				t.Fatal(err)
+			}
+			if body["workspace_id"] != "gxw-legacy1234" || body["case_code"] != "INC-LEGACY-1" {
+				t.Fatalf("unexpected adoption body: %#v", body)
+			}
+			if _, exists := body["tenant_id"]; exists {
+				t.Fatal("AESE must not submit a tenant claim during adoption")
+			}
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprint(w, `{"workspace_id":"gxw-legacy1234","tenant_id":"tenant-session","world_run_id":"world-legacy1234","case_code":"INC-LEGACY-1","display_name":"旧企业","status":"active","current_checkpoint":"tenant_active"}`)
+		case "/api/v1/genesis/workspaces/gxw-legacy1234/session":
+			w.Header().Set("Content-Type", "application/json")
+			fmt.Fprint(w, `{"workspace":{"workspace_id":"gxw-legacy1234","tenant_id":"tenant-session","world_run_id":"world-legacy1234","case_code":"INC-LEGACY-1","display_name":"旧企业","status":"active","current_checkpoint":"session_issued"},"token":"tenant-token"}`)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer server.Close()
+	client := ControlPlaneClient{BaseURL: server.URL}
+	ctx := WithIAOSToken(context.Background(), "player-token")
+	result, err := client.AdoptLegacy(ctx, "player-1", Workspace{
+		WorkspaceID: "gxw-legacy1234", WorldRunID: "world-legacy1234",
+		CaseCode: "INC-LEGACY-1", DisplayName: "旧企业",
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !adoptionSeen || result.TenantToken != "tenant-token" {
+		t.Fatalf("adoption/session was not completed: %#v", result)
 	}
 }

@@ -3,6 +3,9 @@ package genesisworkspace
 import (
 	"context"
 	"errors"
+	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"testing"
 	"time"
@@ -94,6 +97,48 @@ func TestRefreshSessionReissuesTokenOnlyForWorkspaceOwner(t *testing.T) {
 	}
 	if _, err := service.RefreshSession(context.Background(), "player-local-other", created.WorkspaceID); err == nil {
 		t.Fatal("another player refreshed the workspace session")
+	}
+}
+
+func TestRefreshSessionAdoptsOwnedLegacyWorkspaceAfterControlPlane404(t *testing.T) {
+	dir := t.TempDir()
+	store := NewStore(filepath.Join(dir, "workspaces.json"))
+	legacy := Workspace{
+		WorkspaceID: "gxw-legacy1234", OwnerPlayerID: "player-local-001",
+		DisplayName: "旧企业", TenantID: "tenant-legacy",
+		WorldRunID: "world-legacy1234", CaseCode: "INC-LEGACY-1",
+		TemplateKey: "manufacturing-enterprise", Region: "CN-JS",
+		Timezone: "Asia/Shanghai", Status: StatusActive,
+	}
+	if err := store.Save(legacy.OwnerPlayerID, "legacy-workspace-001", legacy); err != nil {
+		t.Fatal(err)
+	}
+	var adopted bool
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/v1/genesis/workspaces/gxw-legacy1234/session":
+			if !adopted {
+				http.NotFound(w, r)
+				return
+			}
+			fmt.Fprint(w, `{"workspace":{"workspace_id":"gxw-legacy1234","tenant_id":"tenant-legacy","world_run_id":"world-legacy1234","case_code":"INC-LEGACY-1","display_name":"旧企业","status":"active","current_checkpoint":"session_issued"},"token":"tenant-token"}`)
+		case "/api/v1/genesis/workspaces/legacy-adoptions":
+			adopted = true
+			fmt.Fprint(w, `{"workspace_id":"gxw-legacy1234","tenant_id":"tenant-legacy","world_run_id":"world-legacy1234","case_code":"INC-LEGACY-1","display_name":"旧企业","status":"active","current_checkpoint":"tenant_active"}`)
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer upstream.Close()
+	control := &ControlPlaneClient{BaseURL: upstream.URL}
+	service := &Service{Store: store, ControlPlane: control}
+	ctx := WithIAOSToken(context.Background(), "player-token")
+	result, err := service.RefreshSession(ctx, legacy.OwnerPlayerID, legacy.WorkspaceID)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !adopted || result.TenantToken != "tenant-token" {
+		t.Fatalf("legacy workspace was not adopted: %#v", result)
 	}
 }
 

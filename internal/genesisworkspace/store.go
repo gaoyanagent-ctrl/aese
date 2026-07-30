@@ -60,6 +60,21 @@ func (s *Store) List(owner string) ([]Workspace, error) {
 	return items, nil
 }
 
+func (s *Store) Get(owner, workspaceID string) (Workspace, bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	state, err := s.load()
+	if err != nil {
+		return Workspace{}, false, err
+	}
+	for _, item := range state.ByIdempotency {
+		if item.OwnerPlayerID == owner && item.WorkspaceID == workspaceID {
+			return item, true, nil
+		}
+	}
+	return Workspace{}, false, nil
+}
+
 func (s *Store) load() (fileState, error) {
 	state := fileState{ByIdempotency: map[string]Workspace{}}
 	data, err := os.ReadFile(s.path)

@@ -127,10 +127,18 @@ Player 控制面会话和 Workspace tenant 会话必须使用两个独立浏览�
 session 并提示用户重新登录 IAOS；不得把身份失效包装成可重试的 `500`，也不得降级为
 仅凭 localStorage player ID 访问生产控制面。
 
+控制面上线前由 loopback adapter 创建的企业可能只有 AESE `0600` Workspace 记录和
+完整的 IAOS tenant/Runtime/case，没有新版 IAOS Workspace 行。恢复 session 收到 404
+时，AESE 只允许对当前本地 player 拥有的同 ID Workspace 发起一次
+`legacy-adoptions`；不发送 tenant/owner 声明。IAOS 必须从当前 JWT 推导身份并验证
+active tenant、owner、chair、Founder Mandate、M9 Runtime 和设立案，然后幂等登记
+控制面。401/403/409/5xx 不得触发该恢复路径，也不得重新 bootstrap 或重放业务流程。
+
 ### 4.1 对外 API
 
 ```text
 POST /api/v1/genesis/workspaces
+POST /api/v1/genesis/workspaces/legacy-adoptions
 GET  /api/v1/genesis/workspaces
 GET  /api/v1/genesis/workspaces/{workspace_id}
 POST /api/v1/genesis/workspaces/{workspace_id}/retry
@@ -165,7 +173,7 @@ AESE 只接收 `tenant_activated` committed outcome 后创建 World Run。主页
 
 | 事实/动作 | 权威仓库 | 浏览器权限 | 失败状态与恢复 |
 |---|---|---|---|
-| Workspace、member、checkpoint | IAOS | 当前 Player membership | 保持 provisioning/failed；同幂等键 retry；401 清理旧会话并要求重新登录 |
+| Workspace、member、checkpoint | IAOS | 当前 Player membership | 保持 provisioning/failed；同幂等键 retry；401 清理旧会话并要求重新登录；旧记录 404 经 IAOS 前置条件核验后一次接管 |
 | Tenant create/activate | IAOS SaaS Ops | 无 platform 权限 | World/smoke 前不可 active |
 | Owner user/role/position/Mandate | IAOS Identity/Governance | `genesis_owner` | 幂等 upsert；绑定失败不签 session |
 | M9 Runtime | IAOS Runtime | 只读/执行已授权资产 | content hash no-op；失败停在 runtime checkpoint |

@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.legacy-workspace-adoption.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "恢复控制面上线前的 Genesis 企业会话",
+  "detail": "AESE 在 Workspace session 404 时只读取当前玩家拥有的旧本地记录，并请求 IAOS 以认证 tenant/subject 和既有 Runtime/case 证据完成幂等接管；不重新 bootstrap 或重跑业务过程。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "旧 local adapter 企业可经 IAOS 安全验证后进入新版控制面并恢复 tenant session。",
+  "evidence_ref": "docs/designs/DES-029-genesis-zero-start-and-ai-identity.md",
+  "occurred_at": "2026-07-30T10:35:00Z"
+}

@@ -95,6 +95,11 @@ IAOS 的已校验 evidence bundle 和 23 个持久工作项；前端不访问数
 - “我的企业”返回 `player_session_expired`：页面会先使用当前 IAOS 会话重试一次；成功
   后自动更新 Player 会话。若仍失败，返回 IAOS 重新登录并再次打开 Enterprise Genesis。
   不需要删除企业数据，也不要反复点击“刷新”。
+- 旧企业点击“继续游戏”曾返回 Workspace session 404/502：新版本会读取当前玩家拥有的
+  `0600` 本地 Workspace，并请求 IAOS 安全接管。IAOS 会验证当前 tenant 的 owner、
+  chair、Founder Mandate、M9 Runtime 和原设立案；通过后自动兑换 session。失败时按
+  页面给出的前置条件修复身份/Runtime/案件，禁止手工补数据库或重新执行 Founder
+  bootstrap。
 - 重复 World Observation：IAOS 业务事实级幂等返回同一事实，不新增业务变化。
 - 登记/开户/任命拒绝、资本差异、Agent 越权或停用：业务状态保持在原节点；从 IAOS
   工作项进入补正、人工接管或重新审批，不在游戏画面私自跳步。

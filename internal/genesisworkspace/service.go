@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/rand"
 	"encoding/hex"
+	"errors"
 	"fmt"
 	"sort"
 	"strings"
@@ -141,7 +142,19 @@ func (s *Service) RefreshSession(ctx context.Context, owner, workspaceID string)
 		return Result{}, fmt.Errorf("owner and workspace_id are required")
 	}
 	if s.ControlPlane != nil && s.ControlPlane.enabled(ctx) {
-		return s.ControlPlane.Session(ctx, owner, workspaceID)
+		result, err := s.ControlPlane.Session(ctx, owner, workspaceID)
+		var upstream *ControlPlaneHTTPError
+		if err == nil || !errors.As(err, &upstream) || upstream.StatusCode != 404 {
+			return result, err
+		}
+		legacy, ok, storeErr := s.Store.Get(owner, workspaceID)
+		if storeErr != nil {
+			return Result{}, storeErr
+		}
+		if !ok {
+			return Result{}, err
+		}
+		return s.ControlPlane.AdoptLegacy(ctx, owner, legacy)
 	}
 	items, err := s.List(ctx, owner)
 	if err != nil {

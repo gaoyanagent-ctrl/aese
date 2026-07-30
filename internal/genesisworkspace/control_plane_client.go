@@ -107,6 +107,24 @@ func (c ControlPlaneClient) Session(ctx context.Context, owner, workspaceID stri
 	return Result{Workspace: mapControlPlaneWorkspace(owner, response.Workspace), TenantToken: response.Token}, nil
 }
 
+func (c ControlPlaneClient) AdoptLegacy(ctx context.Context, owner string, workspace Workspace) (Result, error) {
+	var adopted controlPlaneWorkspace
+	err := c.doJSON(ctx, http.MethodPost, "/api/v1/genesis/workspaces/legacy-adoptions", map[string]any{
+		"workspace_id": workspace.WorkspaceID,
+		"world_run_id": workspace.WorldRunID,
+		"case_code":    workspace.CaseCode,
+		"display_name": workspace.DisplayName,
+		"evidence_ref": "aese-local-store:" + workspace.WorkspaceID,
+		"template_key": workspace.TemplateKey,
+		"region":       workspace.Region,
+		"timezone":     workspace.Timezone,
+	}, &adopted)
+	if err != nil {
+		return Result{}, err
+	}
+	return c.SessionFromWorkspace(ctx, owner, adopted)
+}
+
 func (c ControlPlaneClient) SessionFromWorkspace(ctx context.Context, owner string, workspace controlPlaneWorkspace) (Result, error) {
 	return c.Session(ctx, owner, workspace.WorkspaceID)
 }

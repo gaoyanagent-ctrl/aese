@@ -2,7 +2,7 @@
 
 本文件是 AESE 当前里程碑状态和下一步优先级的权威来源。
 
-最后更新：2026-07-29。
+最后更新：2026-07-30。
 
 ## 1. 里程碑状态
 
@@ -22,7 +22,7 @@
 | M9 Genesis Incorporation | 注资、法人登记、治理、管理岗位、初始组织与预算 | Completed | hctm-genesis@0.2.0、M9 evidence、IAOS DES-051 |
 | M9N IAOS-native Incorporation Closed Loop | 用三层语义、正式身份、Runtime Artifact、Capability/Process/Approval、持久工作项和 World Bridge 重建 M9 真实闭环 | Completed | 25 个 Capability active binding；23 个显式工作项（含 5 个财务开业节点）、G1–G7、三个 World wait、六次 Run/五 Agent 与中途重启恢复真实集成通过 |
 | GX Enterprise Genesis Game Experience | AI 企业身份、人工/Agent 协作和 2.5D 世界中的 M9 游戏化开局 | Completed | DES-028、从空白 case 创建、23 工作项游戏内操作、G1–G7、三个 World wait、三视口 live 浏览器验收 |
-| GX-ZERO Zero-start Enterprise Genesis | 从产品主页创建独立 tenant、World Run、真实 AI 企业身份和 M9 企业 | Completed | 生产 Workspace 控制面、八 checkpoint、tenant-only owner session、五步向导、持久 CreativeJob、动态 Player subject，以及全新 Workspace 的 23/23 节点、7 审批门、3 World wait、6 Agent run 验收全部通过 |
+| GX-ZERO Zero-start Enterprise Genesis | 从产品主页创建独立 tenant、World Run、真实 AI 企业身份和 M9 企业 | Completed | 生产 Workspace 控制面、八 checkpoint、tenant-only owner session、旧 local Workspace 安全接管、五步向导、持久 CreativeJob、动态 Player subject，以及全新 Workspace 的 23/23 节点、7 审批门、3 World wait、6 Agent run 验收全部通过 |
 | M9-FIN Manufacturing Finance Foundation | 在 M9 建立财务组织、账套、科目、期初资本会计和开业报表，并在 M10–M13 接通 AP/AR/资金/资产/成本/总账 | M9 Complete; M10–M13 Planned | M9 F0/F1 已交付并补齐财务对象历史盘点及权限/额度/敏感度/SoD/补偿矩阵；F15–F35 属于 M10–M13 AP/AR/资产/成本/月结和完整报表，不能计入 M9 未完成 |
 | M10 Genesis Plant Build | 选址、场地控制、设施项目、公用工程、异常重排与验收 | Reference Replay Complete; D22 Pending | hctm-genesis@0.3.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
 | M11 Genesis Capability Build | 资金补足、设备/实验室/仓储能力、核心团队与岗位资格 | Reference Replay Complete; D22 Pending | hctm-genesis@0.4.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
