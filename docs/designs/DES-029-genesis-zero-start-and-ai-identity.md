@@ -120,6 +120,12 @@ checkpoint 以 IAOS 为权威。浏览器只提交项目配置和幂等键，不
 AESE 转发当前 Player session，不保存平台凭据或 Founder 密码。loopback dev adapter
 仅在明确缺少生产 session 的本地开发路径保留。
 
+loopback adapter 必须区分“首次 provisioning”和“既有 active tenant 的 session
+refresh”。后者只能使用旧 Workspace 的确定性本地 Founder 凭据调用 login，成功后直接
+返回 session；不得再次执行 Founder bootstrap、Runtime install、tenant activate 或任何
+业务流程。active tenant 登录失败时 fail closed，并提示使用正式 IAOS 会话，禁止通过
+bootstrap 重置身份来掩盖失败。
+
 Player 控制面会话和 Workspace tenant 会话必须使用两个独立浏览器存储键。列表、创建和
 恢复 Workspace 时先使用 Player session；如果该凭据过期但当前 IAOS session 已刷新，
 前端只允许用当前 IAOS session 重试一次，并在成功后更新 Player session。两者都被 IAOS

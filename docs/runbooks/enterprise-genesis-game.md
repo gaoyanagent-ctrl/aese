@@ -33,6 +33,10 @@ AESE 的 Workspace/World 稳定引用保存在 `.aese-data/genesis-workspaces.js
 路径必须把当前 Player session 转发给受限的 Genesis Workspace API；不得把平台 token
 写进 AESE 状态、Vite 环境变量或浏览器。
 
+对已经 active 的旧本地企业，“继续游戏”只刷新 Founder session，不会再次 bootstrap
+身份、安装 Runtime 或激活 tenant。日志若出现上述 provisioning 动作，说明运行的是旧
+AESE 版本，应先更新服务，而不是反复点击。
+
 当前限制：游戏用户名和 player ID 映射保存在浏览器 localStorage，只有本机体验意义，
 没有密码校验且不能跨设备找回。正式多人
 部署必须使用 IAOS DES-062 的 Player Account/OIDC 与服务端 membership 授权，不能把

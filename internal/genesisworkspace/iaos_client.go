@@ -49,6 +49,14 @@ func (c IAOSClient) Provision(ctx context.Context, workspace Workspace) (string,
 		Status string `json:"status"`
 	}
 	tenantExists := c.doJSON(ctx, client, http.MethodGet, base+"/api/v1/platform/tenants/"+url.PathEscape(workspace.TenantID), platformToken, nil, &tenantState) == nil
+	password := workspace.WorkspaceID + "-Founder!9"
+	if tenantExists && tenantState.Status == "active" {
+		token, err := c.loginFounder(ctx, client, base, workspace.TenantID, password)
+		if err != nil {
+			return "", fmt.Errorf("refresh active founder session without reprovisioning: %w", err)
+		}
+		return token, nil
+	}
 	if !tenantExists {
 		if err := c.doJSON(ctx, client, http.MethodPost, base+"/api/v1/platform/tenants", platformToken, map[string]any{
 			"tenant_id": workspace.TenantID, "display_name": workspace.DisplayName,
@@ -57,27 +65,17 @@ func (c IAOSClient) Provision(ctx context.Context, workspace Workspace) (string,
 			return "", fmt.Errorf("create IAOS tenant: %w", err)
 		}
 	}
-	password := workspace.WorkspaceID + "-Founder!9"
 	if err := c.doJSON(ctx, client, http.MethodPost, base+"/api/v1/platform-identities/founder/bootstrap", platformToken, map[string]any{
 		"tenant_id": workspace.TenantID, "tenant_name": workspace.DisplayName,
 		"password": password, "apply": true,
 	}, nil); err != nil {
 		return "", fmt.Errorf("bootstrap founder identity: %w", err)
 	}
-	var founderSession struct {
-		Token string `json:"token"`
-	}
-	if err := c.doJSON(ctx, client, http.MethodPost, base+"/api/v1/auth/login", "", map[string]any{
-		"tenant_id": workspace.TenantID,
-		"username":  "founder-principal",
-		"password":  password,
-	}, &founderSession); err != nil {
+	founderToken, err := c.loginFounder(ctx, client, base, workspace.TenantID, password)
+	if err != nil {
 		return "", fmt.Errorf("issue founder session: %w", err)
 	}
-	if strings.TrimSpace(founderSession.Token) == "" {
-		return "", fmt.Errorf("issue founder session: IAOS returned an empty token")
-	}
-	if err := c.doJSON(ctx, client, http.MethodPost, base+"/api/v1/incorporations/runtime/install", founderSession.Token, map[string]any{
+	if err := c.doJSON(ctx, client, http.MethodPost, base+"/api/v1/incorporations/runtime/install", founderToken, map[string]any{
 		"apply": true,
 	}, nil); err != nil {
 		return "", fmt.Errorf("install M9 runtime: %w", err)
@@ -88,6 +86,23 @@ func (c IAOSClient) Provision(ctx context.Context, workspace Workspace) (string,
 		}, nil); err != nil {
 			return "", fmt.Errorf("activate IAOS tenant: %w", err)
 		}
+	}
+	return founderToken, nil
+}
+
+func (c IAOSClient) loginFounder(ctx context.Context, client *http.Client, base, tenantID, password string) (string, error) {
+	var founderSession struct {
+		Token string `json:"token"`
+	}
+	if err := c.doJSON(ctx, client, http.MethodPost, base+"/api/v1/auth/login", "", map[string]any{
+		"tenant_id": tenantID,
+		"username":  "founder-principal",
+		"password":  password,
+	}, &founderSession); err != nil {
+		return "", err
+	}
+	if strings.TrimSpace(founderSession.Token) == "" {
+		return "", fmt.Errorf("IAOS returned an empty token")
 	}
 	return founderSession.Token, nil
 }

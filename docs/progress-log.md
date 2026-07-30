@@ -1588,3 +1588,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：旧企业无需删除、重建或重跑 23 个 M9 节点即可恢复；tenant 和 owner 不由 AESE 声明，IAOS 必须验证 owner access、chair、Founder Mandate、Runtime 与 case 后才登记。
 - 验证：IAOS 三个 Go module 全量测试、Code Map、治理写入和 Atlas 检查通过；AESE `go test ./...`、20 个前端测试文件/58 项测试及生产构建通过。目标 `gxw-f4b3ce3ce8e2712d` 经 `:4173` 代理兑换返回 200、8/8 checkpoint completed、tenant token 已签发；重复调用后数据库仍为 1 Workspace、1 member、8 step，原设立案保持 `enterprise_operational_ready`。
 - 后续：正式多人环境迁移完成后移除 loopback local adapter 的创建能力，保留只读迁移审计期。
+
+## 2026-07-30 - 阻止旧企业继续游戏重复 Provisioning
+
+- 变更：AESE loopback adapter 对已有 active tenant 先执行 Founder login 并直接返回 session；不再调用 identity bootstrap、Runtime install 或 tenant activate。
+- 原因：浏览器没有 IAOS Player Token 时会进入本地 fallback；旧实现把 session refresh 当成首次 provisioning，每次点击都重复 bootstrap，随后 Runtime 1.8.0 重装失败并被包装成 502。
+- 影响：旧本地企业可以在开发环境继续游戏，同时既有身份、Runtime、流程和业务数据不会被点击操作改写；active tenant 登录失败将直接失败关闭。
+- 验证：回归测试先稳定复现 active tenant 触发 1 次 bootstrap 和 1 次 Runtime install，修复后两者均为 0 且 session 成功签发；现场无 Authorization 请求与全量回归随提交记录。
+- 后续：生产部署继续要求正式 Player Account/OIDC；确定性 Founder 凭据仅保留于 loopback 迁移期。
