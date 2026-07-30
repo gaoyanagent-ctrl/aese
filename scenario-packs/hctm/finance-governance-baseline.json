@@ -1,8 +1,38 @@
 {
-  "schema_version": "1.0",
+  "schema_version": "1.1",
   "currency": "CNY",
   "amount_scale": 2,
   "timezone": "Asia/Shanghai",
+  "organization_foundation": {
+    "organizations": [
+      {"organization_code":"GRP-HCTM","organization_name":"华辰热管理系统集团有限公司","organization_type":"enterprise_group","status":"active","effective_from":"2026-01-01","source_ref":"hctm:organization"},
+      {"organization_code":"LE-HCTM-SH","organization_name":"华辰热管理系统上海有限公司","organization_type":"legal_entity","parent_code":"GRP-HCTM","status":"active","effective_from":"2026-01-01","source_ref":"hctm:organization"},
+      {"organization_code":"BU-EAST","organization_name":"华东事业部","organization_type":"business_unit","parent_code":"LE-HCTM-SH","legal_entity_code":"LE-HCTM-SH","status":"active","effective_from":"2026-01-01","source_ref":"hctm:organization"},
+      {"organization_code":"PLT-SZ","organization_name":"苏州制造基地","organization_type":"plant","parent_code":"BU-EAST","legal_entity_code":"LE-HCTM-SH","status":"active","effective_from":"2026-01-01","source_ref":"hctm:organization"},
+      {"organization_code":"FIN-HCTM-SH","organization_name":"华辰上海财务组织","organization_type":"finance_organization","parent_code":"LE-HCTM-SH","legal_entity_code":"LE-HCTM-SH","status":"active","effective_from":"2026-01-01","source_ref":"hctm:finance"},
+      {"organization_code":"SSC-FINANCE","organization_name":"集团财务共享服务中心","organization_type":"shared_service_center","parent_code":"GRP-HCTM","status":"active","effective_from":"2026-01-01","source_ref":"hctm:finance"}
+    ],
+    "data_sets": [
+      {"set_code":"COMMON","set_name":"平台公共参考数据","scope_type":"common","owner_organization_code":"GRP-HCTM","data_types":["currency","exchange_rate","unit_of_measure","payment_term"],"status":"active","effective_from":"2026-01-01"},
+      {"set_code":"GROUP-FINANCE","set_name":"集团财务与业务主数据","scope_type":"group","owner_organization_code":"GRP-HCTM","data_types":["gl_account","business_partner","customer","supplier","product"],"status":"active","effective_from":"2026-01-01"}
+    ],
+    "assignments": [
+      {"set_code":"COMMON","data_type":"currency","determinant_organization_code":"BU-EAST","access_mode":"reference","priority":10,"status":"active","effective_from":"2026-01-01"},
+      {"set_code":"COMMON","data_type":"exchange_rate","determinant_organization_code":"BU-EAST","access_mode":"reference","priority":10,"status":"active","effective_from":"2026-01-01"},
+      {"set_code":"COMMON","data_type":"unit_of_measure","determinant_organization_code":"BU-EAST","access_mode":"reference","priority":10,"status":"active","effective_from":"2026-01-01"},
+      {"set_code":"COMMON","data_type":"payment_term","determinant_organization_code":"BU-EAST","access_mode":"reference","priority":10,"status":"active","effective_from":"2026-01-01"},
+      {"set_code":"GROUP-FINANCE","data_type":"gl_account","determinant_organization_code":"BU-EAST","access_mode":"extend","priority":20,"status":"active","effective_from":"2026-01-01"},
+      {"set_code":"GROUP-FINANCE","data_type":"business_partner","determinant_organization_code":"BU-EAST","access_mode":"extend","priority":20,"status":"active","effective_from":"2026-01-01"},
+      {"set_code":"GROUP-FINANCE","data_type":"customer","determinant_organization_code":"BU-EAST","access_mode":"extend","priority":20,"status":"active","effective_from":"2026-01-01"},
+      {"set_code":"GROUP-FINANCE","data_type":"supplier","determinant_organization_code":"BU-EAST","access_mode":"extend","priority":20,"status":"active","effective_from":"2026-01-01"},
+      {"set_code":"GROUP-FINANCE","data_type":"product","determinant_organization_code":"BU-EAST","access_mode":"extend","priority":20,"status":"active","effective_from":"2026-01-01"}
+    ],
+    "access_templates": [
+      {"subject_ref":"position:finance-lead","organization_code":"GRP-HCTM","access_scope":"subtree","permissions":["read","reference","extend","manage"]},
+      {"subject_ref":"position:finance-controller","organization_code":"GRP-HCTM","access_scope":"subtree","permissions":["read","reference"]},
+      {"subject_ref":"position:internal-audit","organization_code":"GRP-HCTM","access_scope":"subtree","permissions":["read"]}
+    ]
+  },
   "objects": [
     {"code":"cash_account","milestone":"M9","authority":"IAOS","canonical_entity":"bank_account","historical_source":"m9_bank_account","migration_status":"migrated"},
     {"code":"capital_commitment","milestone":"M9","authority":"IAOS","canonical_entity":"capital_commitment","historical_source":"m9_capital_commitment","migration_status":"migrated"},
@@ -15,6 +45,28 @@
     {"code":"profit_measure","milestone":"M13","authority":"IAOS","canonical_entity":"management_profit_measure","historical_source":"delivery_margin_projection","migration_status":"planned"}
   ],
   "controls": [
+    {
+      "capability":"finance.enterprise.structure.configure",
+      "responsible_position":"finance-lead",
+      "executor":"founder-principal",
+      "permission":"finance.foundation.manage",
+      "approval_gate":"organization-governance",
+      "amount_limit_minor":"0",
+      "data_classification":"confidential",
+      "sod_conflicts":["internal-audit"],
+      "compensation":"supersede the incorrect effective-dated organization version; never reuse a published organization code"
+    },
+    {
+      "capability":"finance.reference.data.configure",
+      "responsible_position":"finance-controller",
+      "executor":"finance-agent",
+      "permission":"finance.foundation.manage",
+      "approval_gate":"master-data-governance",
+      "amount_limit_minor":"0",
+      "data_classification":"confidential",
+      "sod_conflicts":["internal-audit"],
+      "compensation":"inactivate the incorrect assignment and publish a corrected effective-dated Data Set assignment"
+    },
     {
       "capability":"finance.organization.configure",
       "responsible_position":"finance-lead",

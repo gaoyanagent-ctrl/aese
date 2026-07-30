@@ -30,7 +30,10 @@ IAOS 实现必须在独立 worktree 中完成。所有未实现项保持未勾�
 
 - [x] F5A 完成多组织财务、Data Set 共享、科目表两段式、Business Partner
   canonical/组织扩展设计（DES-031）及模块期间状态机设计（DES-035）。
-- [ ] F5B 实现集团/法人/BU/基地/共享中心、Data Set 和组织数据权限基础。
+- [x] F5B 实现集团/法人/BU/基地/共享中心、Data Set 和组织数据权限基础；
+  IAOS DES-067 提供四张 FORCE RLS 权威表、复合租户外键、两项业务 Capability、
+  历史账套幂等迁移和财务工作台表单，AESE `finance-governance-baseline.json`
+  固定 HCTM 确定性组织/Data Set/访问模板并由离线校验器检查引用完整性。
 - [ ] F5C 重构账套原型、科目表/法人扩展、财政日历和多账簿关系，并迁移现有 M9 数据；
   禁止用空字符串或 `other` 通过必填校验。
 - [ ] F5D 实现 Business Partner、客户/供应商及产品的全局身份和组织扩展。

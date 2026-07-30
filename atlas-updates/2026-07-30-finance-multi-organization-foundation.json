@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.finance-multi-organization-foundation.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "交付财务多组织与共享 Data Set 第一切片",
+  "detail": "IAOS 实现集团组织、Data Set、决定项分配和主体组织授权的受治理运行基础；AESE HCTM baseline 增加六个组织、两个 Data Set、九个分配及三个岗位访问模板并离线校验交叉引用。",
+  "status_after": "validating",
+  "progress_after": 84,
+  "current_state": "F5B complete; F5C accounting model migration and F5D business partner extensions remain",
+  "evidence_ref": "docs/designs/finance/DES-031-multi-organization-and-shared-master-data-foundation.md",
+  "occurred_at": "2026-07-30T14:10:00Z"
+}

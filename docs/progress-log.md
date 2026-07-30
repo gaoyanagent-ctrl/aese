@@ -1674,3 +1674,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：财务规格按稳定功能模块维护，里程碑只描述业务事实和完成门；实现状态仍由路线图和财务计划管理，文档拆分不改变已实现范围。
 - 验证：检查 DES frontmatter、目录索引、仓库内旧路径、Markdown 相对链接、Atlas 声明、code map freshness 和 `git diff --check`。
 - 后续：实现 DES-031 的组织/Data Set，随后按 DES-032–036 独立推进账套迁移、子账、成本资产、关账报表和治理 UI。
+
+## 2026-07-30 - 财务多组织与共享 Data Set F5B
+
+- 变更：IAOS 新增集团/法人/BU/基地/工厂/财务组织/共享中心、Data Set、决定项分配和主体组织授权四类权威数据，两项可执行 Capability、RLS/复合 tenant 外键/写入触发器、历史账套幂等迁移及财务工作台表单；AESE baseline 新增 HCTM 六组织、两个 Data Set、九个分配和三个岗位访问模板。
+- 原因：Tenant 不能继续隐式等同单一法人，科目、伙伴、产品、币种和汇率也不能只有“全租户共享”或“逐公司复制”两种选择。
+- 影响：F5B 形成集团财务和后续采购/销售/制造主数据共同依赖的组织与共享边界；AESE 保持场景模板所有权，IAOS 保持运行数据所有权。
+- 验证：IAOS 后端单元/Runtime 测试、真实 PostgreSQL 治理/幂等/RLS/跨租户外键/完整回填集成测试、TypeScript 检查和生产构建；目标租户升级 Runtime 2.0.0 后由真实身份 API 读到 5 个组织、2 个 Data Set、9 个分配和 6 个访问授权；AESE `financebaseline` 引用/闭集/稳定编码测试、场景包离线校验、JSON、Atlas 和 Code Map 检查。
+- 后续：F5C 重构账套原型、科目表法人扩展、财政日历和多账簿并迁移 M9 数据；F5D 实现 Business Partner 及客户/供应商/产品组织扩展。

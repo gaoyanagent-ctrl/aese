@@ -22,6 +22,24 @@ tags: [finance, multi-organization, master-data, data-sharing, ledger, governanc
 本设计建立 IAOS 后续财务、采购、销售、制造和主数据治理共同使用的最小多组织底座。
 它不在 AESE 建立第二套组织或财务引擎。
 
+### 1.1 第一实施切片（F5B，2026-07-30）
+
+F5B 已由 IAOS
+`docs/designs/DES-067-finance-multi-organization-and-reference-data-sets.md` 实现：
+
+- `finance_organization_unit`、`finance_reference_data_set`、
+  `finance_reference_data_assignment`、`finance_organization_access` 四张权威表；
+- `finance.enterprise.structure.configure` 与 `finance.reference.data.configure`
+  两项受治理业务 Capability；
+- FORCE RLS、带 tenant 的复合外键和 `require_capability_execution()` 写入硬门；
+- 财务工作台“多组织与共享数据”业务表单，以及按已有 M9 账套生成默认组织/Data Set
+  的幂等迁移；
+- AESE `scenario-packs/hctm/finance-governance-baseline.json` 只保存确定性场景模板，
+  不复制 IAOS 权威数据，position access template 在应用时解析为平台 subject。
+
+F5C 账套/科目/财政日历重构和 F5D Business Partner/产品组织扩展仍未实现，
+不能因 F5B 完成而标记为完整集团财务。
+
 ## 2. 设计原则
 
 1. **Tenant 是客户安全边界，不等于法人公司。** 一个集团及其受控分子公司通常位于同一
