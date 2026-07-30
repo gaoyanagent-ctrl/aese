@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
   "update_key": "aese.m9.accounting-calendar-input.2026-07-30",
-  "node_key": "aese.m9.finance-opening",
+  "node_key": "aese.world.genesis",
   "update_type": "implementation",
   "summary": "账套启用支持名称、会计年度和完整期间日历",
   "detail": "AESE 采集账套名称、当前会计年度及 12 个默认自然月期间；IAOS 校验连续覆盖并持久化权威账套、期间和 Entity 投影。",
