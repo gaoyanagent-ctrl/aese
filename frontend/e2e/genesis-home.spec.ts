@@ -1,11 +1,23 @@
-import { expect, test } from "@playwright/test";
+import { expect, test, type Page } from "@playwright/test";
+
+async function signIn(page:Page,username="founder-principal"){
+  await page.route("**/api/aese/v1/auth/login",route=>route.fulfill({
+    status:200,json:{
+      status:"success",token:"player-token",expires_at:"2026-07-31T00:00:00Z",
+      player:{subject_id:"founder-principal",username,display_name:"创始治理者"},
+    },
+  }));
+  await page.getByLabel("用户名").fill(username);
+  await page.getByLabel("密码",{exact:true}).fill("FounderPass123");
+  await page.getByRole("button",{name:/安全登录/}).click();
+}
 
 test("root URL opens the Enterprise Genesis product home", async ({ page }) => {
+  await page.route("**/api/aese/v1/genesis/workspaces",route=>route.fulfill({status:200,json:{items:[]}}));
   await page.goto("/");
 
   await expect(page.getByRole("heading",{name:"回到你的企业世界"})).toBeVisible();
-  await page.getByLabel("游戏用户名").fill("founder-principal");
-  await page.getByRole("button",{name:/进入企业世界/}).click();
+  await signIn(page);
   await expect(
     page.getByRole("heading", {
       name: "从一个想法，创建一家真正运行的企业",
@@ -23,9 +35,9 @@ test("root URL opens the Enterprise Genesis product home", async ({ page }) => {
 test("sample-world action keeps the former sandbox available", async ({
   page,
 }) => {
+  await page.route("**/api/aese/v1/genesis/workspaces",route=>route.fulfill({status:200,json:{items:[]}}));
   await page.goto("/");
-  await page.getByLabel("游戏用户名").fill("founder-principal");
-  await page.getByRole("button",{name:/进入企业世界/}).click();
+  await signIn(page);
   await page.getByRole("button", { name: /体验华辰样板世界/ }).click();
 
   await expect(page).toHaveURL(/#sandbox$/);
@@ -37,9 +49,9 @@ test("sample-world action keeps the former sandbox available", async ({
 test("new enterprise starts with server-assigned tenant provisioning", async ({
   page,
 }) => {
+  await page.route("**/api/aese/v1/genesis/workspaces",route=>route.fulfill({status:200,json:{items:[]}}));
   await page.goto("/");
-  await page.getByLabel("游戏用户名").fill("founder-principal");
-  await page.getByRole("button",{name:/进入企业世界/}).click();
+  await signIn(page);
   await page.getByRole("button", { name: /创建新企业/ }).first().click();
 
   await expect(
@@ -62,8 +74,7 @@ test("AI creative officer is an explained contextual creation entry", async ({
     route.fulfill({ status: 200, json: { items: [] } }),
   );
   await page.goto("/");
-  await page.getByLabel("游戏用户名").fill("creative-founder");
-  await page.getByRole("button", { name: /进入企业世界/ }).click();
+  await signIn(page,"creative-founder");
 
   const creativeOfficer = page.getByRole("button", { name: /AI 创意官/ });
   await expect(creativeOfficer).toBeVisible();
@@ -102,8 +113,7 @@ test("signed-in founder can select an existing enterprise and continue", async (
   await page.route("**/api/aese/v1/genesis/workspaces",route=>route.fulfill({status:200,json:{items:[workspace]}}));
   await page.route("**/api/aese/v1/genesis/workspaces/gxw-existing/session",route=>route.fulfill({status:200,json:{...workspace,tenant_token:"founder-token"}}));
   await page.goto("/");
-  await page.getByLabel("游戏用户名").fill("founder-principal");
-  await page.getByRole("button",{name:/进入企业世界/}).click();
+  await signIn(page);
   await expect(page.getByRole("heading",{name:"我的企业"})).toBeVisible();
   await expect(page.getByRole("heading",{name:"我的热管理企业"})).toBeVisible();
   await page.getByRole("button",{name:"继续游戏"}).click();

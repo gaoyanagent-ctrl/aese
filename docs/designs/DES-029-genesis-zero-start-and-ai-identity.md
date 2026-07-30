@@ -59,13 +59,23 @@ tenant ID、case code 和 token 不出现在主导航 URL；token 不放 query/h
 
 ### Step 0 — 玩家身份
 
-玩家先登录或创建平台级账号。首版单机可以使用本机 owner 账号，但它仍是平台身份，
-不能复用通用 `founder-principal` 作为所有玩家的全局主体。
+玩家必须先在 IAOS 注册或登录平台级 PlayerAccount。AESE 不保存密码，不创建第二套
+账号目录，也不接受“只输入游戏用户名”作为认证。IAOS 成功认证后签发短期
+`genesis_player` Session；AESE BFF 只转发注册/登录请求和 Bearer Session，Workspace
+控制面从 Session 中解析稳定 Player subject。
 
-浏览器中的“游戏用户名 → 本机 player ID”只用于界面偏好和本机企业列表标签，不参与
-生产授权。生产控制面从当前 IAOS session 的 source tenant/user 解析或建立稳定
-Player subject；新租户 owner、chair 任职、Founder Mandate 和 M9 人工工作项都引用
-这个真实 subject，不再复用固定 `founder-principal`。
+浏览器中的昵称、头像和界面偏好不参与授权。新租户 owner、chair 任职、Founder
+Mandate 和 M9 人工工作项都引用 IAOS Player subject。`X-Genesis-Player-Id` 只能由
+AESE BFF 从已验证 Session/IAOS profile 派生；正式模式不得信任浏览器声明的 player ID。
+
+现有 IAOS 用户可以使用原凭据首次登录 Genesis：IAOS 验证任一 active tenant
+credential 后，将其已绑定的 platform principal 提升为 PlayerAccount，确保既有
+Workspace ownership 不丢失。全新用户通过 Genesis 注册入口建立独立平台 PlayerAccount，
+此时不创建业务 tenant；只有用户点击“创建新企业”才进入 Workspace/tenant provisioning。
+
+本机用户名映射只保留在显式 `AESE_AUTH_MODE=local_dev`。该模式必须同时绑定
+`127.0.0.1`，不由产品登录页暴露，只供本机测试客户端显式携带开发 Header，且不得部署
+到局域网或正式环境。默认 `AESE_AUTH_MODE=iaos` 在缺少有效 Session 时失败关闭。
 
 ### Step 1 — 创建创业空间
 
@@ -135,12 +145,12 @@ refresh”。后者只能使用旧 Workspace 的确定性本地 Founder 凭据�
 业务流程。active tenant 登录失败时 fail closed，并提示使用正式 IAOS 会话，禁止通过
 bootstrap 重置身份来掩盖失败。
 
-Player 控制面会话和 Workspace tenant 会话必须使用两个独立浏览器存储键。列表、创建和
-恢复 Workspace 时先使用 Player session；如果该凭据过期但当前 IAOS session 已刷新，
-前端只允许用当前 IAOS session 重试一次，并在成功后更新 Player session。两者都被 IAOS
-拒绝时，AESE BFF 必须透传为 `401 player_session_expired`，前端清除失效 Player
-session 并提示用户重新登录 IAOS；不得把身份失效包装成可重试的 `500`，也不得降级为
-仅凭 localStorage player ID 访问生产控制面。
+Player 控制面会话和 Workspace tenant 会话必须使用两个独立浏览器存储键。短期 Player
+Token 只保存在当前标签页的 `sessionStorage`；tenant session 只在进入具体企业后用于
+该企业业务调用。列表、创建和恢复 Workspace 只能使用 Player session，绝不拿 tenant
+Token 或管理员 Token 轮询尝试。Player Token 被 IAOS 拒绝时，AESE BFF 透传 401，前端
+清除失效 Player session 并返回登录入口；不得把身份失效包装成可重试的 500，也不得降级
+为仅凭 localStorage player ID 访问生产控制面。
 
 控制面上线前由 loopback adapter 创建的企业可能只有 AESE `0600` Workspace 记录和
 完整的 IAOS tenant/Runtime/case，没有新版 IAOS Workspace 行。恢复 session 收到 404
@@ -183,6 +193,40 @@ identity bootstrap、runtime install 和 activate 权限。
 AESE 只接收 `tenant_activated` committed outcome 后创建 World Run。主页聚合展示可以
 由 AESE BFF 返回，但租户、身份和 Runtime 事实都来自 IAOS。AESE 不保存密码、平台
 管理员 token 或租户业务表。
+
+### 4.3.1 IAOS Player 认证合同
+
+AESE 对浏览器公开同源 BFF：
+
+```text
+POST /api/aese/v1/auth/register
+POST /api/aese/v1/auth/login
+GET  /api/aese/v1/auth/session
+```
+
+BFF 分别代理 IAOS：
+
+```text
+POST /api/v1/genesis/auth/register
+POST /api/v1/genesis/auth/login
+GET  /api/v1/genesis/auth/session
+```
+
+注册输入为 username、password、display_name；用户名规范化后全局唯一，密码长度和复杂度
+由 IAOS 校验。注册与登录错误不得泄露账号是否存在以外的敏感数据，不记录请求体或密码。
+登录成功返回 Player subject、显示名、短期 JWT 和过期时间。后续 Workspace API 必须携带
+该 JWT；IAOS 使用 JWT user ID 查 `genesis_player_account`，不能使用客户端 header
+作为 owner 权威。
+
+首个可交付版本允许浏览器会话存储短期 Token；正式互联网部署应由 BFF 兑换为
+`HttpOnly + Secure + SameSite` Cookie，并接入 refresh/revoke、邮箱验证、找回密码、
+MFA 和 OIDC。无论采用哪种载体，Token、Cookie、密码和 refresh secret 都不得进入
+URL、World evidence、CreativeJob 或 AESE 持久文件。
+
+登录页必须提供“登录 / 注册”两条清晰路径、密码显隐、字段约束、提交中状态和可理解的
+错误。注册只产生平台 Player 身份；“创建企业”是登录后的独立动作。连续五次密码错误后
+IAOS 临时锁定账号 15 分钟。Workspace BFF 在每次请求中用 Player Token 调 IAOS session
+profile，并以 IAOS 返回的 subject 为 owner，浏览器声明的 subject 仅可作为调试信息。
 
 ### 4.4 跨仓、权限与失败恢复矩阵
 

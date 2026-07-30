@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.world.genesis-real-login-entry.2026-07-30",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "Enterprise Genesis 改用 IAOS Player 真实登录与注册",
+  "detail": "AESE 增加同源认证 BFF、登录/注册表单和短期会话存储；Workspace 请求先验证 IAOS Player profile 并派生 owner，默认不再接受用户名或浏览器 Player ID 免认证。local_dev 仅允许显式配置并绑定 loopback。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "用户必须通过 IAOS 注册或密码登录后才能查看或创建企业；账号与企业 provisioning 分离，AESE 不保存密码。",
+  "evidence_ref": "docs/designs/DES-029-genesis-zero-start-and-ai-identity.md",
+  "occurred_at": "2026-07-30T06:15:00Z"
+}

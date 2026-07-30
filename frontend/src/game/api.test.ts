@@ -1,22 +1,18 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { approveAndExecuteWorkItem, createIncorporationCase, listGenesisWorkspaces, signInGenesisPlayer } from "./api";
+import { approveAndExecuteWorkItem, createIncorporationCase, listGenesisWorkspaces, loginGenesisPlayer, registerGenesisPlayer } from "./api";
 
 describe("Genesis workspace player session recovery", () => {
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     localStorage.setItem("aese_genesis_player_id", "player-local-test");
-    localStorage.setItem("aese_genesis_player_token", "expired-player-token");
-    localStorage.setItem("iaos_token", "current-iaos-token");
+    sessionStorage.setItem("aese_genesis_player_token", "expired-player-token");
   });
 
   afterEach(() => vi.restoreAllMocks());
 
-  it("retries the current IAOS session when the persisted player token expired", async () => {
+  it("uses only the authenticated Genesis Player token", async () => {
     const fetchMock = vi.spyOn(globalThis, "fetch")
-      .mockResolvedValueOnce(new Response(JSON.stringify({
-        error: "IAOS player session expired",
-        code: "player_session_expired",
-      }), { status: 401 }))
       .mockResolvedValueOnce(new Response(JSON.stringify({
         items: [{ workspace_id: "gxw-test", status: "active" }],
       }), { status: 200 }));
@@ -24,11 +20,9 @@ describe("Genesis workspace player session recovery", () => {
     const items = await listGenesisWorkspaces();
 
     expect(items).toHaveLength(1);
+    expect(fetchMock).toHaveBeenCalledTimes(1);
     expect((fetchMock.mock.calls[0][1]?.headers as Record<string, string>).Authorization)
       .toBe("Bearer expired-player-token");
-    expect((fetchMock.mock.calls[1][1]?.headers as Record<string, string>).Authorization)
-      .toBe("Bearer current-iaos-token");
-    expect(localStorage.getItem("aese_genesis_player_token")).toBe("current-iaos-token");
   });
 
   it("clears an expired player token and reports a login action when no session works", async () => {
@@ -36,24 +30,22 @@ describe("Genesis workspace player session recovery", () => {
       .mockResolvedValueOnce(new Response(JSON.stringify({
         error: "IAOS player session expired",
         code: "player_session_expired",
-      }), { status: 401 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({
-        error: "IAOS player session expired",
-        code: "player_session_expired",
       }), { status: 401 }));
 
-    await expect(listGenesisWorkspaces()).rejects.toThrow("IAOS 登录已过期");
-    expect(localStorage.getItem("aese_genesis_player_token")).toBeNull();
+    await expect(listGenesisWorkspaces()).rejects.toThrow("创始人登录已过期");
+    expect(sessionStorage.getItem("aese_genesis_player_token")).toBeNull();
   });
 });
 
 describe("createIncorporationCase", () => {
   beforeEach(() => {
     localStorage.clear();
+    sessionStorage.clear();
     localStorage.setItem("iaos_token", "stale-admin-token");
     localStorage.setItem("aese_iaos_tenant_id", "tenant-gx-test");
     localStorage.setItem("aese_genesis_workspace_id", "gxw-test");
     localStorage.setItem("aese_genesis_player_id", "player-local-test");
+    sessionStorage.setItem("aese_genesis_player_token", "player-token");
   });
 
   afterEach(() => vi.restoreAllMocks());
@@ -86,15 +78,32 @@ describe("createIncorporationCase", () => {
   });
 });
 
-describe("local Genesis player login", () => {
-  it("claims the existing browser player for the first username", () => {
+describe("Genesis Player authentication", () => {
+  afterEach(() => vi.restoreAllMocks());
+
+  it("persists the IAOS-issued player identity after login", async () => {
     localStorage.clear();
-    localStorage.setItem("aese_genesis_player_id", "player-local-existing");
+    sessionStorage.clear();
+    vi.spyOn(globalThis,"fetch").mockResolvedValueOnce(new Response(JSON.stringify({
+      status:"success",token:"signed-player-token",expires_at:"2026-08-01T00:00:00Z",
+      player:{subject_id:"player-trusted",username:"founder-principal",display_name:"Founder"},
+    }),{status:200}));
 
-    const session = signInGenesisPlayer("founder-principal");
+    const session = await loginGenesisPlayer({username:"founder-principal",password:"FounderPass123"});
 
-    expect(session.player_id).toBe("player-local-existing");
+    expect(session.player.subject_id).toBe("player-trusted");
     expect(localStorage.getItem("aese_genesis_username")).toBe("founder-principal");
+    expect(sessionStorage.getItem("aese_genesis_player_token")).toBe("signed-player-token");
+  });
+
+  it("shows a useful conflict when registering an existing username", async () => {
+    vi.spyOn(globalThis,"fetch").mockResolvedValueOnce(new Response(JSON.stringify({
+      error:"username is already registered",code:"username_exists",
+    }),{status:409}));
+
+    await expect(registerGenesisPlayer({
+      username:"founder-principal",password:"FounderPass123",display_name:"Founder",
+    })).rejects.toThrow("该用户名已经注册，请直接登录");
   });
 });
 

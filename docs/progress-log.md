@@ -1644,3 +1644,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：Founder 重新登录 IAOS 时可以看到并进入自己从 AESE 创建的新企业；每张选择卡仍使用目标 tenant-scoped JWT 与目标角色，同名无授权账户不会被合并。
 - 验证：修复前回归稳定遗漏目标租户，修复后通过；IAOS 全量 Go、vet、Atlas、Code Map 与治理写入检查通过。后端部署后真实登录 API 返回 200/multiple，并确认包含 `tenant-gx-bfe7c4374e9340319017`（“还是要赚钱啊”）；健康检查为 UP。
 - 后续：正式 Player/OIDC 接入继续使用不可变 platform subject 关联 Workspace，不使用用户名、邮箱或显示名作为跨租户身份键。
+
+## 2026-07-30 - 建立 Enterprise Genesis 真实登录与注册
+
+- 变更：IAOS 增加全局 Genesis PlayerAccount、注册/密码登录/session profile、连续失败锁定和既有 IAOS credential 安全提升；AESE 增加同源认证 BFF 与登录/注册表单，短期 Player Token 使用 sessionStorage，Workspace owner 每次从 IAOS 验证后的 subject 派生。默认 IAOS 模式彻底移除只输用户名登录，本地适配器仅允许显式 `local_dev + loopback`。
+- 原因：原 AESE 用户名和 `X-Genesis-Player-Id` 都由浏览器声明，既无注册和密码验证，也能被伪造，不能承担 Workspace ownership、跨租户隔离和正式交付身份。
+- 影响：新玩家先注册平台身份，登录后再独立创建企业；现有 Founder 可用原 IAOS 凭据首次提升并保持历史 Workspace；错误密码、锁定、过期/伪造 Token 和跨玩家读取均失败关闭，AESE 不保存密码。
+- 验证：IAOS 全量 Go 测试与 vet、Player 真实 PostgreSQL 注册/登录/session/重复账号/五次失败锁定/双 Player Workspace 隔离通过；真实 `founder-principal` 提升后恢复 5 个原 Workspace，伪造 Player Header 且无 Token 返回 401。AESE Go 全量测试、前端 21 文件/61 项测试、TypeScript、定向 ESLint 与生产构建通过；Genesis Home 15 项三视口 Playwright 及真实 Founder 3 项三视口 Playwright 通过且无控制台错误。IAOS 8082 与 AESE 8090 已重建部署。
+- 后续：正式互联网部署把短期 Bearer 升级为 HttpOnly/Secure/SameSite Cookie，并补 refresh/revoke、邮箱验证、找回密码、MFA、OIDC 与设备会话管理。

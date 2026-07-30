@@ -51,6 +51,8 @@ type Config struct {
 	CreativeProvider        creative.Provider
 	CreativeJobStore        *creative.JobStore
 	GenesisWorkspaceService *genesisworkspace.Service
+	GenesisPlayerAuth       *genesisworkspace.PlayerAuthClient
+	AllowLocalGenesisAuth   bool
 }
 
 type Server struct {
@@ -63,6 +65,7 @@ type Server struct {
 	creativeProvider        creative.Provider
 	creativeJobStore        *creative.JobStore
 	genesisWorkspaceService *genesisworkspace.Service
+	genesisPlayerAuth       *genesisworkspace.PlayerAuthClient
 }
 
 type actionCache struct {
@@ -195,6 +198,7 @@ func New(cfg Config) *Server {
 		creativeProvider:        cfg.CreativeProvider,
 		creativeJobStore:        cfg.CreativeJobStore,
 		genesisWorkspaceService: cfg.GenesisWorkspaceService,
+		genesisPlayerAuth:       cfg.GenesisPlayerAuth,
 	}
 	server.RegisterRoutes()
 	return server
@@ -297,21 +301,79 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch rest[0] {
+	case "auth":
+		if s.genesisPlayerAuth == nil || len(rest) != 2 {
+			s.writeError(w, http.StatusNotFound, "not_found", "route not found", false, "", "")
+			return
+		}
+		switch {
+		case rest[1] == "register" && r.Method == http.MethodPost:
+			var request genesisworkspace.PlayerRegisterRequest
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &request); err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_registration_request", err.Error(), false, "", "")
+				return
+			}
+			result, err := s.genesisPlayerAuth.Register(ctx, request)
+			if err != nil {
+				s.writeGenesisAuthError(w, err, "registration_failed")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, result)
+			return
+		case rest[1] == "login" && r.Method == http.MethodPost:
+			var request genesisworkspace.PlayerLoginRequest
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &request); err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_login_request", err.Error(), false, "", "")
+				return
+			}
+			result, err := s.genesisPlayerAuth.Login(ctx, request)
+			if err != nil {
+				s.writeGenesisAuthError(w, err, "login_failed")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, result)
+			return
+		case rest[1] == "session" && r.Method == http.MethodGet:
+			token := bearerToken(r.Header.Get("Authorization"))
+			if token == "" {
+				s.writeError(w, http.StatusUnauthorized, "player_session_required", "Genesis Player session required", false, "", "")
+				return
+			}
+			result, err := s.genesisPlayerAuth.Session(ctx, token)
+			if err != nil {
+				s.writeGenesisAuthError(w, err, "session_lookup_failed")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, result)
+			return
+		default:
+			s.writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "method not allowed", false, "", "")
+			return
+		}
 	case "genesis":
 		if len(rest) < 2 || rest[1] != "workspaces" || s.genesisWorkspaceService == nil {
 			s.writeError(w, http.StatusNotFound, "not_found", "route not found", false, "", "")
 			return
 		}
-		playerID := strings.TrimSpace(r.Header.Get("X-Genesis-Player-Id"))
-		if playerID == "" {
-			s.writeError(w, http.StatusUnauthorized, "player_identity_required", "X-Genesis-Player-Id is required", false, "", "")
-			return
-		}
-		if authorization := strings.TrimSpace(r.Header.Get("Authorization")); authorization != "" {
-			fields := strings.Fields(authorization)
-			if len(fields) == 2 && strings.EqualFold(fields[0], "Bearer") {
-				ctx = genesisworkspace.WithIAOSToken(ctx, fields[1])
+		token := bearerToken(r.Header.Get("Authorization"))
+		playerID := ""
+		if token != "" && s.genesisPlayerAuth != nil {
+			session, err := s.genesisPlayerAuth.Session(ctx, token)
+			if err != nil {
+				s.writeGenesisAuthError(w, err, "player_session_expired")
+				return
 			}
+			playerID = strings.TrimSpace(session.Player.SubjectID)
+			ctx = genesisworkspace.WithIAOSToken(ctx, token)
+		} else if s.cfg.AllowLocalGenesisAuth {
+			playerID = strings.TrimSpace(r.Header.Get("X-Genesis-Player-Id"))
+			if token != "" {
+				ctx = genesisworkspace.WithIAOSToken(ctx, token)
+			}
+		}
+		if playerID == "" {
+			s.writeError(w, http.StatusUnauthorized, "player_session_required", "authenticated Genesis Player session required", false, "", "")
+			return
 		}
 		if len(rest) == 4 && rest[3] == "session" && r.Method == http.MethodPost {
 			result, err := s.genesisWorkspaceService.RefreshSession(ctx, playerID, rest[2])
@@ -341,10 +403,7 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				s.writeError(w, http.StatusBadRequest, "invalid_workspace_request", err.Error(), false, "", "")
 				return
 			}
-			if request.OwnerPlayerID != playerID {
-				s.writeError(w, http.StatusForbidden, "player_identity_mismatch", "workspace owner must match player identity", false, "", "")
-				return
-			}
+			request.OwnerPlayerID = playerID
 			result, err := s.genesisWorkspaceService.Create(ctx, request)
 			if err != nil {
 				s.writeGenesisWorkspaceError(w, err, "workspace_provisioning_failed")
@@ -1542,6 +1601,38 @@ func (s *Server) writeGenesisWorkspaceError(w http.ResponseWriter, err error, fa
 	default:
 		s.writeError(w, http.StatusBadGateway, fallbackCode, err.Error(), upstream.StatusCode >= 500, "", "")
 	}
+}
+
+func (s *Server) writeGenesisAuthError(w http.ResponseWriter, err error, fallbackCode string) {
+	var upstream *genesisworkspace.PlayerAuthHTTPError
+	if !errors.As(err, &upstream) {
+		s.writeError(w, http.StatusBadGateway, fallbackCode, "IAOS authentication service is unavailable", true, "", "")
+		return
+	}
+	payload := struct {
+		Error string `json:"error"`
+		Code  string `json:"code"`
+	}{}
+	_ = json.Unmarshal([]byte(upstream.Body), &payload)
+	if strings.TrimSpace(payload.Error) == "" {
+		payload.Error = "IAOS authentication request failed"
+	}
+	if strings.TrimSpace(payload.Code) == "" {
+		payload.Code = fallbackCode
+	}
+	status := upstream.StatusCode
+	if status < 400 || status > 599 {
+		status = http.StatusBadGateway
+	}
+	s.writeError(w, status, payload.Code, payload.Error, status >= 500, "", "")
+}
+
+func bearerToken(authorization string) string {
+	fields := strings.Fields(strings.TrimSpace(authorization))
+	if len(fields) != 2 || !strings.EqualFold(fields[0], "Bearer") {
+		return ""
+	}
+	return strings.TrimSpace(fields[1])
 }
 
 func (s *Server) claimRun(run *runRecord) error {

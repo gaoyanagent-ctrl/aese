@@ -9,8 +9,13 @@ test("provisions an isolated tenant before opening the AI identity studio", asyn
   page,
 }) => {
   await page.goto("/");
-  await page.getByLabel("游戏用户名").fill(`founder-live-${Date.now()}`);
-  await page.getByRole("button",{name:/进入企业世界/}).click();
+  const username=`founder-live-${Date.now()}`;
+  await page.getByRole("tab",{name:"注册"}).click();
+  await page.getByLabel("用户名").fill(username);
+  await page.getByLabel("显示名称 选填").fill("浏览器验收创始人");
+  await page.getByLabel("密码",{exact:true}).fill("FounderLive2026");
+  await page.getByLabel("确认密码").fill("FounderLive2026");
+  await page.getByRole("button",{name:/注册并进入/}).click();
   await page.getByRole("button", { name: /创建新企业/ }).first().click();
   await page
     .getByLabel("创业项目名称")

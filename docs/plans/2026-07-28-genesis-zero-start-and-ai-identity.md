@@ -95,3 +95,17 @@ tags: [genesis, tenant, homepage, minimax, onboarding]
 - [x] Z52 修复 Founder IAOS 多租户发现，并完成双租户与 provisioning 失败恢复验收。
 - [x] Z53 校准室内人物与房间家具比例，并增加桌面、移动端最小身高及角色比例回归断言。
 - [x] Z54 修复资本核验完成后组织节点与总部解锁不同步，并增加投影及浏览器回归测试。
+
+## 10. Z7 — IAOS 权威 Player 登录与注册
+
+- [x] Z55 在 IAOS 增加全局 `genesis_player_account`、注册、登录和 session profile；
+      新账号不提前创建业务 tenant。
+- [x] Z56 允许既有 IAOS credential 安全提升为同一 platform principal 的
+      PlayerAccount，保持既有 Workspace ownership。
+- [x] Z57 Workspace 控制面从已验证 Player JWT 派生 owner subject，正式路径不信任
+      `X-Genesis-Player-Id`。
+- [x] Z58 AESE 增加同源认证 BFF 和登录/注册表单，移除默认用户名免认证入口。
+- [x] Z59 将本地身份适配器收口到显式 `AESE_AUTH_MODE=local_dev + 127.0.0.1`；
+      默认 `iaos` 模式缺少 Session 时返回 401。
+- [x] Z60 验证注册、登录、重复账号、错误密码、过期/伪造 Token、跨玩家 Workspace
+      隔离、既有 Founder 企业恢复、键盘/移动端和敏感日志。

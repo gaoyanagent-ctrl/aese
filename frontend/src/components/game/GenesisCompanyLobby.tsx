@@ -1,5 +1,5 @@
 import { ArrowRight, Building2, LoaderCircle, LogOut, Plus, RefreshCw } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { listGenesisWorkspaces, resumeGenesisWorkspace, signOutGenesisPlayer } from "../../game/api";
 import type { GenesisWorkspace, GenesisWorkspaceResult } from "../../game/types";
 import { GenesisHome } from "./GenesisHome";
@@ -7,9 +7,15 @@ import "./GenesisCompanyLobby.css";
 
 export function GenesisCompanyLobby({username,onCreateEnterprise,onOpenDemo,onOpenWorld,onSignedOut,onResume}:{username:string;onCreateEnterprise:()=>void;onOpenDemo:()=>void;onOpenWorld:()=>void;onSignedOut:()=>void;onResume:(workspace:GenesisWorkspaceResult)=>void}){
  const[items,setItems]=useState<GenesisWorkspace[]>([]),[loading,setLoading]=useState(true),[opening,setOpening]=useState(""),[error,setError]=useState("");
- const load=async()=>{setLoading(true);setError("");try{setItems(await listGenesisWorkspaces())}catch(reason){setError(reason instanceof Error?reason.message:String(reason))}finally{setLoading(false)}};
- useEffect(()=>{void load()},[]);
- const resume=async(workspace:GenesisWorkspace)=>{setOpening(workspace.workspace_id);setError("");try{onResume(await resumeGenesisWorkspace(workspace as GenesisWorkspaceResult))}catch(reason){setError(reason instanceof Error?reason.message:String(reason));setOpening("")}};
+ const handleFailure=useCallback((reason:unknown)=>{
+  if(!sessionStorage.getItem("aese_genesis_player_token")){
+   signOutGenesisPlayer();onSignedOut();return;
+  }
+  setError(reason instanceof Error?reason.message:String(reason));
+ },[onSignedOut]);
+ const load=useCallback(async()=>{setLoading(true);setError("");try{setItems(await listGenesisWorkspaces())}catch(reason){handleFailure(reason)}finally{setLoading(false)}},[handleFailure]);
+ useEffect(()=>{void load()},[load]);
+ const resume=async(workspace:GenesisWorkspace)=>{setOpening(workspace.workspace_id);setError("");try{onResume(await resumeGenesisWorkspace(workspace as GenesisWorkspaceResult))}catch(reason){handleFailure(reason);setOpening("")}};
  const portfolio=<section className="gx-lobby" aria-labelledby="my-enterprises-title">
    <div className="gx-lobby__heading"><div><p>FOUNDER PORTFOLIO</p><h2 id="my-enterprises-title">我的企业</h2><span>选择一个已创建的独立 IAOS 租户继续经营。</span></div><div><button className="gx-lobby__refresh" onClick={()=>void load()} disabled={loading}><RefreshCw className={loading?"gx-spin":""} aria-hidden="true"/>刷新</button><button className="gx-lobby__create" onClick={onCreateEnterprise}><Plus aria-hidden="true"/>创建新企业</button></div></div>
    {error&&<p className="gx-lobby__error" role="alert">{error}</p>}

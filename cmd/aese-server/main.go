@@ -5,6 +5,7 @@ import (
 	"flag"
 	"fmt"
 	"log"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
@@ -70,6 +71,15 @@ func run(args []string) int {
 		fmt.Fprintln(os.Stderr, "--request-timeout must be greater than 0")
 		return 2
 	}
+	authMode := strings.ToLower(strings.TrimSpace(envOrDefault("AESE_AUTH_MODE", "iaos")))
+	if authMode != "iaos" && authMode != "local_dev" {
+		fmt.Fprintln(os.Stderr, "AESE_AUTH_MODE must be iaos or local_dev")
+		return 2
+	}
+	if authMode == "local_dev" && !isLoopbackListen(*listen) {
+		fmt.Fprintln(os.Stderr, "AESE_AUTH_MODE=local_dev may only listen on 127.0.0.1 or localhost")
+		return 2
+	}
 
 	logger := log.New(os.Stdout, "[aese-server] ", log.LstdFlags|log.Lshortfile)
 	var creativeProvider creative.Provider = creative.DeterministicProvider{}
@@ -89,13 +99,15 @@ func run(args []string) int {
 		logger.Printf("creative provider fallback enabled (provider=deterministic)")
 	}
 	server := httpapi.New(httpapi.Config{
-		PackDir:          *packDir,
-		IAOSBaseURL:      *iaosBaseURL,
-		RequestTimeout:   *timeout,
-		BodyLimit:        *bodyLimit,
-		Logger:           logger,
-		CreativeProvider: creativeProvider,
-		CreativeJobStore: creative.NewJobStore(envOrDefault("GENESIS_CREATIVE_JOB_STORE", ".aese-data/genesis-creative-jobs.json")),
+		PackDir:               *packDir,
+		IAOSBaseURL:           *iaosBaseURL,
+		RequestTimeout:        *timeout,
+		BodyLimit:             *bodyLimit,
+		Logger:                logger,
+		CreativeProvider:      creativeProvider,
+		CreativeJobStore:      creative.NewJobStore(envOrDefault("GENESIS_CREATIVE_JOB_STORE", ".aese-data/genesis-creative-jobs.json")),
+		GenesisPlayerAuth:     &genesisworkspace.PlayerAuthClient{BaseURL: *iaosBaseURL},
+		AllowLocalGenesisAuth: authMode == "local_dev",
 		GenesisWorkspaceService: &genesisworkspace.Service{
 			Store:        genesisworkspace.NewStore(envOrDefault("GENESIS_WORKSPACE_STORE", ".aese-data/genesis-workspaces.json")),
 			ControlPlane: &genesisworkspace.ControlPlaneClient{BaseURL: *iaosBaseURL},
@@ -138,6 +150,15 @@ func run(args []string) int {
 		return 1
 	}
 	return 0
+}
+
+func isLoopbackListen(address string) bool {
+	host, _, err := net.SplitHostPort(address)
+	if err != nil {
+		return false
+	}
+	host = strings.Trim(host, "[]")
+	return strings.EqualFold(host, "localhost") || net.ParseIP(host).IsLoopback()
 }
 
 func envOrDefault(key, fallback string) string {
