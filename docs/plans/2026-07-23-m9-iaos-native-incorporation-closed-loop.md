@@ -408,3 +408,17 @@ installation 均 active，Runtime 为 2.4.0；参考租户有 0 个设立案、0
 验收：`tenant-001` 全量 46 个 Entity 的阻断语义错误为 0；设立案件及财务/制造原生表列表
 和明细返回 200；投影 Entity 不开放绕过 Capability 的直接 CRUD，页面提供业务维护入口。
 17 条旧制造模型 warning 作为非阻断治理债务继续跟踪，不影响 M9 设立闭环。
+
+## 23. D32 Genesis 会话与 Runtime Edition 恢复
+
+- [x] T131 AESE projection 在旧 tenant/token 导致 401/404 时刷新当前 Workspace session，
+      使用控制面返回的 tenant/token 重试一次。
+- [x] T132 IAOS Workspace session 在签发 token 前检查受管 Runtime version/compiler/hash，
+      stale 时复用平台包应用服务升级，current 时不产生安装写入。
+- [x] T133 Agent 操作只对明确的 `effective runtime artifact stale` 422 执行一次会话刷新和
+      安全重试；其他业务治理拒绝保持失败关闭。
+- [x] T134 现有 `tenant-gx-472324ae8bac4af39519` 从 Runtime 2.4.0 升级到 2.5.0，
+      失败的节点 2 仍为 `ready`，没有部分提交。
+
+验收：投影 stale tenant 回归从 404 恢复为 200；Runtime stale Agent dispatch 在 managed
+session 收敛后可重试；真实不存在的 case 和非 stale 422 不被误吞。

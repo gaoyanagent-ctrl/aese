@@ -1738,3 +1738,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：AESE 仍只调用 IAOS Capability/Process，不拥有或直接写运行数据；动态 Entity 可按权限直接维护，领域投影必须经业务工作台和 Capability 写入。
 - 验证：IAOS `tenant-001` 46 个 Entity 阻断错误为 0，代表性设立、财务、库存、采购和产品列表 API 返回 200；Go、前端组件测试、生产构建、Atlas、Code Map 和线上健康检查通过，IAOS main `e29e0c2` 已推送。
 - 后续：逐步消除 7 条关系展示字段和 10 条未选择 Archetype 的旧制造模型非阻断 warning。
+
+## 2026-07-31 - Genesis 投影会话与 Runtime stale 恢复
+
+- 变更：AESE projection 在旧 tenant/token 造成 401/404 时刷新 Workspace session 并重试；Agent 写请求仅对明确 Runtime stale 422 做一次安全重试。IAOS Workspace session 在签发 token 前幂等对齐 Genesis-managed Edition。
+- 原因：已有企业仍安装 Runtime 2.4.0，平台运行代码已是 2.5.0；同时页面首次投影可能读取上一企业的 localStorage 会话，分别造成 Agent 422 和投影 404。
+- 影响：受管 Workspace 重新进入时自动收敛，普通 IAOS 租户仍保留显式升级；失败请求不会跳过节点或留下部分业务写入。
+- 验证：curl 复现原 422 `effective runtime artifact stale`；正确会话 projection 返回 200；前端新增两条 stale session 回归；IAOS helper 覆盖 stale/current/failure；目标 GX 租户已升级 2.5.0。
+- 后续：继续保留平台包控制台作为普通租户的显式版本治理入口。

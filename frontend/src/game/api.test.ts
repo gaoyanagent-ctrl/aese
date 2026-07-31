@@ -1,5 +1,13 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { approveAndExecuteWorkItem, createIncorporationCase, listGenesisWorkspaces, loginGenesisPlayer, registerGenesisPlayer } from "./api";
+import {
+  approveAndExecuteWorkItem,
+  createIncorporationCase,
+  dispatchAgentWorkItem,
+  listGenesisWorkspaces,
+  loadGameProjection,
+  loginGenesisPlayer,
+  registerGenesisPlayer,
+} from "./api";
 
 describe("Genesis workspace player session recovery", () => {
   beforeEach(() => {
@@ -75,6 +83,68 @@ describe("createIncorporationCase", () => {
     expect(fetchMock.mock.calls[1][0]).toBe("/api/aese/v1/genesis/workspaces/gxw-test/session");
     expect((fetchMock.mock.calls[2][1]?.headers as Record<string, string>).Authorization).toBe("Bearer founder-token");
     expect(localStorage.getItem("iaos_token")).toBe("founder-token");
+  });
+});
+
+describe("live Genesis workspace runtime recovery", () => {
+  beforeEach(() => {
+    localStorage.clear();
+    sessionStorage.clear();
+    localStorage.setItem("iaos_token", "stale-tenant-token");
+    localStorage.setItem("aese_iaos_tenant_id", "tenant-old");
+    localStorage.setItem("aese_genesis_workspace_id", "gxw-test");
+    sessionStorage.setItem("aese_genesis_player_token", "player-token");
+  });
+
+  afterEach(() => vi.restoreAllMocks());
+
+  it("refreshes the workspace session and retries a projection hidden by stale tenant context", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        error: "incorporation case not found",
+      }), { status: 404 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        workspace_id: "gxw-test",
+        tenant_id: "tenant-gx-test",
+        tenant_token: "founder-token",
+      }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        case_code: "INC-GX-TEST",
+        work_items: [],
+      }), { status: 200 }));
+
+    const projection = await loadGameProjection("INC-GX-TEST", 0);
+
+    expect(projection.case_code).toBe("INC-GX-TEST");
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect(fetchMock.mock.calls[1][0]).toBe("/api/aese/v1/genesis/workspaces/gxw-test/session");
+    expect((fetchMock.mock.calls[2][1]?.headers as Record<string, string>)["X-IAOS-Tenant-Id"])
+      .toBe("tenant-gx-test");
+    expect(localStorage.getItem("aese_iaos_tenant_id")).toBe("tenant-gx-test");
+  });
+
+  it("refreshes the managed Edition and retries an Agent dispatch rejected as stale", async () => {
+    const fetchMock = vi.spyOn(globalThis, "fetch")
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        error: "governance rejected: effective runtime artifact stale",
+      }), { status: 422 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        workspace_id: "gxw-test",
+        tenant_id: "tenant-gx-test",
+        tenant_token: "founder-token",
+      }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({
+        status: "committed",
+      }), { status: 201 }));
+
+    await dispatchAgentWorkItem("INC-GX-TEST", 2, {
+      resolution_objective: "建立依法合规且权责清晰的公司治理基础",
+      key_proposals: "批准发起企业设立并建立创始人审批责任边界",
+    });
+
+    expect(fetchMock).toHaveBeenCalledTimes(3);
+    expect((fetchMock.mock.calls[2][1]?.headers as Record<string, string>).Authorization)
+      .toBe("Bearer founder-token");
   });
 });
 

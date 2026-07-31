@@ -23,21 +23,32 @@ export async function loadGameProjection(
   frame: number,
   signal?: AbortSignal,
 ) {
-  const token = localStorage.getItem("iaos_token") ?? "";
-  const tenant =
-    localStorage.getItem("aese_iaos_tenant_id") ??
-    localStorage.getItem("iaos_tenant_id") ??
-    "";
-  const response = await fetch(
-    `/api/aese/v1/game/incorporation/${encodeURIComponent(caseCode)}/projection?frame=${frame}`,
-    {
-      signal,
-      headers: {
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-        ...(tenant ? { "X-IAOS-Tenant-Id": tenant } : {}),
+  const request = () => {
+    const token = localStorage.getItem("iaos_token") ?? "";
+    const tenant =
+      localStorage.getItem("aese_iaos_tenant_id") ??
+      localStorage.getItem("iaos_tenant_id") ??
+      "";
+    return fetch(
+      `/api/aese/v1/game/incorporation/${encodeURIComponent(caseCode)}/projection?frame=${frame}`,
+      {
+        signal,
+        headers: {
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(tenant ? { "X-IAOS-Tenant-Id": tenant } : {}),
+        },
       },
-    },
-  );
+    );
+  };
+  let response = await request();
+  if (
+    (response.status === 401 || response.status === 404) &&
+    localStorage.getItem("aese_genesis_workspace_id") &&
+    genesisPlayerToken()
+  ) {
+    await refreshGenesisWorkspaceSession();
+    response = await request();
+  }
   if (!response.ok)
     throw new GameApiError(
       response.status,
@@ -250,7 +261,7 @@ export async function createGenesisWorkspace(input: {
   localStorage.setItem("aese_genesis_case_code", result.case_code);
   return result;
 }
-async function refreshGenesisSession() {
+export async function refreshGenesisWorkspaceSession() {
   const workspace = localStorage.getItem("aese_genesis_workspace_id");
   if (!workspace) throw new Error("缺少创业空间标识，请从游戏主页重新进入");
   const response = await genesisWorkspaceFetch(
@@ -261,9 +272,13 @@ async function refreshGenesisSession() {
   if (!response.ok)
     throw new Error(
       `Founder 会话刷新失败 ${response.status}: ${await response.text()}`,
-    );
+  );
   const result = (await response.json()) as GenesisWorkspaceResult;
   localStorage.setItem("iaos_token", result.tenant_token);
+  localStorage.setItem("aese_iaos_tenant_id", result.tenant_id);
+  localStorage.setItem("iaos_tenant_id", result.tenant_id);
+  localStorage.setItem("aese_genesis_workspace_id", result.workspace_id);
+  localStorage.setItem("aese_genesis_case_code", result.case_code);
   return result.tenant_token;
 }
 export async function resumeGenesisWorkspace(
@@ -313,7 +328,7 @@ export async function createIncorporationCase(input: {
   if (response.status === 422) {
     const detail = await response.clone().text();
     if (detail.includes("authenticated principal does not match")) {
-      token = await refreshGenesisSession();
+      token = await refreshGenesisWorkspaceSession();
       response = await submit();
     }
   }
@@ -337,11 +352,24 @@ const iaosHeaders = () => {
   };
 };
 async function iaosPost(path: string, body: unknown) {
-  const response = await fetch(`${resolveIaosLifecycleBase()}${path}`, {
-    method: "POST",
-    headers: iaosHeaders(),
-    body: JSON.stringify(body),
-  });
+  const submit = () =>
+    fetch(`${resolveIaosLifecycleBase()}${path}`, {
+      method: "POST",
+      headers: iaosHeaders(),
+      body: JSON.stringify(body),
+    });
+  let response = await submit();
+  if (response.status === 422) {
+    const detail = await response.clone().text();
+    if (
+      detail.includes("effective runtime artifact stale") &&
+      localStorage.getItem("aese_genesis_workspace_id") &&
+      genesisPlayerToken()
+    ) {
+      await refreshGenesisWorkspaceSession();
+      response = await submit();
+    }
+  }
   if (!response.ok)
     throw new Error(`IAOS ${response.status}: ${await response.text()}`);
   return response.json();

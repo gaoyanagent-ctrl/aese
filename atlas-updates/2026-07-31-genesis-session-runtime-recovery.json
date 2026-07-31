@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis-session-runtime-recovery.2026-07-31",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "修复 Genesis 投影会话竞态与 Runtime stale 操作失败",
+  "detail": "AESE 在 projection 401/404 和明确 Runtime stale 422 时刷新当前 Workspace session 并安全重试一次；IAOS session 在签发 token 前对齐 Genesis-managed Edition。",
+  "status_after": "validating",
+  "progress_after": 99,
+  "current_state": "目标 GX 企业已升级 Runtime 2.5.0，节点 2 保持 ready；会话恢复回归测试已覆盖。",
+  "evidence_ref": "docs/solutions/SOL-009-genesis-projection-session-and-runtime-recovery.md",
+  "occurred_at": "2026-07-31T02:50:00Z"
+}

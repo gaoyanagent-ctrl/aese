@@ -29,6 +29,7 @@
 | [Progress Log](progress-log.md) | 只追加的历史记录 | Active |
 | [MVP Blueprint](AESE_MVP_Blueprint.md) | MVP 产品与业务范围 | Approved |
 | [SOL-002 AESE World 失效设立案恢复](solutions/SOL-002-aese-world-stale-incorporation-case-recovery.md) | 旧 case 深链 404 时保留 World 并引导切换有效案件 | Completed |
+| [SOL-009 Genesis 投影会话与 Runtime 自动恢复](solutions/SOL-009-genesis-projection-session-and-runtime-recovery.md) | 旧租户会话造成 projection 404、Runtime stale 422 时刷新受管 Workspace session 并安全重试 | Completed |
 
 ### 华辰场景文档
 
