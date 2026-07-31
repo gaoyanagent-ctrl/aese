@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.capability-lifecycle-permission-alignment.2026-07-31",
+  "node_key": "aese.m9",
+  "update_type": "implementation",
+  "summary": "M9 对齐 IAOS 能力草稿、发布、执行授权和 Active Artifact 闭环",
+  "detail": "AESE M9 只消费 IAOS 已发布、已绑定且角色获 capability.<code>/EXECUTE 的能力；计划引用 IAOS DES-076/SOL-050，禁止把草稿或 governed projection 通用 CRUD 当成可执行剧情动作。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "M9 Capability 调用边界与 IAOS 客户配置入口一致，草稿与运行版本可解释且失败关闭。",
+  "evidence_ref": "docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-31T15:50:00Z"
+}

@@ -1808,3 +1808,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
   `67fe3d2` 已推送 main。
 - 后续：M10+ 新增业务动作先复用现有原子目录；确需新增原子项时必须先提交 typed contract、
   Handler、RLS/回滚测试和平台版本评审，禁止由 AESE 场景包临时扩展。
+
+## 2026-07-31 - M9 对齐能力生命周期与角色执行授权
+
+- 变更：IAOS 新建能力固定进入规范草稿，角色与权限新增 `capability.<code>/EXECUTE` 授权面，执行器只允许 Active Artifact；AESE M9 计划引用该客户配置闭环。
+- 原因：旧 UI 把悬空草稿当作可执行目录项，文档又引用不存在的权限入口，导致用户无法理解 `Test.workorder.create`、`approve_document` 等能力为何不能运行或没有可视化模型。
+- 影响：AESE 只能消费 IAOS 已发布、已绑定、已授权的能力；草稿可视化会明确回退 Draft，不能再伪装为运行失败。
+- 验证：IAOS 33 项前端定向测试、后端 API/Capability 测试、TypeScript、Go/Next 生产构建及 8082/3000 部署通过；启动迁移在 system tenant 上修复 57 条历史悬空草稿，`tenant-001/Test.workorder.create` 已恢复为规范 draft。
+- 后续：M9 测试仅选用平台基础包的 Active Capability；旧 Test 能力若指向 governed projection，应废弃并以声明的领域业务能力替代，不能发布为通用 CRUD。

@@ -325,6 +325,12 @@ Observation 等完整动作降级成原子能力；它们继续作为已发布 B
 或受治理 Bridge 合同运行。IAOS Runtime 的 19 项 V1 原子能力只负责同一事务内的最小
 数据、证据、库存、质量和策略执行积木。
 
+能力的客户配置闭环以 IAOS
+[SOL-050](/iaos/iaos-go/docs/solutions/SOL-050-capability-lifecycle-permission-and-menu-semantics.md)
+为准：新建固定进入草稿，经 Analyzer 和发布生成 Active Runtime Artifact，再由“角色与权限
+→ 能力执行授权”授予 `capability.<code>/EXECUTE`。AESE 不得把 IAOS 目录草稿显示为可执行
+剧情动作；尚未发布、缺少 Implementation Binding 或未授权时必须失败关闭并给出可定位入口。
+
 ## 19. D28 财务责任岗位与游戏内逐节点协作
 
 - [x] T107 IAOS Runtime 1.8.0 发布六个财务岗位模板、两个现任服务主体 Mandate 和四条
