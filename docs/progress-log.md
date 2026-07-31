@@ -1776,5 +1776,5 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 变更：AESE 增加同源白名单 Command Gateway，案件、工作项、Agent、审批和 World Observation 写操作不再由浏览器直达 IAOS；IAOS 原生 Capability 校验不可变 Artifact，设立工作项改由 active Process Artifact 递归展开并锁定子流程/能力版本哈希。
 - 原因：既有实现违反 ADR-003 的浏览器写边界，且 M9 专用 Runtime 绕过 ADR-005/DES-072，以 Go ProcessDefinition 作为工作项运行源。
 - 影响：AESE 仍不保存 IAOS 业务数据或管理员凭据；用户发布内容必须成功编译为 Effective Artifact 才能运行，缺失、漂移和篡改均失败关闭；IAOS 资产发布为 Runtime 2.10.0 / genesis-m9@1.2.0。
-- 验证：AESE Go 网关/客户端测试、前端 API 测试与生产构建；IAOS effectiveruntime/incorporation/capability/api 定向测试。
-- 后续：部署后用浏览器 Network 验证所有 M9 POST 均为 `/api/aese/v1/commands/iaos/*`，并补真实 PostgreSQL 平台包升级及新案件逐节点验收。
+- 验证：AESE 全量 Go、网关/客户端测试、前端 10 项 API 测试与生产构建；IAOS 全量 Go/vet、治理写入/Code Map/Atlas；tenant-001 已安装 Runtime 2.10.0 / genesis-m9@1.2.0，主流程 Artifact 固定 5 个子流程，Capability 使用标准 compiler 和 64 位 hash；实时 Gateway 拒绝任意 Entity 路径并正确透传允许路径。
+- 后续：用户可用新建 Genesis 企业执行浏览器逐节点验收；浏览器 Network 中所有 M9 POST 应为 `/api/aese/v1/commands/iaos/*`。
