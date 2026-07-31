@@ -1793,3 +1793,18 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
   tenant-001 运行库确认两个 Entity owner、两个 published Capability 和 active binding。
 - 后续：人工凭证、冲销、汇率审批、期间关账、AP/AR、资产、成本与预算按 F15–F35
   实现；未具备真实运行逻辑前不得注册空 Capability 冒充完成。
+
+## 2026-07-31 - M9 接入 IAOS 可执行原子能力目录
+
+- 变更：IAOS 以 DES-076 重构原子能力口径并交付 19 项真实可执行 V1 目录、统一
+  Analyzer/Artifact/Runtime/API、受控 Entity CRUD 原语和 Capability Studio 业务向导；
+  AESE M9 计划引用该跨仓执行合同。
+- 原因：旧参考文档把审批、过账、完工和 LLM 调用等完整业务动作误列为原子能力，且
+  文档、Analyzer 与 Dispatcher 曾发生清单漂移，不适合作为 M9 Agent/Process 的稳定底座。
+- 影响：AESE 仍只调用已发布 Business Capability/Process/Bridge，不复制 IAOS Handler；
+  原子能力仅在外层租户、权限、Policy、Approval 和事务上下文中执行。
+- 验证：IAOS 全仓 Go、真实 PostgreSQL Capability integration、TypeScript、原子目录组件、
+  生产构建、8082/3000 部署及 live API（19 total、18 active、1 deprecated）通过；commit
+  `67fe3d2` 已推送 main。
+- 后续：M10+ 新增业务动作先复用现有原子目录；确需新增原子项时必须先提交 typed contract、
+  Handler、RLS/回滚测试和平台版本评审，禁止由 AESE 场景包临时扩展。

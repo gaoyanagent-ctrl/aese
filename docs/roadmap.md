@@ -4,6 +4,11 @@
 
 最后更新：2026-07-31。
 
+2026-07-31 M9 原子能力运行合同：IAOS DES-076 已交付 19 项真实可执行 V1 原子能力
+（18 active、1 deprecated），同一目录驱动 Analyzer、Artifact、Runtime、API 和 Studio。
+AESE 只消费已发布 Business Capability、Process 和 Bridge，不复制原子 Handler，也不把
+审批、过账、完工或 LLM 调用误当成原子能力；M10+ 继续复用该目录并按平台评审新增。
+
 2026-07-31 M9 运行权威收口：浏览器的案件、工作项、Agent、审批和 World
 Observation 写操作已统一进入 AESE 同源白名单 Command Gateway；IAOS 原生 Capability
 执行校验标准 Artifact，设立工作项只从 active 主 Process Artifact 递归展开，并固定

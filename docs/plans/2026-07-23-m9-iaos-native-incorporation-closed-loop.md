@@ -318,6 +318,13 @@ P0
 后续 AP/AR、库存、资产、成本等表必须按
 IAOS DES-065 的风险顺序进入同一强制边界，不能把当前财务纵切误称为全平台迁移完成。
 
+M9 的 Capability/Agent/Process 配置统一依赖 IAOS
+[DES-076](/iaos/iaos-go/docs/designs/DES-076-atomic-capability-library-and-business-authoring.md)
+定义的可执行原子能力目录。AESE 不维护原子 Handler，也不把登记、审批、过账或 World
+Observation 等完整动作降级成原子能力；它们继续作为已发布 Business Capability、Process
+或受治理 Bridge 合同运行。IAOS Runtime 的 19 项 V1 原子能力只负责同一事务内的最小
+数据、证据、库存、质量和策略执行积木。
+
 ## 19. D28 财务责任岗位与游戏内逐节点协作
 
 - [x] T107 IAOS Runtime 1.8.0 发布六个财务岗位模板、两个现任服务主体 Mandate 和四条
