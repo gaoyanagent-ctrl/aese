@@ -441,3 +441,30 @@ session 收敛后可重试；真实不存在的 case 和非 stale 422 不被误�
 案件的权威表与投影名称、地址和经营范围相等；语义分析为 0 error / 0 warning。跨仓设计和
 验证证据见 IAOS
 [SOL-046](/iaos/iaos-go/docs/solutions/SOL-046-incorporation-case-entity-field-parity.md)。
+
+## 25. D34 原生 Entity 投影真实性与明细完整性
+
+- [x] T140 明确逻辑 Entity code 与物理读模型命名合同：业务和 API 使用
+      `governance_resolution` 等稳定 code，PostgreSQL 物理表统一使用
+      `entity_projection_<entity_code>`；物理前缀不是重复建模，也不得暴露为第二个业务
+      Entity。
+- [x] T141 移除平台包安装器把完整 `incorporation_case.state_document` 复制到所有成立
+      Entity 的旧同步；每个生命周期 Entity 只从拥有该事实的 Agent output、Capability
+      journal 或权威领域表重建，尚未发生的后续节点保持零记录。
+- [x] T142 `founder.resolution.prepare`、G1 批准、登记、开户、注资、任命和预算等
+      Capability 在各自提交事务中同步对应投影；节点 2 立即可见治理决议明细，无需重新
+      安装 Edition。
+- [x] T143 为治理决议、登记、任命、资本和预算 Entity 发布领域显式字段和列表视图；
+      财务基础投影把 UUID 引用解析为稳定业务编码，并把 `payload` 物化到编译后的显式列。
+- [x] T144 修正 `finance_organization_access`、共享科目定义和法人科目扩展的 Archetype
+      归属；平台包升级在提交前校验所有已有投影的必填显式列，任何 NULL 漂移整笔失败
+      关闭。
+- [x] T145 `tenant-001` 与 `tenant-gx-472324ae8bac4af39519` 安装
+      `genesis-m9@1.0.5` / Runtime 2.8.1；目标案件位于节点 2 时只存在一条
+      `governance_resolution`，登记、法人、银行账户、注资、任命和预算投影均为零。
+
+验收：数据模型工坊继续展示逻辑 Entity code；菜单列表和详情读取
+`entity_projection_*` 的显式列。目标案件的治理决议标题、目的、提案、风险与下一审批门
+可见，未执行后续步骤不会预生成“完成”事实；财务组织授权只显示主体、组织、访问范围、
+权限、授予人和有效期。跨仓实现和证据见 IAOS
+[SOL-047](/iaos/iaos-go/docs/solutions/SOL-047-native-entity-projection-truthfulness-and-details.md)。

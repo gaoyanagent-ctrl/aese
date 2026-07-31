@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.native-entity-projection-truthfulness.2026-07-31",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M9 原生 Entity 按事实来源物化并补齐菜单明细",
+  "detail": "IAOS Runtime 2.8.1 取消把完整设立案件状态复制到全部投影的旧路径；每个生命周期 Entity 只由拥有事实的 Agent、Capability 或权威表物化，财务与治理投影同步编译后的显式字段并在平台包升级时校验必填完整性。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "tenant-001 与当前 Genesis 测试租户已安装 genesis-m9@1.0.5；节点 2 案件只有治理决议记录，未来节点 Entity 保持零记录。",
+  "evidence_ref": "docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md",
+  "commit_sha": "05532168f686c21595005acbe9ea7dfbfb1d81d9",
+  "occurred_at": "2026-07-31T09:30:00Z"
+}

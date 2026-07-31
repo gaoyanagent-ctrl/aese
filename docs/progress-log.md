@@ -1754,3 +1754,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：用户可在数据模型工坊和设立案件菜单按显式字段理解、查询数据；AESE 仍只通过 IAOS Capability/Process 写入，不直接维护投影；未来权威表新增业务列未完成语义分类和投影映射时不能发布。
 - 验证：IAOS 单元/API 测试和真实 PostgreSQL 字段闭环测试通过；`tenant-001` 与 `tenant-gx-472324ae8bac4af39519` 已升级 `genesis-m9@1.0.2` / Runtime 2.6.0，两个租户均返回四个字段，现有 GX 案件权威表与投影逐字段一致，语义分析 0 error / 0 warning。
 - 后续：新增原生权威 Entity 时复用同一 parity contract；先检索平台语义目录，再提交业务字段的层级、兼容、迁移和受影响资产说明。
+
+## 2026-07-31 - M9 原生 Entity 投影真实性与明细闭环
+
+- 变更：IAOS Runtime 2.8.1 移除把完整设立案件状态复制到所有 Entity 的旧同步，改由 Agent output、Capability journal 和权威领域表按事实所有权逐项物化；治理决议等生命周期 Entity 增加领域显式字段和列表视图，财务基础投影补齐显式列、稳定业务引用及升级期必填完整性门。
+- 原因：`governance_resolution` 等逻辑 Entity 虽有正确的 `entity_projection_<code>` 物理读模型，但旧数据只写通用 payload 或提前复制未来状态，导致菜单详情为空、字段语义错误，并伪造尚未发生的后续业务事实。
+- 影响：用户继续以逻辑 Entity code 使用模型和菜单；物理表前缀只表示统一读模型。节点 2 完成后只出现治理决议，登记、法人、开户、注资、任命和预算必须等待各自 Capability 提交后才出现；原生投影不能直接 CRUD。
+- 验证：IAOS 单元、API、交互式设立集成、财务投影集成、Go vet、语义/治理/Atlas/Code Map 检查通过；`tenant-001` 与目标 GX 租户安装 `genesis-m9@1.0.5` / Runtime 2.8.1，目标案件治理决议 1 条且明细列完整，六类未来 Entity 均为 0，8082 健康检查通过。
+- 后续：M10 及后续原生 Entity 必须声明 authority、projection owner 和字段物化映射，并复用“未发生零记录、显式必填不为空”的发布及集成测试门。
