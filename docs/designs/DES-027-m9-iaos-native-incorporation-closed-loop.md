@@ -863,3 +863,4 @@ ADR-005 与 IAOS DES-072 的运行权威适用于专用设立 Runtime，而不�
 案件运行时从 active 主 Process Artifact 递归展开锁定的子 Artifact。缺失、未锁定、
 循环、source/compiler 漂移或 hash 不一致时不得创建或推进工作项。重新发布子流程不会
 静默改变既有父流程；只有重新发布父流程形成新 Artifact 后，新流程运行才采用该版本。
+本次合同变化发布为 IAOS Runtime `2.10.0` / `genesis-m9@1.2.0`，不得覆盖旧版本。

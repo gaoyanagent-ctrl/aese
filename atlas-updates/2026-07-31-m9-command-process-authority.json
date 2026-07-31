@@ -7,7 +7,7 @@
   "detail": "AESE 浏览器的案件、工作项、Agent、审批和 World Observation 写操作切换到同源白名单 BFF；IAOS 原生 Capability 校验标准 Runtime Artifact，父 Process Artifact 锁定子流程和能力版本哈希并作为工作项唯一来源。",
   "status_after": "validating",
   "progress_after": 98,
-  "current_state": "两仓定向单元测试通过，等待真实 PostgreSQL 升级、部署和浏览器逐节点验收。",
+  "current_state": "两仓定向单元测试通过；IAOS 合同版本为 Runtime 2.10.0 / genesis-m9@1.2.0，等待真实 PostgreSQL 升级和浏览器逐节点验收。",
   "evidence_ref": "docs/solutions/SOL-010-m9-command-gateway-and-process-artifact-authority.md",
   "occurred_at": "2026-07-31T08:55:00Z"
 }
