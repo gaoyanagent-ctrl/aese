@@ -53,6 +53,9 @@ IAOS 实现必须在独立 worktree 中完成。所有未实现项保持未勾�
 - [x] F9 发布 `finance.foundation.setup.v1` 与 `capital.accounting.v1`。
 - [x] F10 配置 CFO/Controller/GL/出纳/成本/审计岗位、Mandate 和职责冲突。
 - [x] F11 把资本到账编译为借银行存款、贷实收资本的原子、幂等、可审计凭证。
+- [x] F11A 把实缴资本业务来源与通用凭证过账 Execution 分离：发布并绑定
+  `finance.journal.entry.post`，将 `journal_entry`、`journal_line` 的唯一写入所有者
+  修正为该能力；IAOS Runtime 2.11.0 / `genesis-m9@1.3.0` 已部署并在 tenant-001 核验。
 - [x] F12 建立银行日记账、总账余额、试算平衡和开业资产负债表。
 - [x] F13A 将财务组织、账套与期间、科目、资本过账、财务就绪五个 M9
   财务动作接入主流程，形成可单独执行和追踪的持久工作项。

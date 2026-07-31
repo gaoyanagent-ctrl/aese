@@ -1778,3 +1778,18 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：AESE 仍不保存 IAOS 业务数据或管理员凭据；用户发布内容必须成功编译为 Effective Artifact 才能运行，缺失、漂移和篡改均失败关闭；IAOS 资产发布为 Runtime 2.10.0 / genesis-m9@1.2.0。
 - 验证：AESE 全量 Go、网关/客户端测试、前端 10 项 API 测试与生产构建；IAOS 全量 Go/vet、治理写入/Code Map/Atlas；tenant-001 已安装 Runtime 2.10.0 / genesis-m9@1.2.0，主流程 Artifact 固定 5 个子流程，Capability 使用标准 compiler 和 64 位 hash；实时 Gateway 拒绝任意 Entity 路径并正确透传允许路径。
 - 后续：用户可用新建 Genesis 企业执行浏览器逐节点验收；浏览器 Network 中所有 M9 POST 应为 `/api/aese/v1/commands/iaos/*`。
+
+## 2026-07-31 - 财务业务来源与通用凭证过账边界
+
+- 变更：IAOS Runtime 2.11.0 / `genesis-m9@1.3.0` 发布
+  `finance.journal.entry.post`；`capital.contribution.post` 在同一受治理事务委托过账，
+  `journal_entry`、`journal_line` 的 metadata 写入所有者同步修正。AESE 财务设计、
+  实施计划、路线图和 Code Map 引用该跨仓合同。
+- 原因：旧 metadata 把凭证主子表归给 `finance.foundation.configure`，与真实执行路径
+  不一致，导致模型工坊和穿透查询错误解释。
+- 影响：M9 资本入账现在可区分业务来源、Posting Profile、通用过账 Execution 和权威
+  存储；AESE 仍只通过 IAOS 受治理命令推进，不保存或直接写凭证。
+- 验证：IAOS 全量 Go、治理/Code Map/Atlas、三组真实 PostgreSQL 财务测试通过；
+  tenant-001 运行库确认两个 Entity owner、两个 published Capability 和 active binding。
+- 后续：人工凭证、冲销、汇率审批、期间关账、AP/AR、资产、成本与预算按 F15–F35
+  实现；未具备真实运行逻辑前不得注册空 Capability 冒充完成。

@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.finance-generic-journal-posting.2026-07-31",
+  "node_key": "aese.m9.finance-foundation",
+  "update_type": "status",
+  "summary": "M9 财务设计接入 IAOS 通用凭证过账能力",
+  "detail": "AESE 财务设计和计划明确 capital.contribution.post 是业务来源能力，finance.journal.entry.post 是 journal_entry/journal_line 的唯一写入所有者；IAOS Runtime 2.11.0 与 genesis-m9@1.3.0 已部署验证。",
+  "status_after": "completed",
+  "progress_after": 76,
+  "current_state": "M9 开业资本过账边界已闭环；人工凭证、冲销、期间关账和 M10-M13 子账仍按财务计划实施。",
+  "evidence_ref": "docs/designs/finance/DES-032-accounting-kernel-and-general-ledger.md",
+  "commit_sha": "bb758e4",
+  "occurred_at": "2026-07-31T14:00:00Z"
+}

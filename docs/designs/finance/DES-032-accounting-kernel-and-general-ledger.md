@@ -96,8 +96,25 @@ M9 开业只接受 CNY，并登记 CNY→CNY 恒等汇率；外币资本到账�
 1. `finance.organization.configure`
 2. `accounting.book.activate`
 3. `chart.of.accounts.activate`
-4. `capital.contribution.post`
-5. `finance.opening.readiness.evaluate`
+4. `capital.contribution.post`（实缴资本业务来源）
+5. `finance.journal.entry.post`（通用、受治理的凭证过账）
+6. `finance.opening.readiness.evaluate`
+
+业务来源能力不得冒充凭证写入所有者。`capital.contribution.post` 校验资本承诺、银行到账、
+授权与案件上下文后，在同一事务委托 `finance.journal.entry.post`；后者依据已发布的
+Posting Profile 写入 `journal_entry`、`journal_line` 及其只读 Entity 投影。当前只发布
+`capital.contribution.posting.v1`，因此这不是允许任意科目和金额的通用 HTTP 凭证接口。
+
+数据模型工坊和穿透查询必须把凭证主子实体解释为：
+
+```text
+journal_entry -> capability:finance.journal.entry.post
+journal_line  -> capability:finance.journal.entry.post
+```
+
+IAOS 实现、覆盖盘点和运行证据见
+`/iaos/iaos-go/docs/designs/DES-075-finance-capability-coverage-and-journal-posting.md`
+及 `/iaos/iaos-go/docs/reports/2026-07-31-finance-capability-coverage-evidence.md`。
 
 实缴资本示例：
 
@@ -118,3 +135,5 @@ M9 开业只接受 CNY，并登记 CNY→CNY 恒等汇率；外币资本到账�
 - 重复执行 no-op，失败无部分凭证；
 - 每个余额可下钻凭证、会计事件、业务事实和 World evidence；
 - RLS、Capability write boundary 和已过账不可变触发器必须同时通过。
+- 人工凭证、冲销、汇率发布审批、期间关账、AP、AR、资产、成本和预算必须在对应模块
+  形成真实实现后再发布 Capability；不得用空注册项冒充可执行财务能力。
