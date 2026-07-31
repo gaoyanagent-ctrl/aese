@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.entity-semantic-record-browser.2026-07-31",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M9 接入 IAOS Entity 继承修复和受治理记录入口合同",
+  "detail": "AESE M9 计划引用 IAOS Runtime 2.5.0：Foundation 继承发布门、旧 Entity source 修复和 Effective Artifact 重编译；运行投影保持只读并通过业务 Capability 维护。",
+  "status_after": "validating",
+  "progress_after": 98,
+  "current_state": "M9 相关 Entity 阻断语义错误和原生表浏览问题已修复；旧制造模型非阻断 warning 留待后续治理。",
+  "evidence_ref": "docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-31T02:15:00Z"
+}

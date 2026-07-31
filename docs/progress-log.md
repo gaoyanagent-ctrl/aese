@@ -1730,3 +1730,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：平台定义按 SemVer/SHA-256 发布，Agent Template 与租户 Agent/Mandate 实例分离；任何新企业只安装定义并自行形成身份与业务事实，不复制其他租户记录。
 - 验证：IAOS 全量 Go、TypeScript、Vitest、Semantic/Foundation、治理写入、Code Map、Atlas 检查通过；真实 PostgreSQL 确认 tenant-001 三个 active installation、Runtime 2.4.0，案件/审批/凭证/World Journal 均为 0；旧 Genesis 租户正确返回 `upgrade_required`，8082/3000 已生产重建。
 - 后续：M10 及后续通用资产必须发布新 package/Edition SemVer；历史租户由有权主体在 IAOS 平台基础包页面显式升级。
+
+## 2026-07-31 - M9 Entity 继承与受治理记录浏览闭环
+
+- 变更：IAOS Runtime 2.5.0 修复 M9/历史 Entity 的 Foundation 字段类型漂移，发布门增加继承和类型校验，平台包升级重新编译 Effective Artifact；通用记录 API 兼容原生领域表，菜单显示 direct/capability 写入模式及业务入口。AESE M9 主计划和 Code Map 同步跨仓合同。
+- 原因：设立案件等 Entity 出现 `owner_id`、`org_node_id` Archetype 类型冲突，部分原生表菜单无法加载明细，领域投影的只读原因和正确录入入口也不可见。
+- 影响：AESE 仍只调用 IAOS Capability/Process，不拥有或直接写运行数据；动态 Entity 可按权限直接维护，领域投影必须经业务工作台和 Capability 写入。
+- 验证：IAOS `tenant-001` 46 个 Entity 阻断错误为 0，代表性设立、财务、库存、采购和产品列表 API 返回 200；Go、前端组件测试、生产构建、Atlas、Code Map 和线上健康检查通过，IAOS main `e29e0c2` 已推送。
+- 后续：逐步消除 7 条关系展示字段和 10 条未选择 Archetype 的旧制造模型非阻断 warning。

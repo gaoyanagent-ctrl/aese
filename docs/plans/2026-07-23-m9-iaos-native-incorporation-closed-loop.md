@@ -392,3 +392,19 @@ IAOS DES-065 的风险顺序进入同一强制边界，不能把当前财务纵�
 installation 均 active，Runtime 为 2.4.0；参考租户有 0 个设立案、0 个审批、0 个凭证
 和 0 条 World Journal；历史 Genesis 租户返回 `upgrade_required=true`。后续 M10 及行业
 包只能依赖或扩展明确 Edition，不能复制 M9 seed 后另行漂移。
+
+## 22. D31 Entity 继承修复与受治理记录入口
+
+- [x] T127 IAOS Runtime 2.5.0 将 Foundation 字段类型、Semantic type、canonical
+      metadata type 和 enum options 纳入 M9 平台包发布门。
+- [x] T128 平台包升级幂等修复旧 Entity source 的 `owner_id`、`org_node_id`，并从源定义
+      重新编译 immutable Effective Runtime Artifact。
+- [x] T129 通用 Entity 记录 API 兼容原生领域表；菜单明确区分可直接维护的动态 Entity
+      与只能经 Capability 写入的只读领域投影。
+- [x] T130 IAOS 解决方案
+      [SOL-044](/iaos/iaos-go/docs/solutions/SOL-044-entity-semantic-inheritance-and-governed-record-browser.md)
+      固定用户操作、业务入口映射、验证证据和剩余 warning。
+
+验收：`tenant-001` 全量 46 个 Entity 的阻断语义错误为 0；设立案件及财务/制造原生表列表
+和明细返回 200；投影 Entity 不开放绕过 Capability 的直接 CRUD，页面提供业务维护入口。
+17 条旧制造模型 warning 作为非阻断治理债务继续跟踪，不影响 M9 设立闭环。
