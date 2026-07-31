@@ -5,10 +5,7 @@ import type {
   GenesisWorkspaceResult,
   NamingProposal,
 } from "./types";
-import {
-  resolveIaosLifecycleBase,
-  submitIncorporationObservation,
-} from "../world/incorporation";
+import { submitIncorporationObservation } from "../world/incorporation";
 export class GameApiError extends Error {
   constructor(
     public status: number,
@@ -315,11 +312,11 @@ export async function createIncorporationCase(input: {
     "tenant-hctm-genesis";
   if (!token) throw new Error("缺少 IAOS 登录凭据，请从 IAOS 重新进入企业创生");
   const submit = () =>
-    fetch(`${resolveIaosLifecycleBase()}/api/v1/incorporations/cases`, {
+    fetch(`/api/aese/v1/commands/iaos/incorporations/cases`, {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
-        "X-Tenant-ID": tenant,
+        "X-IAOS-Tenant-Id": tenant,
         "content-type": "application/json",
       },
       body: JSON.stringify(input),
@@ -347,13 +344,13 @@ const iaosHeaders = () => {
   if (!token) throw new Error("缺少 IAOS 登录凭据，请从 IAOS 重新进入企业创生");
   return {
     Authorization: `Bearer ${token}`,
-    "X-Tenant-ID": tenant,
+    "X-IAOS-Tenant-Id": tenant,
     "content-type": "application/json",
   };
 };
 async function iaosPost(path: string, body: unknown) {
   const submit = () =>
-    fetch(`${resolveIaosLifecycleBase()}${path}`, {
+    fetch(`/api/aese/v1/commands/iaos${path.replace(/^\/api\/v1/, "")}`, {
       method: "POST",
       headers: iaosHeaders(),
       body: JSON.stringify(body),

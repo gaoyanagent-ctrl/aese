@@ -30,6 +30,7 @@
 | [MVP Blueprint](AESE_MVP_Blueprint.md) | MVP 产品与业务范围 | Approved |
 | [SOL-002 AESE World 失效设立案恢复](solutions/SOL-002-aese-world-stale-incorporation-case-recovery.md) | 旧 case 深链 404 时保留 World 并引导切换有效案件 | Completed |
 | [SOL-009 Genesis 投影会话与 Runtime 自动恢复](solutions/SOL-009-genesis-projection-session-and-runtime-recovery.md) | 旧租户会话造成 projection 404、Runtime stale 422 时刷新受管 Workspace session 并安全重试 | Completed |
+| [SOL-010 M9 Command Gateway 与 Process Artifact 权威](solutions/SOL-010-m9-command-gateway-and-process-artifact-authority.md) | M9 浏览器写操作统一经白名单 BFF，IAOS 工作项只消费已发布 Process Artifact | Completed |
 
 ### 华辰场景文档
 
@@ -68,6 +69,7 @@
 | ADR-004 | [AESE 仿真世界事实所有权](decisions/ADR-004-aese-world-state-ownership.md) | Accepted |
 | ADR-005 | [Process Definition 是工作项运行时的唯一事实源](decisions/ADR-005-process-definition-as-runtime-source.md) | Accepted |
 | ADR-006 | [Genesis 创业空间先于企业法律主体](decisions/ADR-006-genesis-workspace-precedes-enterprise.md) | Accepted |
+| PLAN-M9-AUTHORITY-001 | [M9 Command Gateway 与 Effective Process Artifact 收口](plans/2026-07-31-m9-runtime-authority-closeout.md) | Completed |
 | DES-001 | [M3 可执行场景包与重放架构](designs/DES-001-m3-executable-scenario-package.md) | Completed |
 | DES-002 | [快速 2D 企业沙盘设计](designs/DES-002-fast-track-2d-enterprise-sandbox.md) | Completed |
 | DES-003 | [M5 受治理 Agent Tracer 设计](designs/DES-003-governed-agent-tracers.md) | Completed |

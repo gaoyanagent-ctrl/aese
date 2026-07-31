@@ -4,6 +4,11 @@
 
 最后更新：2026-07-31。
 
+2026-07-31 M9 运行权威收口：浏览器的案件、工作项、Agent、审批和 World
+Observation 写操作已统一进入 AESE 同源白名单 Command Gateway；IAOS 原生 Capability
+执行校验标准 Artifact，设立工作项只从 active 主 Process Artifact 递归展开，并固定
+Capability 与子流程的版本/哈希。Go 流程目录只作为平台包发布源，不再作为运行兜底。
+
 2026-07-31 Entity 存储与唯一写入权威：IAOS Runtime 2.9.0 /
 `genesis-m9@1.1.0` 把三类存储合同编译进 Effective Runtime Artifact。普通动态
 Entity 以 `entity_record_<code>` 作为唯一权威存储；复杂领域对象从专用权威表投影到

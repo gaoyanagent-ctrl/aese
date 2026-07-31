@@ -496,8 +496,8 @@ type ScenarioObservedEvent struct {
 
 type ScenarioEventsResponse struct {
 	Items      []ScenarioObservedEvent `json:"items"`
-	NextCursor int64                  `json:"next_cursor"`
-	HasMore    bool                   `json:"has_more"`
+	NextCursor int64                   `json:"next_cursor"`
+	HasMore    bool                    `json:"has_more"`
 }
 
 type ScenarioSnapshot struct {
@@ -626,6 +626,22 @@ type APIError struct {
 	RequiredPermission string
 }
 
+// PostGovernedCommand forwards one already allow-listed business command to
+// IAOS. The AESE HTTP layer owns the route allow-list; this client preserves
+// caller identity and tenant context without exposing a generic database or
+// arbitrary HTTP proxy.
+func (c *Client) PostGovernedCommand(
+	ctx context.Context,
+	path string,
+	body json.RawMessage,
+) (json.RawMessage, error) {
+	var out json.RawMessage
+	if err := c.request(ctx, http.MethodPost, path, body, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (e *APIError) Error() string {
 	return fmt.Sprintf("IAOS %s %s returned %d: %s", e.Method, e.Path, e.StatusCode, e.Message)
 }
@@ -680,12 +696,12 @@ func (c *Client) requestHeaders(ctx context.Context, method, path string, body a
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		message := strings.TrimSpace(string(data))
 		var envelope struct {
-			Error             string `json:"error"`
-			Message           string `json:"message"`
-			ErrorCode         string `json:"error_code"`
-			Code              string `json:"code"`
+			Error              string `json:"error"`
+			Message            string `json:"message"`
+			ErrorCode          string `json:"error_code"`
+			Code               string `json:"code"`
 			RequiredPermission string `json:"required_permission"`
-			Permission        string `json:"permission"`
+			Permission         string `json:"permission"`
 			PermissionResource string `json:"permission_resource"`
 		}
 		if json.Unmarshal(data, &envelope) == nil && envelope.Error != "" {
@@ -703,7 +719,7 @@ func (c *Client) requestHeaders(ctx context.Context, method, path string, body a
 			StatusCode:         resp.StatusCode,
 			Message:            message,
 			ErrorCode:          errorCode,
-			RequiredPermission:  requiredPermission,
+			RequiredPermission: requiredPermission,
 		}
 	}
 	if out == nil || len(bytes.TrimSpace(data)) == 0 {

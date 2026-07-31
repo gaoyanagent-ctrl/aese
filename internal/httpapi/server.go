@@ -301,6 +301,9 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch rest[0] {
+	case "commands":
+		s.handleIAOSCommandGateway(ctx, w, r, rest)
+		return
 	case "auth":
 		if s.genesisPlayerAuth == nil || len(rest) != 2 {
 			s.writeError(w, http.StatusNotFound, "not_found", "route not found", false, "", "")
@@ -775,6 +778,92 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	s.writeError(w, http.StatusNotFound, "not_found", "route not found", false, "", "")
+}
+
+func (s *Server) handleIAOSCommandGateway(
+	ctx context.Context,
+	w http.ResponseWriter,
+	r *http.Request,
+	rest []string,
+) {
+	if r.Method != http.MethodPost || len(rest) < 3 || rest[1] != "iaos" {
+		s.writeError(w, http.StatusNotFound, "command_route_not_found", "command route not found", false, "", "")
+		return
+	}
+	pathParts := rest[2:]
+	if !allowedIAOSCommandPath(pathParts) {
+		s.writeError(w, http.StatusForbidden, "command_route_not_allowed", "IAOS command route is not allow-listed", false, "", "")
+		return
+	}
+	token := bearerToken(r.Header.Get("Authorization"))
+	tenantID := strings.TrimSpace(r.Header.Get("X-IAOS-Tenant-Id"))
+	if tenantID == "" {
+		tenantID = strings.TrimSpace(r.Header.Get("X-Tenant-ID"))
+	}
+	if token == "" || tenantID == "" {
+		s.writeError(w, http.StatusUnauthorized, "command_identity_required", "IAOS bearer token and tenant context are required", false, "", "")
+		return
+	}
+	var body json.RawMessage
+	if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &body); err != nil {
+		s.writeError(w, http.StatusBadRequest, "invalid_command_body", err.Error(), false, "", "")
+		return
+	}
+	client, err := iaosclient.New(iaosclient.Config{
+		BaseURL: s.cfg.IAOSBaseURL, Token: token, TenantID: tenantID,
+	})
+	if err != nil {
+		s.writeError(w, http.StatusServiceUnavailable, "command_gateway_unavailable", err.Error(), true, "", "")
+		return
+	}
+	result, err := client.PostGovernedCommand(
+		ctx, "api/v1/"+strings.Join(pathParts, "/"), body,
+	)
+	if err != nil {
+		var apiErr *iaosclient.APIError
+		if errors.As(err, &apiErr) {
+			s.writeError(w, apiErr.StatusCode, firstNonEmptyString(apiErr.ErrorCode, "iaos_command_rejected"), apiErr.Message, apiErr.StatusCode >= 500, "", apiErr.RequiredPermission)
+			return
+		}
+		s.writeError(w, http.StatusBadGateway, "iaos_command_failed", err.Error(), true, "", "")
+		return
+	}
+	if len(result) == 0 {
+		w.WriteHeader(http.StatusNoContent)
+		return
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	_, _ = w.Write(result)
+}
+
+func allowedIAOSCommandPath(parts []string) bool {
+	if len(parts) == 2 && parts[0] == "incorporations" && parts[1] == "cases" {
+		return true
+	}
+	if len(parts) == 5 && parts[0] == "incorporations" &&
+		parts[2] == "work-items" &&
+		(parts[4] == "execute" || parts[4] == "dispatch-agent") {
+		_, err := strconv.Atoi(parts[3])
+		return parts[1] != "" && err == nil
+	}
+	if len(parts) == 5 && parts[0] == "incorporations" &&
+		parts[2] == "gates" && parts[4] == "submit" {
+		return parts[1] != "" && parts[3] != ""
+	}
+	if len(parts) == 3 && parts[0] == "approvals" && parts[2] == "approve" {
+		return parts[1] != ""
+	}
+	return len(parts) == 2 && parts[0] == "world-bridge" && parts[1] == "observations"
+}
+
+func firstNonEmptyString(values ...string) string {
+	for _, value := range values {
+		if strings.TrimSpace(value) != "" {
+			return value
+		}
+	}
+	return ""
 }
 
 func (s *Server) handleScenarios(ctx context.Context, w http.ResponseWriter, _ *http.Request) {

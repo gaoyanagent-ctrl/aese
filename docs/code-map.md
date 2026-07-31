@@ -424,6 +424,13 @@ B0-B7 实现后必须把“目标路径”更新为实际入口：
 M9 账套/期间交互入口：`frontend/src/components/game/WorkItemActionPanel.tsx` 采集账套名称、
 年度和 12 期日历，经 `frontend/src/game/api.ts` 传入 IAOS `accounting.book.activate`。
 
+M9 受治理写入口：`frontend/src/game/api.ts` 与
+`frontend/src/world/incorporation.ts` 只调用
+`POST /api/aese/v1/commands/iaos/*`；白名单、身份/租户透传和错误映射位于
+`internal/httpapi/server.go::handleIAOSCommandGateway`，窄 IAOS adapter 位于
+`internal/iaosclient/client.go::PostGovernedCommand`。IAOS 端的 Capability/Process
+Artifact 执行权威见 IAOS SOL-048 和 DES-072。
+
 以下改动必须更新本文件：
 
 - 新增命令、核心 package、场景包、schema 或脚本。

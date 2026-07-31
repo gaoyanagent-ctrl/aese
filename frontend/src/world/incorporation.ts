@@ -156,13 +156,13 @@ export async function submitIncorporationObservation(
   // prevents repeated clicks from creating misleading journal growth.
   const nonce = `${caseCode}-${payloadType}-${result}`;
   const response = await fetch(
-    `${resolveIaosLifecycleBase()}/api/v1/world-bridge/observations`,
+    `/api/aese/v1/commands/iaos/world-bridge/observations`,
     {
       method: "POST",
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
-        "X-Tenant-ID": tenant,
+        "X-IAOS-Tenant-Id": tenant,
       },
       body: JSON.stringify({
         schema_version: "1.0",

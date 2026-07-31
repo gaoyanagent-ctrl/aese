@@ -1770,3 +1770,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：新动态 Entity 统一使用 `entity_record_<code>`；复杂领域对象必须由唯一 Capability/Process 写专用权威表；Journal/Aggregate/Query 汇总只读。AESE 继续只通过 IAOS 受治理入口推进世界，不直接写 Entity 表或投影。
 - 验证：IAOS 单元、API、交互式设立集成、Go vet、TypeScript、组件和生产构建通过；真实租户共 35 个 M9 Entity 均为 version 1 合同（27 个领域投影、8 个计算投影），计算投影直接 Create 返回 `405 entity_write_owner_enforced`，8082/3000 健康。
 - 后续：历史 contract version 0 动态 Entity 按独立迁移计划冻结写入、对账、切换 metadata 和重编译 Artifact；不得自动改名或用降级规避合同。
+
+## 2026-07-31 - M9 Command Gateway 与 Process Artifact 运行权威
+
+- 变更：AESE 增加同源白名单 Command Gateway，案件、工作项、Agent、审批和 World Observation 写操作不再由浏览器直达 IAOS；IAOS 原生 Capability 校验不可变 Artifact，设立工作项改由 active Process Artifact 递归展开并锁定子流程/能力版本哈希。
+- 原因：既有实现违反 ADR-003 的浏览器写边界，且 M9 专用 Runtime 绕过 ADR-005/DES-072，以 Go ProcessDefinition 作为工作项运行源。
+- 影响：AESE 仍不保存 IAOS 业务数据或管理员凭据；用户发布内容必须成功编译为 Effective Artifact 才能运行，缺失、漂移和篡改均失败关闭。
+- 验证：AESE Go 网关/客户端测试、前端 API 测试与生产构建；IAOS effectiveruntime/incorporation/capability/api 定向测试。
+- 后续：部署后用浏览器 Network 验证所有 M9 POST 均为 `/api/aese/v1/commands/iaos/*`，并补真实 PostgreSQL 平台包升级及新案件逐节点验收。

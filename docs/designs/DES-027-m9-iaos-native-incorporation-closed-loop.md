@@ -844,3 +844,22 @@ Agent 实例、案件、审批、凭证或 World Journal。
 AESE 只保存场景参数和稳定业务编码，并从 IAOS 读取目标租户的 Edition/hash 与业务
 证据。新 World/tenant 不得维护另一套 M9 资产数组；历史租户版本差异必须通过 IAOS
 “配置包控制台 → 平台基础包”查询和受治理升级。
+
+## 9. D30 — Command Gateway 与实际 Process Artifact 执行
+
+ADR-003 的浏览器边界适用于 M9 所有写操作：案件创建、工作项执行、Agent 派发、
+审批提交/决定和 World Observation 必须先进入 AESE 同源 Command Gateway。Gateway
+只允许明确的企业设立命令路径，透传当前 JWT、tenant、correlation 和 idempotency，
+不保存业务状态、不持有平台管理员 token，也不提供任意 IAOS HTTP 代理。
+
+ADR-005 与 IAOS DES-072 的运行权威适用于专用设立 Runtime，而不只适用于通用流程
+引擎。平台包中的 Go `ProcessDefinition` 是确定性的发布源，不是运行时兜底。发布时：
+
+1. Capability 节点固定 Capability Artifact version/hash；
+2. subprocess 节点固定子 Process version/artifact version/hash；
+3. 节点配置固化 task type、participant、responsible position、gate 和业务输入输出说明；
+4. 子流程先编译，父流程后编译，任何未解析依赖阻止发布。
+
+案件运行时从 active 主 Process Artifact 递归展开锁定的子 Artifact。缺失、未锁定、
+循环、source/compiler 漂移或 hash 不一致时不得创建或推进工作项。重新发布子流程不会
+静默改变既有父流程；只有重新发布父流程形成新 Artifact 后，新流程运行才采用该版本。
