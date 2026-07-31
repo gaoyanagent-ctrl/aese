@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.incorporation-entity-field-parity.2026-07-31",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M9 接入设立案件权威事实与 Entity 字段一致性合同",
+  "detail": "IAOS Runtime 2.6.0 将案件名称、拟设企业名称、注册地址和经营范围统一发布到 Domain Entity、显式投影和 Effective Runtime Artifact，并对未来权威表新增业务列执行失败关闭校验。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "tenant-001 与当前 Genesis 测试租户已安装 genesis-m9@1.0.2，历史案件权威表与投影逐字段一致。",
+  "evidence_ref": "docs/plans/2026-07-23-m9-iaos-native-incorporation-closed-loop.md",
+  "occurred_at": "2026-07-31T04:05:00Z"
+}

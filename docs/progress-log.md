@@ -1746,3 +1746,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：受管 Workspace 重新进入时自动收敛，普通 IAOS 租户仍保留显式升级；失败请求不会跳过节点或留下部分业务写入。
 - 验证：curl 复现原 422 `effective runtime artifact stale`；正确会话 projection 返回 200；前端新增两条 stale session 回归；IAOS helper 覆盖 stale/current/failure；目标 GX 租户已升级 2.5.0。
 - 后续：继续保留平台包控制台作为普通租户的显式版本治理入口。
+
+## 2026-07-31 - M9 设立案件 Entity 字段一致性
+
+- 变更：IAOS Runtime 2.6.0 显式发布设立案件名称、拟设企业名称、注册地址和经营范围，案件 Capability 同步权威表与 Entity 投影；平台安装器新增权威业务列自动发现和字段一致性失败关闭门。AESE M9 计划、路线图、Code Map 与 Atlas 同步该跨仓合同。
+- 原因：数据库 `incorporation_case` 已有四个业务列，但旧 Entity 编译器只发布 Archetype 字段和 `payload`，导致数据模型工坊与真实运行数据不一致，原语义分析也无法发现完整性缺口。
+- 影响：用户可在数据模型工坊和设立案件菜单按显式字段理解、查询数据；AESE 仍只通过 IAOS Capability/Process 写入，不直接维护投影；未来权威表新增业务列未完成语义分类和投影映射时不能发布。
+- 验证：IAOS 单元/API 测试和真实 PostgreSQL 字段闭环测试通过；`tenant-001` 与 `tenant-gx-472324ae8bac4af39519` 已升级 `genesis-m9@1.0.2` / Runtime 2.6.0，两个租户均返回四个字段，现有 GX 案件权威表与投影逐字段一致，语义分析 0 error / 0 warning。
+- 后续：新增原生权威 Entity 时复用同一 parity contract；先检索平台语义目录，再提交业务字段的层级、兼容、迁移和受影响资产说明。

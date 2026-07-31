@@ -422,3 +422,22 @@ installation 均 active，Runtime 为 2.4.0；参考租户有 0 个设立案、0
 
 验收：投影 stale tenant 回归从 404 恢复为 200；Runtime stale Agent dispatch 在 managed
 session 收敛后可重试；真实不存在的 case 和非 stale 422 不被误吞。
+
+## 24. D33 设立案件权威事实与 Entity 字段一致性
+
+- [x] T135 定位 `incorporation_case` 权威表与数据模型工坊字段不一致的根因：M9 Entity
+      编译器只合并 `document` Archetype 和 `payload`，没有发布四个拟设业务事实。
+- [x] T136 IAOS Runtime 2.6.0 将 `case_name`、`proposed_company_name`、
+      `registered_address`、`business_scope` 纳入 Domain Entity、显式投影列、列表视图和
+      Effective Runtime Artifact。
+- [x] T137 案件创建和状态同步在同一受治理事务中逐字段更新权威表与
+      `entity_projection_incorporation_case`；升级从旧 `payload` 幂等回填历史记录。
+- [x] T138 平台包发布增加 authority parity contract；安装器自动发现权威表中未分类的
+      新业务列，Entity 编译合同或投影缺失时整笔失败关闭。
+- [x] T139 `tenant-001` 与 `tenant-gx-472324ae8bac4af39519` 安装
+      `genesis-m9@1.0.2` / Runtime 2.6.0，并完成真实 PostgreSQL 权威表—投影逐字段验收。
+
+验收：两个租户的数据模型工坊均返回 13 个设立案件字段，四个拟设业务字段完整；现有 GX
+案件的权威表与投影名称、地址和经营范围相等；语义分析为 0 error / 0 warning。跨仓设计和
+验证证据见 IAOS
+[SOL-046](/iaos/iaos-go/docs/solutions/SOL-046-incorporation-case-entity-field-parity.md)。
