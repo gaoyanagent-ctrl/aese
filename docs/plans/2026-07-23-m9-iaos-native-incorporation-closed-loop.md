@@ -468,3 +468,25 @@ session 收敛后可重试；真实不存在的 case 和非 stale 422 不被误�
 可见，未执行后续步骤不会预生成“完成”事实；财务组织授权只显示主体、组织、访问范围、
 权限、授予人和有效期。跨仓实现和证据见 IAOS
 [SOL-047](/iaos/iaos-go/docs/solutions/SOL-047-native-entity-projection-truthfulness-and-details.md)。
+
+## 26. D35 Entity 存储分类与唯一写入权威
+
+- [x] T146 IAOS 建立三类 closed set 存储合同：
+      `dynamic_authority`、`domain_projection`、`computed_projection`，并把版本、权威
+      来源、唯一写入者和唯一投影维护者编译进 Effective Runtime Artifact。
+- [x] T147 新建普通 OLTP Entity 默认使用 `entity_record_<code>` 作为唯一权威表；
+      配置包不能再通过任意物理表名隐式建立第二写入口。
+- [x] T148 有复杂事务约束的领域 Entity 使用独立权威表，并由唯一 Capability/Process
+      写入；菜单读取 `entity_projection_<code>`，通用 CRUD 不得写投影。
+- [x] T149 Journal、Aggregate 或 Query 生成的汇总 Entity 使用只读
+      `computed_projection`，`storage_write_owner=none`，只能由声明的 projector 重建。
+- [x] T150 M9 平台包升级到 `genesis-m9@1.1.0` / Runtime 2.9.0；35 个 Entity 全部
+      使用 version 1 合同，其中 27 个领域投影、8 个计算投影。
+- [x] T151 数据模型工坊和通用业务浏览器展示存储类型、权威来源、写入口及投影维护者；
+      非动态 Entity 的 Create/Update/Delete 返回
+      `405 entity_write_owner_enforced`。
+
+验收：`tenant-001` 与 `tenant-gx-472324ae8bac4af39519` 已安装参考 Edition；API 验证
+`incorporation_case` 从专用权威表投影、`governance_resolution` 从 Journal 生成只读
+投影、`journal_entry` 只能由财务 Capability 写入。设计与迁移规则见 IAOS
+[DES-074](/iaos/iaos-go/docs/designs/DES-074-entity-storage-and-write-authority-contract.md)。

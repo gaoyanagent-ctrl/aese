@@ -1762,3 +1762,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：用户继续以逻辑 Entity code 使用模型和菜单；物理表前缀只表示统一读模型。节点 2 完成后只出现治理决议，登记、法人、开户、注资、任命和预算必须等待各自 Capability 提交后才出现；原生投影不能直接 CRUD。
 - 验证：IAOS 单元、API、交互式设立集成、财务投影集成、Go vet、语义/治理/Atlas/Code Map 检查通过；`tenant-001` 与目标 GX 租户安装 `genesis-m9@1.0.5` / Runtime 2.8.1，目标案件治理决议 1 条且明细列完整，六类未来 Entity 均为 0，8082 健康检查通过。
 - 后续：M10 及后续原生 Entity 必须声明 authority、projection owner 和字段物化映射，并复用“未发生零记录、显式必填不为空”的发布及集成测试门。
+
+## 2026-07-31 - M9 Entity 存储与唯一写入权威
+
+- 变更：IAOS Runtime 2.9.0 / `genesis-m9@1.1.0` 新增三类 Entity 存储合同，把权威来源、唯一写入者和投影维护者编译进 Effective Runtime Artifact；M9 计划、路线图和 Code Map 同步跨仓合同。
+- 原因：仅靠 `entity_projection_` 前缀无法区分动态权威表、复杂领域读模型和纯计算汇总，也不能阻止通用 CRUD 与 Capability 同时写同一 Entity。
+- 影响：新动态 Entity 统一使用 `entity_record_<code>`；复杂领域对象必须由唯一 Capability/Process 写专用权威表；Journal/Aggregate/Query 汇总只读。AESE 继续只通过 IAOS 受治理入口推进世界，不直接写 Entity 表或投影。
+- 验证：IAOS 单元、API、交互式设立集成、Go vet、TypeScript、组件和生产构建通过；真实租户共 35 个 M9 Entity 均为 version 1 合同（27 个领域投影、8 个计算投影），计算投影直接 Create 返回 `405 entity_write_owner_enforced`，8082/3000 健康。
+- 后续：历史 contract version 0 动态 Entity 按独立迁移计划冻结写入、对账、切换 metadata 和重编译 Artifact；不得自动改名或用降级规避合同。
