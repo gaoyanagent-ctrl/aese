@@ -12,7 +12,7 @@
 | 当前里程碑和优先级 | `docs/roadmap.md` |
 | 任务到文件导航 | `docs/code-map.md` |
 | 历史进展 | `docs/progress-log.md` |
-| 当前实施任务 | PLAN-GXZ-001 active；PLAN-M9-FIN-001 active |
+| 当前实施任务 | PLAN-GXZ-001 active；PLAN-M9-FIN-001、PLAN-KNOWLEDGE-AESE-001 并行 active |
 
 若内容冲突，当前状态以 `docs/roadmap.md` 为准，长期架构决策以 ADR 为准。
 
@@ -99,6 +99,7 @@
 | DES-027 | [M9 IAOS 原生语义驱动企业成立真实闭环](designs/DES-027-m9-iaos-native-incorporation-closed-loop.md) | Approved |
 | DES-028 | [Enterprise Genesis AI 原生企业创生游戏体验](designs/DES-028-enterprise-genesis-game-experience.md) | Completed |
 | DES-029 | [Enterprise Genesis 零起点主页、独立租户与真实 AI 企业身份](designs/DES-029-genesis-zero-start-and-ai-identity.md) | Approved |
+| DES-037 | [AESE 场景知识与 IAOS 产品知识中枢集成](designs/DES-037-aese-scenario-knowledge-and-iaos-product-hub.md) | Active |
 | DES-030 | [M9–M13 制造企业财务运行体系](designs/finance/DES-030-manufacturing-finance-operating-system.md) | Approved |
 | DES-031 | [IAOS 多组织财务与共享主数据基础](designs/finance/DES-031-multi-organization-and-shared-master-data-foundation.md) | Active |
 | FINANCE | [财务设计模块索引](designs/finance/README.md) | Active |
@@ -119,6 +120,7 @@
 | PLAN-GX | [Enterprise Genesis 游戏体验实施计划](plans/2026-07-27-enterprise-genesis-game-experience.md) | Completed |
 | PLAN-GXZ | [Enterprise Genesis 零起点与真实 AI 身份实施计划](plans/2026-07-28-genesis-zero-start-and-ai-identity.md) | Active |
 | PLAN-M9-FIN | [M9 制造企业财务基础与 M10–M13 业财闭环实施计划](plans/2026-07-28-m9-manufacturing-finance-foundation.md) | Active |
+| PLAN-KNOWLEDGE-AESE | [AESE 场景知识与 IAOS 产品知识中枢集成计划](plans/2026-08-01-product-knowledge-scenario-integration.md) | Active |
 | PLAN-M10 | [M10 Project Genesis 工厂选址与设施建设实施计划](plans/2026-07-22-m10-genesis-plant-build.md) | Completed |
 | PLAN-M11 | [M11 Project Genesis 生产能力建设实施计划](plans/2026-07-22-m11-genesis-production-capability-build.md) | Completed |
 | PLAN-M12 | [M12 Project Genesis 产品工业化与量产批准实施计划](plans/2026-07-22-m12-genesis-product-industrialization.md) | Completed |
@@ -137,6 +139,7 @@
 | AESE 3 Runbook | [M17-M24 Reference Release](runbooks/aese3-reference-release.md) | Completed |
 | AESE 3 Evidence | [M17-M24 Completion Evidence](reports/aese3-m17-m24-completion-evidence.md) | Completed |
 | M9 Runbook | [Genesis Incorporation Runbook](runbooks/genesis-incorporation.md) | Completed |
+| M9 用户手册 | [M9 企业设立用户手册](manuals/m9-incorporation-user-manual.md) | Active |
 | M9 Evidence | [Genesis Incorporation Evidence](reports/m9-genesis-incorporation-evidence.md) | Completed |
 | M9N Asset Audit | [IAOS-native M9 machine-readable asset audit](reports/m9-native-asset-audit.json) | Active |
 | M9N Frozen Contract | [IAOS-native M9 lifecycle contract](contracts/m9-native-incorporation-contract.json) | Active |

@@ -1,5 +1,13 @@
 # AESE Roadmap
 
+## 2026-08-01 产品知识与用户手册
+
+- 已完成 AESE/IAOS 知识所有权、场景 Article 扩展和 Agent 回答合同设计（DES-037）。
+- 已建立 M9 企业设立用户手册第一版，明确 human/agent/approval/world 四类节点与证据入口。
+- IAOS 已实现产品知识中枢第一纵向切片；AESE 下一步按
+  PLAN-KNOWLEDGE-AESE-001 交付机器 manifest、Knowledge Edition 安装、节点帮助和双侧证据。
+- 该计划是 PLAN-GXZ-001 的并行知识治理计划，不改变 M9 财务未完成项状态。
+
 本文件是 AESE 当前里程碑状态和下一步优先级的权威来源。
 
 最后更新：2026-07-31。

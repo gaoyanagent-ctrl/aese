@@ -432,6 +432,13 @@ M9 受治理写入口：`frontend/src/game/api.ts` 与
 `internal/iaosclient/client.go::PostGovernedCommand`。IAOS 端的 Capability/Process
 Artifact 执行权威见 IAOS SOL-048 和 DES-072。
 
+产品知识与用户手册：AESE 场景知识合同见
+`docs/designs/DES-037-aese-scenario-knowledge-and-iaos-product-hub.md`，M9 人工可读入口为
+`docs/manuals/m9-incorporation-user-manual.md`，实施计划为
+`docs/plans/2026-08-01-product-knowledge-scenario-integration.md`。通用 Knowledge Registry、
+知识中心、权限和 Copilot 检索由 IAOS DES-077 与 `/api/v1/knowledge/*` 提供；AESE 不新增
+知识数据库。后续机器 manifest 和 World 节点帮助入口必须更新本节。
+
 以下改动必须更新本文件：
 
 - 新增命令、核心 package、场景包、schema 或脚本。

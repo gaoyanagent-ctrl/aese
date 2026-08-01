@@ -1,0 +1,75 @@
+---
+id: DES-037
+title: AESE 场景知识与 IAOS 产品知识中枢集成
+date: 2026-08-01
+status: active
+author: Codex + User
+tags: [aese, knowledge, manual, m9, iaos]
+---
+
+# 1. 目标
+
+AESE 用户不仅要知道游戏中“点击什么”，还要理解每个剧情节点对应的真实企业活动、参与者、
+IAOS Capability/Process/Entity、输入输出和证据查询路径。IAOS DES-077 负责通用产品知识
+Registry、权限、页面帮助和 Copilot；AESE 负责场景手册源及 World/IAOS 映射，不复制知识
+服务、权限体系或运行数据库。
+
+# 2. 内容所有权
+
+| 内容 | 所有者 |
+| --- | --- |
+| IAOS 概念、菜单、配置和错误恢复 | IAOS Product Knowledge Hub |
+| AESE 剧情、角色、World Observation 和操作步骤 | AESE 场景手册 |
+| 当前 IAOS 租户 Active Artifact 和业务记录 | IAOS Runtime |
+| 当前 AESE World 客观事实和 actor knowledge | AESE World |
+
+场景手册不能宣称某 IAOS 节点已完成；必须通过 Bridge/Runtime evidence 证明。
+
+# 3. 场景知识 Article 扩展
+
+AESE 场景文章沿用 IAOS `Knowledge Article` 合同，并在 `related_assets` 中增加：
+
+```json
+{
+  "aese_routes": ["world-incorporation"],
+  "world_actions": ["registrar.confirm_registration"],
+  "iaos_processes": ["enterprise.incorporation.lifecycle.v1"],
+  "iaos_capabilities": ["registration.observation.commit"],
+  "iaos_entities": ["incorporation_case"],
+  "evidence_types": ["journal", "outbox", "world_observation"]
+}
+```
+
+每个节点说明：业务目的、前置事实、责任主体、人工/Agent/外部世界分类、输入表单、校验、预期
+输出、实际输出查询、失败恢复、IAOS 深链和 World evidence。
+
+# 4. 发布方式
+
+AESE 平台基线手册保留在 Git 并受场景版本审核；构建时生成 Knowledge Edition manifest，
+由 IAOS 平台包安装器发布为 `scenario` 文章。浏览器不直接读取仓库文件。文章必须带
+`applies_to_version`、AESE pack hash 和 IAOS Edition 依赖。
+
+第一切片以 `docs/manuals/m9-incorporation-user-manual.md` 为人工可读源；机器 manifest、发布
+编译器和每节点完整映射在 PLAN-KNOWLEDGE-AESE-001 后续切片实现。
+
+# 5. Agent 合同
+
+AESE 对话框将当前 workspace、case、world run、剧情节点和用户角色传给 IAOS 知识检索；
+回答必须分区显示：
+
+1. 场景中下一步怎么做；
+2. 这一步在真实企业中的含义；
+3. 对应 IAOS 配置和当前运行状态；
+4. World 与 IAOS 两侧证据；
+5. 来源文章 ID 和版本。
+
+对话框只提供知识查询时不得调用写 API；推进剧情继续走 AESE Command Gateway、IAOS
+Capability、Approval 和 World Observation。
+
+# 6. 验收
+
+- 用户从任一 M9 节点可打开对应场景说明；
+- 文章能跳转 IAOS Capability、Process、Entity 和证据入口；
+- Agent 能回答“谁做、为什么、输入输出、在哪里查看”，并显示来源；
+- 文章与运行事实冲突时明确提示漂移；
+- AESE 不新增知识数据库，不绕过 IAOS 权限读取跨租户内容。

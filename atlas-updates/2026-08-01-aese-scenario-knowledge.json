@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.knowledge.scenario-integration-design.2026-08-01",
+  "node_key": "aese.world.knowledge",
+  "update_type": "design",
+  "summary": "建立 AESE 场景手册与 IAOS 产品知识中枢集成合同",
+  "detail": "明确 AESE 负责剧情、角色和 World 映射，IAOS 负责知识 Registry、权限与 Copilot；新增 M9 用户手册第一版和机器发布、页面上下文、双侧证据后续计划。",
+  "status_after": "validating",
+  "progress_after": 55,
+  "current_state": "场景知识所有权、Article 扩展和 M9 人工手册已建立；机器 manifest、Knowledge Edition 安装及 AESE 页面/Agent 接入仍待实现。",
+  "evidence_ref": "docs/designs/DES-037-aese-scenario-knowledge-and-iaos-product-hub.md",
+  "occurred_at": "2026-08-01T03:55:00Z"
+}

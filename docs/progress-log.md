@@ -1816,3 +1816,10 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：AESE 只能消费 IAOS 已发布、已绑定、已授权的能力；草稿可视化会明确回退 Draft，不能再伪装为运行失败。
 - 验证：IAOS 33 项前端定向测试、后端 API/Capability 测试、TypeScript、Go/Next 生产构建及 8082/3000 部署通过；启动迁移在 system tenant 上修复 57 条历史悬空草稿，`tenant-001/Test.workorder.create` 已恢复为规范 draft；Atlas 声明校验通过，运行时同步端点暂返 404，待 System Atlas 写入路由恢复后补同步。
 - 后续：M9 测试仅选用平台基础包的 Active Capability；旧 Test 能力若指向 governed projection，应废弃并以声明的领域业务能力替代，不能发布为通用 CRUD。
+## 2026-08-01 - AESE 场景知识接入 IAOS 产品知识中枢
+
+- 变更：新增 DES-037、PLAN-KNOWLEDGE-AESE-001 和 M9 企业设立用户手册第一版。
+- 原因：现有设计、代码和页面说明缺少面向最终用户的统一检索和 Agent 可引用入口。
+- 影响：明确 AESE 只拥有场景知识和 World 映射，IAOS 拥有通用知识 Registry、权限和 Copilot；避免复制平台知识系统。
+- 验证：新增文档均带治理头；跨仓引用已核对；Atlas 声明已新增。
+- 后续：建立场景知识 Schema/manifest、Knowledge Edition 安装、节点帮助、上下文 Agent 与双侧证据验收。
