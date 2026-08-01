@@ -1941,5 +1941,5 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 变更：Plant Build Play 在可信 Observation 比较后增加合格候选选择、推荐理由、替代方案和单一来源例外表单；AESE 定向 BFF 调用 IAOS `site.selection.recommend`，IAOS 以 `site-assessment-v1` 重算并创建版本化 Approval Request；批准后由 `site.selection.formalize` 独立消费并写正式选址决定，IAOS 工作台增加推荐/审批穿透页。
 - 原因：浏览器预览分数、Agent 建议和人工推荐都不能直接成为正式场址事实，审批人也不能由提交页面自行指定。
 - 影响：M10 已形成 Requirement → Agent Proposal → Human Review → World Observation → IAOS Recommendation → Approval → Formal Selection 的在线纵切；默认审批流按 `chair` 岗位解析，客户可在审批中心发布多阶段/会签新版本，在途请求冻结原版本和处理人。
-- 验证：IAOS API/平台包定向 Go 测试、Next 生产构建以及 AESE BFF、TypeScript、24 个前端测试文件/70 项测试已通过；完整全仓、治理、Atlas、部署和 live 证据在本次发布收口中继续执行。
+- 验证：AESE 全仓 Go/vet、BFF、TypeScript、24 个前端测试文件/70 项测试与 Vite 生产构建通过；IAOS 全仓 Go/vet、治理写检查、Code Map/Atlas、TypeScript 与 Next 生产构建通过。两仓已推送，IAOS 已合并 main；8082/3000/8090/4173 健康，四个 active 租户升级到 `genesis-m9@1.10.0`，Capability Artifact、审批流和未认证 BFF 401 已在线核对。System Atlas 声明同步端点仍返回 404，声明保留待路由恢复后幂等补录。
 - 后续：实现平台 Entity 元数据、人工候选权威提交、完整单一 Effective Process Run、项目/WBS、合同、施工、付款、验收和工程财务纵切；在这些范围完成前不把交互式 M10 标记为 Completed。
