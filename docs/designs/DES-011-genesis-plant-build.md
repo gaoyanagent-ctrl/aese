@@ -144,6 +144,8 @@ country / region / city（用户需求）
 `genesis.site.selection.approval`。推荐、审批和正式落地分离；只有审批状态 approved 时，
 `site.selection.formalize` 才能消费该请求并写正式决定。少于两个合格候选必须填写单一来源例外说明。
 
+IAOS 同时把 Requirement、ProposalSet/Proposal Line、Review、Investigation Request/Observation、持久 Work Item、Recommendation 和 Decision 发布为九个 `domain_projection` Entity。它们只用于数据模型工坊、左侧业务菜单和穿透查询；权威写入仍分别属于七个 Capability 或调查 Process。投影与权威变化在同一事务同步，菜单不提供通用新增、修改和删除，避免用户或 Agent 绕过 M10 业务能力直接改事实。
+
 ### 7.1 Agent 生成与人工选择合同
 
 `plant-planning-agent` 的输入只能来自当前租户有权读取的事实和本次需求版本：

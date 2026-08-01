@@ -1943,3 +1943,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：M10 已形成 Requirement → Agent Proposal → Human Review → World Observation → IAOS Recommendation → Approval → Formal Selection 的在线纵切；默认审批流按 `chair` 岗位解析，客户可在审批中心发布多阶段/会签新版本，在途请求冻结原版本和处理人。
 - 验证：AESE 全仓 Go/vet、BFF、TypeScript、24 个前端测试文件/70 项测试与 Vite 生产构建通过；IAOS 全仓 Go/vet、治理写检查、Code Map/Atlas、TypeScript 与 Next 生产构建通过。两仓已推送，IAOS 已合并 main；8082/3000/8090/4173 健康，四个 active 租户升级到 `genesis-m9@1.10.0`，Capability Artifact、审批流和未认证 BFF 401 已在线核对。System Atlas 声明同步端点仍返回 404，声明保留待路由恢复后幂等补录。
 - 后续：实现平台 Entity 元数据、人工候选权威提交、完整单一 Effective Process Run、项目/WBS、合同、施工、付款、验收和工程财务纵切；在这些范围完成前不把交互式 M10 标记为 Completed。
+
+## 2026-08-01 - M10 权威对象只读 Entity 投影
+
+- 变更：IAOS 平台包新增设施需求、候选集/候选行、人工评审、调研请求/事实、持久工作项、推荐和正式决定九个 `domain_projection` Entity；权威 Capability 成功时同事务同步 typed projection，菜单仅授予 READ 并清除通用 CRUD。
+- 原因：M10 数据过去只能从专项工作台或数据库读取，数据模型工坊没有正式合同；若开放通用 Entity 写入又会绕过 Capability、审批和 World 信任边界。
+- 影响：实施人员现在可在左侧业务菜单和数据模型工坊穿透查看各阶段事实、主子候选和唯一写入所有者；数据修改仍必须回到 M10 工作台、AESE Command Gateway 或受治理 Process/Agent。
+- 验证：IAOS 全量 Go、vet、治理写入、Code Map、Atlas 和真实租户 Edition 升级/投影查询；AESE 文档、计划、链接和 Atlas 校验。Atlas 同步写端点若仍为 404，则保留声明待服务路由恢复后补录。
+- 后续：实现 S2.3 单一全程 Effective Process Run、S3.3 人工候选权威提交，以及项目/WBS、合同、施工、付款、验收和工程财务闭环。

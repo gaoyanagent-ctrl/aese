@@ -33,7 +33,7 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 
 ### S2 IAOS 权威对象与受治理能力
 
-- [ ] S2.1 在 IAOS 独立 worktree 发布 Facility Requirement、Proposal、Review 与调查请求 Entity/storage contract。五类 FORCE RLS 权威存储（含 Investigation Request、Observation 和持久 Work Item）、Capability 写入触发器、幂等与版本合同已完成；平台 Entity/Edition 元数据发布仍待补齐。
+- [x] S2.1 在 IAOS 独立 worktree 发布 Facility Requirement、Proposal/Proposal Line、Review、Investigation Request/Observation、Work Item、Recommendation 与 Decision 九个 Entity/storage contract；八张 FORCE RLS 权威/工作项表仍由逐对象 Capability/Process 唯一写入，同事务生成只读 `entity_projection_*`，数据模型工坊和左侧菜单不暴露通用 CRUD。
 - [x] S2.2 发布 `facility.requirement.define`、`site.proposal.record`、`site.proposal.review`、`site.investigation.request`、`site.investigation.observation.commit` Capability Artifact 与实现绑定。五项均进入 `genesis-m9@1.9.0` 平台包并使用 Published Active Artifact/native binding。
 - [ ] S2.3 Process Artifact 展开为 human task → agent task → human review → world wait，不允许 Go 固定帧跳步。已发布 `facility.site.investigation.v1` 的 request → persistent world wait 首段并形成可恢复工作项；完整需求、Agent、评审、调研和选址流程尚未统一到同一 Effective Process Run。
 - [ ] S2.4 proposal/review、Agent Run、audit、journal 和 Outbox 同事务；RLS、幂等、版本冲突和失败无部分写入。Requirement/Proposal/Review 已具备事务 Audit、Outbox、RLS、幂等与版本冲突门；Agent 技术证据当前由 AESE CreativeJob 保存，尚未纳入 IAOS Agent Run/Process 事务。
@@ -72,7 +72,7 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 
 ## 4. 当前执行
 
-S0、S1、S2.2、S3.0、S3.1、S3.2、S3.4、S4.1、S4.2、S4.2b 和 S4.4a 已完成。当前在线纵切为：M9 机器终态交接 → 权威财务快照 → Requirement → Agent Proposal → Human Review → 持久 World wait/Intent → 可信 Observation → 可解释预览 → IAOS 权威重算 → 人工推荐 → 统一审批 → 独立 Capability 正式选址。该纵切不等于完整 M10：平台 Entity 元数据、完整单一 Effective Process Run、人工候选权威提交、项目/WBS/合同/施工/会计和 S5 全链验收仍未完成。既有未跟踪 M7 验收产物不属于本计划，不修改、不提交。
+S0、S1、S2.1、S2.2、S3.0、S3.1、S3.2、S3.4、S4.1、S4.2、S4.2b 和 S4.4a 已完成。当前在线纵切为：M9 机器终态交接 → 权威财务快照 → Requirement → Agent Proposal → Human Review → 持久 World wait/Intent → 可信 Observation → 可解释预览 → IAOS 权威重算 → 人工推荐 → 统一审批 → 独立 Capability 正式选址，并可从 IAOS 数据模型工坊/业务菜单查看九类只读明细。该纵切不等于完整 M10：完整单一 Effective Process Run、人工候选权威提交、项目/WBS/合同/施工/会计和 S5 全链验收仍未完成。既有未跟踪 M7 验收产物不属于本计划，不修改、不提交。
 
 ## 5. 当前接口与事实所有权
 
