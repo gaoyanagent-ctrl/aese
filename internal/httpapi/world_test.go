@@ -235,6 +235,7 @@ func TestPlantPlanningProposalPersistsEvidenceAndReplaysIdempotently(t *testing.
 
 func TestPlantPlanningCommitsRequirementAndAgentProposalThroughIAOSCapabilities(t *testing.T) {
 	capabilities := []string{}
+	var proposalAgentRun map[string]any
 	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/profile" {
 			_, _ = w.Write([]byte(`{"username":"founder-principal","tenant_id":"tenant-a"}`))
@@ -245,8 +246,9 @@ func TestPlantPlanningCommitsRequirementAndAgentProposalThroughIAOSCapabilities(
 			return
 		}
 		var command struct {
-			CapabilityCode string `json:"capability_code"`
-			ActorID        string `json:"actor_id"`
+			CapabilityCode string         `json:"capability_code"`
+			ActorID        string         `json:"actor_id"`
+			AgentRun       map[string]any `json:"agent_run"`
 		}
 		if err := json.NewDecoder(r.Body).Decode(&command); err != nil {
 			t.Fatal(err)
@@ -255,6 +257,9 @@ func TestPlantPlanningCommitsRequirementAndAgentProposalThroughIAOSCapabilities(
 			t.Fatalf("actor=%s", command.ActorID)
 		}
 		capabilities = append(capabilities, command.CapabilityCode)
+		if command.CapabilityCode == "site.proposal.record" {
+			proposalAgentRun = command.AgentRun
+		}
 		w.WriteHeader(http.StatusCreated)
 		_, _ = w.Write([]byte(`{"status":"committed"}`))
 	}))
@@ -272,6 +277,9 @@ func TestPlantPlanningCommitsRequirementAndAgentProposalThroughIAOSCapabilities(
 	}
 	if strings.Join(capabilities, ",") != "facility.requirement.define,site.proposal.record" {
 		t.Fatalf("capabilities=%v", capabilities)
+	}
+	if proposalAgentRun["agent_id"] != "plant-planning-agent" || proposalAgentRun["status"] != "completed" || proposalAgentRun["validation_result"] != "valid" {
+		t.Fatalf("agent_run=%v", proposalAgentRun)
 	}
 }
 

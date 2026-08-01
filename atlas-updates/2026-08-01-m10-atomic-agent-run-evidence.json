@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.atomic-agent-run-evidence.2026-08-01",
+  "node_key": "aese.genesis.m10-plant-build",
+  "update_type": "implementation",
+  "summary": "M10 Agent Run 与 Proposal 进入 IAOS 原子证据链",
+  "detail": "AESE Command Gateway 将服务端形成的 completed/valid Agent Run Evidence 随 ProposalSet 提交，IAOS 原子写入 Agent Run、候选、Capability/Process/Audit/Outbox；M10 工作台增加 Agent 运行穿透页签。",
+  "status_after": "building",
+  "current_state": "S2.4 完成；项目/WBS、合同、施工、工程财务和 S5 全链验收仍待实现。",
+  "evidence_ref": "docs/designs/DES-011-genesis-plant-build.md",
+  "occurred_at": "2026-08-01T17:10:00Z"
+}

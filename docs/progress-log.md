@@ -1975,3 +1975,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：外部模型和人工路径不再互为前置条件；首版与追加版都固定认证 actor、输入/输出 hash、金额边界和来源，仍不能伪造 Agent 或 World 事实。
 - 验证：IAOS 全模块 Go/vet、治理写入和 Atlas tracking 通过；AESE 全仓 Go/vet、24 文件/71 项 Vitest、TypeScript 与 Vite 生产构建通过。8082/8090/3000/4173 健康，四个 active 租户均升级到 `genesis-m9@1.14.0` 且 `up_to_date=true`；线上 Process Artifact 仍为 `business_command_driven` 并声明 Agent/项目负责人双参与入口，未认证人工入口按预期返回 401。System Atlas 同步端点仍返回 404，声明已保留。
 - 后续：完成 S2.4 Agent Run 与业务 Proposal 同事务证据，并继续 M10 项目/WBS 纵切。
+
+## 2026-08-01 - M10 Agent Run 与 Proposal 原子证据
+
+- 变更：AESE Command Gateway 将 completed/valid Agent Run Evidence 随 Agent Proposal 提交；IAOS `site.proposal.record` 逐字段匹配 provider/model/prompt/request/token/input/output hash，并在同一事务写 ProposalSet、Agent Run、Capability Execution、Process trace、Audit、Outbox 和投影。IAOS M10 工作台新增 Agent 运行页签。
+- 原因：CreativeJob 文件只证明 AESE 调过模型，不能证明 IAOS 接受的候选与哪次运行一致，也无法保证候选与运行证据同时成功或同时失败。
+- 影响：Agent 候选缺少或篡改运行证据会失败关闭；人员候选禁止伪造 Agent Run。World Journal 仍只接受外部 Intent/Observation，不混入模型运行。
+- 验证：新增 Agent Run/Proposal 匹配、篡改拒绝、人工路径隔离和 BFF 命令证据测试；完整回归与在线发布证据在本次发布后补录。
+- 后续：推进 S4.3 项目/WBS、空间和承包策略的 Agent 建议与人员决定纵切。

@@ -293,7 +293,7 @@ genesis.facility.accepted.v1
 
 1. Plant Build Play 读取 IAOS 已过账银行科目和已批准预算形成的只读财务快照，显示来源引用和 snapshot hash；用户只能编辑投资申请额、现金保留下限等业务输入，不能覆盖现金或预算事实。
 2. 用户填写 `FacilityRequirement` 后，浏览器只调用 AESE 同源 BFF；AESE 严格校验合同、调用已配置的 `plant-planning-agent` provider，并保存模型、prompt、request、token、输入/输出 hash 与校验结果等 CreativeJob 技术证据。
-3. AESE 分别以 `facility.requirement.define` 和 `site.proposal.record` 向 IAOS 提交 Requirement 与 candidate-only ProposalSet。IAOS 使用当前 tenant/actor、FORCE RLS、Capability Execution、幂等键、版本检查、Audit 和 Outbox 保存业务事实。
+3. AESE 分别以 `facility.requirement.define` 和 `site.proposal.record` 向 IAOS 提交 Requirement 与 candidate-only ProposalSet。Agent 生成时同时携带由服务端形成的 Agent Run Evidence；IAOS 逐字段匹配 Proposal Evidence，并在同一事务保存 ProposalSet、Agent Run、Capability Execution、Process trace、Audit、Outbox 和只读投影。人员候选禁止携带 Agent Run。
 4. 项目负责人可对候选执行采纳调研、退回重生成或淘汰，并填写业务理由；AESE 从 IAOS profile 解析实际人员身份，再以 `site.proposal.review` 保存审阅，浏览器不能指定 `reviewed_by`。
 5. 对已保存且审阅结论为“采纳调研”的候选，人员可发起外部调研。IAOS 创建 `facility.site.investigation.v1` 持久 `waiting_world` 工作项，并通过 World Bridge 写入带 correlation/subject 的 Intent。
 6. AESE 外部参与者使用结构化表单返回权属、可用面积、电力容量、正式报价、可用日期、许可、证据引用和备注。AESE 必须先写受信 World Journal Observation；IAOS 的 `site.investigation.observation.commit` 只消费与 Intent/correlation 匹配的 Journal 事实，保存权威 Observation 并完成工作项。
@@ -311,11 +311,12 @@ Requirement 到正式选址现已统一为 `facility.plant.planning.v1@1.0.0` �
 ### 16.0 IAOS 菜单入口与双系统职责
 
 M10 的 IAOS 用户入口是左侧导航的 `业务智造层 → M10 工厂规划`，不是隐藏 API，
-也不要求用户先记住 AESE URL。该工作台提供八个可解释标签页：
+也不要求用户先记住 AESE URL。该工作台提供九个可解释标签页：
 
 - `权威资金约束`：读取当前案件已过账现金和已批准预算，只读展示来源与快照哈希。
 - `设施需求`：查看人员提交的版本化 Requirement。
 - `Agent 候选方案`：查看 candidate-only ProposalSet、假设、风险和待验证事实。
+- `Agent 运行`：查看 IAOS 权威 Agent Run、模型/request/token/耗时、输入输出 hash 和对应候选 revision；这不是 World 外部事实。
 - `人工评审`：查看采纳调研、退回或淘汰及其理由；评审不等于投资审批。
 - `外部调研工作项`：查看调查请求、`facility.site.investigation.v1`、等待能力、World 状态与已返回 Observation。
 - `推荐与审批`：查看权威评分输入 hash、推荐候选、审批流/请求状态和正式选址决定。

@@ -100,6 +100,25 @@ type ProposalSet struct {
 	Evidence      ProposalEvidence     `json:"evidence"`
 }
 
+type AgentRunEvidence struct {
+	AgentRunID       string         `json:"agent_run_id"`
+	CaseCode         string         `json:"case_code"`
+	AgentID          string         `json:"agent_id"`
+	Status           string         `json:"status"`
+	Provider         string         `json:"provider"`
+	Model            string         `json:"model"`
+	ModelVersion     string         `json:"model_version"`
+	PromptVersion    string         `json:"prompt_version"`
+	RequestID        string         `json:"request_id"`
+	InputHash        string         `json:"input_hash"`
+	OutputHash       string         `json:"output_hash"`
+	TokenUsage       map[string]int `json:"token_usage"`
+	ValidationResult string         `json:"validation_result"`
+	LatencyMS        int64          `json:"latency_ms"`
+	StartedAt        string         `json:"started_at"`
+	CompletedAt      string         `json:"completed_at"`
+}
+
 type ProposalReview struct {
 	ProposalSetID    string `json:"proposal_set_id"`
 	ProposalID       string `json:"proposal_id"`

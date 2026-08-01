@@ -62,7 +62,7 @@
 - `site.selection.recommend`
 - `site.selection.formalize`
 
-IAOS 侧应能读取最新 Requirement、ProposalSet、Review、Investigation Request、Work Item、Observation、Recommendation、Approval Request 和 Site Selection Decision；每次提交同时产生 tenant-scoped Audit 与 Outbox。Agent 模型、prompt、request、token 和输入/输出 hash 保存在 AESE CreativeJob 技术证据中。两类证据必须分别存在，不能用页面展示或 Agent 文本替代。
+IAOS 侧应能读取最新 Requirement、ProposalSet、Agent Run、Review、Investigation Request、Work Item、Observation、Recommendation、Approval Request 和 Site Selection Decision；每次提交同时产生 tenant-scoped Audit 与 Outbox。Agent 模型、prompt、request、token 和输入/输出 hash 同时保存在 AESE CreativeJob 技术日志和 IAOS 权威 Agent Run 中；后者必须与 ProposalSet 原子提交并逐字段匹配。两类证据不能用页面展示或 Agent 文本替代。
 
 ### 失败与恢复验收
 

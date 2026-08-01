@@ -876,7 +876,7 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 						return
 					}
 					if authority != nil {
-						if err := postPlantAuthorityCommand(ctx, authority, "site.proposal.record", actorID, request.CaseCode, set.ProposalSetID, set.Revision, set); err != nil {
+						if err := postPlantAuthorityProposalCommand(ctx, authority, actorID, request.CaseCode, set, existing); err != nil {
 							s.writePlantAuthorityError(w, err, "site_proposal_not_committed")
 							return
 						}
@@ -915,7 +915,7 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				}
 			}
 			if authority != nil {
-				if err := postPlantAuthorityCommand(ctx, authority, "site.proposal.record", actorID, request.CaseCode, set.ProposalSetID, set.Revision, set); err != nil {
+				if err := postPlantAuthorityProposalCommand(ctx, authority, actorID, request.CaseCode, set, job); err != nil {
 					s.writePlantAuthorityError(w, err, "site_proposal_not_committed")
 					return
 				}
@@ -1379,7 +1379,23 @@ func postPlantAuthorityCommand(ctx context.Context, client *iaosclient.Client, c
 	return err
 }
 
+func postPlantAuthorityProposalCommand(ctx context.Context, client *iaosclient.Client, actorID, caseCode string, set plantbuild.ProposalSet, job creative.CreativeJob) error {
+	run := plantbuild.AgentRunEvidence{
+		AgentRunID: job.JobID, CaseCode: caseCode, AgentID: "plant-planning-agent", Status: job.Status,
+		Provider: job.Provider, Model: job.Model, ModelVersion: job.ModelVersion,
+		PromptVersion: job.PromptVersion, RequestID: job.RequestID, InputHash: job.InputHash,
+		OutputHash: job.ContentHash, TokenUsage: job.TokenUsage, ValidationResult: job.ValidationResult,
+		LatencyMS: job.LatencyMS, StartedAt: job.CreatedAt, CompletedAt: job.CompletedAt,
+	}
+	_, err := postPlantAuthorityCommandResultWithAgentRun(ctx, client, "site.proposal.record", actorID, caseCode, set.ProposalSetID, set.Revision, set, &run)
+	return err
+}
+
 func postPlantAuthorityCommandResult(ctx context.Context, client *iaosclient.Client, capabilityCode, actorID, scopeID, objectID string, revision int, payload any) (json.RawMessage, error) {
+	return postPlantAuthorityCommandResultWithAgentRun(ctx, client, capabilityCode, actorID, scopeID, objectID, revision, payload, nil)
+}
+
+func postPlantAuthorityCommandResultWithAgentRun(ctx context.Context, client *iaosclient.Client, capabilityCode, actorID, scopeID, objectID string, revision int, payload any, agentRun *plantbuild.AgentRunEvidence) (json.RawMessage, error) {
 	field := ""
 	switch capabilityCode {
 	case "facility.requirement.define":
@@ -1405,6 +1421,9 @@ func postPlantAuthorityCommandResult(ctx context.Context, client *iaosclient.Cli
 		"correlation_id":  "corr-m10-" + strings.TrimSpace(scopeID),
 		"idempotency_key": fmt.Sprintf("m10:%s:%s:r%d", capabilityCode, strings.TrimSpace(objectID), revision),
 		field:             payload,
+	}
+	if agentRun != nil {
+		command["agent_run"] = agentRun
 	}
 	raw, err := json.Marshal(command)
 	if err != nil {

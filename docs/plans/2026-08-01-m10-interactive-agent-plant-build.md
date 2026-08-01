@@ -36,7 +36,7 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 - [x] S2.1 在 IAOS 独立 worktree 发布 Facility Requirement、Proposal/Proposal Line、Review、Investigation Request/Observation、Work Item、Recommendation 与 Decision 九个 Entity/storage contract；八张 FORCE RLS 权威/工作项表仍由逐对象 Capability/Process 唯一写入，同事务生成只读 `entity_projection_*`，数据模型工坊和左侧菜单不暴露通用 CRUD。
 - [x] S2.2 发布 `facility.requirement.define`、`site.proposal.record`、`site.proposal.review`、`site.investigation.request`、`site.investigation.observation.commit` Capability Artifact 与实现绑定。五项均进入 `genesis-m9@1.9.0` 平台包并使用 Published Active Artifact/native binding。
 - [x] S2.3 Process Artifact 展开为 human task → agent task → human review → world wait → recommendation → approval → formalization；`facility.plant.planning.v1` 由七个受治理 Capability 和审批决定在原事务推进同一 `process_run`。该流程禁止通用一键运行，不能重复创建审批或伪造 World Observation；IAOS M10 工作台提供按案件穿透页和流程工作室深链。
-- [ ] S2.4 proposal/review、Agent Run、audit、journal 和 Outbox 同事务；RLS、幂等、版本冲突和失败无部分写入。Requirement/Proposal/Review 已具备事务 Audit、Outbox、RLS、幂等与版本冲突门；Agent 技术证据当前由 AESE CreativeJob 保存，尚未纳入 IAOS Agent Run/Process 事务。
+- [x] S2.4 proposal/review、Agent Run、audit、生命周期 trace 和 Outbox 同事务；RLS、幂等、版本冲突和失败无部分写入。AESE CreativeJob 继续保存模型调用技术日志；Agent Proposal 成功时 IAOS 要求匹配的 completed/valid Agent Run，并与 ProposalSet、Capability Execution、Process trace、Audit、Outbox、投影原子提交。模型调用不是 World Observation，因此不写 World Journal。
 
 ### S3 用户表单与人工选择
 
@@ -72,7 +72,7 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 
 ## 4. 当前执行
 
-S0、S1、S2.1、S2.2、S2.3、S3.0–S3.4、S4.1、S4.2、S4.2b 和 S4.4a 已完成。当前在线纵切为：M9 机器终态交接 → 权威财务快照 → Requirement → Agent 或人工 Proposal → Human Review → 持久 World wait/Intent → 可信 Observation → 可解释预览 → IAOS 权威重算 → 人工推荐 → 统一审批 → 独立 Capability 正式选址；所有参与追加到同一 `facility.plant.planning.v1` Effective Process Run，并可从 IAOS 数据模型工坊、M10 工作台和流程工作室穿透查看。该纵切不等于完整 M10：Agent Run/业务 proposal 同事务证据、项目/WBS/合同/施工/会计和 S5 全链验收仍未完成。既有未跟踪 M7 验收产物不属于本计划，不修改、不提交。
+S0、S1、S2、S3、S4.1、S4.2、S4.2b 和 S4.4a 已完成。当前在线纵切为：M9 机器终态交接 → 权威财务快照 → Requirement → Agent 或人工 Proposal → Human Review → 持久 World wait/Intent → 可信 Observation → 可解释预览 → IAOS 权威重算 → 人工推荐 → 统一审批 → 独立 Capability 正式选址；Agent Proposal 与 IAOS Agent Run/Capability/Process/Audit/Outbox 原子提交，所有参与追加到同一 `facility.plant.planning.v1` Effective Process Run，并可从 IAOS 数据模型工坊、M10 工作台和流程工作室穿透查看。该纵切不等于完整 M10：项目/WBS/合同/施工/会计和 S5 全链验收仍未完成。既有未跟踪 M7 验收产物不属于本计划，不修改、不提交。
 
 ## 5. 当前接口与事实所有权
 
@@ -80,7 +80,7 @@ S0、S1、S2.1、S2.2、S2.3、S3.0–S3.4、S4.1、S4.2、S4.2b 和 S4.4a 已�
 | --- | --- | --- | --- |
 | 打开交互规划 | `GET /api/aese/v1/world/plant-build/financial-constraints?case_code=...` | 使用当前 IAOS token/tenant 定向转发，不缓存业务事实 | 从已过账银行科目和已批预算形成只读 snapshot、来源引用与 hash |
 | 恢复候选估算 | `GET /api/aese/v1/world/plant-build/proposals?requirement_id=...` | 使用命名 IAOS adapter 读取最新 ProposalSet，不代理任意路径 | 返回 IAOS 已保存的 candidate-only ProposalSet，使刷新后仍可与 Observation 并列比较 |
-| 保存需求并生成候选 | `POST /api/aese/v1/world/plant-build/proposals` | 严格校验 Requirement、调用已配置模型、保存 CreativeJob 技术证据 | `facility.requirement.define` 与 `site.proposal.record` 分别提交 Requirement 和 candidate-only ProposalSet |
+| 保存需求并生成候选 | `POST /api/aese/v1/world/plant-build/proposals` | 严格校验 Requirement、调用已配置模型、保存 CreativeJob 技术日志并提交匹配的 Agent Run Evidence | `facility.requirement.define` 提交 Requirement；`site.proposal.record` 原子提交 candidate-only ProposalSet、Agent Run、Capability/Process/Audit/Outbox |
 | 人工新增候选 | `POST /api/aese/v1/world/plant-build/proposals/manual` | 读取最新 Requirement/ProposalSet、覆盖浏览器身份字段并生成版本证据 | `site.proposal.record` 可在无候选集时建立第 1 版；已有版本时只允许追加一个人员来源候选，既有候选不可修改 |
 | 审阅候选 | `POST /api/aese/v1/world/plant-build/reviews` | 从 IAOS profile 解析实际 actor，禁止浏览器伪造 reviewer | `site.proposal.review` 保存 action、理由、revision、reviewer、Audit 和 Outbox |
 | 发起外部调研 | `POST /api/aese/v1/world/plant-build/investigations` | 只接受已保存且结论为 `adopt_for_investigation` 的候选，服务端解析 actor | `site.investigation.request` 创建调查请求、`facility.site.investigation.v1` 持久 `waiting_world` 工作项和 World Intent |
