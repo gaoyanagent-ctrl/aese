@@ -8,7 +8,10 @@
   “这一步是什么”入口；IAOS 已实现租户知识发布和正式只读 Agent Tool。
 - 已完成 workspace/case/world run/node/actor/capability 封闭导航上下文深链；IAOS 知识中心
   可见展示、允许清除并在 Copilot BFF 二次校验，明确不能把浏览器参数当作运行事实。
-- 下一步按 PLAN-KNOWLEDGE-AESE-001 完成 World/IAOS 双侧实际证据、配置漂移和失败关闭验收。
+- 已完成 World Observation 接收回执、IAOS Evidence Bundle/工作项、权威哈希、逐字段配置漂移
+  和 Copilot 服务端重读；越权、旧合同、缺失节点/Artifact/Observation 时失败关闭。
+- PLAN-KNOWLEDGE-AESE-001 的 S1–S12 已全部完成；后续知识增强进入 IAOS 通用菜单覆盖、
+  错误码覆盖和 Agent 引用评测，不再作为 AESE M9 场景知识阻塞项。
 - 该计划是 PLAN-GXZ-001 的并行知识治理计划，不改变 M9 财务未完成项状态。
 
 本文件是 AESE 当前里程碑状态和下一步优先级的权威来源。

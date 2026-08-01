@@ -96,6 +96,23 @@ AESE 从当前 `WorldProjection`、`GameWorkItem` 和 Genesis session 生成以�
 - Copilot 回答当前状态前，重新读取有权访问的 IAOS Runtime/业务 API；无证据时明确失败关闭；
 - S9 前不宣称已完成双侧证据核验或配置漂移检测。
 
+## 5.2 双侧实际证据合同
+
+M9 的外部参与者操作经 AESE Command Gateway 提交，IAOS 校验合同并把受信 Observation 写入
+`world_bridge_journal`。因此用户看到的“World 证据”必须是 IAOS Evidence Bundle 中已持久化的
+`world_exchanges` 接收回执；AESE 画面、按钮点击次数、URL 参数和场景手册都不能证明外部结果。
+
+IAOS 知识中心使用当前用户 JWT 读取案件 Evidence Bundle 和工作项，分别显示：
+
+- World：匹配当前工作项 correlation 的 message、payload type 和 recorded time；
+- IAOS：实际节点状态、参与者、Capability、Journal/Approval/Outbox/Process/Decision/Agent Run/
+  Capability Execution、Case canonical hash、Bundle hash 和 Effective Artifact hash；
+- Drift：case、world run、node、actor、task type、Capability 与 Effective Artifact 清单的差异。
+
+Copilot BFF 必须独立重读相同 API，只接收稳定编码、状态、计数、版本和哈希摘要，不信任浏览器
+已渲染结果。越权、案件/节点缺失、旧 Evidence 合同、验签失败、Capability 未发布或
+`world_wait` 没有 Observation 回执均失败关闭。
+
 # 6. 验收
 
 - 用户从任一 M9 节点可打开对应场景说明；
@@ -110,6 +127,8 @@ AESE 从当前 `WorldProjection`、`GameWorkItem` 和 Genesis session 生成以�
   `KB-M9-INCORPORATION` 打开 IAOS 知识中心；深链同时携带 5.1 节定义的封闭场景导航上下文；
 - IAOS 知识中心明确展示该上下文，Copilot 请求经前端和 BFF 双重归一化后使用；它不能替代
   Runtime、Journal、Outbox 或 World Observation 证据；
+- IAOS 知识中心从签名 Evidence Bundle 和工作项展示 5.2 节双侧证据与逐字段漂移，Copilot
+  BFF 使用原 JWT 独立重读；
 - 清单逐节点固定 purpose、inputs、outputs、actor、task type、gate、evidence、IAOS menu 和
   World action；
 - 内容哈希不等同于生产签名或安装完成；只有 IAOS 安装器登记成功后才能宣称 Edition 已发布。

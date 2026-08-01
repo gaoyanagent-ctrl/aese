@@ -2,7 +2,7 @@
 id: PLAN-KNOWLEDGE-AESE-001
 title: AESE 场景知识与 IAOS 产品知识中枢集成计划
 date: 2026-08-01
-status: active
+status: completed
 author: Codex + User
 tags: [knowledge, m9, iaos, aese]
 parent_plan: PLAN-GXZ-001
@@ -30,10 +30,10 @@ PLAN-KNOWLEDGE-001；本仓只维护场景知识、映射、校验和 AESE 页�
 - [x] S7 World 节点详情增加“这一步是什么”上下文入口。
 - [x] S8 将 workspace/case/world run/node/actor 作为封闭导航上下文传入受治理知识问答，并在
   IAOS BFF 二次校验、可见展示和明确区分运行证据。
-- [ ] S9 展示 World 与 IAOS 双侧实际证据和配置漂移。
+- [x] S9 展示 World Observation 接收回执、IAOS Evidence Bundle/工作项证据和逐字段配置漂移。
 
 ## S3 验收
 
 - [x] S10 M9 全节点人工、Agent、Approval、World 分类覆盖率 100%。
-- [ ] S11 越权、旧版本、缺失资产和无运行证据失败关闭。
-- [ ] S12 UI/API/runbook、Atlas、code map 和 evidence 全部收口。
+- [x] S11 越权、旧版本、缺失资产、缺少 World Observation 和无运行证据失败关闭。
+- [x] S12 UI/API/runbook、Atlas、code map、生产构建、部署和 evidence 全部收口。

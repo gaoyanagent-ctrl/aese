@@ -446,7 +446,8 @@ Artifact 执行权威见 IAOS SOL-048 和 DES-072。
 `frontend/src/game/iaosLinks.ts::m9KnowledgeUrl`；该函数从 WorldProjection、GameWorkItem 和
 Genesis session 生成封闭 workspace/case/world run/node/actor/task/capability 导航上下文。
 IAOS 知识中心与 Copilot BFF 负责二次归一化和可见展示。World/IAOS 双侧实际证据和漂移检测
-仍属后续 S9，导航参数不得被解释为运行事实。
+由 IAOS `ScenarioEvidencePanel`、M9 Evidence Bundle/工作项 API 和 Copilot BFF 服务端重读实现；
+World 证据特指 IAOS 已持久化的外部 Observation 回执，导航参数不得被解释为运行事实。
 
 以下改动必须更新本文件：
 

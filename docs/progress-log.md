@@ -1851,3 +1851,24 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 验证：AESE 深链单测与 TypeScript 通过；IAOS 归一化单测、TypeScript 和生产构建通过；
   详细证据见两仓对应的 2026-08-01 scenario context evidence。
 - 后续：S9 接入有权限的 World/IAOS 双侧实际证据读取和配置漂移提示。
+
+## 2026-08-01 - M9 知识中心双侧证据与配置漂移闭环
+
+- 变更：IAOS 知识中心以当前 JWT 读取 M9 Evidence Bundle 和工作项，展示节点实际状态、
+  IAOS 证据计数与权威哈希、World Observation 接收回执和逐字段漂移；Copilot BFF 独立重读。
+- 原因：导航 ID 和场景手册只能定位，不能证明节点、审批、Agent 或外部世界结果。
+- 影响：AESE 仍不保存 IAOS 业务数据；World 证据明确限定为 IAOS 已校验并持久化的 Bridge
+  回执。越权、旧合同、缺失节点/Capability/Observation 或验签失败时不再推断状态。
+- 验证：IAOS resolver 覆盖一致、漂移、验签失败/缺失和旧合同；TypeScript、lint、生产构建、
+  runbook、Code Map 和 Atlas 声明作为 S12 发布门。
+- 后续：完成 S12 现场 UI/API 验收并继续通用产品知识覆盖。
+
+## 2026-08-01 - M9 场景知识计划 S1–S12 发布收口
+
+- 变更：完成双侧证据 UI、Copilot 服务端重读、失败关闭、Runbook、Code Map、验证报告、
+  System Atlas、生产构建和部署，PLAN-KNOWLEDGE-AESE-001 状态改为 completed。
+- 原因：场景导航、知识文章和运行证据必须形成用户可验证的完整闭环，不能停留在设计或单测。
+- 影响：M9 场景知识不再阻塞 AESE；通用菜单、错误码和 Agent 引用评测继续由 IAOS 主计划治理。
+- 验证：知识定向测试 11 项、场景安全/证据测试 9 项、TypeScript、定向 lint、Next 生产构建、
+  3000 部署、无凭证 401、不存在案件 404、四端口 200 和 Atlas 同步通过。
+- 后续：用用户新建的首个 M9 案件执行 Runbook 正向现场验收，不为收口预造业务数据。

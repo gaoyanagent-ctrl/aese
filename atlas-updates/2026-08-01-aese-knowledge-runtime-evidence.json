@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.knowledge-runtime-evidence.2026-08-01",
+  "node_key": "aese.world.knowledge",
+  "update_type": "implementation",
+  "summary": "M9 场景知识接入 World 与 IAOS 双侧实际证据",
+  "detail": "IAOS 知识中心读取签名 Evidence Bundle 与工作项，展示节点状态、权威哈希、World Observation 接收回执和逐字段漂移；Copilot 服务端独立重读，缺失或越权失败关闭。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "AESE M9 场景知识 S1-S12 已完成；通用菜单覆盖和 Agent 引用评测继续由 IAOS 产品知识计划推进。",
+  "evidence_ref": "docs/reports/2026-08-01-knowledge-runtime-evidence.md",
+  "occurred_at": "2026-08-01T05:52:00Z"
+}
