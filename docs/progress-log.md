@@ -1925,5 +1925,5 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 变更：IAOS 新增调查请求、Observation 和持久工作项权威存储，发布 `site.investigation.request`、`site.investigation.observation.commit` 与 `facility.site.investigation.v1`；AESE 新增发起调研和外部参与者结构化反馈 UI/BFF。
 - 原因：既有 M10 只把候选保存到人工 Review，采纳后没有真实调查工作、World Intent、外部事实或可恢复等待状态。
 - 影响：已采纳候选现在会进入持久 `waiting_world`；权属、面积、电力、正式报价、可用日期、许可和证据必须先写受信 World Journal，IAOS 才能完成工作项，浏览器不能直接伪造权威 Observation。
-- 验证：AESE `go test ./...`、23 个前端测试文件/67 项测试、TypeScript 和 Vite 生产构建通过；IAOS `go test ./...`、TypeScript、Next.js 生产构建、治理写入检查、Atlas tracking 和 JSON/SQL 检查通过。IAOS `:8082`/`:3000` 与 AESE `:8090`/`:4173` 已部署健康，四个现存活跃租户升级到平台基础包 `1.9.0`，新 Capability/Process Artifact 和 BFF 路由现场可读。IAOS 全前端回归另有 7 个既有测试文件失败（中文按钮与英文断言、超时及测试环境清理问题），本次修改文件构建无错。
+- 验证：AESE `go test ./...`、23 个前端测试文件/67 项测试、TypeScript 和 Vite 生产构建通过；IAOS `go test ./...`、TypeScript、Next.js 生产构建、治理写入检查、Atlas tracking 和 JSON/SQL 检查通过。IAOS `:8082`/`:3000` 与 AESE `:8090`/`:4173` 已部署健康，四个现存活跃租户升级到平台基础包 `1.9.0`，新 Capability/Process Artifact 和 BFF 路由现场可读。IAOS 全前端回归另有 7 个既有测试文件失败（中文按钮与英文断言、超时及测试环境清理问题），本次修改文件构建无错。两仓 Atlas 声明已通过仓库检查，但部署后的同步写端点仍返回 404，保留声明待路由恢复后幂等补录。
 - 后续：统一 Requirement→Agent→Review→World→选址审批的完整 Effective Process Run，并实现评分、正式选址、项目/WBS、合同、施工和工程财务纵切。
