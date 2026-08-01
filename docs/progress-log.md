@@ -1949,5 +1949,5 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 变更：IAOS 平台包新增设施需求、候选集/候选行、人工评审、调研请求/事实、持久工作项、推荐和正式决定九个 `domain_projection` Entity；权威 Capability 成功时同事务同步 typed projection，菜单仅授予 READ 并清除通用 CRUD。
 - 原因：M10 数据过去只能从专项工作台或数据库读取，数据模型工坊没有正式合同；若开放通用 Entity 写入又会绕过 Capability、审批和 World 信任边界。
 - 影响：实施人员现在可在左侧业务菜单和数据模型工坊穿透查看各阶段事实、主子候选和唯一写入所有者；数据修改仍必须回到 M10 工作台、AESE Command Gateway 或受治理 Process/Agent。
-- 验证：IAOS 全量 Go、vet、治理写入、Code Map、Atlas 和真实租户 Edition 升级/投影查询；AESE 文档、计划、链接和 Atlas 校验。Atlas 同步写端点若仍为 404，则保留声明待服务路由恢复后补录。
+- 验证：IAOS 全量 Go、vet、治理写入、Code Map 与 Atlas 检查通过；后端已发布，四个 active 租户升级到 `genesis-m9@1.11.0`。在线 Schema 验证九个 Entity 均为 `domain_projection` 和正确写入所有者，通用写入返回 405 `entity_write_owner_enforced`，菜单权限仅 READ；AESE 文档、计划和 Atlas 校验通过。两仓 Atlas 同步写端点仍返回 404，声明已保留待服务路由恢复后补录。
 - 后续：实现 S2.3 单一全程 Effective Process Run、S3.3 人工候选权威提交，以及项目/WBS、合同、施工、付款、验收和工程财务闭环。
