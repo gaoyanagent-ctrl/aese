@@ -1919,4 +1919,4 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 原因：M10 路由虽然存在，但 M9 终态只显示“当前章节已完成”，没有下一阶段提示或按钮；用户无法发现入口，且手工路由不能证明沿用当前企业上下文。
 - 影响：用户完成 M9 后可以在原页面连续进入 M10，M10 读取同一租户案件的实际现金、预算与法人资料；阶段总览仍只是导航，不能绕过 M9 资格门产生业务事实。
 - 验证：新增终态组件回归测试先稳定复现“找不到交接标题/按钮”，修复后前端 23 个测试文件/67 项测试、定向 ESLint、TypeScript、生产构建通过；Playwright 在 1440×900、1280×720 和 390×844 三个视口验证交接标题、按钮和完整上下文 URL。全仓 ESLint 仍有 4 个既有 Fast Refresh 警告，与本次文件无关。
-- 后续：执行 live 企业终态浏览器验收，并继续 M10 Investigation、Effective Process Artifact、World Observation 和工程执行闭环。
+- 后续：执行用户 live 企业终态浏览器验收，并继续 M10 Investigation、Effective Process Artifact、World Observation 和工程执行闭环。部署后 Atlas 写入端点仍返回 404，本次声明已保留在仓库，待路由恢复后补同步。
