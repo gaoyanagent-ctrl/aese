@@ -68,6 +68,10 @@ describe("PlantBuildPlay interactive planning", () => {
         ? { ok: true, json: async () => ({ status: "waiting_world", investigation_request: {}, work_item: {} }) }
         : { ok: true, json: async () => ({ items: [] }) };
       if (path.endsWith("reviews")) return { ok: true, json: async () => ({ status: "committed", proposal_review: {} }) };
+      if (path.endsWith("proposals/manual") && init?.method === "POST") return { ok: true, status: 201, json: async () => ({ status: "committed", manual_proposal_id: "manual-site-1", proposal_set: {
+        schema_version: "1.0", proposal_set_id: "set-1", requirement_id: "facility-requirement-INC-GX-TEST", revision: 2, status: "candidate_only", proposals: [],
+        evidence: { provider: "human", model: "manual-entry", prompt_version: "manual-candidate-v1", source_type: "human_manual", parent_revision: 1, input_hash: "sha256:in", output_hash: "sha256:out", validated_at: "2026-08-01T09:00:00Z" },
+      } }) };
       if (path.includes("/proposals?") && init?.method !== "POST") return { ok: false, status: 404, text: async () => "not found" };
       if (path.endsWith("proposals") && init?.method === "POST") return { ok: true, json: async () => ({ proposal_set: {
         schema_version: "1.0", proposal_set_id: "set-1", requirement_id: "facility-requirement-INC-GX-TEST", revision: 1, status: "candidate_only",
@@ -110,6 +114,23 @@ describe("PlantBuildPlay interactive planning", () => {
     const investigation = JSON.parse(fetchMock.mock.calls.find(([path, init]) => String(path).endsWith("investigations") && init?.method === "POST")?.[1]?.body as string);
     expect(investigation.proposal_id).toBe("site-1");
     expect(investigation.scope).toContain("commercial_quote");
+    fireEvent.click(screen.getByRole("button", { name: "人工新增候选" }));
+    fireEvent.change(screen.getByLabelText("候选名称"), { target: { value: "人工园区候选" } });
+    fireEvent.change(screen.getByLabelText("方案类型"), { target: { value: "lease_and_retrofit" } });
+    fireEvent.change(screen.getByLabelText("业务理由"), { target: { value: "项目负责人基于招商线索补充候选" } });
+    fireEvent.change(screen.getByLabelText("最小估算（CNY）"), { target: { value: "7000000" } });
+    fireEvent.change(screen.getByLabelText("最可能估算（CNY）"), { target: { value: "8000000" } });
+    fireEvent.change(screen.getByLabelText("最大估算（CNY）"), { target: { value: "9000000" } });
+    fireEvent.change(screen.getByLabelText("估算依据"), { target: { value: "人工概念级估算" } });
+    fireEvent.change(screen.getByLabelText("预计可用日期"), { target: { value: "2026-11-01" } });
+    fireEvent.change(screen.getByLabelText(/假设/), { target: { value: "园区存在可租赁空间" } });
+    fireEvent.change(screen.getByLabelText(/待核验事实/), { target: { value: "权属与正式报价" } });
+    fireEvent.change(screen.getByLabelText(/主要风险/), { target: { value: "交付日期尚未核验" } });
+    fireEvent.click(screen.getByRole("button", { name: /提交到 IAOS 候选集/ }));
+    await waitFor(() => expect(fetchMock.mock.calls.some(([path, init]) => String(path).endsWith("proposals/manual") && init?.method === "POST")).toBe(true));
+    const manual = JSON.parse(fetchMock.mock.calls.find(([path]) => String(path).endsWith("proposals/manual"))?.[1]?.body as string);
+    expect(manual.expected_revision).toBe(1);
+    expect(manual.proposal.business_rationale).toContain("招商线索");
   });
 
   it("compares only delivered observations and keeps hard constraints visible", async () => {

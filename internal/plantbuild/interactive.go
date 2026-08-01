@@ -78,14 +78,16 @@ type SiteOptionProposal struct {
 }
 
 type ProposalEvidence struct {
-	Provider      string         `json:"provider"`
-	Model         string         `json:"model"`
-	PromptVersion string         `json:"prompt_version"`
-	RequestID     string         `json:"request_id,omitempty"`
-	InputHash     string         `json:"input_hash"`
-	OutputHash    string         `json:"output_hash"`
-	TokenUsage    map[string]int `json:"token_usage,omitempty"`
-	ValidatedAt   string         `json:"validated_at"`
+	Provider       string         `json:"provider"`
+	Model          string         `json:"model"`
+	PromptVersion  string         `json:"prompt_version"`
+	SourceType     string         `json:"source_type,omitempty"`
+	ParentRevision int            `json:"parent_revision,omitempty"`
+	RequestID      string         `json:"request_id,omitempty"`
+	InputHash      string         `json:"input_hash"`
+	OutputHash     string         `json:"output_hash"`
+	TokenUsage     map[string]int `json:"token_usage,omitempty"`
+	ValidatedAt    string         `json:"validated_at"`
 }
 
 type ProposalSet struct {
@@ -264,7 +266,9 @@ func ValidateProposalSet(requirement FacilityRequirement, set ProposalSet) error
 	if set.SchemaVersion != InteractiveSchemaVersion || set.RequirementID != requirement.RequirementID || set.Revision < 1 || set.Status != "candidate_only" {
 		return errors.New("proposal set identity or status is invalid")
 	}
-	if len(set.Proposals) != requirement.CandidateCount {
+	manualRevision := set.Evidence.Provider == "human"
+	if (!manualRevision && len(set.Proposals) != requirement.CandidateCount) ||
+		(manualRevision && (len(set.Proposals) <= requirement.CandidateCount || len(set.Proposals) > 12)) {
 		return fmt.Errorf("proposal count %d does not match requested %d", len(set.Proposals), requirement.CandidateCount)
 	}
 	seen := map[string]bool{}
@@ -293,7 +297,15 @@ func ValidateProposalSet(requirement FacilityRequirement, set ProposalSet) error
 			return fmt.Errorf("proposal %s: %w", proposal.ProposalID, err)
 		}
 	}
-	if set.Evidence.Provider == "" || set.Evidence.Model == "" || set.Evidence.PromptVersion != PlanningPromptVersion || !strings.HasPrefix(set.Evidence.InputHash, "sha256:") || !strings.HasPrefix(set.Evidence.OutputHash, "sha256:") {
+	if set.Evidence.Provider == "" || set.Evidence.Model == "" || !strings.HasPrefix(set.Evidence.InputHash, "sha256:") || !strings.HasPrefix(set.Evidence.OutputHash, "sha256:") {
+		return errors.New("agent generation evidence is incomplete")
+	}
+	if manualRevision {
+		if set.Revision < 2 || set.Evidence.Model != "manual-entry" || set.Evidence.PromptVersion != "manual-candidate-v1" ||
+			set.Evidence.SourceType != "human_manual" || set.Evidence.ParentRevision != set.Revision-1 {
+			return errors.New("manual proposal revision evidence is incomplete")
+		}
+	} else if set.Evidence.PromptVersion != PlanningPromptVersion {
 		return errors.New("agent generation evidence is incomplete")
 	}
 	return nil

@@ -741,6 +741,71 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			_, _ = w.Write(result)
 			return
 		}
+		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "proposals" && rest[3] == "manual" && r.Method == http.MethodPost {
+			var input struct {
+				RequirementID    string                        `json:"requirement_id"`
+				ProposalSetID    string                        `json:"proposal_set_id"`
+				ExpectedRevision int                           `json:"expected_revision"`
+				Proposal         plantbuild.SiteOptionProposal `json:"proposal"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_manual_site_proposal", err.Error(), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_planning_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			setRaw, err := authority.PlantProposalSet(ctx, input.RequirementID)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "site_proposal_previous_revision_unavailable")
+				return
+			}
+			var previous plantbuild.ProposalSet
+			if err := json.Unmarshal(setRaw, &previous); err != nil || previous.ProposalSetID != input.ProposalSetID || previous.Revision != input.ExpectedRevision {
+				s.writeError(w, http.StatusConflict, "site_proposal_revision_conflict", "候选集已变化，请刷新后重新提交人工候选", false, "", "")
+				return
+			}
+			requirementRaw, err := authority.PlantRequirement(ctx, input.RequirementID)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "facility_requirement_unavailable")
+				return
+			}
+			var requirement plantbuild.FacilityRequirement
+			if err := json.Unmarshal(requirementRaw, &requirement); err != nil {
+				s.writeError(w, http.StatusBadGateway, "facility_requirement_invalid", err.Error(), false, "", "")
+				return
+			}
+			proposalID, err := resetToken()
+			if err != nil {
+				s.writeError(w, http.StatusInternalServerError, "manual_site_proposal_id_failed", err.Error(), true, "", "")
+				return
+			}
+			input.Proposal.ProposalID = "manual-site-" + proposalID
+			input.Proposal.Status = "proposed"
+			input.Proposal.SourceRefs = append(input.Proposal.SourceRefs, "human:"+actorID)
+			next := previous
+			next.Revision = previous.Revision + 1
+			next.Proposals = append(append([]plantbuild.SiteOptionProposal{}, previous.Proposals...), input.Proposal)
+			next.Evidence = plantbuild.ProposalEvidence{
+				Provider: "human", Model: "manual-entry", PromptVersion: "manual-candidate-v1",
+				SourceType: "human_manual", ParentRevision: previous.Revision,
+				InputHash: plantbuild.CanonicalHash(previous), OutputHash: plantbuild.CanonicalHash(next.Proposals),
+				ValidatedAt: time.Now().UTC().Format(time.RFC3339),
+			}
+			if err := plantbuild.ValidateProposalSet(requirement, next); err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "invalid_manual_site_proposal", err.Error(), false, "", "")
+				return
+			}
+			if err := postPlantAuthorityCommand(ctx, authority, "site.proposal.record", actorID, requirement.CaseCode, next.ProposalSetID, next.Revision, next); err != nil {
+				s.writePlantAuthorityError(w, err, "manual_site_proposal_not_committed")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "committed", "proposal_set": next, "manual_proposal_id": input.Proposal.ProposalID})
+			return
+		}
 		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "proposals" && r.Method == http.MethodPost {
 			var request plantbuild.FacilityRequirement
 			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &request); err != nil {

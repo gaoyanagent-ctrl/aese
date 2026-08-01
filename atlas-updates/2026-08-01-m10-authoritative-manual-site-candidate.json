@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.authoritative-manual-site-candidate.2026-08-01",
+  "node_key": "aese.genesis.m10-plant-build",
+  "update_type": "implementation",
+  "summary": "M10 人工候选从浏览器草稿升级为 IAOS 权威修订",
+  "detail": "AESE 提供同构人工候选表单并通过定向 Command Gateway 提交；IAOS site.proposal.record 只允许基于最新 ProposalSet revision 追加一项，保留旧候选、认证人员和输入输出 hash。",
+  "status_after": "building",
+  "current_state": "外部模型不可用时可由人员完成权威候选输入并继续 Review/World/Approval；工程执行与财务纵切仍待实现。",
+  "evidence_ref": "docs/designs/DES-011-genesis-plant-build.md",
+  "occurred_at": "2026-08-01T16:30:00Z"
+}

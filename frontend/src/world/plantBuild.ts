@@ -130,6 +130,8 @@ export type ProposalSet = {
     provider: string;
     model: string;
     prompt_version: string;
+    source_type?: string;
+    parent_revision?: number;
     request_id?: string;
     input_hash: string;
     output_hash: string;
@@ -387,4 +389,19 @@ export async function generatePlantProposals(
     throw new Error(message);
   }
   return response.json() as Promise<PlantPlanningResult>;
+}
+
+export async function submitManualPlantProposal(input: {
+  requirement_id: string;
+  proposal_set_id: string;
+  expected_revision: number;
+  proposal: Omit<SiteOptionProposal, "proposal_id" | "status">;
+}) {
+  const response = await fetch("/api/aese/v1/world/plant-build/proposals/manual", {
+    method: "POST",
+    headers: { "content-type": "application/json", ...iaosHeaders() },
+    body: JSON.stringify(input),
+  });
+  if (!response.ok) throw new Error(`提交人工候选 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ status: "committed"; proposal_set: ProposalSet; manual_proposal_id: string }>;
 }

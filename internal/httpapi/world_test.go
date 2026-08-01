@@ -275,6 +275,58 @@ func TestPlantPlanningCommitsRequirementAndAgentProposalThroughIAOSCapabilities(
 	}
 }
 
+func TestManualPlantProposalAppendsAuthorityRevisionWithAuthenticatedActor(t *testing.T) {
+	var command map[string]any
+	proposalSet := `{"schema_version":"1.0","proposal_set_id":"SET-1","requirement_id":"REQ-1","revision":1,"status":"candidate_only","proposals":[{"proposal_id":"P-1","option_type":"lease_and_retrofit","display_name":"候选一","business_rationale":"满足初始规划需求","estimated_amount":{"minimum":{"value":"7000000.00","currency":"CNY","scale":2},"likely":{"value":"8000000.00","currency":"CNY","scale":2},"maximum":{"value":"9000000.00","currency":"CNY","scale":2},"basis":"概念估算"},"estimated_schedule":{"earliest":"2026-09-01T00:00:00Z","likely":"2026-10-01T00:00:00Z","latest":"2026-11-01T00:00:00Z"},"assumptions":["可租赁"],"facts_required":["权属"],"risks":["延期"],"source_refs":["requirement:REQ-1"],"confidence":"0.7","status":"proposed"},{"proposal_id":"P-2","option_type":"build_to_suit","display_name":"候选二","business_rationale":"满足初始规划需求","estimated_amount":{"minimum":{"value":"7000000.00","currency":"CNY","scale":2},"likely":{"value":"8000000.00","currency":"CNY","scale":2},"maximum":{"value":"9000000.00","currency":"CNY","scale":2},"basis":"概念估算"},"estimated_schedule":{"earliest":"2026-09-01T00:00:00Z","likely":"2026-10-01T00:00:00Z","latest":"2026-11-01T00:00:00Z"},"assumptions":["可建设"],"facts_required":["许可"],"risks":["延期"],"source_refs":["requirement:REQ-1"],"confidence":"0.6","status":"proposed"}],"evidence":{"provider":"MiniMax","model":"M3","prompt_version":"plant-planning-v1","input_hash":"sha256:in","output_hash":"sha256:out","validated_at":"2026-08-01T00:00:00Z"}}`
+	requirement := `{"schema_version":"1.0","requirement_id":"REQ-1","tenant_id":"tenant-a","case_code":"INC-1","legal_entity_code":"LE-1","target_region":"华东","facility_purpose":"制造","minimum_area_m2":5000,"minimum_electricity_kva":2000,"target_available_at":"2027-01-01T00:00:00Z","candidate_count":2,"allowed_option_types":["lease_and_retrofit","build_to_suit"],"investment_request":{"value":"12000000.00","currency":"CNY","scale":2},"minimum_cash_reserve":{"value":"3000000.00","currency":"CNY","scale":2},"financial_constraint":{"available_cash":{"value":"20000000.00","currency":"CNY","scale":2},"approved_budget":{"value":"12000000.00","currency":"CNY","scale":2},"cash_source_ref":"ledger:CASH","budget_source_ref":"budget:B1","snapshot_hash":"sha256:authority"},"preferences":["工期"],"revision":1,"revision_reason":"首次规划"}`
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/api/v1/profile":
+			_, _ = w.Write([]byte(`{"username":"project-owner","tenant_id":"tenant-a"}`))
+		case r.URL.Path == "/api/v1/genesis/plant/interactive/proposal-sets":
+			_, _ = w.Write([]byte(proposalSet))
+		case r.URL.Path == "/api/v1/genesis/plant/interactive/requirements/REQ-1":
+			_, _ = w.Write([]byte(requirement))
+		case r.URL.Path == "/api/v1/genesis/plant/interactive/actions":
+			if err := json.NewDecoder(r.Body).Decode(&command); err != nil {
+				t.Fatal(err)
+			}
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"status":"committed"}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer iaos.Close()
+	server := New(Config{IAOSBaseURL: iaos.URL})
+	body := `{"requirement_id":"REQ-1","proposal_set_id":"SET-1","expected_revision":1,"proposal":{"option_type":"lease_and_retrofit","display_name":"人工园区候选","business_rationale":"项目负责人根据招商线索补充并要求正式调研","estimated_amount":{"minimum":{"value":"7000000.00","currency":"CNY","scale":2},"likely":{"value":"8000000.00","currency":"CNY","scale":2},"maximum":{"value":"9000000.00","currency":"CNY","scale":2},"basis":"人工概念估算"},"estimated_schedule":{"earliest":"2026-10-01T00:00:00Z","likely":"2026-10-01T00:00:00Z","latest":"2026-10-01T00:00:00Z"},"assumptions":["园区存在可租赁空间"],"facts_required":["权属与正式报价"],"risks":["交付日期未核验"],"source_refs":["manual:user-input"],"confidence":"0.40"}}`
+	req := httptest.NewRequest(http.MethodPost, "/api/aese/v1/world/plant-build/proposals/manual", strings.NewReader(body))
+	req.Header.Set("Authorization", "Bearer owner-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-a")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusCreated {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
+	if command["actor_id"] != "project-owner" || command["capability_code"] != "site.proposal.record" {
+		t.Fatalf("command=%v", command)
+	}
+	set := command["proposal_set"].(map[string]any)
+	if set["revision"] != float64(2) {
+		t.Fatalf("set=%v", set)
+	}
+	evidence := set["evidence"].(map[string]any)
+	if evidence["source_type"] != "human_manual" || evidence["parent_revision"] != float64(1) {
+		t.Fatalf("evidence=%v", evidence)
+	}
+	proposals := set["proposals"].([]any)
+	added := proposals[2].(map[string]any)
+	refs := added["source_refs"].([]any)
+	if refs[len(refs)-1] != "human:project-owner" {
+		t.Fatalf("refs=%v", refs)
+	}
+}
+
 func TestPlantProposalReviewOverwritesActorFromAuthenticatedProfile(t *testing.T) {
 	var received map[string]any
 	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

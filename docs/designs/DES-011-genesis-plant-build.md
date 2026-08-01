@@ -302,7 +302,9 @@ genesis.facility.accepted.v1
 
 Requirement 到正式选址现已统一为 `facility.plant.planning.v1@1.0.0` 单一持久 Effective Process Run。七个业务 Capability 成功时在同一事务追加人、Agent 或 World 节点证据；调查请求进入 `waiting_event`，推荐进入 `waiting_approval`，审批决定恢复到正式选址或失败结束，正式选择后为 `succeeded`。流程工作室只允许查看该业务命令驱动流程，不能一键运行而重复创建审批或伪造外部事实。
 
-以下仍未实现：人工新增候选的权威提交、场地控制、项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
+人工新增候选现已进入权威链：人员填写方案类型、理由、金额区间/依据、预计可用日期、假设、待核验事实和风险；AESE BFF 读取最新 ProposalSet 与 Requirement，IAOS 只允许 `site.proposal.record` 在下一 revision 追加一项，逐项校验既有候选、人员来源和 hash。人工输入不冒充 Agent 输出或 World 外部事实。
+
+以下仍未实现：场地控制、项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
 
 ## 16. 用户配置、操作、验证与恢复
 
@@ -340,7 +342,7 @@ AESE 首页同时把原“世界地图”命名为 `企业生命周期 · M9–M
 
 - 当前用户已通过 IAOS 登录并进入正确 Genesis Workspace；AESE 只能透传该用户的 token 和 tenant context。
 - 对应 M9 案件已经形成法人编码、币种、已批准预算和已过账银行现金；任一事实缺失时不得手工填写替代值。
-- `plant-planning-agent` provider 已配置并返回 connected；未启用外部模型时页面明确显示不可生成，用户可建立本地人工草稿，但当前版本不能把该草稿提交为权威候选。
+- `plant-planning-agent` provider 已配置并返回 connected；未启用外部模型时页面明确显示不可生成，用户可通过“人工新增权威候选”完成同构输入并提交 IAOS，不生成固定假数据。
 
 ### 16.2 当前可操作步骤
 

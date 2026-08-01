@@ -31,6 +31,7 @@ import {
   submitSiteInvestigationObservation,
   submitSiteSelectionRecommendation,
   submitPlantProposalReview,
+  submitManualPlantProposal,
   type FacilityRequirement,
   type PlantBuildTrace,
   type PlantPlanningProviderStatus,
@@ -269,7 +270,16 @@ function PlantPlanningWorkspace() {
   const [manualOpen, setManualOpen] = useState(false);
   const [manualName, setManualName] = useState("");
   const [manualRationale, setManualRationale] = useState("");
-  const [manualAmount, setManualAmount] = useState("");
+  const [manualOptionType, setManualOptionType] = useState("");
+  const [manualMinimum, setManualMinimum] = useState("");
+  const [manualLikely, setManualLikely] = useState("");
+  const [manualMaximum, setManualMaximum] = useState("");
+  const [manualBasis, setManualBasis] = useState("");
+  const [manualAvailableAt, setManualAvailableAt] = useState("");
+  const [manualAssumptions, setManualAssumptions] = useState("");
+  const [manualFacts, setManualFacts] = useState("");
+  const [manualRisks, setManualRisks] = useState("");
+  const [manualBusy, setManualBusy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const routeParams = new URLSearchParams(window.location.hash.split("?")[1] ?? "");
@@ -374,25 +384,43 @@ function PlantPlanningWorkspace() {
     }
   };
 
-  const addManual = (event: FormEvent) => {
+  const addManual = async (event: FormEvent) => {
     event.preventDefault();
-    const amount = manualAmount || "0.00";
-    const now = new Date().toISOString();
-    const proposal: SiteOptionProposal = {
-      proposal_id: `manual-${Date.now()}`,
-      option_type: "manual_option",
+    if (!proposalSet || !activeRequirement) {
+      setError("请先保存设施需求并建立首版候选集");
+      return;
+    }
+    setManualBusy(true); setError("");
+    try {
+      const money = (value: string) => ({ value, currency: "CNY" as const, scale: 2 as const });
+      const available = localDate(manualAvailableAt);
+      const proposal: Omit<SiteOptionProposal, "proposal_id" | "status"> = {
+      option_type: manualOptionType,
       display_name: manualName.trim(),
       business_rationale: manualRationale.trim(),
-      estimated_amount: { minimum: { value: amount, currency: "CNY", scale: 2 }, likely: { value: amount, currency: "CNY", scale: 2 }, maximum: { value: amount, currency: "CNY", scale: 2 }, basis: "人工初始估算，待调研校验" },
-      estimated_schedule: { earliest: now, likely: now, latest: now },
-      assumptions: [], facts_required: ["补充外部调研和权威证据"], risks: [], source_refs: ["manual:user-input"], confidence: "0", status: "manual_draft",
+      estimated_amount: { minimum: money(manualMinimum), likely: money(manualLikely), maximum: money(manualMaximum), basis: manualBasis.trim() },
+      estimated_schedule: { earliest: available, likely: available, latest: available },
+      assumptions: manualAssumptions.split("\n").map((value) => value.trim()).filter(Boolean),
+      facts_required: manualFacts.split("\n").map((value) => value.trim()).filter(Boolean),
+      risks: manualRisks.split("\n").map((value) => value.trim()).filter(Boolean),
+      source_refs: ["manual:user-input"], confidence: "0.40",
     };
-    setProposalSet((current) => current ? { ...current, proposals: [...current.proposals, proposal] } : {
-      schema_version: "1.0", proposal_set_id: "local-manual-draft", requirement_id: "local-manual", revision: 1, status: "candidate_only", proposals: [proposal],
-      evidence: { provider: "human", model: "none", prompt_version: "manual", input_hash: "local", output_hash: "local", validated_at: now },
-    });
-    setReviews((current) => ({ ...current, [proposal.proposal_id]: { action: "add_manual_option", reason: "由项目负责人手工补充候选" } }));
-    setManualName(""); setManualRationale(""); setManualAmount(""); setManualOpen(false);
+      const result = await submitManualPlantProposal({
+        requirement_id: activeRequirement.requirement_id,
+        proposal_set_id: proposalSet.proposal_set_id,
+        expected_revision: proposalSet.revision,
+        proposal,
+      });
+      setProposalSet(result.proposal_set);
+      setReviews({}); setSavedReviews({});
+      setManualName(""); setManualRationale(""); setManualOptionType("");
+      setManualMinimum(""); setManualLikely(""); setManualMaximum(""); setManualBasis("");
+      setManualAvailableAt(""); setManualAssumptions(""); setManualFacts(""); setManualRisks(""); setManualOpen(false);
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : String(reason));
+    } finally {
+      setManualBusy(false);
+    }
   };
 
   const startInvestigation = async (proposalID: string) => {
@@ -475,8 +503,8 @@ function PlantPlanningWorkspace() {
       </form>
       {status?.state === "not_configured" && <p className="plant-inline-warning" role="status"><TriangleAlert />外部模型未启用，不能生成虚拟固定候选；请配置模型，或使用“人工新增候选”。</p>}
       {error && <p className="plant-inline-error" role="alert">{error}</p>}
-      {manualOpen && <form className="plant-manual-form" onSubmit={addManual}><h3>人工新增候选草稿</h3><label>候选名称<input required value={manualName} onChange={(e) => setManualName(e.target.value)} /></label><label>业务理由<textarea required value={manualRationale} onChange={(e) => setManualRationale(e.target.value)} /></label><label>初始估算（CNY）<input required min="0" step="0.01" type="number" value={manualAmount} onChange={(e) => setManualAmount(e.target.value)} /></label><button>加入本地审阅列表</button></form>}
-      {proposalSet && <section className="plant-proposals" aria-live="polite"><header><div><span>{proposalSet.status}</span><h2>候选方案 · {proposalSet.proposals.length}</h2></div><small>{proposalSet.evidence.provider} / {proposalSet.evidence.model} · {proposalSet.evidence.prompt_version}</small></header><div className="plant-proposal-grid">{proposalSet.proposals.map((proposal) => <ProposalCard key={proposal.proposal_id} proposal={proposal} review={reviews[proposal.proposal_id]} onReview={(review) => { setReviews((current) => ({ ...current, [proposal.proposal_id]: review })); setSavedReviews((current) => ({ ...current, [proposal.proposal_id]: false })); }} onSubmitReview={() => submitReview(proposal.proposal_id)} saved={Boolean(savedReviews[proposal.proposal_id])} busy={reviewBusy === proposal.proposal_id} investigation={investigations.find((item) => item.request.proposal_id === proposal.proposal_id)} investigationBusy={investigationBusy === proposal.proposal_id} onRequestInvestigation={() => startInvestigation(proposal.proposal_id)} />)}</div><p className="plant-persistence-note"><BadgeCheck />Agent 候选和相应人工审阅通过 IAOS Capability 保存；人工新增候选在其正式 Capability 完成前明确保留为本地草稿。“采纳调研”不等于投资批准或合同签署。</p></section>}
+      {manualOpen && <form className="plant-manual-form" onSubmit={addManual}><h3>人工新增权威候选</h3><label>候选名称<input required value={manualName} onChange={(e) => setManualName(e.target.value)} /></label><label>方案类型<select required value={manualOptionType} onChange={(e) => setManualOptionType(e.target.value)}><option value="">请选择</option>{(activeRequirement?.allowed_option_types ?? draft.optionTypes).map((value) => <option key={value} value={value}>{OPTION_TYPES.find(([code]) => code === value)?.[1] ?? value}</option>)}</select></label><label>业务理由<textarea required minLength={6} value={manualRationale} onChange={(e) => setManualRationale(e.target.value)} /></label><label>最小估算（CNY）<input required min="0" step="0.01" type="number" value={manualMinimum} onChange={(e) => setManualMinimum(e.target.value)} /></label><label>最可能估算（CNY）<input required min="0" step="0.01" type="number" value={manualLikely} onChange={(e) => setManualLikely(e.target.value)} /></label><label>最大估算（CNY）<input required min="0" step="0.01" type="number" value={manualMaximum} onChange={(e) => setManualMaximum(e.target.value)} /></label><label>估算依据<textarea required value={manualBasis} onChange={(e) => setManualBasis(e.target.value)} /></label><label>预计可用日期<input required type="date" value={manualAvailableAt} onChange={(e) => setManualAvailableAt(e.target.value)} /></label><label>假设 <small>每行一项</small><textarea required value={manualAssumptions} onChange={(e) => setManualAssumptions(e.target.value)} /></label><label>待核验事实 <small>每行一项</small><textarea required value={manualFacts} onChange={(e) => setManualFacts(e.target.value)} /></label><label>主要风险 <small>每行一项</small><textarea required value={manualRisks} onChange={(e) => setManualRisks(e.target.value)} /></label><button disabled={manualBusy || !proposalSet}>{manualBusy ? <LoaderCircle className="gx-spin" /> : <FilePlus2 />}{manualBusy ? "正在提交…" : "提交到 IAOS 候选集"}</button></form>}
+      {proposalSet && <section className="plant-proposals" aria-live="polite"><header><div><span>{proposalSet.status}</span><h2>候选方案 · {proposalSet.proposals.length}</h2></div><small>{proposalSet.evidence.provider} / {proposalSet.evidence.model} · {proposalSet.evidence.prompt_version}</small></header><div className="plant-proposal-grid">{proposalSet.proposals.map((proposal) => <ProposalCard key={proposal.proposal_id} proposal={proposal} review={reviews[proposal.proposal_id]} onReview={(review) => { setReviews((current) => ({ ...current, [proposal.proposal_id]: review })); setSavedReviews((current) => ({ ...current, [proposal.proposal_id]: false })); }} onSubmitReview={() => submitReview(proposal.proposal_id)} saved={Boolean(savedReviews[proposal.proposal_id])} busy={reviewBusy === proposal.proposal_id} investigation={investigations.find((item) => item.request.proposal_id === proposal.proposal_id)} investigationBusy={investigationBusy === proposal.proposal_id} onRequestInvestigation={() => startInvestigation(proposal.proposal_id)} />)}</div><p className="plant-persistence-note"><BadgeCheck />Agent 候选、人工新增候选和相应审阅都通过 IAOS Capability 保存并形成版本；“采纳调研”不等于投资批准或合同签署。</p></section>}
       {investigations.length > 0 && <section className="plant-investigations" aria-live="polite"><header><div><span>facility.site.investigation.v1</span><h2>场址外部调研工作项</h2></div><small>{investigations.filter((item) => item.status === "waiting_world").length} 条等待 World</small></header>{investigations.map((item) => <InvestigationPanel key={item.request.investigation_request_id} item={item} caseCode={caseCode} onCommitted={refreshInvestigations} />)}</section>}
       {assessments.length > 0 && <section className="plant-assessments" aria-labelledby="plant-assessment-title">
         <header><div><span>OBSERVATION-ONLY COMPARISON</span><h2 id="plant-assessment-title">外部事实比较</h2><p>只有已送达的 World Observation 参与评分；Agent 估算只用于对照，不会覆盖正式报价或现场事实。</p></div><small>{assessments.filter((item) => item.eligible).length}/{assessments.length} 个候选通过硬约束</small></header>

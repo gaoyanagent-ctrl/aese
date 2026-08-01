@@ -399,6 +399,7 @@
 .plant-requirement-form input,
 .plant-requirement-form textarea,
 .plant-manual-form input,
+.plant-manual-form select,
 .plant-manual-form textarea,
 .plant-review-actions textarea {
   width: 100%;

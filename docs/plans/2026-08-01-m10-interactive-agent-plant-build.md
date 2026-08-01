@@ -43,7 +43,7 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 - [x] S3.0 M9 `enterprise_operational_ready` 终态显示 M9→M10 交接卡与主按钮，携带当前 tenant/case/workspace；首页提供可发现的 `企业生命周期 · M9–M24` 总览入口。
 - [x] S3.1 Plant Build Play 增加需求表单、字段解释、来源标识和金额/日期/候选边界校验；实际现金与已批预算只读显示 IAOS 来源引用。
 - [x] S3.2 候选卡展示依据、金额/工期区间、假设、未知事实、风险、来源、置信度和 Agent 生成证据。
-- [ ] S3.3 支持采纳调研、退回重生成、人工新增和淘汰；所有决定要求理由。采纳/退回/淘汰已通过 BFF 持久化到 IAOS；人工新增仍是明确标识的本地草稿，尚不能提交调查或成为权威候选。
+- [x] S3.3 支持采纳调研、退回重生成、人工新增和淘汰；所有决定要求理由。人工新增使用完整业务表单，经 BFF 读取最新 ProposalSet/Requirement 后调用唯一写 owner `site.proposal.record` 创建下一 revision；服务端只允许追加一项并固定旧候选、认证人员和输入/输出 hash。
 - [x] S3.4 页面提供可见“功能说明”，解释 M9 资格/资金 → Requirement → Agent Proposal → Human Review → IAOS/World 后续链；真正的 Entity/Capability/Process/Evidence 深链随 S2.3/S4 补齐。
 
 ### S4 World 调研、参数化项目和资金治理
@@ -72,7 +72,7 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 
 ## 4. 当前执行
 
-S0、S1、S2.1、S2.2、S2.3、S3.0、S3.1、S3.2、S3.4、S4.1、S4.2、S4.2b 和 S4.4a 已完成。当前在线纵切为：M9 机器终态交接 → 权威财务快照 → Requirement → Agent Proposal → Human Review → 持久 World wait/Intent → 可信 Observation → 可解释预览 → IAOS 权威重算 → 人工推荐 → 统一审批 → 独立 Capability 正式选址；所有参与追加到同一 `facility.plant.planning.v1` Effective Process Run，并可从 IAOS 数据模型工坊、M10 工作台和流程工作室穿透查看。该纵切不等于完整 M10：人工候选权威提交、项目/WBS/合同/施工/会计和 S5 全链验收仍未完成。既有未跟踪 M7 验收产物不属于本计划，不修改、不提交。
+S0、S1、S2.1、S2.2、S2.3、S3.0–S3.4、S4.1、S4.2、S4.2b 和 S4.4a 已完成。当前在线纵切为：M9 机器终态交接 → 权威财务快照 → Requirement → Agent 或人工 Proposal → Human Review → 持久 World wait/Intent → 可信 Observation → 可解释预览 → IAOS 权威重算 → 人工推荐 → 统一审批 → 独立 Capability 正式选址；所有参与追加到同一 `facility.plant.planning.v1` Effective Process Run，并可从 IAOS 数据模型工坊、M10 工作台和流程工作室穿透查看。该纵切不等于完整 M10：Agent Run/业务 proposal 同事务证据、项目/WBS/合同/施工/会计和 S5 全链验收仍未完成。既有未跟踪 M7 验收产物不属于本计划，不修改、不提交。
 
 ## 5. 当前接口与事实所有权
 
@@ -81,6 +81,7 @@ S0、S1、S2.1、S2.2、S2.3、S3.0、S3.1、S3.2、S3.4、S4.1、S4.2、S4.2b �
 | 打开交互规划 | `GET /api/aese/v1/world/plant-build/financial-constraints?case_code=...` | 使用当前 IAOS token/tenant 定向转发，不缓存业务事实 | 从已过账银行科目和已批预算形成只读 snapshot、来源引用与 hash |
 | 恢复候选估算 | `GET /api/aese/v1/world/plant-build/proposals?requirement_id=...` | 使用命名 IAOS adapter 读取最新 ProposalSet，不代理任意路径 | 返回 IAOS 已保存的 candidate-only ProposalSet，使刷新后仍可与 Observation 并列比较 |
 | 保存需求并生成候选 | `POST /api/aese/v1/world/plant-build/proposals` | 严格校验 Requirement、调用已配置模型、保存 CreativeJob 技术证据 | `facility.requirement.define` 与 `site.proposal.record` 分别提交 Requirement 和 candidate-only ProposalSet |
+| 人工新增候选 | `POST /api/aese/v1/world/plant-build/proposals/manual` | 读取最新 Requirement/ProposalSet、覆盖浏览器身份字段并生成版本证据 | `site.proposal.record` 只允许在上一 revision 追加一个人员来源候选，既有候选不可修改 |
 | 审阅候选 | `POST /api/aese/v1/world/plant-build/reviews` | 从 IAOS profile 解析实际 actor，禁止浏览器伪造 reviewer | `site.proposal.review` 保存 action、理由、revision、reviewer、Audit 和 Outbox |
 | 发起外部调研 | `POST /api/aese/v1/world/plant-build/investigations` | 只接受已保存且结论为 `adopt_for_investigation` 的候选，服务端解析 actor | `site.investigation.request` 创建调查请求、`facility.site.investigation.v1` 持久 `waiting_world` 工作项和 World Intent |
 | 外部参与者反馈 | `POST /api/aese/v1/world/plant-build/observations` | 校验结构化表单，先向 World Bridge 提交与 Intent 匹配的 Observation | `site.investigation.observation.commit` 只消费受信 Journal，保存外部事实并完成对应工作项；浏览器不能直接伪造 IAOS Observation |

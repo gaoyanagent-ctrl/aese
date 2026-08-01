@@ -1959,3 +1959,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：每个受治理 Capability 与最终审批决定在原事务追加 trace 并固定 Process Artifact version/hash；流程禁止通用一键运行，避免重复审批与伪造 World Observation；升级前推荐可从权威事实恢复 Run。
 - 验证：IAOS 全仓 Go/vet、治理/Code Map/Atlas、TypeScript、Process Studio 23 项和正式 Next/Turbopack 构建通过；8082/3000 发布健康，四个 active 租户升级到 `genesis-m9@1.12.0`；线上主流程 Artifact 为 10 节点，通用运行按合同返回 409。AESE 8090/4173 健康。Atlas 声明同步端点仍返回 404，声明保留待路由恢复后补录。
 - 后续：实现 S3.3 人工候选权威提交，并继续项目/WBS、合同、施工、付款、验收和工程财务纵切。
+
+## 2026-08-01 - M10 人工候选从本地草稿升级为权威修订
+
+- 变更：AESE “人工新增候选”改为完整业务表单，并通过 Command Gateway 读取最新 Requirement/ProposalSet 后调用 IAOS `site.proposal.record`；IAOS Runtime 2.19.0 只允许在下一 revision 追加一项并固定认证人员和 hash。
+- 原因：浏览器本地草稿无法恢复、审计或进入外部调研，也不能作为关闭外部模型时的正式人工接管路径。
+- 影响：Agent 和人工两条路径都写同一权威候选集且共享唯一存储 owner；人工输入不伪装成 Agent 证据，报价、权属、容量和许可仍必须由 World Observation 核验。
+- 验证：IAOS/AESE 定向合同、Command Gateway、旧候选防篡改和 UI 类型/组件测试通过；全量验证与部署在本切片发布门完成。
+- 后续：完成 S2.4 Agent Run 与业务 proposal 同事务证据，再推进项目/WBS、合同、施工、付款、验收和工程财务。

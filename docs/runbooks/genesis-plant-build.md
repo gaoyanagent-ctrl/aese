@@ -17,19 +17,20 @@
 2. 检查“可用现金快照”“已批准预算快照”为只读，并分别显示 `gl:` 与 `budget:` 来源；若无数据，先回 M9 完成预算和资本入账，不能在 M10 页面伪造。
 3. 填写目标区域、设施用途、最小面积、最小电力、目标日期、候选数量、允许类型、投资申请额、最低现金保留额、业务偏好和修订原因。
 4. 点击“保存需求并让 Agent 生成候选”。候选数量必须等于填写值（2–8），每张卡必须展示金额/工期区间、依据、假设、待验证事实、风险、来源、置信度和模型/prompt 证据。
-5. 对一个候选选择“采纳调研”，填写至少 6 个字符的业务理由并点击“提交审阅到 IAOS”。按钮变为“已保存审阅”。再用另一候选验证“退回重生成”或“淘汰”。
-6. 在已保存审阅的候选卡点击“发起外部调研工作项”。页面应出现 `facility.site.investigation.v1` 和 `waiting_world`，刷新页面后仍存在。
-7. 在“场址外部调研工作项”填写外部参与者标识、权属、可用面积、电力、正式报价、可用日期、许可、证据引用和备注，点击“园区运营方确认并提交 Observation”。成功后状态变为“可信事实已提交”且工作项为 `completed`。
-8. 页面应出现“外部事实比较”。调整成本、工期、容量和控制权重，确认合格候选综合分变化；另选候选发起调查并提交一个面积、电力、报价或可用日期不满足 Requirement 的 Observation，确认候选显示“硬约束不通过”且不再有综合分。
-9. 在比较卡中确认 Agent 估算标为“非正式事实”、World Observation 标为“评分事实”，并可展开查看 Observation ID、权属、许可和证据引用。页面必须提示该结果不是正式推荐或批准。
-10. 在“提交人工场址推荐”中选择一个合格候选，填写至少 12 个字符的推荐理由和替代方案比较。若当前只有一个合格候选，还必须填写至少 20 个字符的单一来源例外说明。点击“提交 IAOS 选址审批”。
-11. 确认页面显示推荐编号、`genesis.site.selection.approval`、审批请求和权威输入哈希。浏览器 Network 中的提交体不得包含审批人或页面计算出的总分；IAOS 必须重新读取 Requirement、指定 ProposalSet revision 与可信 Observation 后计算。
-12. 点击“打开 IAOS 审批中心”。由审批流当前版本解析出的有权人员审阅事项、推荐理由、替代方案、硬约束、评分和证据后作出批准或拒绝。不要用提交推荐的人员伪装审批人；如客户需要 CEO/CFO、多阶段或会签，应先在审批中心发布审批流新版本。
-13. 审批通过后返回 AESE，刷新状态并点击“同步批准并正式选址”。确认只有 `approval_status=approved` 时按钮可用，完成后显示“已正式选址”。拒绝、待审批或不属于该推荐的审批请求必须失败关闭。
-14. 回到 IAOS `业务智造层 → M10 工厂规划 → 推荐与审批`，确认推荐、审批状态和正式决定可以穿透查看，并可从审批请求按钮进入审批中心。
-15. 打开“流程运行”，确认流程键为 `facility.plant.planning.v1`、Run ID 从需求建立到正式选址不变、当前状态为 `succeeded`、节点为 `end`，trace 中依次可见 human/agent/world/approval。点击“打开流程运行”应在流程工作室直接打开该 Run；该流程的通用“运行”按钮必须禁用。
-16. 从左侧业务菜单或“数据模型工坊”依次打开设施需求、场址候选方案集、场址候选方案、人工评审、外部调研请求、外部调研事实、工厂规划工作项、场址选择推荐和正式场址决定；应看到同一案件的明细及存储写入所有者，但不应出现通用新增、修改或删除按钮。
-17. 展开页面底部的“已封存的确定性参考回放”，确认它有 `fixture-only` 提示且不会自动写入上方候选列表。
+5. 点击“人工新增候选”，填写方案类型、业务理由、最小/最可能/最大金额、估算依据、可用日期、假设、待核验事实和风险，点击“提交到 IAOS 候选集”。应看到候选集 revision 加 1、原有候选不变、新候选来源为当前认证人员；若其他人已更新该候选集，应提示刷新而不是覆盖。
+6. 对一个候选选择“采纳调研”，填写至少 6 个字符的业务理由并点击“提交审阅到 IAOS”。按钮变为“已保存审阅”。再用另一候选验证“退回重生成”或“淘汰”。
+7. 在已保存审阅的候选卡点击“发起外部调研工作项”。页面应出现 `facility.site.investigation.v1` 和 `waiting_world`，刷新页面后仍存在。
+8. 在“场址外部调研工作项”填写外部参与者标识、权属、可用面积、电力、正式报价、可用日期、许可、证据引用和备注，点击“园区运营方确认并提交 Observation”。成功后状态变为“可信事实已提交”且工作项为 `completed`。
+9. 页面应出现“外部事实比较”。调整成本、工期、容量和控制权重，确认合格候选综合分变化；另选候选发起调查并提交一个面积、电力、报价或可用日期不满足 Requirement 的 Observation，确认候选显示“硬约束不通过”且不再有综合分。
+10. 在比较卡中确认 Agent 估算标为“非正式事实”、World Observation 标为“评分事实”，并可展开查看 Observation ID、权属、许可和证据引用。页面必须提示该结果不是正式推荐或批准。
+11. 在“提交人工场址推荐”中选择一个合格候选，填写至少 12 个字符的推荐理由和替代方案比较。若当前只有一个合格候选，还必须填写至少 20 个字符的单一来源例外说明。点击“提交 IAOS 选址审批”。
+12. 确认页面显示推荐编号、`genesis.site.selection.approval`、审批请求和权威输入哈希。浏览器 Network 中的提交体不得包含审批人或页面计算出的总分；IAOS 必须重新读取 Requirement、指定 ProposalSet revision 与可信 Observation 后计算。
+13. 点击“打开 IAOS 审批中心”。由审批流当前版本解析出的有权人员审阅事项、推荐理由、替代方案、硬约束、评分和证据后作出批准或拒绝。不要用提交推荐的人员伪装审批人；如客户需要 CEO/CFO、多阶段或会签，应先在审批中心发布审批流新版本。
+14. 审批通过后返回 AESE，刷新状态并点击“同步批准并正式选址”。确认只有 `approval_status=approved` 时按钮可用，完成后显示“已正式选址”。拒绝、待审批或不属于该推荐的审批请求必须失败关闭。
+15. 回到 IAOS `业务智造层 → M10 工厂规划 → 推荐与审批`，确认推荐、审批状态和正式决定可以穿透查看，并可从审批请求按钮进入审批中心。
+16. 打开“流程运行”，确认流程键为 `facility.plant.planning.v1`、Run ID 从需求建立到正式选址不变、当前状态为 `succeeded`、节点为 `end`，trace 中依次可见 human/agent/world/approval。点击“打开流程运行”应在流程工作室直接打开该 Run；该流程的通用“运行”按钮必须禁用。
+17. 从左侧业务菜单或“数据模型工坊”依次打开设施需求、场址候选方案集、场址候选方案、人工评审、外部调研请求、外部调研事实、工厂规划工作项、场址选择推荐和正式场址决定；应看到同一案件的明细及存储写入所有者，但不应出现通用新增、修改或删除按钮。
+18. 展开页面底部的“已封存的确定性参考回放”，确认它有 `fixture-only` 提示且不会自动写入上方候选列表。
 
 ### API 与权威证据
 
@@ -40,6 +41,7 @@
 | `GET /api/aese/v1/world/plant-build/planning-status` | `connected` 或明确 `not_configured` | 只说明 Agent provider 状态 |
 | `GET /api/aese/v1/world/plant-build/financial-constraints?case_code=...` | 200，带 source refs 与 snapshot hash | IAOS 权威现金/预算只读快照 |
 | `GET /api/aese/v1/world/plant-build/proposals?requirement_id=...` | 200 或尚无候选时 404 | 从 IAOS 恢复最新 candidate-only ProposalSet，刷新后仍可对照 Agent 估算 |
+| `POST /api/aese/v1/world/plant-build/proposals/manual` | 201，返回新 revision | 认证人员在最新 ProposalSet 追加一个同构候选，旧候选不可覆盖 |
 | `POST /api/aese/v1/world/plant-build/proposals` | 200，`authority_status=committed` | IAOS 已分别保存 Requirement 与 candidate-only ProposalSet |
 | `POST /api/aese/v1/world/plant-build/reviews` | 201，`status=committed` | IAOS 已保存当前用户的 ProposalReview |
 | `POST /api/aese/v1/world/plant-build/investigations` | 201，`status=waiting_world` | IAOS 已保存调查请求、持久工作项和 World Intent |
@@ -81,7 +83,7 @@ IAOS 侧应能读取最新 Requirement、ProposalSet、Review、Investigation Re
 
 ### 当前限制
 
-- “人工新增候选”当前只加入本地审阅列表，不是 IAOS 权威记录，不能发起外部调查。
+- “人工新增候选”必须成功提交 IAOS 新 revision 后才能审阅或发起外部调查；浏览器本地数据、旧 revision、修改既有候选或超投资上限均不能形成权威记录。
 - 当前页面评分是只读预览；提交推荐时 IAOS 使用 `site-assessment-v1` 独立重算并固化，当前尚未提供租户自定义评分策略版本的 UI。
 - 正式场址选择已进入统一审批；投资额度、租赁/用地合同、场地控制、项目/WBS、施工、变更、付款、验收、AP/CIP/总账闭环仍未实现。
 - 现场部署、纯人工路径和完整断线/重启/并发证据属于 S5，完成前 M10 保持 `Interactive Revision Pending`。
