@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.adjustable-budget-governance.2026-08-01",
+  "node_key": "aese.genesis.m9",
+  "update_type": "design",
+  "summary": "M9 预算改为租户可调边界并区分 Agent proposal 与 binding 金额",
+  "detail": "AESE fixture 金额降级为 reference replay；正式节点 21/22 使用 IAOS 版本化预算草案、租户策略和权威资金上限。",
+  "status_after": "completed",
+  "progress_after": 100,
+  "current_state": "M9 设计与 IAOS 实现一致，等待新案件现场 UI 验收。",
+  "evidence_ref": "docs/designs/DES-010-genesis-incorporation-and-governance.md",
+  "occurred_at": "2026-08-01T12:30:00Z"
+}

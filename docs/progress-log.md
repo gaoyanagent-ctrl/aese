@@ -1896,3 +1896,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：用户现在可完成“权威财务快照 → 需求 → Agent proposal → 人工采纳/退回/淘汰”；实际现金和已批预算不可在页面编辑，Agent 候选仍是 `candidate_only`，审阅不等于外部调查、投资审批或合同承诺。
 - 验证：AESE 全量 Go、合同/HTTP/UI 定向测试、TypeScript、ESLint 与生产构建通过；IAOS 全量 Go 和治理检查通过，后端已部署，`tenant-001`、`tenant-hctm` 均已升级至 `genesis-m9@1.6.0` 且 `up_to_date=true`，三个 Capability 的 Active Artifact 可在线读取。完整业务案件现场 UI/API/DB 证据仍属于 S5。
 - 后续：实现人工候选权威提交、`site.investigation.request`、Effective Process Artifact、World 报价/权属/容量/许可 Observation，以及选址审批、项目/WBS、施工、付款、验收和 AP/CIP/总账闭环。部署后的 System Atlas 声明同步端点 `/api/v1/system-atlas/updates` 当前返回 404，三个声明已保留在仓库，待 IAOS 写入路由恢复后补同步。
+
+## 2026-08-01 - M9 预算边界参数化与 Agent 金额效力纠偏
+
+- 变更：M9 设计和计划明确场景 fixture 金额只用于 reference replay；正式预算由租户配置最低金额、可选绝对上限和已核验资金比例。IAOS 将预算准备声明为 proposal，保存 revision/hash，并要求 G7 引用同一草案。
+- 原因：finance-agent 的 100 万元自主交易限额被错误套到 100,000,008 元预算草案，且准备与批准可以填写不同金额。
+- 影响：企业预算不再受平台固定金额限制；真正形成承诺或资金事实的 binding 能力仍保留 Agent Mandate 限额，最终预算仍不得突破权威已核验资金。
+- 验证：IAOS `go test ./internal/incorporation ./internal/api`、governed-write 检查、Atlas tracking 和 `git diff --check` 通过；AESE 文档与计划完成一致性更新。
+- 后续：部署 Runtime 2.14.0 / `genesis-m9@1.7.0` 后，以新案件验证节点 21 大额草案、节点 22 只读引用和租户策略调整。

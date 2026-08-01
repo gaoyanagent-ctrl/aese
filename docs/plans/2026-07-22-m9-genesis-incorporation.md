@@ -15,14 +15,15 @@ tags: [m9, genesis, incorporation, governance, budget, agent]
 
 > 创始投资人通过 IAOS 提出并批准华辰苏州制造公司的设立方案；AESE 推进登记、开户和资本到账的客观世界过程；董事会任命 CEO、CFO 和工厂项目负责人；IAOS 批准初始组织与启动预算，最终形成机器可验证的 M10 工厂建设立项资格。
 
-首版固定为单 tenant、单 world run、单法人、单币种 CNY、单预算版本和三个管理岗位。
+首版场景拓扑为单 tenant、单 world run、单法人、单币种 CNY 和三个管理岗位；正式交互预算
+是可修订版本，不使用固定金额。历史单预算版本只作为 fixture reference replay。
 
 ## 2. 前置基线
 
 - [x] G1 M8 F0-F5、World Store、确定性内核、World Bridge 和 World Play 已完成。
 - [x] G2 ADR-004 三态所有权与 DES-008 bridge 合同继续有效。
 - [x] G3 DES-010 固定 M9 业务链、对象所有权、角色、事件族和非目标。
-- [x] G4 固定虚构资金基线、登记周期/费用、初始岗位和预算额度，并由 invariants fixture 验证。
+- [x] G4 为 reference fixture 固定虚构资金基线、登记周期/费用、初始岗位和示例预算；正式交互路径从 IAOS 租户策略与权威资金读取可调边界。
 - [x] G5 完成 IAOS metadata/Process/Policy/Capability gap audit，冻结两仓实施顺序。
 
 G1-G5 与 I0-I5 已完成；当前没有 active 主实施计划。
@@ -32,7 +33,7 @@ G1-G5 与 I0-I5 已完成；当前没有 active 主实施计划。
 ### I0 - 业务基线与机器合同（第 1 周）
 
 - [x] T1 定义投资主体、法人、登记、账户、资本、任命、mandate 和 budget envelope 的稳定编码与所有权矩阵。
-- [x] T2 固定虚构资金、登记费用/周期、资本到账、首年预算和三年目标的基线，不使用未注明来源的展示数字。
+- [x] T2 reference replay 固定虚构资金、登记费用/周期、资本到账、首年预算和三年目标；正式运行不继承该金额，只使用有来源的租户输入和 IAOS 权威约束。
 - [x] T3 扩展 World JSON Schema、Go 类型、strict parser、fixture 和 canonical hash。
 - [x] T4 为 M9 observation/intent/outcome payload family 建立 strict schema registry 和破损 fixture。
 - [x] T5 定义 `pre_incorporation -> registering -> registered -> capitalizing -> organizing -> budgeted -> plant_project_eligible` 状态机。

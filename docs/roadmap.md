@@ -111,6 +111,7 @@ Schema/UI/Agent Context、Capability API/Agent Tool 和 Process Run 收敛到同
 | M8 AESE 2.0 基础 | 三态世界、确定性离散事件内核、IAOS 双向桥和最小 Genesis tracer | Completed | PLAN-M8-001、World Play runbook、两仓测试与部署证据 |
 | M9 Genesis Incorporation | 注资、法人登记、治理、管理岗位、初始组织与预算 | Completed | hctm-genesis@0.2.0、M9 evidence、IAOS DES-051 |
 | M9N IAOS-native Incorporation Closed Loop | 用三层语义、正式身份、Runtime Artifact、Capability/Process/Approval、持久工作项和 World Bridge 重建 M9 真实闭环 | Completed | Runtime 2.11.0；`genesis-m9@1.3.0` 三包 Edition；31 个 Capability；23 个显式工作项（含 5 个财务开业节点）、G1–G7、三个 World wait、五次 Agent Run/五 Agent；35 个 Entity 具备唯一存储/写入权威合同，资本来源能力委托通用凭证过账能力 |
+| M9 Budget Governance Correction | 消除固定预算和 proposal/交易限额混淆，建立版本化草案与可调边界 | Completed | IAOS Runtime 2.14.0 / `genesis-m9@1.7.0`；租户级上下限与资金比例、proposal/binding 金额效力、G7 草案引用 |
 | GX Enterprise Genesis Game Experience | AI 企业身份、人工/Agent 协作和 2.5D 世界中的 M9 游戏化开局 | Completed | DES-028/DES-029、从空白 case 创建、23 工作项游戏内操作、G1–G7、三个 World wait、首页 AI 创意官可访问入口与三视口 live 浏览器验收 |
 | GX-ZERO Zero-start Enterprise Genesis | 从产品主页创建独立 tenant、World Run、真实 AI 企业身份和 M9 企业 | Completed | IAOS Player 注册/密码登录与既有账号安全提升、生产 Workspace 控制面、八 checkpoint、tenant-only owner session、旧 local Workspace 安全接管、五步向导、持久 CreativeJob、动态 Player subject，以及全新 Workspace 的 23/23 节点、7 审批门、3 World wait、6 Agent run 验收 |
 | M9-FIN Manufacturing Finance Foundation | 在 M9 建立财务组织、账套、科目、期初资本会计和开业报表，并在 M10–M13 接通 AP/AR/资金/资产/成本/总账 | F11A Complete; F5E Deferred; M10–M13 Planned | M9 开业纵切、多组织/共享数据、账簿/伙伴/产品已交付；Runtime 2.11.0 新增通用凭证过账能力并修复凭证主子写入所有者；模块期间和 F15–F35 仍不得计入完成 |

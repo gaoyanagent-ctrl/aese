@@ -15,6 +15,12 @@ M9 把 `hctm-genesis` 从“已经有现金、人员和设备的 tracer 世界�
 
 首版只覆盖一个虚构投资主体、一个集团、一个苏州制造法人、CEO/CFO/工厂项目负责人三个岗位和一份启动预算。
 
+启动预算没有平台固定上下限。正式交互路径由用户按当前企业实际资金和经营计划填写，
+`finance-agent` 只准备 `proposal` 草案，不因草案金额消耗 Agent 自主交易授权；IAOS G7
+批准形成 `binding` 预算授权。租户可配置最低金额、可选绝对上限和已核验资金比例，最终
+有效上限永远不得突破 IAOS 权威已核验现金。节点 21 的草案必须带 revision/hash，节点 22
+只能批准所引用草案；修改金额必须退回重编并留下新版本。
+
 ## 2. 纵向业务链
 
 ```text
@@ -88,6 +94,7 @@ Agent 首版采用版本化确定性岗位策略，不引入自由自治 LLM。�
 - `company opening cash + capital received = company paid + company closing cash`。
 - 认缴、实缴、可用现金和预算额度是四个不同数值，禁止互相替代。
 - 预算批准只形成支出授权，不消耗现金；M10 实际付款才消耗现金。
+- 场景包中的示例预算仅用于确定性 reference replay，不得成为新企业默认值或运行时上限。
 - 岗位任命需要决议 committed outcome 和受任者接受，两者缺一不可。
 - CEO/CFO 未生效或无相应 mandate 时，预算 intent 必须失败关闭。
 - 所有金额使用十进制字符串、`CNY` 和显式 scale；时间使用 RFC 3339 与 `Asia/Shanghai`。

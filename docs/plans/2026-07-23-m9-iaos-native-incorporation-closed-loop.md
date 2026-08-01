@@ -148,6 +148,8 @@ G5–G8 未关闭前，不得发布业务 Runtime Artifact 或执行正式 M9 ap
 - [x] T34 完成 `banking.and.capitalization.v1`、`organization.and.appointments.v1`、`mandate.and.initial.budget.v1`。
 - [x] T35 完成 `capital.contribution.match`、`appointment.eligibility`、`mandate.scope.and.limit`、`initial.budget.control` 和 `enterprise.operational.readiness`。
 - [x] T36 固定承诺、到账、核验余额、预算授权和实际现金的独立对象、单位、精度、引用和守恒规则。
+- [x] T36A 预算上下限改为租户可调策略：下限、可选绝对上限和已核验资金比例均可配置；
+      `initial.budget.prepare` 为 proposal、不消耗 Agent 交易限额，G7 只批准带 revision/hash 的同一草案。
 - [x] T37 实现开户与候选人 Intent/Observation/CommittedOutcome；外部结果只能由 World Bridge 输入。
 - [x] T38 实现 G3–G7、批准失效、拒绝、补正、超时、撤权、版本变化和正式 override。
 - [x] T39 实现 readiness evaluator，只有法律主体、账户、核验出资、组织岗位、任命、Mandate 和预算引用一致时进入终态。
