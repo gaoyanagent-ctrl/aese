@@ -1933,5 +1933,5 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 变更：Plant Build Play 新增只读“外部事实比较”，只消费已完成工作项的 World Observation；六类硬约束先于成本、工期、容量、控制四维可调权重，展示分项、综合分、Agent 估算对照、Observation ID 和证据引用；定向 BFF 从 IAOS 恢复最新 ProposalSet，刷新后不丢失估算对照。
 - 原因：外部调研事实已经进入 IAOS，但用户仍无法解释不同候选是否满足 Requirement、评分依据来自哪里，或区分 Agent 估算与正式报价。
 - 影响：不合格候选不能被权重抬高；权重只改变当前派生比较，不写 IAOS、不形成推荐或批准。DES-011、active plan、Roadmap、Code Map 和 Runbook 已同步实现边界。
-- 验证：评分单元测试覆盖合格解释与硬约束失败；Plant Build 组件测试覆盖已送达 Observation、证据和“非批准”提示；TypeScript、全量前端测试、生产构建、Go 全量测试和 Atlas tracking 作为发布门。
+- 验证：评分单元测试覆盖合格解释与硬约束失败；Plant Build 组件测试覆盖已送达 Observation、证据和“非批准”提示；Go 全仓、前端 24 文件/70 项、TypeScript、生产构建、三视口 Playwright 和 Atlas tracking 均通过。AESE `:8090` 已部署，ProposalSet 新读路由无身份时按预期返回 401，四端口健康；Atlas 声明同步端点仍返回 404，声明保留待路由恢复后幂等补录。
 - 后续：将版本化评分策略与结果固化为 IAOS Effective Artifact/Capability 输入，接正式推荐和统一 Approval Flow，再推进项目/WBS、合同、施工与工程财务。
