@@ -5,6 +5,10 @@ test("plant build campaign", async ({ page }) => {
   await page.getByRole("button", { name: "工厂建设 Campaign" }).click();
   await expect(page).toHaveURL(/#world-plant-build$/);
   await expect(
+    page.getByRole("heading", { name: "设施需求与候选方案" }),
+  ).toBeVisible();
+  await page.getByText("查看已封存的确定性参考回放（fixture-only）").click();
+  await expect(
     page.getByRole("heading", { name: "消费 M9 机器资格" }),
   ).toBeVisible();
   for (let i = 0; i < 9; i += 1) {

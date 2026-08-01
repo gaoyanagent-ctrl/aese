@@ -294,6 +294,19 @@ export async function loadPlantRequirement(
   return response.json() as Promise<FacilityRequirement>;
 }
 
+export async function loadPlantProposalSet(
+  requirementID: string,
+  signal?: AbortSignal,
+): Promise<ProposalSet | null> {
+  const response = await fetch(
+    `/api/aese/v1/world/plant-build/proposals?requirement_id=${encodeURIComponent(requirementID)}`,
+    { headers: iaosHeaders(), signal },
+  );
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`设施候选历史 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<ProposalSet>;
+}
+
 export async function generatePlantProposals(
   requirement: FacilityRequirement,
 ): Promise<PlantPlanningResult> {

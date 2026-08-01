@@ -1927,3 +1927,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：已采纳候选现在会进入持久 `waiting_world`；权属、面积、电力、正式报价、可用日期、许可和证据必须先写受信 World Journal，IAOS 才能完成工作项，浏览器不能直接伪造权威 Observation。
 - 验证：AESE `go test ./...`、23 个前端测试文件/67 项测试、TypeScript 和 Vite 生产构建通过；IAOS `go test ./...`、TypeScript、Next.js 生产构建、治理写入检查、Atlas tracking 和 JSON/SQL 检查通过。IAOS `:8082`/`:3000` 与 AESE `:8090`/`:4173` 已部署健康，四个现存活跃租户升级到平台基础包 `1.9.0`，新 Capability/Process Artifact 和 BFF 路由现场可读。IAOS 全前端回归另有 7 个既有测试文件失败（中文按钮与英文断言、超时及测试环境清理问题），本次修改文件构建无错。两仓 Atlas 声明已通过仓库检查，但部署后的同步写端点仍返回 404，保留声明待路由恢复后幂等补录。
 - 后续：统一 Requirement→Agent→Review→World→选址审批的完整 Effective Process Run，并实现评分、正式选址、项目/WBS、合同、施工和工程财务纵切。
+
+## 2026-08-01 - M10 Observation-only 场址评分比较
+
+- 变更：Plant Build Play 新增只读“外部事实比较”，只消费已完成工作项的 World Observation；六类硬约束先于成本、工期、容量、控制四维可调权重，展示分项、综合分、Agent 估算对照、Observation ID 和证据引用；定向 BFF 从 IAOS 恢复最新 ProposalSet，刷新后不丢失估算对照。
+- 原因：外部调研事实已经进入 IAOS，但用户仍无法解释不同候选是否满足 Requirement、评分依据来自哪里，或区分 Agent 估算与正式报价。
+- 影响：不合格候选不能被权重抬高；权重只改变当前派生比较，不写 IAOS、不形成推荐或批准。DES-011、active plan、Roadmap、Code Map 和 Runbook 已同步实现边界。
+- 验证：评分单元测试覆盖合格解释与硬约束失败；Plant Build 组件测试覆盖已送达 Observation、证据和“非批准”提示；TypeScript、全量前端测试、生产构建、Go 全量测试和 Atlas tracking 作为发布门。
+- 后续：将版本化评分策略与结果固化为 IAOS Effective Artifact/Capability 输入，接正式推荐和统一 Approval Flow，再推进项目/WBS、合同、施工与工程财务。

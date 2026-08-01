@@ -129,6 +129,20 @@ country / region / city（用户需求）
 
 评分器只生成可解释 candidate comparison，不自动替代批准。硬约束（现金、预算、最低公用工程、最晚可用日期）先于加权评分；不满足硬约束的候选不能因高综合分被选中。
 
+当前 S4.2 评分实现是 AESE 中的只读派生视图，不新增第二个业务写入权威。它只消费已由 IAOS
+匹配 Intent、写入 World Journal 并完成工作项的 Observation，按以下顺序计算：
+
+1. 先检查正式报价币种与投资申请额、实际面积、实际电力、正式可用日期、权属结论和许可结论。
+2. 任一硬约束失败时标记为不合格，`total_score=null`；调整权重不能把不合格方案变成合格方案。
+3. 对合格方案计算成本、工期、容量、控制四个 0–100 分的可解释分项，并按用户当前输入的非负权重自动归一化。
+4. Agent 估算额和预计日期只与 Observation 并列展示；正式报价、可用日期、面积、电力、权属和许可始终来自 Observation，二者不得覆盖。
+5. 每个比较卡必须展示 Observation ID、硬约束结果、分项分数和证据引用。该比较不是推荐、选址批准或投资批准。
+
+当前权重只控制当前页面的比较视图，尚未成为可发布、可审批的 `SiteAssessmentPolicy`。
+正式推荐纵切必须把评分版本、权重、Requirement revision、Observation IDs、计算结果和人员理由
+固化为 IAOS Effective Artifact/Capability 输入，再进入统一 Approval Flow；在该纵切完成前，AESE
+不得提供会造成“已经批准”误解的按钮。
+
 ### 7.1 Agent 生成与人工选择合同
 
 `plant-planning-agent` 的输入只能来自当前租户有权读取的事实和本次需求版本：
@@ -282,7 +296,7 @@ genesis.facility.accepted.v1
 6. AESE 外部参与者使用结构化表单返回权属、可用面积、电力容量、正式报价、可用日期、许可、证据引用和备注。AESE 必须先写受信 World Journal Observation；IAOS 的 `site.investigation.observation.commit` 只消费与 Intent/correlation 匹配的 Journal 事实，保存权威 Observation 并完成工作项。
 7. 外部模型未配置、财务快照缺失或已变化、Agent 输出不满足 Schema、候选超过投资申请上限、身份/权限不足、revision 冲突或 World Observation 不受信时失败关闭，不用固定候选或页面 JSON 兜底。
 
-以下仍未实现：人工新增候选的权威提交、从 Requirement 到选址审批的完整 Effective Process Run、外部事实评分与正式选址审批、场地控制、项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
+以下仍未实现：人工新增候选的权威提交、从 Requirement 到选址审批的完整 Effective Process Run、评分策略/结果的 IAOS 权威固化与正式选址审批、场地控制、项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
 
 ## 16. 用户配置、操作、验证与恢复
 
@@ -328,6 +342,7 @@ AESE 首页同时把原“世界地图”命名为 `企业生命周期 · M9–M
 4. 阅读每个候选的业务理由、金额/工期区间、估算依据、假设、待验证事实、风险、来源和置信度。
 5. 选择“采纳调研”“退回重生成”或“淘汰”，填写至少 6 个字符的理由并提交。成功表示 Review 已保存；“采纳调研”仍不等于外部事实已确认。
 6. 对已采纳候选点击“发起外部调研工作项”。页面显示 `waiting_world` 后，模拟登记/园区/产权等外部角色填写权属、面积、电力、正式报价、可用日期、许可和证据引用并提交；只有 IAOS 显示工作项 `completed` 才代表事实已进入权威闭环。
+7. 至少一个 Observation 完成后，页面显示“外部事实比较”。用户可调整成本、工期、容量和控制权重；系统先显示六类硬约束，再显示分项与综合分。Agent 估算与 World 正式事实分栏显示，任何权重都不能抵消硬约束失败。
 
 ### 16.3 关系与证据
 
@@ -338,11 +353,13 @@ M9 已过账现金 + 已批预算
 -> plant-planning-agent / CreativeJob（AESE 技术证据）
 -> ProposalSet（IAOS candidate-only 业务事实）
 -> ProposalReview（IAOS 人工决定、Audit、Outbox）
--> [待实现] Investigation Request / World Observation / Process / Approval
+-> Investigation Request / persistent World wait / World Observation（IAOS 权威事实）
+-> SiteAssessment derived comparison（AESE 只读、Observation-only）
+-> [待实现] 版本化评分 Artifact / 正式推荐 / Process / Approval
 -> [待实现] Project / WBS / Contract / Payment / Acceptance / Finance
 ```
 
-页面上的 Agent 估算不是报价，Review 不是审批，reference replay 不是当前企业运行事实。验收时必须分别核对 AESE CreativeJob 技术证据和 IAOS Requirement/Proposal/Review/Audit/Outbox 业务证据。
+页面上的 Agent 估算不是报价，Review 不是审批，派生评分不是推荐或批准，reference replay 不是当前企业运行事实。验收时必须分别核对 AESE CreativeJob 技术证据、IAOS Requirement/Proposal/Review/Audit/Outbox 业务证据和 Observation 的 Journal/工作项证据。
 
 ### 16.4 失败恢复
 

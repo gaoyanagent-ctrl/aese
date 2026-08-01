@@ -137,6 +137,22 @@ func (c *Client) PlantRequirement(ctx context.Context, requirementID string) (js
 	return out, nil
 }
 
+// PlantProposalSet reads the latest candidate-only proposal set for one stable
+// requirement so AESE can compare the original estimate with delivered World facts.
+func (c *Client) PlantProposalSet(ctx context.Context, requirementID string) (json.RawMessage, error) {
+	requirementID = strings.TrimSpace(requirementID)
+	if requirementID == "" {
+		return nil, fmt.Errorf("requirement_id is required")
+	}
+	query := url.Values{}
+	query.Set("requirement_id", requirementID)
+	var out json.RawMessage
+	if err := c.request(ctx, http.MethodGet, "api/v1/genesis/plant/interactive/proposal-sets?"+query.Encode(), nil, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *Client) PlantInvestigations(ctx context.Context, caseCode string) (json.RawMessage, error) {
 	caseCode = strings.TrimSpace(caseCode)
 	if caseCode == "" {

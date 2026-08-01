@@ -712,6 +712,33 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			_, _ = w.Write(result)
 			return
 		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "proposals" && r.Method == http.MethodGet {
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			token := bearerToken(r.Header.Get("Authorization"))
+			if token == "" || tenantID == "" {
+				s.writeError(w, http.StatusUnauthorized, "plant_proposal_identity_required", "IAOS bearer token and tenant context are required", false, "", "")
+				return
+			}
+			client, err := iaosclient.New(iaosclient.Config{BaseURL: s.cfg.IAOSBaseURL, Token: token, TenantID: tenantID})
+			if err != nil {
+				s.writeError(w, http.StatusServiceUnavailable, "plant_proposal_gateway_unavailable", err.Error(), true, "", "")
+				return
+			}
+			result, err := client.PlantProposalSet(ctx, r.URL.Query().Get("requirement_id"))
+			if err != nil {
+				var apiErr *iaosclient.APIError
+				if errors.As(err, &apiErr) {
+					s.writeError(w, apiErr.StatusCode, firstNonEmptyString(apiErr.ErrorCode, "plant_proposal_unavailable"), apiErr.Message, apiErr.StatusCode >= 500, "", apiErr.RequiredPermission)
+					return
+				}
+				s.writeError(w, http.StatusBadGateway, "plant_proposal_unavailable", err.Error(), true, "", "")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(result)
+			return
+		}
 		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "proposals" && r.Method == http.MethodPost {
 			var request plantbuild.FacilityRequirement
 			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &request); err != nil {

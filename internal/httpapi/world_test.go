@@ -194,6 +194,28 @@ func TestPlantFinancialConstraintUsesNarrowAuthenticatedIAOSRead(t *testing.T) {
 	}
 }
 
+func TestPlantProposalSetUsesNarrowAuthenticatedIAOSRead(t *testing.T) {
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/v1/genesis/plant/interactive/proposal-sets" || r.URL.Query().Get("requirement_id") != "REQ-LIVE" {
+			t.Fatalf("unexpected IAOS request %s?%s", r.URL.Path, r.URL.RawQuery)
+		}
+		if r.Header.Get("Authorization") != "Bearer founder-token" || r.Header.Get("X-IAOS-Tenant-Id") != "tenant-live" {
+			t.Fatalf("identity not forwarded: %#v", r.Header)
+		}
+		_, _ = w.Write([]byte(`{"schema_version":"1.0","proposal_set_id":"SET-LIVE","requirement_id":"REQ-LIVE","revision":1,"status":"candidate_only","proposals":[],"evidence":{"provider":"MiniMax","model":"M3","prompt_version":"v1","input_hash":"sha256:in","output_hash":"sha256:out","validated_at":"2026-08-01T00:00:00Z"}}`))
+	}))
+	defer iaos.Close()
+	server := New(Config{IAOSBaseURL: iaos.URL})
+	req := httptest.NewRequest(http.MethodGet, "/api/aese/v1/world/plant-build/proposals?requirement_id=REQ-LIVE", nil)
+	req.Header.Set("Authorization", "Bearer founder-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-live")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusOK || !strings.Contains(res.Body.String(), `"proposal_set_id":"SET-LIVE"`) {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
+}
+
 func TestPlantPlanningProposalPersistsEvidenceAndReplaysIdempotently(t *testing.T) {
 	provider := &planningProviderStub{}
 	server := New(Config{PlantPlanningProvider: provider, CreativeJobStore: creative.NewJobStore(t.TempDir() + "/jobs.json"), AllowLocalPlantAuthority: true})

@@ -22,6 +22,7 @@ import {
   loadPlantBuild,
   loadPlantFinancialConstraint,
   loadPlantPlanningStatus,
+  loadPlantProposalSet,
   loadPlantRequirement,
   loadSiteInvestigations,
   requestSiteInvestigation,
@@ -35,6 +36,11 @@ import {
   type SiteOptionProposal,
   type SiteInvestigationItem,
 } from "../../world/plantBuild";
+import {
+  assessObservedSites,
+  type SiteAssessment,
+  type SiteAssessmentWeights,
+} from "../../world/siteAssessment";
 import "./WorldPlay.css";
 
 const cny = (value: string) =>
@@ -212,9 +218,35 @@ function InvestigationPanel({ item, caseCode, onCommitted }: { item: SiteInvesti
   </article>;
 }
 
+const SCORE_DIMENSIONS: Array<[keyof SiteAssessmentWeights, string, string]> = [
+  ["cost", "成本", "正式报价相对投资申请额"],
+  ["schedule", "工期", "正式可用日期相对目标日期"],
+  ["capacity", "容量", "实际面积与电力容量"],
+  ["control", "控制", "权属与许可核验结论"],
+];
+
+function AssessmentCard({ assessment }: { assessment: SiteAssessment }) {
+  return <article className={`plant-assessment-card ${assessment.eligible ? "eligible" : "ineligible"}`}>
+    <header>
+      <div><span>{assessment.observation_id}</span><h3>{assessment.display_name}</h3></div>
+      <strong>{assessment.eligible ? `${assessment.total_score?.toFixed(1)} 分` : "硬约束不通过"}</strong>
+    </header>
+    {assessment.hard_failures.length > 0
+      ? <ul className="plant-hard-failures">{assessment.hard_failures.map((failure) => <li key={failure}>{failure}</li>)}</ul>
+      : <p className="plant-hard-pass"><BadgeCheck />投资、面积、电力、日期、权属和许可硬约束通过</p>}
+    <div className="plant-estimate-observation">
+      <section><span>Agent 估算 · 非正式事实</span><strong>{assessment.estimated ? cny(assessment.estimated.amount) : "当前会话未加载"}</strong><small>{assessment.estimated ? new Date(assessment.estimated.available_at).toLocaleDateString("zh-CN") : "以 Observation 为评分依据"}</small></section>
+      <section><span>World Observation · 评分事实</span><strong>{cny(assessment.observed.quote)}</strong><small>{new Date(assessment.observed.available_at).toLocaleDateString("zh-CN")} · {assessment.observed.area_m2} m² · {assessment.observed.electricity_kva} kVA</small></section>
+    </div>
+    <dl className="plant-score-components">{SCORE_DIMENSIONS.map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{assessment.component_scores[key].toFixed(1)}</dd></div>)}</dl>
+    <details className="plant-assessment-evidence"><summary>查看事实与证据引用</summary><dl><div><dt>权属</dt><dd>{assessment.observed.ownership}</dd></div><div><dt>许可</dt><dd>{assessment.observed.permit}</dd></div></dl><ul>{assessment.evidence_refs.map((reference) => <li key={reference}>{reference}</li>)}</ul></details>
+  </article>;
+}
+
 function PlantPlanningWorkspace() {
   const [status, setStatus] = useState<PlantPlanningProviderStatus | null>(null);
   const [financial, setFinancial] = useState<PlantFinancialConstraint | null>(null);
+  const [activeRequirement, setActiveRequirement] = useState<FacilityRequirement | null>(null);
   const [draft, setDraft] = useState<RequirementDraft>(blankDraft);
   const [proposalSet, setProposalSet] = useState<ProposalSet | null>(null);
   const [reviews, setReviews] = useState<Record<string, ReviewState>>({});
@@ -222,6 +254,7 @@ function PlantPlanningWorkspace() {
   const [reviewBusy, setReviewBusy] = useState("");
   const [investigations, setInvestigations] = useState<SiteInvestigationItem[]>([]);
   const [investigationBusy, setInvestigationBusy] = useState("");
+  const [assessmentWeights, setAssessmentWeights] = useState<SiteAssessmentWeights>({ cost: 35, schedule: 25, capacity: 20, control: 20 });
   const [nextRevision, setNextRevision] = useState(1);
   const [manualOpen, setManualOpen] = useState(false);
   const [manualName, setManualName] = useState("");
@@ -239,7 +272,11 @@ function PlantPlanningWorkspace() {
     Promise.all([
       loadPlantPlanningStatus(controller.signal).then(setStatus),
       loadPlantFinancialConstraint(caseCode, controller.signal).then(setFinancial),
-      loadPlantRequirement(requirementID, controller.signal).then((existing) => setNextRevision((existing?.revision ?? 0) + 1)),
+      loadPlantRequirement(requirementID, controller.signal).then((existing) => {
+        setActiveRequirement(existing?.investment_request && existing.target_available_at ? existing : null);
+        setNextRevision((existing?.revision ?? 0) + 1);
+      }),
+      loadPlantProposalSet(requirementID, controller.signal).then(setProposalSet),
       loadSiteInvestigations(caseCode, controller.signal).then((result) => setInvestigations(result.items ?? [])),
     ]).catch((reason) => { if (reason.name !== "AbortError") setError(String(reason)); });
     return () => controller.abort();
@@ -247,6 +284,11 @@ function PlantPlanningWorkspace() {
   const update = (name: keyof RequirementDraft, value: string | string[]) =>
     setDraft((current) => ({ ...current, [name]: value }));
   const entityCode = financial?.legal_entity_code ?? "";
+  const assessments = useMemo(
+    () => activeRequirement ? assessObservedSites(activeRequirement, proposalSet, investigations, assessmentWeights) : [],
+    [activeRequirement, assessmentWeights, investigations, proposalSet],
+  );
+  const normalizedWeightTotal = Object.values(assessmentWeights).reduce((sum, value) => sum + Math.max(0, value), 0);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -276,6 +318,7 @@ function PlantPlanningWorkspace() {
         revision_reason: draft.revisionReason.trim(),
       };
       const result = await generatePlantProposals(requirement);
+      setActiveRequirement(requirement);
       setProposalSet(result.proposal_set);
       setReviews({});
       setSavedReviews({});
@@ -386,6 +429,12 @@ function PlantPlanningWorkspace() {
       {manualOpen && <form className="plant-manual-form" onSubmit={addManual}><h3>人工新增候选草稿</h3><label>候选名称<input required value={manualName} onChange={(e) => setManualName(e.target.value)} /></label><label>业务理由<textarea required value={manualRationale} onChange={(e) => setManualRationale(e.target.value)} /></label><label>初始估算（CNY）<input required min="0" step="0.01" type="number" value={manualAmount} onChange={(e) => setManualAmount(e.target.value)} /></label><button>加入本地审阅列表</button></form>}
       {proposalSet && <section className="plant-proposals" aria-live="polite"><header><div><span>{proposalSet.status}</span><h2>候选方案 · {proposalSet.proposals.length}</h2></div><small>{proposalSet.evidence.provider} / {proposalSet.evidence.model} · {proposalSet.evidence.prompt_version}</small></header><div className="plant-proposal-grid">{proposalSet.proposals.map((proposal) => <ProposalCard key={proposal.proposal_id} proposal={proposal} review={reviews[proposal.proposal_id]} onReview={(review) => { setReviews((current) => ({ ...current, [proposal.proposal_id]: review })); setSavedReviews((current) => ({ ...current, [proposal.proposal_id]: false })); }} onSubmitReview={() => submitReview(proposal.proposal_id)} saved={Boolean(savedReviews[proposal.proposal_id])} busy={reviewBusy === proposal.proposal_id} investigation={investigations.find((item) => item.request.proposal_id === proposal.proposal_id)} investigationBusy={investigationBusy === proposal.proposal_id} onRequestInvestigation={() => startInvestigation(proposal.proposal_id)} />)}</div><p className="plant-persistence-note"><BadgeCheck />Agent 候选和相应人工审阅通过 IAOS Capability 保存；人工新增候选在其正式 Capability 完成前明确保留为本地草稿。“采纳调研”不等于投资批准或合同签署。</p></section>}
       {investigations.length > 0 && <section className="plant-investigations" aria-live="polite"><header><div><span>facility.site.investigation.v1</span><h2>场址外部调研工作项</h2></div><small>{investigations.filter((item) => item.status === "waiting_world").length} 条等待 World</small></header>{investigations.map((item) => <InvestigationPanel key={item.request.investigation_request_id} item={item} caseCode={caseCode} onCommitted={refreshInvestigations} />)}</section>}
+      {assessments.length > 0 && <section className="plant-assessments" aria-labelledby="plant-assessment-title">
+        <header><div><span>OBSERVATION-ONLY COMPARISON</span><h2 id="plant-assessment-title">外部事实比较</h2><p>只有已送达的 World Observation 参与评分；Agent 估算只用于对照，不会覆盖正式报价或现场事实。</p></div><small>{assessments.filter((item) => item.eligible).length}/{assessments.length} 个候选通过硬约束</small></header>
+        <fieldset className="plant-assessment-weights"><legend>本次比较权重（自动归一化）</legend>{SCORE_DIMENSIONS.map(([key, label, help]) => <label key={key}>{label}<small>{help}</small><input aria-label={`${label}权重`} type="number" min="0" max="100" value={assessmentWeights[key]} onChange={(event) => setAssessmentWeights((current) => ({ ...current, [key]: Math.max(0, Number(event.target.value) || 0) }))} /></label>)}<p>当前权重合计 {normalizedWeightTotal}。权重只改变合格候选的比较视图；任何硬约束失败都不会被高分抵消。</p></fieldset>
+        <div className="plant-assessment-grid">{assessments.map((assessment) => <AssessmentCard key={assessment.observation_id} assessment={assessment} />)}</div>
+        <p className="plant-assessment-governance"><TriangleAlert />当前结果是可解释的派生比较，不是正式推荐、选址批准或投资批准。正式决定将在后续 Capability + Approval Flow 中由有权人员提交。</p>
+      </section>}
     </section>
   );
 }

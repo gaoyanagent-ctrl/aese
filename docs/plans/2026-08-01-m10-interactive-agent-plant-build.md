@@ -49,7 +49,7 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 ### S4 World 调研、参数化项目和资金治理
 
 - [x] S4.1 World 外部参与者通过结构化表单返回正式报价、权属、面积、电力容量、许可、可用日期和证据引用 Observation；AESE 先写 World Journal，再由 IAOS 受治理能力匹配 Intent/correlation 并完成持久工作项。
-- [ ] S4.2 评分只消费已送达事实；Agent 估算与外部事实并列显示，不得互相覆盖。
+- [x] S4.2 评分只消费已送达事实；Agent 估算与外部事实并列显示，不得互相覆盖。已交付 Observation-only 派生比较、六类硬约束、四维可调权重、分项解释和证据引用；评分策略/结果的 IAOS 权威固化与正式推荐属于后续 S2.3/选址审批纵切。
 - [ ] S4.3 空间、承包策略、WBS、延期缓解和投资变更均采用 Agent 建议 + 人员决定。
 - [x] S4.4a IAOS 从已过账银行科目与设立案件已批预算读取只读财务快照，返回来源引用和 snapshot hash；AESE BFF 不接受页面伪造该快照。
 - [ ] S4.4b 投资、合同、变更和付款金额可修订但必须重新校验/审批；资金变化使旧 Requirement snapshot 失效并要求修订。
@@ -71,16 +71,18 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 
 ## 4. 当前执行
 
-S0、S1、S2.2、S3.0、S3.1、S3.2、S3.4、S4.1 和 S4.4a 已完成。当前在线纵切为：M9 机器终态交接 → IAOS 只读财务快照 → 人员填写 Facility Requirement → AESE 调用真实 Agent → IAOS 保存 Requirement/Proposal → 人员提交采纳 Review → IAOS 创建 `facility.site.investigation.v1` 持久 World 等待工作项和 Intent → AESE 外部参与者提交结构化 Observation → IAOS 匹配受信 World Journal 并完成工作项。该纵切不等于完整 M10：平台 Entity/Edition 发布、完整 Effective Process Run、人工候选权威提交、正式评分/选址审批、项目/WBS/合同/施工/会计和 S5 全链验收仍未完成。既有未跟踪 M7 验收产物不属于本计划，不修改、不提交。
+S0、S1、S2.2、S3.0、S3.1、S3.2、S3.4、S4.1、S4.2 和 S4.4a 已完成。当前在线纵切为：M9 机器终态交接 → IAOS 只读财务快照 → 人员填写 Facility Requirement → AESE 调用真实 Agent → IAOS 保存 Requirement/Proposal → 人员提交采纳 Review → IAOS 创建 `facility.site.investigation.v1` 持久 World 等待工作项和 Intent → AESE 外部参与者提交结构化 Observation → IAOS 匹配受信 World Journal 并完成工作项 → AESE 只消费已送达 Observation，先过硬约束再按可调权重形成可解释比较。该纵切不等于完整 M10：平台 Entity/Edition 发布、完整 Effective Process Run、人工候选权威提交、评分策略/结果权威固化、正式推荐/选址审批、项目/WBS/合同/施工/会计和 S5 全链验收仍未完成。既有未跟踪 M7 验收产物不属于本计划，不修改、不提交。
 
 ## 5. 当前接口与事实所有权
 
 | 用户动作 | 浏览器调用 | AESE 职责 | IAOS 权威结果 |
 | --- | --- | --- | --- |
 | 打开交互规划 | `GET /api/aese/v1/world/plant-build/financial-constraints?case_code=...` | 使用当前 IAOS token/tenant 定向转发，不缓存业务事实 | 从已过账银行科目和已批预算形成只读 snapshot、来源引用与 hash |
+| 恢复候选估算 | `GET /api/aese/v1/world/plant-build/proposals?requirement_id=...` | 使用命名 IAOS adapter 读取最新 ProposalSet，不代理任意路径 | 返回 IAOS 已保存的 candidate-only ProposalSet，使刷新后仍可与 Observation 并列比较 |
 | 保存需求并生成候选 | `POST /api/aese/v1/world/plant-build/proposals` | 严格校验 Requirement、调用已配置模型、保存 CreativeJob 技术证据 | `facility.requirement.define` 与 `site.proposal.record` 分别提交 Requirement 和 candidate-only ProposalSet |
 | 审阅候选 | `POST /api/aese/v1/world/plant-build/reviews` | 从 IAOS profile 解析实际 actor，禁止浏览器伪造 reviewer | `site.proposal.review` 保存 action、理由、revision、reviewer、Audit 和 Outbox |
 | 发起外部调研 | `POST /api/aese/v1/world/plant-build/investigations` | 只接受已保存且结论为 `adopt_for_investigation` 的候选，服务端解析 actor | `site.investigation.request` 创建调查请求、`facility.site.investigation.v1` 持久 `waiting_world` 工作项和 World Intent |
 | 外部参与者反馈 | `POST /api/aese/v1/world/plant-build/observations` | 校验结构化表单，先向 World Bridge 提交与 Intent 匹配的 Observation | `site.investigation.observation.commit` 只消费受信 Journal，保存外部事实并完成对应工作项；浏览器不能直接伪造 IAOS Observation |
+| 比较已送达事实 | 页面内只读派生计算 | 只读取当前 Requirement 与已完成 Observation；先硬约束、后按可调权重评分并展示证据 | 不产生 IAOS 写入、不创建推荐或审批结果；后续由版本化 Capability/Approval 固化正式决定 |
 
-上述 BFF 不是通用 IAOS 代理，也不拥有权威业务表。外部模型未配置、财务快照不完整或变更、候选 Schema 不合法、权限不足、重复键输入不同、审阅版本冲突时均失败关闭。
+上述 BFF 不是通用 IAOS 代理，也不拥有权威业务表。Requirement 和 ProposalSet 的 GET 只用于恢复 IAOS 已保存事实，不从 AESE 本地重建。外部模型未配置、财务快照不完整或变更、候选 Schema 不合法、权限不足、重复键输入不同、审阅版本冲突时均失败关闭。
