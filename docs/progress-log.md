@@ -1911,4 +1911,4 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 原因：M10 已有 API、Capability 和 Agent，但缺少租户可发现的菜单资产与页面路由，用户无法从 IAOS 导航进入已实现的交互纵切。
 - 影响：平台基础包升级至 `1.8.0` 后，既有与新租户通过同一包清单获得 M10 入口；IAOS 继续拥有权威业务事实，AESE 继续拥有 World/Agent 交互。该入口不改变 M10 尚未完成调查、Process、工程执行和财务全链的事实。
 - 验证：IAOS 新增菜单包回归测试先失败后通过；`go test ./internal/incorporation ./internal/api`、生产构建、治理写入检查、Atlas tracking 和线上菜单/财务约束 API 验证通过；`tenant-001`、`tenant-hctm` 与当前 GX 租户均已升级到 `1.8.0`。
-- 后续：从新工作台完成 Requirement → Agent Proposal → Human Review 现场验收，再实现 Investigation、Effective Process Artifact、World Observation、项目/WBS、施工、付款、验收和工程财务闭环。
+- 后续：从新工作台完成 Requirement → Agent Proposal → Human Review 现场验收，再实现 Investigation、Effective Process Artifact、World Observation、项目/WBS、施工、付款、验收和工程财务闭环。部署后 Atlas 同步端点仍返回 404，本次声明已保留在仓库，待 IAOS 写入路由恢复后补同步。
