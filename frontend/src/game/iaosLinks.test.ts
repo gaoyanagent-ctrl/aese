@@ -17,6 +17,6 @@ describe("IAOS finance drill-through", () => {
 describe("M9 knowledge drill-through",()=>{
   it("preserves tenant, case, article and current capability",()=>{
     const url=m9KnowledgeUrl({tenant_id:"tenant-gx-demo",case_code:"INC-DEMO-001"},"capital.commitment.record");
-    expect(url).toContain("article_id=KB-M9-INCORPORATION");expect(url).toContain("capability=capital.commitment.record");expect(url).toContain("tenant=tenant-gx-demo");expect(url.endsWith("#knowledge_center")).toBe(true);
+    expect(url).toContain("article_id=KB-HCTM-M9-INCORPORATION");expect(url).toContain("capability=capital.commitment.record");expect(url).toContain("tenant=tenant-gx-demo");expect(url.endsWith("#knowledge_center")).toBe(true);
   });
 });

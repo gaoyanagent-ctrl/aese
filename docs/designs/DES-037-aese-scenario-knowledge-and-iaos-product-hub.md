@@ -52,8 +52,11 @@ AESE 平台基线手册保留在 Git 并受场景版本审核；构建时生成 
 人工可读源为 `docs/manuals/m9-incorporation-user-manual.md`；机器 Edition 位于
 `scenario-packs/hctm/knowledge/m9-incorporation.json`，Schema 位于同目录 `schemas/`。
 `internal/scenarioknowledge` 使用严格 JSON 解码、稳定编码 allowlist、18 节点顺序/完整性和
-canonical SHA-256 校验；`aese knowledge validate` 是离线质量门。manifest 当前是可验证的
-发布输入，写入 IAOS 行业 Edition 的幂等安装器仍属于 S6。
+canonical SHA-256 校验；`aese knowledge validate` 是离线质量门。`aese knowledge compile`
+读取受版本控制的 Markdown，将正文摘要写入 `knowledge_article` 资产版本，再签名 Package 和
+Edition，产物位于 `scenario-packs/hctm/knowledge/dist/`。`aese knowledge install` 默认仅向
+IAOS 做 dry-run 校验，显式 `--apply` 后才按 JWT 租户安装。IAOS 保存 FORCE RLS 行业 Active
+版本、审计和安装清单；相同 bundle 重试 no-op，同版本换正文失败关闭。
 
 # 5. Agent 合同
 

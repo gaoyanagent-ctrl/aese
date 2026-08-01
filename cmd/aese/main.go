@@ -23,7 +23,9 @@ const usage = `Usage:
   aese world inspect <world-dir>
   aese world run <world-dir> [--until <RFC3339>] [--apply --output <dir>]
   aese world replay <world-dir> --log <event-log.json> [--apply --output <dir>]
-  aese knowledge validate <knowledge-manifest.json>
+  aese knowledge validate|digest <knowledge-manifest.json>
+  aese knowledge compile <knowledge-manifest.json> --output <bundle.json>
+  aese knowledge install <bundle.json> --target <IAOS URL> [--apply]
   aese reconcile <bridge-journal.json>
   aese experiment validate|inspect|expand|run|compare|evidence|replay [--definition <json>] [--apply]
 
@@ -78,8 +80,36 @@ func run(args []string, stdout, stderr io.Writer) int {
 }
 
 func knowledgeCommand(args []string, stdout, stderr io.Writer) int {
+	if len(args) >= 1 && args[0] == "install" {
+		return knowledgeInstallCommand(args[1:], stdout, stderr)
+	}
+	if len(args) >= 1 && args[0] == "compile" {
+		fs := flag.NewFlagSet("knowledge compile", flag.ContinueOnError)
+		fs.SetOutput(stderr)
+		output := fs.String("output", "", "signed IAOS knowledge bundle path")
+		if len(args) < 2 || fs.Parse(args[2:]) != nil || *output == "" {
+			fmt.Fprintln(stderr, "knowledge compile requires <manifest> --output <bundle.json>")
+			return 2
+		}
+		bundle, err := scenarioknowledge.CompileBundle(args[1])
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		data, err := scenarioknowledge.BundleJSON(bundle)
+		if err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		if err := os.WriteFile(*output, append(data, '\n'), 0o644); err != nil {
+			fmt.Fprintln(stderr, err)
+			return 1
+		}
+		fmt.Fprintf(stdout, "compiled knowledge edition: %s@%s hash=%s -> %s\n", bundle.Edition.EditionKey, bundle.Edition.Version, bundle.Edition.ContentHash, *output)
+		return 0
+	}
 	if len(args) != 2 || (args[0] != "validate" && args[0] != "digest") {
-		fmt.Fprintln(stderr, "knowledge requires: validate|digest <knowledge-manifest.json>")
+		fmt.Fprintln(stderr, "knowledge requires: validate|digest|compile <knowledge-manifest.json>")
 		return 2
 	}
 	m, err := scenarioknowledge.Load(args[1])

@@ -1831,3 +1831,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：AESE 仍不保存知识或 IAOS 业务数据；清单作为待发布场景 Edition 输入，页面通过稳定 article ID 跳转 IAOS。内容哈希不冒充 IAOS 安装完成。
 - 验证：`go test ./internal/scenarioknowledge ./cmd/aese`、`aese knowledge validate`、JSON Schema fixture 校验和 AESE `npm run build` 通过；18 节点覆盖率 100%，hash 为 `6a73c7735970e14adbbe198f5ebc07bd7b580cf6fc3f32da3137c3633efd6543`。
 - 后续：实现 IAOS Knowledge Edition 幂等安装、Agent workspace/node 上下文和 World/IAOS 双侧运行证据漂移检查。
+
+## 2026-08-01 - HCTM Knowledge Edition 签名发布与安装闭环
+
+- 变更：新增 Markdown 到 IAOS `KnowledgeEditionBundle` 的确定性编译、正文 SHA-256、Package/Edition 双层签名、版本化 dist 产物和默认 dry-run 的 `aese knowledge install`；IAOS 增加租户范围行业文章物化与幂等安装 API。
+- 原因：仅校验场景 manifest 不能证明实际正文未被替换，也不能保证行业知识只对已安装租户生效。
+- 影响：AESE 继续拥有场景内容、不保存 IAOS 业务数据；IAOS 继续拥有权限、RLS、审计、安装目录和有效解析。M9 深链改用独立行业文章 ID，避免与平台基线无痕覆盖。
+- 验证：manifest/schema、编译器、CLI、IAOS 全量 Go、Product Knowledge/API 定向 Go 测试、AESE 全量 Go/生产构建/深链 Vitest 通过；live dry-run 验签通过，缺少 `genesis-m9@1.5.0` 时 409 失败关闭；升级依赖后重复 apply 返回 `no_op=true,writes=0`，`tenant-hctm` 可见行业文章而 `tenant-001` 返回 404，额外行业包不影响基础包 `up_to_date=true`。Edition hash 为 `1afd39e1ce2139c1254aea2e01f250d480796e001121e85bbbe72b9d1e59ec47`。
+- 后续：推进 Agent workspace/node 上下文和 World/IAOS 双侧证据漂移。

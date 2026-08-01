@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.knowledge-edition-install.2026-08-01",
+  "node_key": "aese.world.knowledge",
+  "update_type": "implementation",
+  "summary": "完成 HCTM M9 场景知识签名编译与 IAOS 幂等安装闭环",
+  "detail": "AESE 将用户手册和 18 节点映射编译为正文哈希覆盖的签名 Knowledge Edition，CLI 默认 dry-run 且仅 --apply 写入；IAOS 按目标租户实施 RLS、审计和重复安装 no-op。",
+  "status_after": "validating",
+  "progress_after": 82,
+  "current_state": "场景知识已从人工文档推进为可安装机器 Edition；下一步补 Agent 运行上下文和 World/IAOS 双侧证据漂移。",
+  "evidence_ref": "docs/designs/DES-037-aese-scenario-knowledge-and-iaos-product-hub.md",
+  "occurred_at": "2026-08-01T04:57:00Z"
+}

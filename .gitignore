@@ -11,6 +11,8 @@
 tmp/
 .aese-data/
 dist/
+!scenario-packs/hctm/knowledge/dist/
+!scenario-packs/hctm/knowledge/dist/*.bundle.json
 build/
 
 # Local environment

@@ -1,0 +1,165 @@
+{
+  "schema_version": "1.0",
+  "edition": {
+    "schema_version": "1.0",
+    "edition_key": "hctm-m9-incorporation-knowledge",
+    "display_name": "华辰 M9 企业设立知识 Edition",
+    "version": "1.0.0",
+    "description": "按租户安装的 HCTM 场景知识，不包含业务实例数据。",
+    "packages": [
+      {
+        "package_key": "hctm-m9-incorporation-knowledge",
+        "version": "1.0.0",
+        "content_hash": "e847c2c54b066c2f3958892ee1dd1dce6a8e272c27926f6542a5dcc34adaa3c0"
+      }
+    ],
+    "content_hash": "1afd39e1ce2139c1254aea2e01f250d480796e001121e85bbbe72b9d1e59ec47"
+  },
+  "packages": [
+    {
+      "schema_version": "1.0",
+      "package_key": "hctm-m9-incorporation-knowledge",
+      "display_name": "华辰 M9 企业设立知识包",
+      "version": "1.0.0",
+      "description": "HCTM 行业场景说明和 18 节点 IAOS 证据映射。",
+      "depends_on": [
+        "genesis-m9@1.5.0"
+      ],
+      "assets": [
+        {
+          "kind": "knowledge_article",
+          "key": "KB-HCTM-M9-INCORPORATION",
+          "version": "f3bef6e5fc12e2dc069d84f5de1b3bc0fbe93f01a355ab6d6aacfeab80dba68a",
+          "ownership": "industry",
+          "description": "M9 企业设立人机协作验收手册"
+        }
+      ],
+      "content_hash": "e847c2c54b066c2f3958892ee1dd1dce6a8e272c27926f6542a5dcc34adaa3c0"
+    }
+  ],
+  "articles": [
+    {
+      "article_id": "KB-HCTM-M9-INCORPORATION",
+      "title": "M9 企业设立人机协作验收手册",
+      "summary": "华辰 M9 企业设立 18 个节点的角色、输入、输出、审批门、World 动作和 IAOS 证据入口。",
+      "content_type": "scenario",
+      "audience": [
+        "founder",
+        "tester",
+        "implementer"
+      ],
+      "module": "incorporation",
+      "menu_code": "enterprise_lifecycle",
+      "route": "/enterprise_lifecycle",
+      "applies_to_version": "hctm-m9-incorporation-knowledge@1.0.0",
+      "status": "active",
+      "language": "zh-CN",
+      "purpose": "让实施人员和业务用户逐节点理解并验收 AESE 与 IAOS 的人机协作闭环。",
+      "prerequisites": [
+        "目标租户已安装 genesis-m9@1.5.0",
+        "企业设立流程已发布",
+        "用户具备知识读取权限"
+      ],
+      "steps": [
+        "01 · incorporation.case.open · founder-principal · 由创始人提交可追踪的设立意图并建立案件。",
+        "02 · founder.resolution.prepare · incorporation-agent · Agent 依据案件合同准备可审计的创始人决议草稿。",
+        "03 · founder.resolution.approve · founder-principal · 有权主体审阅并批准设立决议。",
+        "04 · capital.commitment.record · finance-agent · 记录股东出资承诺及币种、金额和履约条件。",
+        "05 · registration.package.validate · legal-compliance-agent · 校验登记材料完整性且不伪造监管结果。",
+        "06 · registration.submit · founder-principal · 批准向登记机构提交正式材料。",
+        "07 · registration.observation.commit · world-registry · 接收登记机构可信 Observation 后形成法人登记事实。",
+        "08 · bank.account.opening.submit · founder-principal · 批准向银行发起对公账户开户。",
+        "09 · bank.account.observation.commit · world-bank · 接收银行可信 Observation 并登记银行账户。",
+        "10 · capital.contribution.verify · finance-agent · 核对银行到账事实并确认实缴资本。",
+        "11 · organization.establish · iaos-runtime · 依据法人事实建立初始组织骨架。",
+        "12 · executive.appointment.propose · governance-agent · 准备高管任命建议与职责边界。",
+        "13 · executive.appointment.acceptance.commit · world-talent · 记录候选人的外部接受意愿。",
+        "14 · executive.appointment.approve · founder-principal · 有权主体批准高管任命。",
+        "15 · operating.mandate.grant · founder-principal · 向经营岗位授予有范围、限额和期限的授权。",
+        "16 · initial.budget.prepare · finance-agent · 财务 Agent 准备开业预算草案。",
+        "17 · initial.budget.approve · founder-principal · 审批开业预算并冻结责任范围。",
+        "18 · enterprise.readiness.evaluate · audit-agent · 独立评估治理、资本、组织、授权、预算和财务证据是否齐备。"
+      ],
+      "validation": [
+        "18 个节点顺序完整",
+        "每个节点可穿透到实际 IAOS 证据",
+        "World 节点不由 IAOS 伪造"
+      ],
+      "recovery": [
+        "版本不匹配时停止安装并升级 IAOS 基础 Edition",
+        "缺失运行证据时保持失败关闭并检查节点全链"
+      ],
+      "related_assets": {
+        "capabilities": [
+          "incorporation.case.open",
+          "founder.resolution.prepare",
+          "founder.resolution.approve",
+          "capital.commitment.record",
+          "registration.package.validate",
+          "registration.submit",
+          "registration.observation.commit",
+          "bank.account.opening.submit",
+          "bank.account.observation.commit",
+          "capital.contribution.verify",
+          "organization.establish",
+          "executive.appointment.propose",
+          "executive.appointment.acceptance.commit",
+          "executive.appointment.approve",
+          "operating.mandate.grant",
+          "initial.budget.prepare",
+          "initial.budget.approve",
+          "enterprise.readiness.evaluate"
+        ],
+        "menus": [
+          "approvals",
+          "bank_account",
+          "budget_envelope",
+          "capital_commitment",
+          "capital_contribution",
+          "decision_audit",
+          "enterprise_lifecycle",
+          "executive_appointment",
+          "finance_workspace",
+          "incorporation_agents",
+          "incorporation_cases",
+          "incorporation_processes",
+          "incorporation_tasks",
+          "journal_entry",
+          "legal_entity",
+          "legal_registration",
+          "operating_mandate",
+          "org_explorer",
+          "organization_position"
+        ],
+        "processes": [
+          "enterprise.incorporation.lifecycle.v1"
+        ],
+        "world_actions": [
+          "bank.confirm_account_opened",
+          "registrar.confirm_registration",
+          "talent.accept_appointment"
+        ]
+      },
+      "keywords": [
+        "M9",
+        "企业设立",
+        "HCTM",
+        "AESE",
+        "人工审批",
+        "Agent 任务",
+        "World Observation"
+      ],
+      "source_refs": [
+        "docs/manuals/m9-incorporation-user-manual.md",
+        "scenario-packs/hctm/knowledge/m9-incorporation.json"
+      ],
+      "body_markdown": "---\nid: MANUAL-M9-001\ntitle: M9 企业设立用户手册\ndate: 2026-08-01\nstatus: active\nauthor: Codex + User\ntags: [manual, m9, incorporation, aese, iaos]\n---\n\n# 这份手册解决什么问题\n\n本手册帮助创始治理者理解 M9 不是“一键播放动画”，而是一组由人、Agent、审批流和 AESE\n外部参与者共同完成的企业活动。完整节点合同以\n[M9 原生闭环设计](../designs/DES-027-m9-iaos-native-incorporation-closed-loop.md) 为准；IAOS\n通用概念和配置方式从“帮助与知识中心”查询。\n\n# 四类节点\n\n| 类型 | 谁推进 | 典型输入 | 结果在哪里看 |\n| --- | --- | --- | --- |\n| human_task | 当前岗位用户 | 表单、选择、确认 | 我的经营待办、Entity、Journal |\n| agent_task | 有 Mandate 的 IAOS Agent | 业务说明和已有事实 | Agent 任务、草稿输出、Tool Call |\n| approval | Approval Flow 解析的实际审批人 | 事项快照、意见、决定 | 审批中心、Decision、通知 |\n| world_wait | AESE 外部机构或客观世界 | Observation | World Journal、IAOS World Bridge |\n\n# 推荐测试路径\n\n1. 在 AESE 创建或选择 Workspace，并进入企业世界。\n2. 在 IAOS“企业生命周期”新建设立案。\n3. 在“我的经营待办”只处理当前 waiting 节点；locked 节点不能提前推进。\n4. Agent 节点先审阅输入来源和授权，再点击执行并查看草稿。\n5. Approval 节点到“审批中心”查看完整事项和实际处理人。\n6. World wait 节点回 AESE 由登记机构、银行等外部参与者提交一次幂等 Observation。\n7. 回 IAOS 打开节点全链，核对 Capability、Process、Entity、Journal、Outbox 和 World 证据。\n8. 完成账套、期间、资本凭证和经营就绪检查。\n\n# 常见误解\n\n- AESE 画面中的公司代码不应是脱离 IAOS 案件的演示常量。\n- Agent 输出是草稿或建议，不等于审批决定。\n- 点击外部确认多次不应增加不同事实；相同幂等键应返回同一结果。\n- `completed` 必须有实际输出和证据，不能仅因为剧情帧前进。\n- 设计文档说明预期行为；当前是否可执行必须查看 IAOS Active Runtime Artifact。\n\n# 知识查询示例\n\n在 IAOS Copilot 中可以询问：\n\n- “当前节点为什么由 Agent 执行，它读取哪些数据？”\n- “这个审批人的来源是什么？”\n- “登记机构确认后为什么 IAOS 仍在等待？”\n- “capital.commitment.record 的输入、输出和写入 Entity 是什么？”\n- “当前 Process Artifact 与用户手册是否一致？”\n",
+      "owner": "AESE HCTM Scenario Governance",
+      "source_layer": "industry",
+      "edition_key": "hctm-m9-incorporation-knowledge",
+      "article_version": 1,
+      "reviewed_at": "0001-01-01T00:00:00Z",
+      "updated_at": "0001-01-01T00:00:00Z"
+    }
+  ]
+}

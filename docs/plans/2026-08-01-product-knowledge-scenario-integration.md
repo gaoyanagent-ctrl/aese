@@ -23,7 +23,7 @@ PLAN-KNOWLEDGE-001；本仓只维护场景知识、映射、校验和 AESE 页�
 
 - [x] S4 建立场景知识 JSON Schema 和 M9 article manifest。
 - [x] S5 校验 World action、IAOS Capability/Process/Entity 稳定编码引用。
-- [ ] S6 生成签名 Knowledge Edition 并经 IAOS 平台包幂等安装。
+- [x] S6 生成签名 Knowledge Edition 并经 IAOS 平台包幂等安装。
 
 ## S2 页面与 Agent
 

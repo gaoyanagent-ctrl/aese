@@ -20,6 +20,6 @@ export function financeWorkspaceUrl(
 }
 
 export function m9KnowledgeUrl(projection: Pick<GameProjection,"tenant_id"|"case_code">, capability:string):string {
-  const query=new URLSearchParams({tenant:projection.tenant_id,case:projection.case_code,article_id:"KB-M9-INCORPORATION",capability});
+  const query=new URLSearchParams({tenant:projection.tenant_id,case:projection.case_code,article_id:"KB-HCTM-M9-INCORPORATION",capability});
   return `${iaosBaseUrl()}/?${query.toString()}#knowledge_center`;
 }
