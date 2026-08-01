@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m10.agent-options-parameterized-amounts.2026-08-01",
+  "node_key": "aese.world.genesis.plant-build",
+  "update_type": "design",
+  "summary": "M10 改为 Agent 生成候选、人工选择和金额参数化",
+  "detail": "DES-011 与 PLAN-M10 取消正式运行的固定候选、固定赢家和固定金额，规定 IAOS 权威现金/预算、用户输入、Agent proposal、人工审阅及 World Observation 的边界；旧三个候选和固定延期只保留为 fixture-only reference replay，并新增 R1-R10 交互实现门。",
+  "status_after": "designed",
+  "progress_after": 45,
+  "current_state": "设计与治理文档已修订；既有 hctm-genesis@0.3.0 仍仅证明固定 fixture replay，Agent 候选生成、可编辑金额和逐节点交互尚待实现。",
+  "evidence_ref": "docs/designs/DES-011-genesis-plant-build.md",
+  "occurred_at": "2026-08-01T10:16:22Z"
+}

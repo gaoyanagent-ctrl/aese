@@ -13,16 +13,16 @@ tags: [m10, genesis, site-selection, facility, construction, project]
 
 用 **5 到 7 周**把 M9 的 `plant_project_eligible=true` 推进为：
 
-> 华辰苏州制造公司在 20,000,000 CNY 实际现金和 15,000,000 CNY 首年预算授权内，完成候选场址评估、受治理选址与投资批准、场地控制、设施改造、公用工程接入、异常重排和验收，输出 `capability_build_eligible=true`。
+> 华辰苏州制造公司消费 IAOS 中当前企业的实际现金、已批准预算和用户填写的投资参数，由设施规划 Agent 提供候选方案，项目负责人及 CEO/CFO 完成选择与治理，随后完成场地控制、设施改造、公用工程接入、异常重排和验收，输出 `capability_build_eligible=true`。
 
-首版固定单法人、苏州区域、一个被选场址、一个设施项目、一个主承包商、单币种 CNY 和一个公用工程延期异常。
+首版可限制单法人、一个最终场址和一个设施项目；区域、候选数量、币种、投资申请额、预算/现金边界、承包策略和异常不得作为运行时代码常量。历史苏州/CNY/固定延期数据只属于 reference replay fixture。
 
 ## 2. 前置门
 
 - [x] G1 M9 已完成并机器输出 `plant_project_eligible=true`。
 - [x] G2 ADR-004、DES-008、DES-009 与 M8 World/Bridge/Knowledge 边界继续有效。
 - [x] G3 DES-011 固定 M10 三态所有权、空间层级、选址模型、建设范围和 M11 边界。
-- [x] G4 固定三个虚构候选场址、硬约束、权重、报价、项目预算、工期和异常基线。
+- [x] G4 历史 reference replay 冻结三个虚构候选及数值基线；正式交互版改由用户参数、Agent proposal 与 World Observation 产生，见第 9 节修订门。
 - [x] G5 完成 IAOS project/investment/contract/payment/acceptance gap audit，冻结两仓 payload 与交付顺序。
 
 G4/G5 完成前只允许 AESE Schema、fixture、离线评分和规则实现，不进入 IAOS 写端点开发。
@@ -32,8 +32,8 @@ G4/G5 完成前只允许 AESE Schema、fixture、离线评分和规则实现，�
 ### P0 - 场址、空间与项目机器合同（第 1 周）
 
 - [x] T1 定义 SiteOption、Assessment、SpatialNode、UtilityCapacity、FacilityProject、WorkPackage、Milestone 和 InspectionResult stable code/owner。
-- [x] T2 固定三个虚构候选场址的成本、周期、物流、人力、公用工程、风险和扩展性基线。
-- [x] T3 固定一期 WBS、前置依赖、资源日历、预算/现金/承诺/付款和验收门。
+- [x] T2 为历史 reference replay 固定三个虚构候选；正式运行不得复制这些候选为业务事实。
+- [x] T3 为历史 replay 固定一期 WBS 与数值；正式运行由 Agent/人工提出 WBS，预算/现金读取 IAOS 权威事实，合同/付款读取运行事实。
 - [x] T4 扩展 JSON Schema、Go 类型、strict parser、canonical hash、合法/破损 fixture 和 payload registry。
 - [x] T5 定义 `eligible -> evaluating -> site_selected -> site_controlled -> project_approved -> constructing -> facility_acceptance -> capability_build_eligible` 状态机。
 - [x] T6 完成 IAOS gap ledger、权限矩阵、Atlas 依赖和两仓交付矩阵。
@@ -48,7 +48,7 @@ G4/G5 完成前只允许 AESE Schema、fixture、离线评分和规则实现，�
 - [x] T10 实现推荐 intent、CEO/CFO 审批、拒绝、重评和幂等 no-op 的离线 bridge tracer。
 - [x] T11 验证绿地/超预算候选即使综合分高也不能被批准。
 
-验收：至少三个候选有可解释比较；同一输入产生相同推荐，但最终批准仍经过 IAOS 治理。
+历史 replay 验收：fixture 的三个候选有可解释比较；同一 fixture 输入产生相同推荐，但最终批准仍经过 IAOS 治理。正式交互验收改按 R1–R10：候选数量由用户设置，Agent 只建议，人员选择。
 
 ### P2 - AESE 设施项目与空间世界（第 2-3 周）
 
@@ -95,9 +95,9 @@ G4/G5 完成前只允许 AESE Schema、fixture、离线评分和规则实现，�
 
 验收：只有全部强制设施、utility、消防/EHS、资金和治理门通过时输出 `capability_build_eligible=true`；UI 完成不替代业务证据。
 
-## 4. 首版候选与编码方向
+## 4. Reference replay 候选与编码
 
-P0 最终冻结前使用以下虚构编码方向：
+以下编码仅用于既有确定性 fixture 和回归定位，不是 Agent 正式运行必须返回的方案：
 
 ```text
 SITE-SZ-EAST-GREENFIELD
@@ -118,7 +118,7 @@ ZONE-HCTM-SZ-UTILITY
 ## 5. 完成定义
 
 - Plant Build campaign 可验证、初始化、推进、重放、快照恢复和 reset。
-- 三个候选通过硬约束和解释性评分；资金不可行方案不能被批准。
+- reference fixture 的三个候选通过硬约束和解释性评分；正式运行由可配置候选集合执行同一规则，资金不可行方案不能被批准。
 - site control、空间、WBS、设施、utility、验收、现金、承诺和付款三态分离。
 - utility delay tracer 有 observation/intent/outcome/world consequence/discrepancy close 完整链。
 - 人类/Agent 共用治理能力；越权、超预算、未验收付款和重复付款失败关闭。
@@ -145,8 +145,25 @@ ZONE-HCTM-SZ-UTILITY
 - P5 串行收口两仓证据；并行 agent 必须有子计划、owner 和不重叠 worktree。
 - 不得覆盖当前共享工作区中的测试修改、截图删除或验收产物。
 
-## 8. 完成记录
+## 8. 历史 reference replay 完成记录
 
 - AESE：`hctm-genesis@0.3.0`、Plant Build API/UI、机器合同、确定性 tracer、runbook 与 evidence 已交付。
 - IAOS：独立 `feat/m10-plant-governance` worktree，revision `23be02a`，DES-052。
 - 终态：`capability_build_eligible=true`；M11 设备与人员能力不在本计划范围。
+
+## 9. D22 交互式修订门（待实现）
+
+以下任务是 2026-08-01 对 DES-011 的修订，不得因 P0–P5 的历史勾选而视为已完成：
+
+- [ ] R1 新增用户可编辑的设施需求、区域、目标日期、候选数量范围、投资申请额、现金保留下限、币种和评分偏好表单；金额使用 decimal string。
+- [ ] R2 新增 `plant-planning-agent` 任务，由已发布 Agent/Capability Artifact 生成结构化候选、假设、风险、金额区间和待验证事实。
+- [ ] R3 新增项目负责人审阅工作项，支持采纳调研、退回重生成、人工新增和淘汰，并记录理由；Agent 不得直接选择赢家。
+- [ ] R4 通过 World Observation 补齐真实报价、权属、容量和许可；Agent 估算不得冒充外部事实。
+- [ ] R5 将场址候选、空间/功能区、承包策略、WBS、缓解和投资/变更方案等固定选择改为 Agent 建议 + 人工决定；外部模型不可用时提供同构人工表单，不自动提交 fixture。
+- [ ] R6 将投资、预算调整、合同、变更和付款金额参数化；实际现金和已批准预算只读自 IAOS 权威账簿，修改必须走相应业务能力与审批。
+- [ ] R7 把现有三个候选、1,500 万预算、赢家和延期迁入 `fixture_only` reference replay，正式 API/Process 禁止默认导入。
+- [ ] R8 建立 proposal/input snapshot、Agent run、人工决定、模型/模板版本、来源和审计证据；验证越权、自批、提示注入、无来源和 Schema 失败关闭。
+- [ ] R9 用 Effective Process Artifact 逐节点执行 Agent task、human task、approval 和 world wait，并提供 UI 穿透查看输入、输出、选择理由和金额版本。
+- [ ] R10 完成外部模型与纯人工两条端到端路径、不同金额/候选组合、无候选单一来源例外、reset/replay 和 M9 回归验收。
+
+R1–R10 完成前，M10 只能声明 reference replay 完成，不能声明真实用户可配置的交互闭环完成。

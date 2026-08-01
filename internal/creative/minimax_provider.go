@@ -125,6 +125,15 @@ founder_intent=` + string(intentJSON)
 	return result.Proposals, nil
 }
 
+// CompleteJSON exposes the same configured provider to other candidate-only
+// AESE planners without leaking credentials or accepting arbitrary endpoints.
+func (p *MiniMaxProvider) CompleteJSON(ctx context.Context, system, user string, temperature float64, maxTokens int) (string, string, map[string]int, error) {
+	evidence := GenerationEvidence{TokenUsage: map[string]int{}}
+	generationCtx := WithGenerationEvidence(ctx, func(value GenerationEvidence) { evidence = value })
+	content, err := p.complete(generationCtx, []map[string]string{{"role": "system", "content": system}, {"role": "user", "content": user}}, temperature, maxTokens)
+	return content, evidence.RequestID, evidence.TokenUsage, err
+}
+
 func (p *MiniMaxProvider) complete(ctx context.Context, messages []map[string]string, temperature float64, maxTokens int) (string, error) {
 	var lastErr error
 	for attempt := 0; attempt < 2; attempt++ {

@@ -16,6 +16,7 @@ import (
 	"github.com/industrial-ai/iaos-aese/internal/creative"
 	"github.com/industrial-ai/iaos-aese/internal/genesisworkspace"
 	"github.com/industrial-ai/iaos-aese/internal/httpapi"
+	"github.com/industrial-ai/iaos-aese/internal/plantbuild"
 )
 
 const usage = `Usage:
@@ -83,6 +84,7 @@ func run(args []string) int {
 
 	logger := log.New(os.Stdout, "[aese-server] ", log.LstdFlags|log.Lshortfile)
 	var creativeProvider creative.Provider = creative.DeterministicProvider{}
+	var plantPlanningProvider plantbuild.PlanningProvider = plantbuild.UnconfiguredPlanningProvider{}
 	if key := strings.TrimSpace(os.Getenv("MINMAX_API_KEY")); key != "" {
 		provider, err := creative.NewMiniMaxProvider(creative.MiniMaxConfig{
 			BaseURL: os.Getenv("MINMAX_API_BASE"),
@@ -94,6 +96,7 @@ func run(args []string) int {
 			return 2
 		}
 		creativeProvider = provider
+		plantPlanningProvider = plantbuild.AIPlanningProvider{Completer: provider, Provider: "MiniMax", Model: os.Getenv("MINMAX_MODEL")}
 		logger.Printf("creative provider enabled (provider=MiniMax model=%s)", os.Getenv("MINMAX_MODEL"))
 	} else {
 		logger.Printf("creative provider fallback enabled (provider=deterministic)")
@@ -106,6 +109,7 @@ func run(args []string) int {
 		Logger:                logger,
 		CreativeProvider:      creativeProvider,
 		CreativeJobStore:      creative.NewJobStore(envOrDefault("GENESIS_CREATIVE_JOB_STORE", ".aese-data/genesis-creative-jobs.json")),
+		PlantPlanningProvider: plantPlanningProvider,
 		GenesisPlayerAuth:     &genesisworkspace.PlayerAuthClient{BaseURL: *iaosBaseURL},
 		AllowLocalGenesisAuth: authMode == "local_dev",
 		GenesisWorkspaceService: &genesisworkspace.Service{

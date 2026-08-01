@@ -18,6 +18,15 @@
 
 最后更新：2026-08-01。
 
+2026-08-01 M10 交互首个纵切：Plant Build Play 已能从 IAOS 已过账银行科目和已批
+预算读取只读 snapshot，人员填写 Facility Requirement 后由真实 provider 生成可解释
+ProposalSet，并通过 AESE 定向 BFF 以 `facility.requirement.define`、
+`site.proposal.record`、`site.proposal.review` 保存需求、候选和人工审阅。IAOS 首个权威切片
+具备 tenant RLS、Capability 写门、幂等、版本、Audit 与 Outbox，Agent 技术证据保存在
+AESE CreativeJob。该纵切尚未实现调查请求、Effective Process Artifact、World 调研、
+正式选址/投资审批、项目/WBS、施工、付款、验收和工程财务，因此 M10 仍为
+`Reference Replay Complete; Interactive Revision Pending`。
+
 2026-07-31 M9 原子能力运行合同：IAOS DES-076 已交付 19 项真实可执行 V1 原子能力
 （18 active、1 deprecated），同一目录驱动 Analyzer、Artifact、Runtime、API 和 Studio。
 AESE 只消费已发布 Business Capability、Process 和 Bridge，不复制原子 Handler，也不把
@@ -105,7 +114,7 @@ Schema/UI/Agent Context、Capability API/Agent Tool 和 Process Run 收敛到同
 | GX Enterprise Genesis Game Experience | AI 企业身份、人工/Agent 协作和 2.5D 世界中的 M9 游戏化开局 | Completed | DES-028/DES-029、从空白 case 创建、23 工作项游戏内操作、G1–G7、三个 World wait、首页 AI 创意官可访问入口与三视口 live 浏览器验收 |
 | GX-ZERO Zero-start Enterprise Genesis | 从产品主页创建独立 tenant、World Run、真实 AI 企业身份和 M9 企业 | Completed | IAOS Player 注册/密码登录与既有账号安全提升、生产 Workspace 控制面、八 checkpoint、tenant-only owner session、旧 local Workspace 安全接管、五步向导、持久 CreativeJob、动态 Player subject，以及全新 Workspace 的 23/23 节点、7 审批门、3 World wait、6 Agent run 验收 |
 | M9-FIN Manufacturing Finance Foundation | 在 M9 建立财务组织、账套、科目、期初资本会计和开业报表，并在 M10–M13 接通 AP/AR/资金/资产/成本/总账 | F11A Complete; F5E Deferred; M10–M13 Planned | M9 开业纵切、多组织/共享数据、账簿/伙伴/产品已交付；Runtime 2.11.0 新增通用凭证过账能力并修复凭证主子写入所有者；模块期间和 F15–F35 仍不得计入完成 |
-| M10 Genesis Plant Build | 选址、场地控制、设施项目、公用工程、异常重排与验收 | Reference Replay Complete; D22 Pending | hctm-genesis@0.3.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
+| M10 Genesis Plant Build | Agent 辅助候选、人工选址、参数化投资、场地控制、设施项目、公用工程、异常重排与验收 | Reference Replay Complete; Interactive Revision Pending | 已实现只读 IAOS 财务快照、参数化 Requirement、真实 Agent Proposal、CreativeJob 证据、AESE BFF 和 IAOS Human Review 首个纵切；调查/Process/World/项目/WBS/工程财务与全链现场验收仍未完成 |
 | M11 Genesis Capability Build | 资金补足、设备/实验室/仓储能力、核心团队与岗位资格 | Reference Replay Complete; D22 Pending | hctm-genesis@0.4.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
 | M12 Genesis Industrialization | RFQ/定点、产品/工艺、供应商/工装、APQP、试制、PPAP 与量产批准 | Reference Replay Complete; D22 Pending | hctm-genesis@0.5.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
 | M13 Genesis First Delivery | 正式 O2D、三批交付、客户接受、开票/回款、实际成本与项目毛利 | Reference Replay Complete; D22 Pending | hctm-genesis@0.6.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
@@ -128,7 +137,9 @@ M3、M3V、M4、M5、M6、M7 和跨里程碑的 X1 System Atlas 已完成。联�
 
 PLAN-M8-001 至 PLAN-M24-001 均已完成。M17-M24 严格消费前一 terminal，统一证据输出 `industry_simulation_platform_ready=true`。
 
-当前唯一 active 主计划为 `PLAN-GXZ-001`。`PLAN-M9-NATIVE-001` 曾因通用平台资产缺口恢复为 active remediation。专用状态机、
+当前 active 主计划为 `PLAN-M10-INTERACTIVE-001`；当前可操作边界只到
+FinancialConstraint → FacilityRequirement → Agent Proposal → Human Review，不得把
+Review 解释为审批，也不得把 Agent 估算解释为外部报价。`PLAN-GXZ-001` 与 M9 场景知识计划已完成，`PLAN-M9-FIN-001` 继续作为跨 M10–M13 的财务依赖子计划。`PLAN-M9-NATIVE-001` 曾因通用平台资产缺口恢复为 active remediation。专用状态机、
 事务、身份、G1–G7、World Bridge 与 trace 证据保留；完成 D19–D21 的通用资产注册、
 十工作区、逐步骤追踪及可解释配置合同已经交付，但用户验收证明这些查看入口不能替代
 持久化工作项和真实参与者推进。M9N 因 DES-027 D22 再次打开；只有人工、Agent、审批、
@@ -241,7 +252,7 @@ Program 总边界以 DES-018 为准。M24 关闭本轮 AESE 3.0 规划；真实�
 
 ## 8. M16 已完成范围
 
-包含：
+历史 reference replay 包含：
 
 - adopted release、12 周 canonical observation、World/IAOS stable refs、as-of cutoff/cursor 和 correction lineage。
 - missing/late/duplicate/conflict/unit/version/owner 数据质量门。
@@ -542,13 +553,13 @@ Program 总边界以 DES-018 为准。M24 关闭本轮 AESE 3.0 规划；真实�
 
 ## 32. M10 已完成范围
 
-包含：
+历史 reference replay 包含：
 
-- 至少三个虚构候选场址及资金、工期、物流、人力、公用工程、风险和扩展性评估。
+- fixture 中三个虚构候选场址及资金、工期、物流、人力、公用工程、风险和扩展性评估。
 - 项目负责人推荐、CEO/CFO 受治理的选址与投资批准，以及租赁/场地使用控制。
 - 设施项目、WBS、承包商资源日历、合同承诺、变更、里程碑、付款和验收。
 - 区域/城市/园区/场地/建筑/楼层/功能区的最小空间层级和公用工程容量。
-- 一个固定公用工程接入延期的 discrepancy、Knowledge、重排和关闭 tracer。
+- fixture 中一个固定公用工程接入延期的 discrepancy、Knowledge、重排和关闭 tracer。
 - World Play 工厂建设 campaign，以及 M7/M8/M9 强制回归。
 
 不包含：
@@ -571,7 +582,7 @@ Program 总边界以 DES-018 为准。M24 关闭本轮 AESE 3.0 规划；真实�
 
 ## 34. M10 完成条件
 
-- 至少三个候选先经过硬约束，再产生版本化、可解释的多维评分和受治理决策。
+- Agent/人工形成用户配置数量的候选；至少两个有效候选先经过硬约束再评分，或由有权人员记录单一来源例外；Agent recommendation 不能替代受治理决策。
 - 从 M9 terminal contract 到 `capability_build_eligible` 可确定性运行、恢复、重放和安全复位。
 - IAOS 项目记录与 AESE 现场事实严格分离；时间到期或管理记录不能凭空完成工程。
 - 预算、合同承诺、实际付款和现金分别守恒，未验收、越权或超预算动作失败关闭。
@@ -580,7 +591,8 @@ Program 总边界以 DES-018 为准。M24 关闭本轮 AESE 3.0 规划；真实�
 
 ## 35. M10 风险与依赖
 
-- M9 只有 20,000,000 CNY 实际现金和 15,000,000 CNY 首年预算，首版不得假设可支付绿地自建；候选基线预计收敛到租赁标准厂房改造，但必须由规则和审批得出。
+- 正式运行必须读取当前企业的实际现金和已批准预算；20,000,000 / 15,000,000 CNY 只属于历史 fixture。用户可修改投资申请、现金保留和候选估算，但不能直接覆盖账簿现金或已批准预算。
+- 固定候选、固定赢家、固定 WBS 或固定金额会绕过 Agent/人员真实协作；DES-011/PLAN-M10 已新增 Agent proposal、人工审阅、World 事实验证和金额版本化修订门。
 - IAOS project/milestone 状态不等于现场实际进度；只有 AESE World consequence 和验收事实可以推进物理状态。
 - G4/G5 已关闭；P3 在独立 `feat/m10-plant-governance` worktree 完成，revision `23be02a`。
 - 承包商、公用工程方、园区和验收机构是确定性外部世界策略，不是 IAOS 用户，也不能绕过 observation/intent/outcome 合同。

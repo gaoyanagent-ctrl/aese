@@ -1,11 +1,26 @@
 package httpapi
 
 import (
+	"context"
+	"encoding/json"
 	"net/http"
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	"github.com/industrial-ai/iaos-aese/internal/creative"
+	"github.com/industrial-ai/iaos-aese/internal/plantbuild"
 )
+
+type planningProviderStub struct{ calls int }
+
+func (p *planningProviderStub) Status() plantbuild.PlanningProviderStatus {
+	return plantbuild.PlanningProviderStatus{State: "connected", Provider: "MiniMax", Model: "MiniMax-M3", PromptVersion: plantbuild.PlanningPromptVersion}
+}
+func (p *planningProviderStub) Generate(_ context.Context, request plantbuild.FacilityRequirement) (plantbuild.ProposalSet, error) {
+	p.calls++
+	return plantbuild.ProposalSet{SchemaVersion: "1.0", ProposalSetID: "SET-1", RequirementID: request.RequirementID, Revision: 1, Status: "candidate_only", Evidence: plantbuild.ProposalEvidence{Provider: "MiniMax", Model: "MiniMax-M3", PromptVersion: plantbuild.PlanningPromptVersion, RequestID: "req-1", InputHash: "sha256:input", OutputHash: "sha256:output", TokenUsage: map[string]int{"total_tokens": 12}, ValidatedAt: "2026-08-01T10:00:00Z"}}, nil
+}
 
 func TestGenesisWorldAPI(t *testing.T) {
 	server := New(Config{})
@@ -144,6 +159,129 @@ func TestPlantBuildWorldAPI(t *testing.T) {
 	}
 	if !strings.Contains(res.Body.String(), `"campaign":"plant-build"`) || !strings.Contains(res.Body.String(), `"capability_build_eligible":true`) {
 		t.Fatalf("incomplete campaign %s", res.Body.String())
+	}
+}
+
+func TestPlantPlanningStatusFailsClosedWithoutExternalModel(t *testing.T) {
+	server := New(Config{})
+	req := httptest.NewRequest(http.MethodGet, "/api/aese/v1/world/plant-build/planning-status", nil)
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusOK || !strings.Contains(res.Body.String(), `"state":"not_configured"`) {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
+}
+
+func TestPlantFinancialConstraintUsesNarrowAuthenticatedIAOSRead(t *testing.T) {
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/api/v1/genesis/plant/interactive/financial-constraints" || r.URL.Query().Get("case_code") != "INC-LIVE" {
+			t.Fatalf("unexpected IAOS request %s?%s", r.URL.Path, r.URL.RawQuery)
+		}
+		if r.Header.Get("Authorization") != "Bearer founder-token" || r.Header.Get("X-IAOS-Tenant-Id") != "tenant-live" {
+			t.Fatalf("identity not forwarded: %#v", r.Header)
+		}
+		_, _ = w.Write([]byte(`{"case_code":"INC-LIVE","legal_entity_code":"LE-LIVE","financial_constraint":{"available_cash":{"value":"30000000.00","currency":"CNY","scale":2},"approved_budget":{"value":"20000000.00","currency":"CNY","scale":2},"cash_source_ref":"gl:BOOK-INC-LIVE:1002","budget_source_ref":"budget:BUDGET-INC-LIVE","snapshot_hash":"sha256:authority"}}`))
+	}))
+	defer iaos.Close()
+	server := New(Config{IAOSBaseURL: iaos.URL})
+	req := httptest.NewRequest(http.MethodGet, "/api/aese/v1/world/plant-build/financial-constraints?case_code=INC-LIVE", nil)
+	req.Header.Set("Authorization", "Bearer founder-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-live")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusOK || !strings.Contains(res.Body.String(), `"snapshot_hash":"sha256:authority"`) {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
+}
+
+func TestPlantPlanningProposalPersistsEvidenceAndReplaysIdempotently(t *testing.T) {
+	provider := &planningProviderStub{}
+	server := New(Config{PlantPlanningProvider: provider, CreativeJobStore: creative.NewJobStore(t.TempDir() + "/jobs.json"), AllowLocalPlantAuthority: true})
+	body := `{"schema_version":"1.0","requirement_id":"REQ-1","tenant_id":"tenant-a","case_code":"INC-1","legal_entity_code":"LE-1","target_region":"华东","facility_purpose":"汽车零部件制造","minimum_area_m2":12000,"minimum_electricity_kva":2200,"target_available_at":"2027-01-01T00:00:00+08:00","candidate_count":2,"allowed_option_types":["leased_shell","build_to_suit"],"investment_request":{"value":"18000000.00","currency":"CNY","scale":2},"minimum_cash_reserve":{"value":"5000000.00","currency":"CNY","scale":2},"financial_constraint":{"available_cash":{"value":"30000000.00","currency":"CNY","scale":2},"approved_budget":{"value":"20000000.00","currency":"CNY","scale":2},"cash_source_ref":"ledger:CASH-1","budget_source_ref":"budget:BUD-1","snapshot_hash":"sha256:abc"},"preferences":["优先投产速度"],"revision":1,"revision_reason":"首次规划"}`
+	for attempt := 0; attempt < 2; attempt++ {
+		req := httptest.NewRequest(http.MethodPost, "/api/aese/v1/world/plant-build/proposals", strings.NewReader(body))
+		res := httptest.NewRecorder()
+		server.ServeHTTP(res, req)
+		if res.Code != http.StatusOK || !strings.Contains(res.Body.String(), `"kind":"facility_planning"`) {
+			t.Fatalf("attempt=%d status=%d body=%s", attempt, res.Code, res.Body.String())
+		}
+	}
+	if provider.calls != 1 {
+		t.Fatalf("provider calls=%d", provider.calls)
+	}
+}
+
+func TestPlantPlanningCommitsRequirementAndAgentProposalThroughIAOSCapabilities(t *testing.T) {
+	capabilities := []string{}
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/v1/profile" {
+			_, _ = w.Write([]byte(`{"username":"founder-principal","tenant_id":"tenant-a"}`))
+			return
+		}
+		if r.URL.Path != "/api/v1/genesis/plant/interactive/actions" || r.Method != http.MethodPost {
+			http.NotFound(w, r)
+			return
+		}
+		var command struct {
+			CapabilityCode string `json:"capability_code"`
+			ActorID        string `json:"actor_id"`
+		}
+		if err := json.NewDecoder(r.Body).Decode(&command); err != nil {
+			t.Fatal(err)
+		}
+		if command.ActorID != "founder-principal" {
+			t.Fatalf("actor=%s", command.ActorID)
+		}
+		capabilities = append(capabilities, command.CapabilityCode)
+		w.WriteHeader(http.StatusCreated)
+		_, _ = w.Write([]byte(`{"status":"committed"}`))
+	}))
+	defer iaos.Close()
+	provider := &planningProviderStub{}
+	server := New(Config{IAOSBaseURL: iaos.URL, PlantPlanningProvider: provider, CreativeJobStore: creative.NewJobStore(t.TempDir() + "/jobs.json")})
+	body := `{"schema_version":"1.0","requirement_id":"REQ-1","tenant_id":"tenant-a","case_code":"INC-1","legal_entity_code":"LE-1","target_region":"华东","facility_purpose":"汽车零部件制造","minimum_area_m2":12000,"minimum_electricity_kva":2200,"target_available_at":"2027-01-01T00:00:00+08:00","candidate_count":2,"allowed_option_types":["leased_shell","build_to_suit"],"investment_request":{"value":"18000000.00","currency":"CNY","scale":2},"minimum_cash_reserve":{"value":"5000000.00","currency":"CNY","scale":2},"financial_constraint":{"available_cash":{"value":"30000000.00","currency":"CNY","scale":2},"approved_budget":{"value":"20000000.00","currency":"CNY","scale":2},"cash_source_ref":"ledger:CASH-1","budget_source_ref":"budget:BUD-1","snapshot_hash":"sha256:abc"},"preferences":["优先投产速度"],"revision":1,"revision_reason":"首次规划"}`
+	req := httptest.NewRequest(http.MethodPost, "/api/aese/v1/world/plant-build/proposals", strings.NewReader(body))
+	req.Header.Set("Authorization", "Bearer founder-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-a")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusOK || !strings.Contains(res.Body.String(), `"authority_status":"committed"`) {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
+	if strings.Join(capabilities, ",") != "facility.requirement.define,site.proposal.record" {
+		t.Fatalf("capabilities=%v", capabilities)
+	}
+}
+
+func TestPlantProposalReviewOverwritesActorFromAuthenticatedProfile(t *testing.T) {
+	var received map[string]any
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/v1/profile" {
+			_, _ = w.Write([]byte(`{"username":"project-owner","tenant_id":"tenant-a"}`))
+			return
+		}
+		if err := json.NewDecoder(r.Body).Decode(&received); err != nil {
+			t.Fatal(err)
+		}
+		w.WriteHeader(http.StatusCreated)
+		_, _ = w.Write([]byte(`{"status":"committed"}`))
+	}))
+	defer iaos.Close()
+	server := New(Config{IAOSBaseURL: iaos.URL})
+	req := httptest.NewRequest(http.MethodPost, "/api/aese/v1/world/plant-build/reviews", strings.NewReader(`{"proposal_set_id":"SET-1","proposal_id":"SITE-1","action":"adopt_for_investigation","reason":"进入外部调研并核验权属","expected_revision":1}`))
+	req.Header.Set("Authorization", "Bearer owner-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-a")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusCreated {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
+	if received["actor_id"] != "project-owner" {
+		t.Fatalf("command=%v", received)
+	}
+	review := received["proposal_review"].(map[string]any)
+	if review["reviewed_by"] != "project-owner" || review["reviewed_at"] == "" {
+		t.Fatalf("review=%v", review)
 	}
 }
 

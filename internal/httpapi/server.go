@@ -43,16 +43,18 @@ const (
 )
 
 type Config struct {
-	PackDir                 string
-	IAOSBaseURL             string
-	RequestTimeout          time.Duration
-	BodyLimit               int64
-	Logger                  *log.Logger
-	CreativeProvider        creative.Provider
-	CreativeJobStore        *creative.JobStore
-	GenesisWorkspaceService *genesisworkspace.Service
-	GenesisPlayerAuth       *genesisworkspace.PlayerAuthClient
-	AllowLocalGenesisAuth   bool
+	PackDir                  string
+	IAOSBaseURL              string
+	RequestTimeout           time.Duration
+	BodyLimit                int64
+	Logger                   *log.Logger
+	CreativeProvider         creative.Provider
+	CreativeJobStore         *creative.JobStore
+	PlantPlanningProvider    plantbuild.PlanningProvider
+	GenesisWorkspaceService  *genesisworkspace.Service
+	GenesisPlayerAuth        *genesisworkspace.PlayerAuthClient
+	AllowLocalGenesisAuth    bool
+	AllowLocalPlantAuthority bool
 }
 
 type Server struct {
@@ -64,6 +66,7 @@ type Server struct {
 	order                   []string
 	creativeProvider        creative.Provider
 	creativeJobStore        *creative.JobStore
+	plantPlanningProvider   plantbuild.PlanningProvider
 	genesisWorkspaceService *genesisworkspace.Service
 	genesisPlayerAuth       *genesisworkspace.PlayerAuthClient
 }
@@ -190,6 +193,9 @@ func New(cfg Config) *Server {
 	if cfg.CreativeProvider == nil {
 		cfg.CreativeProvider = creative.DeterministicProvider{}
 	}
+	if cfg.PlantPlanningProvider == nil {
+		cfg.PlantPlanningProvider = plantbuild.UnconfiguredPlanningProvider{}
+	}
 	server := &Server{
 		cfg:                     cfg,
 		runs:                    map[string]*runRecord{},
@@ -197,6 +203,7 @@ func New(cfg Config) *Server {
 		mux:                     http.NewServeMux(),
 		creativeProvider:        cfg.CreativeProvider,
 		creativeJobStore:        cfg.CreativeJobStore,
+		plantPlanningProvider:   cfg.PlantPlanningProvider,
 		genesisWorkspaceService: cfg.GenesisWorkspaceService,
 		genesisPlayerAuth:       cfg.GenesisPlayerAuth,
 	}
@@ -270,6 +277,11 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/genesis/workspaces",
 			"/api/aese/v1/genesis/workspaces/:workspace/session",
 			"/api/aese/v1/world/plant-build",
+			"/api/aese/v1/world/plant-build/planning-status",
+			"/api/aese/v1/world/plant-build/financial-constraints",
+			"/api/aese/v1/world/plant-build/requirements/:requirement_id",
+			"/api/aese/v1/world/plant-build/proposals",
+			"/api/aese/v1/world/plant-build/reviews",
 			"/api/aese/v1/world/capability-build",
 			"/api/aese/v1/world/industrialization",
 			"/api/aese/v1/world/first-delivery",
@@ -639,6 +651,192 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 		s.writeJSON(w, http.StatusOK, projection)
 		return
 	case "world":
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "planning-status" && r.Method == http.MethodGet {
+			s.writeJSON(w, http.StatusOK, s.plantPlanningProvider.Status())
+			return
+		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "financial-constraints" && r.Method == http.MethodGet {
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			caseCode := strings.TrimSpace(r.URL.Query().Get("case_code"))
+			token := bearerToken(r.Header.Get("Authorization"))
+			if token == "" || tenantID == "" {
+				s.writeError(w, http.StatusUnauthorized, "plant_financial_identity_required", "IAOS bearer token and tenant context are required", false, "", "")
+				return
+			}
+			client, err := iaosclient.New(iaosclient.Config{BaseURL: s.cfg.IAOSBaseURL, Token: token, TenantID: tenantID})
+			if err != nil {
+				s.writeError(w, http.StatusServiceUnavailable, "plant_financial_gateway_unavailable", err.Error(), true, "", "")
+				return
+			}
+			result, err := client.PlantFinancialConstraint(ctx, caseCode)
+			if err != nil {
+				var apiErr *iaosclient.APIError
+				if errors.As(err, &apiErr) {
+					s.writeError(w, apiErr.StatusCode, firstNonEmptyString(apiErr.ErrorCode, "plant_financial_constraint_unavailable"), apiErr.Message, apiErr.StatusCode >= 500, "", apiErr.RequiredPermission)
+					return
+				}
+				s.writeError(w, http.StatusBadGateway, "plant_financial_constraint_unavailable", err.Error(), true, "", "")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(result)
+			return
+		}
+		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "requirements" && r.Method == http.MethodGet {
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			token := bearerToken(r.Header.Get("Authorization"))
+			if token == "" || tenantID == "" {
+				s.writeError(w, http.StatusUnauthorized, "plant_requirement_identity_required", "IAOS bearer token and tenant context are required", false, "", "")
+				return
+			}
+			client, err := iaosclient.New(iaosclient.Config{BaseURL: s.cfg.IAOSBaseURL, Token: token, TenantID: tenantID})
+			if err != nil {
+				s.writeError(w, http.StatusServiceUnavailable, "plant_requirement_gateway_unavailable", err.Error(), true, "", "")
+				return
+			}
+			result, err := client.PlantRequirement(ctx, rest[3])
+			if err != nil {
+				var apiErr *iaosclient.APIError
+				if errors.As(err, &apiErr) {
+					s.writeError(w, apiErr.StatusCode, firstNonEmptyString(apiErr.ErrorCode, "plant_requirement_unavailable"), apiErr.Message, apiErr.StatusCode >= 500, "", apiErr.RequiredPermission)
+					return
+				}
+				s.writeError(w, http.StatusBadGateway, "plant_requirement_unavailable", err.Error(), true, "", "")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(result)
+			return
+		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "proposals" && r.Method == http.MethodPost {
+			var request plantbuild.FacilityRequirement
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &request); err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_facility_requirement", err.Error(), false, "", "")
+				return
+			}
+			if err := plantbuild.ValidateRequirement(request); err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "invalid_facility_requirement", err.Error(), false, "", "")
+				return
+			}
+			if err := s.validateCreativeSession(ctx, r, request.TenantID); err != nil {
+				s.writeError(w, http.StatusForbidden, "plant_planning_session_invalid", err.Error(), false, "", "")
+				return
+			}
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, request.TenantID)
+			if err != nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_planning_identity_invalid", err.Error(), false, "", "")
+				return
+			}
+			if authority != nil {
+				if err := postPlantAuthorityCommand(ctx, authority, "facility.requirement.define", actorID, request.CaseCode, request.RequirementID, request.Revision, request); err != nil {
+					s.writePlantAuthorityError(w, err, "facility_requirement_not_committed")
+					return
+				}
+			}
+			providerStatus := s.plantPlanningProvider.Status()
+			inputHash := plantbuild.CanonicalHash(request)
+			jobID := "plant-planning-" + strings.TrimPrefix(inputHash, "sha256:")[:24]
+			started := time.Now().UTC()
+			job := creative.CreativeJob{
+				JobID: jobID, TenantID: request.TenantID, CaseCode: request.CaseCode,
+				WorkspaceID: strings.TrimSpace(r.Header.Get("X-Genesis-Workspace-Id")), CorrelationID: "corr-" + request.CaseCode,
+				Kind: "facility_planning", Status: "running", Provider: providerStatus.Provider,
+				Model: providerStatus.Model, ModelVersion: providerStatus.Model,
+				Prompt: providerStatus.PromptVersion, PromptVersion: providerStatus.PromptVersion,
+				InputHash: inputHash, RequestID: jobID, CreatedAt: started.Format(time.RFC3339),
+				TokenUsage: map[string]int{}, ValidationResult: "pending",
+			}
+			if s.creativeJobStore != nil {
+				existing, replay, beginErr := s.creativeJobStore.Begin(job)
+				if errors.Is(beginErr, creative.ErrJobRunning) {
+					s.writeError(w, http.StatusConflict, "plant_planning_job_running", "同一设施需求的 Agent 任务正在运行", true, "", "")
+					return
+				}
+				if beginErr != nil {
+					s.writeError(w, http.StatusInternalServerError, "plant_planning_evidence_write_failed", beginErr.Error(), true, "", "")
+					return
+				}
+				if replay {
+					set, ok := decodeStoredProposalSet(existing.Parameters["proposal_set"])
+					if !ok {
+						s.writeError(w, http.StatusInternalServerError, "plant_planning_evidence_invalid", "stored proposal evidence cannot be decoded", false, "", "")
+						return
+					}
+					if authority != nil {
+						if err := postPlantAuthorityCommand(ctx, authority, "site.proposal.record", actorID, request.CaseCode, set.ProposalSetID, set.Revision, set); err != nil {
+							s.writePlantAuthorityError(w, err, "site_proposal_not_committed")
+							return
+						}
+					}
+					s.writeJSON(w, http.StatusOK, map[string]any{"proposal_set": set, "agent_job": existing, "idempotent_replay": true, "authority_status": "committed"})
+					return
+				}
+			}
+			set, err := s.plantPlanningProvider.Generate(ctx, request)
+			if errors.Is(err, plantbuild.ErrPlanningModelNotConfigured) {
+				job.Status, job.Error, job.ValidationResult = "failed", err.Error(), "failed"
+				job.CompletedAt = time.Now().UTC().Format(time.RFC3339)
+				if s.creativeJobStore != nil {
+					_ = s.creativeJobStore.Save(job)
+				}
+				s.writeError(w, http.StatusServiceUnavailable, "plant_planning_model_not_configured", "外部设施规划模型未启用；请配置模型或使用人工新增候选表单", false, "", "")
+				return
+			}
+			if err != nil {
+				job.Status, job.Error, job.ValidationResult = "failed", err.Error(), "failed"
+				job.CompletedAt = time.Now().UTC().Format(time.RFC3339)
+				if s.creativeJobStore != nil {
+					_ = s.creativeJobStore.Save(job)
+				}
+				s.writeError(w, http.StatusBadGateway, "plant_planning_provider_failed", err.Error(), true, "", "")
+				return
+			}
+			job.Status, job.ValidationResult = "completed", "valid"
+			job.RequestID, job.TokenUsage = set.Evidence.RequestID, set.Evidence.TokenUsage
+			job.ContentHash, job.Parameters = set.Evidence.OutputHash, map[string]any{"proposal_set": set}
+			job.LatencyMS, job.CompletedAt = time.Since(started).Milliseconds(), time.Now().UTC().Format(time.RFC3339)
+			if s.creativeJobStore != nil {
+				if err := s.creativeJobStore.Save(job); err != nil {
+					s.writeError(w, http.StatusInternalServerError, "plant_planning_evidence_write_failed", err.Error(), true, "", "")
+					return
+				}
+			}
+			if authority != nil {
+				if err := postPlantAuthorityCommand(ctx, authority, "site.proposal.record", actorID, request.CaseCode, set.ProposalSetID, set.Revision, set); err != nil {
+					s.writePlantAuthorityError(w, err, "site_proposal_not_committed")
+					return
+				}
+			}
+			s.writeJSON(w, http.StatusOK, map[string]any{"proposal_set": set, "agent_job": job, "idempotent_replay": false, "authority_status": "committed"})
+			return
+		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "reviews" && r.Method == http.MethodPost {
+			var review plantbuild.ProposalReview
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &review); err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_site_proposal_review", err.Error(), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_review_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			review.ReviewedBy = actorID
+			review.ReviewedAt = time.Now().UTC().Format(time.RFC3339)
+			if err := plantbuild.ValidateReview(review); err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "invalid_site_proposal_review", err.Error(), false, "", "")
+				return
+			}
+			if err := postPlantAuthorityCommand(ctx, authority, "site.proposal.review", actorID, review.ProposalSetID, review.ProposalID, review.ExpectedRevision, review); err != nil {
+				s.writePlantAuthorityError(w, err, "site_proposal_review_not_committed")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "committed", "proposal_review": review})
+			return
+		}
 		if len(rest) != 2 || r.Method != http.MethodGet {
 			s.writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "method not allowed", false, "", "")
 			return
@@ -864,6 +1062,84 @@ func firstNonEmptyString(values ...string) string {
 		}
 	}
 	return ""
+}
+
+func errorString(err error) string {
+	if err == nil {
+		return ""
+	}
+	return err.Error()
+}
+
+func (s *Server) plantAuthorityClient(ctx context.Context, r *http.Request, tenantID string) (*iaosclient.Client, string, error) {
+	if strings.TrimSpace(s.cfg.IAOSBaseURL) == "" {
+		if s.cfg.AllowLocalPlantAuthority {
+			return nil, "local-test-actor", nil
+		}
+		return nil, "", fmt.Errorf("IAOS plant authority is not configured")
+	}
+	token := bearerToken(r.Header.Get("Authorization"))
+	tenantID = strings.TrimSpace(tenantID)
+	if token == "" || tenantID == "" {
+		return nil, "", fmt.Errorf("IAOS bearer token and tenant context are required")
+	}
+	client, err := iaosclient.New(iaosclient.Config{BaseURL: s.cfg.IAOSBaseURL, Token: token, TenantID: tenantID})
+	if err != nil {
+		return nil, "", err
+	}
+	profile, err := client.Profile(ctx)
+	if err != nil {
+		return nil, "", fmt.Errorf("load IAOS actor identity: %w", err)
+	}
+	if profile.TenantID != tenantID || strings.TrimSpace(profile.Username) == "" {
+		return nil, "", fmt.Errorf("IAOS actor identity does not match tenant")
+	}
+	return client, profile.Username, nil
+}
+
+func postPlantAuthorityCommand(ctx context.Context, client *iaosclient.Client, capabilityCode, actorID, scopeID, objectID string, revision int, payload any) error {
+	field := ""
+	switch capabilityCode {
+	case "facility.requirement.define":
+		field = "facility_requirement"
+	case "site.proposal.record":
+		field = "proposal_set"
+	case "site.proposal.review":
+		field = "proposal_review"
+	default:
+		return fmt.Errorf("unsupported M10 capability %q", capabilityCode)
+	}
+	command := map[string]any{
+		"capability_code": capabilityCode,
+		"actor_id":        actorID,
+		"correlation_id":  "corr-m10-" + strings.TrimSpace(scopeID),
+		"idempotency_key": fmt.Sprintf("m10:%s:%s:r%d", capabilityCode, strings.TrimSpace(objectID), revision),
+		field:             payload,
+	}
+	raw, err := json.Marshal(command)
+	if err != nil {
+		return err
+	}
+	_, err = client.PostGovernedCommand(ctx, "api/v1/genesis/plant/interactive/actions", raw)
+	return err
+}
+
+func decodeStoredProposalSet(value any) (plantbuild.ProposalSet, bool) {
+	var set plantbuild.ProposalSet
+	raw, err := json.Marshal(value)
+	if err != nil || json.Unmarshal(raw, &set) != nil || set.ProposalSetID == "" {
+		return set, false
+	}
+	return set, true
+}
+
+func (s *Server) writePlantAuthorityError(w http.ResponseWriter, err error, fallbackCode string) {
+	var apiErr *iaosclient.APIError
+	if errors.As(err, &apiErr) {
+		s.writeError(w, apiErr.StatusCode, firstNonEmptyString(apiErr.ErrorCode, fallbackCode), apiErr.Message, apiErr.StatusCode >= 500, "", apiErr.RequiredPermission)
+		return
+	}
+	s.writeError(w, http.StatusBadGateway, fallbackCode, err.Error(), true, "", "")
 }
 
 func (s *Server) handleScenarios(ctx context.Context, w http.ResponseWriter, _ *http.Request) {

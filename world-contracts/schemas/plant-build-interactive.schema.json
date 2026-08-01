@@ -1,0 +1,87 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://aese.local/schemas/plant-build-interactive.schema.json",
+  "title": "M10 interactive plant planning contracts",
+  "oneOf": [
+    { "$ref": "#/$defs/facility_requirement" },
+    { "$ref": "#/$defs/proposal_set" },
+    { "$ref": "#/$defs/proposal_review" }
+  ],
+  "$defs": {
+    "money": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["value", "currency", "scale"],
+      "properties": {
+        "value": { "type": "string", "pattern": "^(0|[1-9][0-9]*)(\\.[0-9]+)?$" },
+        "currency": { "type": "string", "pattern": "^[A-Z]{3}$" },
+        "scale": { "type": "integer", "minimum": 0, "maximum": 6 }
+      }
+    },
+    "financial_constraint": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["available_cash", "approved_budget", "cash_source_ref", "budget_source_ref", "snapshot_hash"],
+      "properties": {
+        "available_cash": { "$ref": "#/$defs/money" },
+        "approved_budget": { "$ref": "#/$defs/money" },
+        "cash_source_ref": { "type": "string", "minLength": 1 },
+        "budget_source_ref": { "type": "string", "minLength": 1 },
+        "snapshot_hash": { "type": "string", "pattern": "^sha256:[0-9a-f]+$" }
+      }
+    },
+    "facility_requirement": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "requirement_id", "tenant_id", "case_code", "legal_entity_code", "target_region", "facility_purpose", "minimum_area_m2", "minimum_electricity_kva", "target_available_at", "candidate_count", "allowed_option_types", "investment_request", "minimum_cash_reserve", "financial_constraint", "preferences", "revision", "revision_reason"],
+      "properties": {
+        "schema_version": { "const": "1.0" },
+        "requirement_id": { "type": "string", "minLength": 1 },
+        "tenant_id": { "type": "string", "minLength": 1 },
+        "case_code": { "type": "string", "minLength": 1 },
+        "legal_entity_code": { "type": "string", "minLength": 1 },
+        "target_region": { "type": "string", "minLength": 1 },
+        "facility_purpose": { "type": "string", "minLength": 1 },
+        "minimum_area_m2": { "type": "integer", "minimum": 1 },
+        "minimum_electricity_kva": { "type": "integer", "minimum": 1 },
+        "target_available_at": { "type": "string", "format": "date-time" },
+        "candidate_count": { "type": "integer", "minimum": 2, "maximum": 8 },
+        "allowed_option_types": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "investment_request": { "$ref": "#/$defs/money" },
+        "minimum_cash_reserve": { "$ref": "#/$defs/money" },
+        "financial_constraint": { "$ref": "#/$defs/financial_constraint" },
+        "preferences": { "type": "array", "items": { "type": "string" } },
+        "revision": { "type": "integer", "minimum": 1 },
+        "revision_reason": { "type": "string", "minLength": 1 }
+      }
+    },
+    "proposal_set": {
+      "type": "object",
+      "additionalProperties": true,
+      "required": ["schema_version", "proposal_set_id", "requirement_id", "revision", "status", "proposals", "evidence"],
+      "properties": {
+        "schema_version": { "const": "1.0" },
+        "proposal_set_id": { "type": "string", "minLength": 1 },
+        "requirement_id": { "type": "string", "minLength": 1 },
+        "revision": { "type": "integer", "minimum": 1 },
+        "status": { "const": "candidate_only" },
+        "proposals": { "type": "array", "minItems": 2, "maxItems": 8 },
+        "evidence": { "type": "object" }
+      }
+    },
+    "proposal_review": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["proposal_set_id", "proposal_id", "action", "reason", "reviewed_by", "reviewed_at", "expected_revision"],
+      "properties": {
+        "proposal_set_id": { "type": "string", "minLength": 1 },
+        "proposal_id": { "type": "string", "minLength": 1 },
+        "action": { "enum": ["adopt_for_investigation", "request_revision", "add_manual_option", "discard"] },
+        "reason": { "type": "string", "minLength": 6 },
+        "reviewed_by": { "type": "string", "minLength": 1 },
+        "reviewed_at": { "type": "string", "format": "date-time" },
+        "expected_revision": { "type": "integer", "minimum": 1 }
+      }
+    }
+  }
+}

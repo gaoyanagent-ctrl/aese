@@ -1872,3 +1872,27 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 验证：知识定向测试 11 项、场景安全/证据测试 9 项、TypeScript、定向 lint、Next 生产构建、
   3000 部署、无凭证 401、不存在案件 404、四端口 200 和 Atlas 同步通过。
 - 后续：用用户新建的首个 M9 案件执行 Runbook 正向现场验收，不为收口预造业务数据。
+
+## 2026-08-01 - M10 改为 Agent 候选、人工选择与金额参数化
+
+- 变更：修订 DES-011 与 PLAN-M10，取消正式运行中的三个固定候选、固定赢家、固定预算/现金、固定 WBS 和固定异常假设；新增 `plant-planning-agent` 结构化 proposal、项目负责人审阅、World 事实补齐、金额来源/可编辑边界及 R1–R10 交互修订门。历史 evidence/runbook 明确降级为 `fixture_only` reference replay。
+- 原因：固定剧情会绕过 Agent 与业务人员协作，也会把单一示例企业的资金和选址条件错误推广到所有新企业。
+- 影响：正式 M10 必须由当前租户 IAOS 权威现金/预算、用户可编辑投资参数、Agent 建议、人工决定和外部 Observation 共同驱动；Agent 不得虚构报价、容量、权属、许可或自行批准资金动作。
+- 验证：Markdown `git diff --check` 通过；Roadmap、Code Map、文档索引、历史 evidence 和 runbook 已同步标明实现边界；System Atlas 跟踪声明已新增。
+- 后续：按 PLAN-M10 R1–R10 实现 Effective Process Artifact 工作项、Agent Artifact、表单、版本化金额、人工/外部模型双路径和现场验收；完成前只声明 reference replay 完成。
+
+## 2026-08-01 - M10 交互计划与 Agent proposal 首个代码切片
+
+- 变更：新增 PLAN-M10-INTERACTIVE-001；`internal/plantbuild/interactive.go` 实现设施需求、权威财务快照、金额/工期区间、候选 proposal、人工 review 和生成证据合同；MiniMax 暴露受限 JSON completion adapter，AESE 新增 planning status/proposals API，未配置模型返回显式失败而非固定候选。
+- 原因：旧 M10 只有编译在 Go 中的十帧回放，无法让用户输入参数、Agent 生成候选或人员作出选择。
+- 影响：候选数量 2–8、区域、日期、选项类型和所有业务输入金额均可参数化；现金/预算必须携带 IAOS 权威来源引用与快照 hash；Agent 输出必须披露假设、待验证事实、风险、来源、模型和输入/输出 hash。
+- 验证：`go test ./internal/plantbuild ./internal/creative ./internal/httpapi ./cmd/aese-server` 通过；未配置 provider status 和失败关闭有回归测试。
+- 后续：完成 Agent 证据持久化与坏 JSON/provider 测试，在 IAOS 独立 worktree 实现 Entity/Capability/Process 权威链，再接人工审阅 UI。
+
+## 2026-08-01 - M10 设施规划 Agent 与人工审阅首个在线纵切
+
+- 变更：Plant Build Play 增加参数化设施需求、IAOS 只读现金/预算来源、Agent 候选解释卡和人工审阅；AESE 定向 BFF 串联 `facility.requirement.define`、`site.proposal.record` 与 `site.proposal.review`，IAOS 首个权威切片保存 Requirement、ProposalSet、Review、Audit、Outbox 和幂等证据。
+- 原因：需求、Agent 技术输出和人工决定必须成为可区分、可追踪的事实，不能继续用三个固定候选、固定金额或浏览器本地状态冒充正式 M10。
+- 影响：用户现在可完成“权威财务快照 → 需求 → Agent proposal → 人工采纳/退回/淘汰”；实际现金和已批预算不可在页面编辑，Agent 候选仍是 `candidate_only`，审阅不等于外部调查、投资审批或合同承诺。
+- 验证：AESE 全量 Go、合同/HTTP/UI 定向测试、TypeScript、ESLint 与生产构建通过；IAOS 全量 Go 和治理检查通过，后端已部署，`tenant-001`、`tenant-hctm` 均已升级至 `genesis-m9@1.6.0` 且 `up_to_date=true`，三个 Capability 的 Active Artifact 可在线读取。完整业务案件现场 UI/API/DB 证据仍属于 S5。
+- 后续：实现人工候选权威提交、`site.investigation.request`、Effective Process Artifact、World 报价/权属/容量/许可 Observation，以及选址审批、项目/WBS、施工、付款、验收和 AP/CIP/总账闭环。

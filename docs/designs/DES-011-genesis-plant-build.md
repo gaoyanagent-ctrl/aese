@@ -2,7 +2,7 @@
 id: DES-011
 title: M10 Project Genesis 工厂选址与设施建设
 date: 2026-07-22
-status: completed
+status: active
 author: Codex + User
 tags: [m10, genesis, plant, site-selection, construction, project]
 ---
@@ -17,28 +17,28 @@ M10 从 M9 的 `plant_project_eligible=true` 开始，让华辰苏州制造公�
 
 ## 2. 业务现实约束
 
-M9 终态提供：
+M9 终态在每个企业自己的账簿、预算和治理记录中提供运行时约束，而不是由 M10 场景写死：
 
-- 公司实际现金：20,000,000 CNY。
-- 首年预算授权：15,000,000 CNY。
+- 公司实际可用现金及币种，由 IAOS 现金/银行账簿实时读取。
+- 已批准预算 envelope、剩余额度和期间，由 IAOS 预算事实实时读取。
 - 已生效 CEO、CFO 和工厂项目负责人岗位及 mandate。
 
-因此 M10 不默认选择昂贵绿地自建。候选方案至少包含：
+用户必须能在受治理表单中填写或修订设施需求、计划投用日期、候选数量、目标区域、投资申请额、预算上限、现金保留下限和评估权重。所有金额采用 decimal string + ISO 4217 币种，保存修订版本、修改人、修改理由和审批状态；UI 不得把演示金额设为不可修改常量。
 
-- 绿地购地自建：周期长、资金需求高，首版可被规则判定不可行。
-- 标准厂房租赁改造：资金和工期较低，适合一期 tracer。
-- 定制代建/长期租赁：成本和控制权居中，但存在交付依赖。
+候选方案不再由剧情固定为三种模式。`plant-planning-agent` 根据上述约束生成可解释的候选方案草稿；项目负责人可以要求补充、删除、重生成或人工新增候选，再选择进入正式调研的方案。Agent 可以建议绿地自建、租赁改造、定制代建或其他合理模式，但这些只是建议，不是预设必选项。
 
-最终选择必须来自版本化多维评估和 IAOS 受治理决策，不能由剧情直接指定赢家。所有候选地点、园区和外部机构保持虚构。
+Agent 不能虚构已经发生的报价、权属、公用工程容量或政府许可。候选草稿中的估算、假设和缺失事实必须明确标注；真实报价和场址条件由 AESE World 外部参与者 Observation 或经验证资料补齐。最终选择必须来自版本化多维评估和 IAOS 受治理决策，不能由 Agent 或剧情直接指定赢家。所有演示地点、园区和外部机构保持虚构。
 
 ## 3. 纵向业务链
 
 ```text
 消费 M9 plant_project_eligible
 -> 建立产能与设施需求
--> 生成并调研候选场址
+-> plant-planning-agent 生成候选方案草稿、假设和待调研项
+-> 项目负责人审阅、补充并选择需要调研的候选
+-> 外部参与者返回报价与场址事实
 -> 评估资金、工期、物流、人力、公用工程和风险
--> 项目总监提出推荐方案
+-> Agent 形成解释性比较与推荐，项目负责人决定是否提交
 -> CEO / CFO 经 IAOS 审批选址与投资上限
 -> 签署租赁/场地使用协议并取得实际场地控制
 -> 建立设施建设项目与 WBS
@@ -85,21 +85,28 @@ IAOS 里程碑完成记录不等于现场已经完工。AESE 先计算实际施�
 - `payment_request`
 - `facility_acceptance`
 
+另需保存以下受治理对象：
+
+- `facility_requirement`：用户可编辑的需求、目标日期、金额边界、权重和版本。
+- `site_option_proposal`：Agent/人工候选草稿、假设、置信度、待验证事实和生成运行引用。
+- `site_option_review`：项目负责人的采纳、退回、补充、淘汰及理由。
+- `agent_run` / `agent_output_evidence`：模型、提示模板版本、输入快照、结构化输出、校验结果和人工决定；密钥不进入业务数据。
+
 优先用 metadata/config package、Process、Policy、Decision 和 Capability。M10 不把 IAOS 扩展成通用建筑项目管理产品。
 
 ## 6. 空间与设施范围
 
-M10 最小空间层级：
+M10 最小空间层级是结构约束，节点名称和地点不是固定值：
 
 ```text
-China / Jiangsu / Suzhou
--> fictional industrial park
--> HCTM Suzhou site
--> main building
--> office / production / warehouse / quality / utility zones
+country / region / city（用户需求）
+-> candidate park / site（Agent 建议，外部事实验证）
+-> selected site（人员批准）
+-> building / floor（Agent 或人工规划）
+-> office / production / warehouse / quality / utility zone（Agent 建议，人员确认）
 ```
 
-每个节点至少携带 stable code、parent、二维坐标/边界、面积、用途、占用状态、容量和验收状态。M10 不做自由布局编辑器、BIM、3D、物流路径优化或设备级摆放。
+`China / Jiangsu / Suzhou`、`HCTM Suzhou site` 和既有 zone 编码仅是 reference fixture。每个正式节点至少携带 stable code、parent、二维坐标/边界、面积、用途、占用状态、容量和验收状态。制造工厂必须满足办公、生产、仓储、质量、公辅等功能门，但具体建筑数量、区域组合、面积和编码由 Agent/人工方案决定。M10 不做自由布局编辑器、BIM、3D、物流路径优化或设备级摆放。
 
 设施交付边界：
 
@@ -122,6 +129,53 @@ China / Jiangsu / Suzhou
 
 评分器只生成可解释 candidate comparison，不自动替代批准。硬约束（现金、预算、最低公用工程、最晚可用日期）先于加权评分；不满足硬约束的候选不能因高综合分被选中。
 
+### 7.1 Agent 生成与人工选择合同
+
+`plant-planning-agent` 的输入只能来自当前租户有权读取的事实和本次需求版本：
+
+- 企业、目标区域、设施用途、面积/产能与公用工程需求；
+- 用户填写的目标日期、候选数量范围、投资申请额、现金保留下限和评分偏好；
+- IAOS 返回的实际现金、已批准预算、岗位 mandate 和既有承诺；
+- 已送达 Actor Knowledge 的市场、场址和外部 Observation。
+
+结构化输出至少包含：
+
+```text
+proposal_id / option_type / business_rationale
+estimated_amount { amount, currency, basis, range }
+estimated_schedule { earliest, likely, latest }
+assumptions[] / facts_required[] / risks[]
+score_preview[] / confidence / source_refs[]
+```
+
+Agent 输出先进入 `proposed`，不得直接创建协议、承诺、付款或批准结果。项目负责人必须在工作项中逐项执行 `adopt_for_investigation`、`request_revision`、`add_manual_option` 或 `discard`；只有采纳后的候选才能请求外部调研。若外部模型未启用、输出不符合 Schema 或缺少来源，工作项保持可人工处理，系统只提供同构空白表单。reference fixture 只能由测试人员在显式 replay 模式加载，并显示醒目标识，不能出现在正式候选下拉框或自动成为业务事实。
+
+### 7.2 金额来源与可编辑边界
+
+| 金额 | 来源 | 用户是否可改 | 治理规则 |
+| --- | --- | --- | --- |
+| 实际可用现金 | IAOS 银行/现金账簿 | 不可直接改 | 只能由受治理收付款/记账能力改变 |
+| 预算 envelope | 已批准预算事实 | 不能在 M10 页面直接覆盖 | 可发起预算新增/调整审批 |
+| 投资申请额、现金保留下限 | 用户表单或 Agent 建议 | 可修改 | 每次修改形成新版本并重新校验/审批 |
+| 候选估算额 | Agent/人工估算 | 可修改 | 必须保留依据、区间、币种和假设 |
+| 外部报价/合同金额 | World Observation/供应商报价 | 可在谈判草稿中修订 | 正式承诺必须引用有效报价和审批 |
+| 付款申请额 | 已验收里程碑与合同 | 可在余额内调整 | 不得超过验收、合同、预算及现金门 |
+
+候选数量、投资规模、预算、合同、变更和付款均不得依赖代码常量。演示包可以提供预填值，但 UI 必须标注“演示建议”，允许用户在首次提交前修改；提交后按版本化变更和审批处理。
+
+### 7.3 所有方案选择点
+
+| 选择点 | Agent 负责 | 人员负责 | 权威事实来源 |
+| --- | --- | --- | --- |
+| 场址候选 | 生成多种可解释草案 | 选择调研项、允许人工新增/淘汰 | World 调研 Observation |
+| 空间/功能区方案 | 建议建筑和区域组合、面积及容量 | 确认业务适用性和提交审批 | 设施需求与现场测量 |
+| 承包/租赁策略 | 比较总包、分包、租赁、代建等选项 | 选择询价与谈判策略 | 外部报价、资质和合同 |
+| WBS 与基准计划 | 生成任务、依赖、工期和资源建议 | 调整、确认基线并提交批准 | 已批准范围、合同和资源日历 |
+| 延期缓解方案 | 生成重排、临时供给或范围调整建议 | 评估风险、金额并决定提交 | World discrepancy 与最新 Observation |
+| 投资/变更方案 | 比较金额、现金和工期影响 | 选择申请额并承担审批责任 | IAOS 现金、预算、承诺和报价 |
+
+任何 Agent 建议都必须留下“为什么、基于什么、还不知道什么、谁选择了什么”的穿透证据。系统规则可以固定合规门和数据结构，不能固定业务人员应选择的方案。
+
 ## 8. 工期、资金和项目不变量
 
 - 没有 `plant_project_eligible=true` 不能创建可执行项目。
@@ -137,7 +191,7 @@ China / Jiangsu / Suzhou
 
 ## 9. 最小异常 tracer
 
-M10 固定一条公用工程延期 tracer：
+M10 必须覆盖至少一条公用工程或外部交付异常 tracer。异常类型、发生时间和影响值由版本化 World policy + seed 决定；下列公用工程延期仅是确定性回归 fixture，不是每个企业都会发生的固定剧情：
 
 ```text
 IAOS 项目计划认为增容按期
@@ -161,6 +215,7 @@ IAOS 项目计划认为增容按期
 | CEO | 批准选址与项目目标 | 不能绕过预算硬约束 |
 | CFO | 审查现金、预算、承诺、变更和付款 | 不能把未验收里程碑当作付款证据 |
 | 外部承包商/园区/公用工程方 | 由 World policy 提供报价、施工和外部结果 | 不是 IAOS 内部用户 |
+| 设施规划 Agent | 生成候选、WBS/缓解建议和解释性比较 | 不得伪造外部事实、批准自身建议或提交资金动作 |
 
 人类与 Agent 共用同一 IAOS Capability、Decision、Policy、Process 和审计；Agent 输出只形成 recommendation/intent。
 
@@ -190,6 +245,8 @@ genesis.facility.accepted.v1
 
 - `hctm-genesis` 升级到下一 minor version，新增 `campaigns/plant-build/`。
 - Plant Build 初态显式引用并验证 M9 incorporation 终态 hash/eligibility，不复制或手填成立结果。
+- pack 中固定候选、固定金额和固定赢家只能位于 `fixtures/reference-replay/`，并标记 `fixture_only=true`；正式运行从用户输入、IAOS 权威事实、Agent proposal 和 World Observation 建立数据。
+- 相同 seed、输入快照、Agent artifact 版本和外部 observation 应可重放；真实外部 LLM 的原始自由文本不能直接成为确定性状态，必须经过 Schema 校验、规范化并以已接受 proposal snapshot 进入运行。
 - M8 设备 tracer 与 M9 incorporation 继续可独立运行和回归。
 - M11 只能消费 M10 机器输出，不从画布或项目文案推断设施已就绪。
 
@@ -204,8 +261,62 @@ genesis.facility.accepted.v1
 ## 14. 完成标准
 
 - 单一 run 从 M9 eligibility 确定性推进到 `capability_build_eligible=true`。
-- 至少三个场址候选通过硬约束和可解释评分，资金不可行方案被正确拒绝。
+- 用户可让 Agent 生成可配置数量的候选、人工增删/重生成并选择正式调研项；至少两个有效候选进入比较，或由有权人员记录单一来源例外理由。
 - 空间、设施、项目、现金、预算、承诺、付款和知识三态可对账。
 - 公用工程延期、知情延迟、受治理 rebaseline 和最终验收形成完整因果链。
 - 人类/Agent 共用治理能力，越权、自批、超预算、未验收付款全部失败关闭。
 - M7/M8/M9 回归、两仓测试、部署、runbook/evidence 和 Atlas 完整。
+- 无任何候选、金额、赢家或异常被运行时代码写死；关闭外部模型时可人工完成同一流程，且 Agent 不可用状态清晰可见。
+
+## 15. 2026-08-01 设计修订与实现状态
+
+原 `hctm-genesis@0.3.0` 的三个候选、1,500 万预算和固定延期仍作为历史确定性 reference replay 证据保留。它们不再代表正式 M10 产品合同。
+
+交互修订当前已形成第一个可操作纵切：
+
+1. Plant Build Play 读取 IAOS 已过账银行科目和已批准预算形成的只读财务快照，显示来源引用和 snapshot hash；用户只能编辑投资申请额、现金保留下限等业务输入，不能覆盖现金或预算事实。
+2. 用户填写 `FacilityRequirement` 后，浏览器只调用 AESE 同源 BFF；AESE 严格校验合同、调用已配置的 `plant-planning-agent` provider，并保存模型、prompt、request、token、输入/输出 hash 与校验结果等 CreativeJob 技术证据。
+3. AESE 分别以 `facility.requirement.define` 和 `site.proposal.record` 向 IAOS 提交 Requirement 与 candidate-only ProposalSet。IAOS 使用当前 tenant/actor、FORCE RLS、Capability Execution、幂等键、版本检查、Audit 和 Outbox 保存业务事实。
+4. 项目负责人可对候选执行采纳调研、退回重生成或淘汰，并填写业务理由；AESE 从 IAOS profile 解析实际人员身份，再以 `site.proposal.review` 保存审阅，浏览器不能指定 `reviewed_by`。
+5. 外部模型未配置、财务快照缺失或已变化、Agent 输出不满足 Schema、候选超过投资申请上限、身份/权限不足或 revision 冲突时失败关闭，不用固定候选兜底。
+
+以下仍未实现：人工新增候选的权威提交、调查请求、human task → agent task → human review → world wait 的 Effective Process Artifact、World 报价/权属/容量/许可 Observation、正式比较与选址审批、场地控制、项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
+
+## 16. 用户配置、操作、验证与恢复
+
+### 16.1 前置条件
+
+- 当前用户已通过 IAOS 登录并进入正确 Genesis Workspace；AESE 只能透传该用户的 token 和 tenant context。
+- 对应 M9 案件已经形成法人编码、币种、已批准预算和已过账银行现金；任一事实缺失时不得手工填写替代值。
+- `plant-planning-agent` provider 已配置并返回 connected；未启用外部模型时页面明确显示不可生成，用户可建立本地人工草稿，但当前版本不能把该草稿提交为权威候选。
+
+### 16.2 当前可操作步骤
+
+1. 进入“工厂建设 Campaign”，确认“可用现金快照”和“已批准预算快照”均为只读，并能看到 `gl:`、`budget:` 来源引用。
+2. 填写目标区域、设施用途、最小面积、电力容量、目标日期、2–8 个候选、允许的方案类型、投资申请额、最低现金保留额、偏好和修订原因。
+3. 点击“保存需求并让 Agent 生成候选”。成功表示 Requirement 与 ProposalSet 均已进入 IAOS；这不表示投资已获批。
+4. 阅读每个候选的业务理由、金额/工期区间、估算依据、假设、待验证事实、风险、来源和置信度。
+5. 选择“采纳调研”“退回重生成”或“淘汰”，填写至少 6 个字符的理由并提交。成功表示 Review 已保存；“采纳调研”仍不等于外部事实已确认。
+
+### 16.3 关系与证据
+
+```text
+M9 已过账现金 + 已批预算
+-> FinancialConstraint（IAOS 只读 snapshot）
+-> FacilityRequirement（人员输入，IAOS 权威版本）
+-> plant-planning-agent / CreativeJob（AESE 技术证据）
+-> ProposalSet（IAOS candidate-only 业务事实）
+-> ProposalReview（IAOS 人工决定、Audit、Outbox）
+-> [待实现] Investigation Request / World Observation / Process / Approval
+-> [待实现] Project / WBS / Contract / Payment / Acceptance / Finance
+```
+
+页面上的 Agent 估算不是报价，Review 不是审批，reference replay 不是当前企业运行事实。验收时必须分别核对 AESE CreativeJob 技术证据和 IAOS Requirement/Proposal/Review/Audit/Outbox 业务证据。
+
+### 16.4 失败恢复
+
+- 财务快照变化：重新打开页面读取新 snapshot，以新 revision 和修订理由保存 Requirement，不能复用旧快照继续提交。
+- 模型失败或坏 JSON：保留已填写需求，修复 provider 后重试；系统不得生成模拟候选冒充成功。
+- 重复点击：相同 object/revision 使用同一幂等键返回既有结果；同键不同输入必须 409 冲突。
+- 审阅版本冲突：刷新 ProposalSet/Review 后按最新 revision 重新决定，不能覆盖他人已提交审阅。
+- IAOS 不可用或权限不足：页面保持当前表单和候选展示，但不得显示“已保存”；恢复会话或权限后再次提交。

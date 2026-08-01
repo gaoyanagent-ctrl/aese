@@ -16,7 +16,7 @@
 | 维护 M7 场景运行控制台 | ADR-003、DES-005、M7 completed plan、现有 CLI application service |
 | 维护 AESE 2.0 World Runtime | ADR-004、DES-007、DES-009、M8 completed plan；先读 `world-contracts/` 和 `internal/worldcontract/` |
 | 维护 M9 企业成立与治理 | DES-010、PLAN-M9-001、M9 evidence；先读 `internal/incorporation/`、`world-packs/hctm-genesis/campaigns/incorporation/` 与 World Bridge |
-| 维护 M10 工厂选址与设施建设 | DES-011、PLAN-M10-001、M10 evidence；先读 `internal/plantbuild/`、Plant Build campaign 与 IAOS DES-052 |
+| 维护 M10 工厂选址与设施建设 | DES-011、PLAN-M10-INTERACTIVE-001、M10 runbook；先读 `internal/plantbuild/interactive.go`、`frontend/src/components/world/PlantBuildPlay.tsx`、AESE BFF 与 IAOS `plant_interactive.go`。旧 campaign/evidence 只证明 fixture replay |
 | 维护 M11 生产能力建设 | DES-012、PLAN-M11-001、M11 evidence；先读 `internal/capabilitybuild/`、Capability Build campaign 与 IAOS DES-053 |
 | 维护 M12 产品工业化与量产批准 | DES-013、PLAN-M12-001、M12 evidence；先读 `internal/industrialization/`、Industrialization campaign 与 IAOS DES-054 |
 | 维护 M13 第一次完整商业交付 | DES-014、PLAN-M13-001、M13/Genesis evidence；先读 `internal/firstdelivery/` 与 First Delivery campaign |
@@ -59,7 +59,8 @@
 | World/IAOS 桥接合同 | `docs/designs/DES-008-world-iaos-bridge-contract.md` | observation/intent/committed outcome、journal/cursor、权限与失败恢复 |
 | M8 completed plan | `docs/plans/2026-07-22-m8-aese-2-foundation.md` | 已完成的三态世界、内核、bridge、pack 和 World Play 基线 |
 | M9 completed plan | `docs/plans/2026-07-22-m9-genesis-incorporation.md` | 已完成的企业成立、治理、资本和预算基线 |
-| M10 completed plan | `docs/plans/2026-07-22-m10-genesis-plant-build.md` | 已完成的场址、设施、项目、公用工程和验收基线 |
+| M10 Agent 辅助工厂建设设计 | `docs/designs/DES-011-genesis-plant-build.md`、`docs/plans/2026-07-22-m10-genesis-plant-build.md`、`docs/runbooks/genesis-plant-build.md`、`docs/reports/m10-genesis-plant-build-evidence.md` | 场址/设施 reference replay 已完成；正式运行改由用户参数 + Agent Proposal + Human Review + World Observation 驱动，历史三个候选及金额仅为 fixture |
+| M10 交互修订 active plan | `docs/plans/2026-08-01-m10-interactive-agent-plant-build.md`、`world-contracts/schemas/plant-build-interactive.schema.json`、`internal/plantbuild/interactive.go`、`internal/creative/minimax_provider.go::CompleteJSON`、`internal/httpapi/server.go`、`internal/iaosclient/client.go` | 已落地严格合同、MiniMax adapter、CreativeJob 技术证据、只读财务快照 BFF、Requirement/Proposal 受治理提交、人工 Review 提交和可操作 UI；Process/World/WBS/工程财务仍待实现 |
 | M11 completed plan | `docs/plans/2026-07-22-m11-genesis-production-capability-build.md` | C0-C6 跨仓交付与验收记录 |
 | M12 completed plan | `docs/plans/2026-07-22-m12-genesis-product-industrialization.md` | D0-D7 跨仓交付与验收记录 |
 | M13 completed plan | `docs/plans/2026-07-22-m13-genesis-first-commercial-delivery.md` | E0-E8 跨仓交付与 Genesis 收口记录 |
@@ -280,19 +281,19 @@ M9 I0-I5 的当前入口如下：
 | IAOS 法人/治理能力 | `/iaos/iaos-go-m9-genesis/platform/internal/api/genesis_governance.go`；DES-051；revision `edcb915` |
 | M9 runbook / evidence | `docs/runbooks/genesis-incorporation.md`、`docs/reports/m9-genesis-incorporation-evidence.md` |
 
-## 13. M10 已实现路径
+## 13. M10 reference 与交互纵切路径
 
 | 能力 | 路径 |
 | --- | --- |
-| M10 设计与 completed plan | `docs/designs/DES-011-genesis-plant-build.md`、`docs/plans/2026-07-22-m10-genesis-plant-build.md` |
-| 场址、空间、项目模型与 tracer | `internal/plantbuild/` |
-| 场址/空间/项目机器合同 | `world-contracts/schemas/plant-build-campaign.schema.json`、对应 fixture |
-| Plant Build campaign | `world-packs/hctm-genesis/campaigns/plant-build/` |
-| IAOS bridge adapter | `internal/bridge/iaos/` |
-| World Play 工厂建设视图 | `frontend/src/components/world/PlantBuildPlay.tsx`、`frontend/src/world/plantBuild.ts`、`/#world-plant-build` |
-| Plant Build API | `internal/httpapi/server.go`（`GET /api/aese/v1/world/plant-build`） |
-| IAOS 投资与项目治理 | `/iaos/iaos-go-m10-plant/platform/internal/api/plant_governance.go`；DES-052；revision `23be02a` |
-| M10 runbook / evidence | `docs/runbooks/genesis-plant-build.md`、`docs/reports/m10-genesis-plant-build-evidence.md` |
+| M10 设计与计划 | `docs/designs/DES-011-genesis-plant-build.md`、`docs/plans/2026-08-01-m10-interactive-agent-plant-build.md`；旧 completed plan 只治理 reference replay |
+| 交互 Requirement/Proposal/Review 合同 | `internal/plantbuild/interactive.go`、`world-contracts/schemas/plant-build-interactive.schema.json` |
+| Agent provider 与技术证据 | `internal/creative/minimax_provider.go::CompleteJSON`、CreativeJob store；失败时不返回 fixture 候选 |
+| 交互 Plant Build Play | `frontend/src/components/world/PlantBuildPlay.tsx`、`frontend/src/world/plantBuild.ts`、`frontend/src/components/world/PlantBuildPlay.test.tsx`、`/#world-plant-build` |
+| AESE 定向 BFF | `internal/httpapi/server.go`：`planning-status`、`financial-constraints`、`proposals`、`reviews`；`internal/iaosclient/client.go` 只暴露命名的 IAOS adapter |
+| IAOS 交互权威切片 | `/iaos/iaos-go-m10-interactive-authority/platform/internal/api/plant_interactive.go`：只读财务快照、Requirement/Proposal/Review、RLS、Capability 写门、幂等、Audit/Outbox；尚未包含 investigation/Process/World/WBS/财务全链 |
+| 历史场址/空间/项目 tracer | `internal/plantbuild/`、`world-contracts/schemas/plant-build-campaign.schema.json`、`world-packs/hctm-genesis/campaigns/plant-build/`；只允许 fixture replay |
+| 历史 IAOS 投资与项目治理 | `/iaos/iaos-go-m10-plant/platform/internal/api/plant_governance.go`；DES-052；revision `23be02a`，尚未接入新交互 Process |
+| M10 runbook / reference evidence | `docs/runbooks/genesis-plant-build.md`、`docs/reports/m10-genesis-plant-build-evidence.md`；evidence 仍只证明 reference replay |
 
 ## 14. M11 已实现路径
 

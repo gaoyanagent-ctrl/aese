@@ -107,6 +107,36 @@ func (c *Client) Profile(ctx context.Context) (ProfileResponse, error) {
 	return out, err
 }
 
+// PlantFinancialConstraint reads the authoritative cash and approved-budget
+// snapshot used by the interactive M10 planning contract. Keeping this as a
+// named adapter avoids turning AESE into a generic IAOS read proxy.
+func (c *Client) PlantFinancialConstraint(ctx context.Context, caseCode string) (json.RawMessage, error) {
+	caseCode = strings.TrimSpace(caseCode)
+	if caseCode == "" {
+		return nil, fmt.Errorf("case_code is required")
+	}
+	query := url.Values{}
+	query.Set("case_code", caseCode)
+	var out json.RawMessage
+	if err := c.request(ctx, http.MethodGet, "api/v1/genesis/plant/interactive/financial-constraints?"+query.Encode(), nil, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// PlantRequirement reads the latest revision for one stable M10 requirement.
+func (c *Client) PlantRequirement(ctx context.Context, requirementID string) (json.RawMessage, error) {
+	requirementID = strings.TrimSpace(requirementID)
+	if requirementID == "" {
+		return nil, fmt.Errorf("requirement_id is required")
+	}
+	var out json.RawMessage
+	if err := c.request(ctx, http.MethodGet, "api/v1/genesis/plant/interactive/requirements/"+url.PathEscape(requirementID), nil, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 type UpsertAction string
 
 const (

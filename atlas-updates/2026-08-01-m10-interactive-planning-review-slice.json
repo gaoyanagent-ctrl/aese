@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m10.interactive-planning-review-slice.2026-08-01",
+  "node_key": "aese.world.genesis.plant-build",
+  "update_type": "implementation",
+  "summary": "交付 M10 权威财务快照、Agent 候选与人工审阅首个纵切",
+  "detail": "Plant Build Play 经 AESE 定向 BFF 读取 IAOS 只读现金和已批预算快照，人员填写 FacilityRequirement，真实 provider 生成带来源和 hash 的 ProposalSet，IAOS 通过 facility.requirement.define、site.proposal.record、site.proposal.review 保存需求、候选和人工审阅，并留下 RLS、幂等、Audit 与 Outbox 证据。",
+  "status_after": "building",
+  "progress_after": 60,
+  "current_state": "设施需求、Agent 候选、CreativeJob 技术证据、只读 IAOS 财务快照、AESE BFF 和人工审阅首个纵切已实现；人工候选权威提交、调查请求、Effective Process Artifact、World 调研、项目/WBS、施工、付款、验收与工程财务仍未完成，M10 保持 Interactive Revision Pending。",
+  "evidence_ref": "docs/plans/2026-08-01-m10-interactive-agent-plant-build.md",
+  "occurred_at": "2026-08-01T12:30:00Z"
+}

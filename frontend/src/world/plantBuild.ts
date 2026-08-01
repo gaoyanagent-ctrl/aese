@@ -48,6 +48,121 @@ export type PlantBuildTrace = {
   m9_terminal_hash: string;
   frames: PlantBuildFrame[];
 };
+
+export type PlantPlanningProviderStatus = {
+  state: "connected" | "not_configured" | "degraded";
+  provider: string;
+  model?: string;
+  prompt_version: string;
+};
+
+export type FacilityMoney = {
+  value: string;
+  currency: "CNY";
+  scale: 2;
+};
+
+export type FacilityRequirement = {
+  schema_version: "1.0";
+  requirement_id: string;
+  tenant_id: string;
+  case_code: string;
+  legal_entity_code: string;
+  target_region: string;
+  facility_purpose: string;
+  minimum_area_m2: number;
+  minimum_electricity_kva: number;
+  target_available_at: string;
+  candidate_count: number;
+  allowed_option_types: string[];
+  investment_request: FacilityMoney;
+  minimum_cash_reserve: FacilityMoney;
+  financial_constraint: {
+    available_cash: FacilityMoney;
+    approved_budget: FacilityMoney;
+    cash_source_ref: string;
+    budget_source_ref: string;
+    snapshot_hash: string;
+  };
+  preferences: string[];
+  revision: number;
+  revision_reason: string;
+};
+
+export type PlantFinancialConstraint = {
+  case_code: string;
+  legal_entity_code: string;
+  financial_constraint: FacilityRequirement["financial_constraint"];
+};
+
+export type SiteOptionProposal = {
+  proposal_id: string;
+  option_type: string;
+  display_name: string;
+  business_rationale: string;
+  estimated_amount: {
+    minimum: FacilityMoney;
+    likely: FacilityMoney;
+    maximum: FacilityMoney;
+    basis: string;
+  };
+  estimated_schedule: {
+    earliest: string;
+    likely: string;
+    latest: string;
+  };
+  assumptions: string[];
+  facts_required: string[];
+  risks: string[];
+  source_refs: string[];
+  confidence: string;
+  status: string;
+};
+
+export type ProposalSet = {
+  schema_version: string;
+  proposal_set_id: string;
+  requirement_id: string;
+  revision: number;
+  status: "candidate_only";
+  proposals: SiteOptionProposal[];
+  evidence: {
+    provider: string;
+    model: string;
+    prompt_version: string;
+    request_id?: string;
+    input_hash: string;
+    output_hash: string;
+    token_usage?: Record<string, number>;
+    validated_at: string;
+  };
+};
+
+export type PlantPlanningResult = {
+  proposal_set: ProposalSet;
+  agent_job: unknown;
+  idempotent_replay: boolean;
+};
+
+export type SiteProposalReviewInput = {
+  proposal_set_id: string;
+  proposal_id: string;
+  action: "adopt_for_investigation" | "request_revision" | "discard";
+  reason: string;
+  expected_revision: number;
+};
+
+export async function submitPlantProposalReview(input: SiteProposalReviewInput) {
+  const response = await fetch("/api/aese/v1/world/plant-build/reviews", {
+    method: "POST",
+    headers: { "content-type": "application/json", ...iaosHeaders() },
+    body: JSON.stringify(input),
+  });
+  if (!response.ok) {
+    throw new Error(`保存候选审阅 ${response.status}: ${await response.text()}`);
+  }
+  return response.json() as Promise<{ status: "committed"; proposal_review: SiteProposalReviewInput & { reviewed_by: string; reviewed_at: string } }>;
+}
 export async function loadPlantBuild(
   signal?: AbortSignal,
 ): Promise<PlantBuildTrace> {
@@ -63,4 +178,80 @@ export async function loadPlantBuild(
     utilities: f.utilities ?? {},
   }));
   return t;
+}
+
+export async function loadPlantPlanningStatus(
+  signal?: AbortSignal,
+): Promise<PlantPlanningProviderStatus> {
+  const response = await fetch(
+    "/api/aese/v1/world/plant-build/planning-status",
+    { signal },
+  );
+  if (!response.ok) throw new Error(`设施规划模型状态 ${response.status}`);
+  return response.json() as Promise<PlantPlanningProviderStatus>;
+}
+
+const iaosHeaders = () => {
+  const token = localStorage.getItem("iaos_token")?.trim();
+  const tenant = (
+    localStorage.getItem("aese_iaos_tenant_id") ??
+    localStorage.getItem("iaos_tenant_id")
+  )?.trim();
+  if (!token || !tenant) throw new Error("缺少 IAOS 企业会话，请重新从企业入口进入");
+  return { Authorization: `Bearer ${token}`, "X-IAOS-Tenant-Id": tenant };
+};
+
+export async function loadPlantFinancialConstraint(
+  caseCode: string,
+  signal?: AbortSignal,
+): Promise<PlantFinancialConstraint> {
+  if (!caseCode.trim()) throw new Error("当前企业会话缺少设立案编码");
+  const response = await fetch(
+    `/api/aese/v1/world/plant-build/financial-constraints?case_code=${encodeURIComponent(caseCode)}`,
+    { headers: iaosHeaders(), signal },
+  );
+  if (!response.ok) {
+    const detail = await response.text();
+    throw new Error(`权威资金与预算快照 ${response.status}: ${detail}`);
+  }
+  return response.json() as Promise<PlantFinancialConstraint>;
+}
+
+export async function loadPlantRequirement(
+  requirementID: string,
+  signal?: AbortSignal,
+): Promise<FacilityRequirement | null> {
+  const response = await fetch(
+    `/api/aese/v1/world/plant-build/requirements/${encodeURIComponent(requirementID)}`,
+    { headers: iaosHeaders(), signal },
+  );
+  if (response.status === 404) return null;
+  if (!response.ok) throw new Error(`设施需求历史 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<FacilityRequirement>;
+}
+
+export async function generatePlantProposals(
+  requirement: FacilityRequirement,
+): Promise<PlantPlanningResult> {
+  const workspace = localStorage.getItem("aese_genesis_workspace_id")?.trim();
+  const response = await fetch("/api/aese/v1/world/plant-build/proposals", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      ...iaosHeaders(),
+      ...(workspace ? { "X-Genesis-Workspace-Id": workspace } : {}),
+    },
+    body: JSON.stringify(requirement),
+  });
+  if (!response.ok) {
+    let message = `设施规划 Agent ${response.status}`;
+    try {
+      const payload = (await response.json()) as { error?: string };
+      message = payload.error || message;
+    } catch {
+      // Non-JSON proxy failures still retain the status-oriented message.
+    }
+    throw new Error(message);
+  }
+  return response.json() as Promise<PlantPlanningResult>;
 }

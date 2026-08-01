@@ -12,7 +12,7 @@
 | 当前里程碑和优先级 | `docs/roadmap.md` |
 | 任务到文件导航 | `docs/code-map.md` |
 | 历史进展 | `docs/progress-log.md` |
-| 当前实施任务 | PLAN-GXZ-001 active；PLAN-M9-FIN-001、PLAN-KNOWLEDGE-AESE-001 并行 active |
+| 当前实施任务 | PLAN-M10-INTERACTIVE-001 active；PLAN-M9-FIN-001 作为跨阶段财务依赖子计划 |
 
 若内容冲突，当前状态以 `docs/roadmap.md` 为准，长期架构决策以 ADR 为准。
 
@@ -80,7 +80,7 @@
 | DES-008 | [AESE World 与 IAOS 三段式桥接合同](designs/DES-008-world-iaos-bridge-contract.md) | Approved |
 | DES-009 | [AESE World 三态术语、所有权与数据分类](designs/DES-009-world-contract-model.md) | Approved |
 | DES-010 | [M9 Project Genesis 企业成立与治理](designs/DES-010-genesis-incorporation-and-governance.md) | Approved |
-| DES-011 | [M10 Project Genesis 工厂选址与设施建设](designs/DES-011-genesis-plant-build.md) | Completed |
+| DES-011 | [M10 Project Genesis 工厂选址与设施建设](designs/DES-011-genesis-plant-build.md) | Active（Agent/人工/金额参数化修订） |
 | DES-012 | [M11 Project Genesis 生产能力建设](designs/DES-012-genesis-production-capability-build.md) | Completed |
 | DES-013 | [M12 Project Genesis 产品工业化与量产批准](designs/DES-013-genesis-product-industrialization.md) | Completed |
 | DES-014 | [M13 Project Genesis 第一次完整商业交付](designs/DES-014-genesis-first-commercial-delivery.md) | Completed |
@@ -121,7 +121,8 @@
 | PLAN-GXZ | [Enterprise Genesis 零起点与真实 AI 身份实施计划](plans/2026-07-28-genesis-zero-start-and-ai-identity.md) | Active |
 | PLAN-M9-FIN | [M9 制造企业财务基础与 M10–M13 业财闭环实施计划](plans/2026-07-28-m9-manufacturing-finance-foundation.md) | Active |
 | PLAN-KNOWLEDGE-AESE | [AESE 场景知识与 IAOS 产品知识中枢集成计划](plans/2026-08-01-product-knowledge-scenario-integration.md) | Active |
-| PLAN-M10 | [M10 Project Genesis 工厂选址与设施建设实施计划](plans/2026-07-22-m10-genesis-plant-build.md) | Completed |
+| PLAN-M10 | [M10 Project Genesis 工厂选址与设施建设实施计划](plans/2026-07-22-m10-genesis-plant-build.md) | Reference Completed；D22 Revision Pending |
+| PLAN-M10-INTERACTIVE | [M10 Agent 候选与参数化工厂建设交互闭环](plans/2026-08-01-m10-interactive-agent-plant-build.md) | Active |
 | PLAN-M11 | [M11 Project Genesis 生产能力建设实施计划](plans/2026-07-22-m11-genesis-production-capability-build.md) | Completed |
 | PLAN-M12 | [M12 Project Genesis 产品工业化与量产批准实施计划](plans/2026-07-22-m12-genesis-product-industrialization.md) | Completed |
 | PLAN-M13 | [M13 Project Genesis 第一次完整商业交付实施计划](plans/2026-07-22-m13-genesis-first-commercial-delivery.md) | Completed |

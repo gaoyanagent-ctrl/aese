@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m10.interactive-planning-contract.2026-08-01",
+  "node_key": "aese.world.genesis.plant-build",
+  "update_type": "implementation",
+  "summary": "实现 M10 参数化设施需求与真实 Agent 候选合同",
+  "detail": "新增 FacilityRequirement、SiteOptionProposal、ProposalSet、ProposalReview 和生成证据严格合同；复用 MiniMax 安全配置提供 JSON proposal API，未配置模型时失败关闭，不再返回固定候选冒充 AI。",
+  "status_after": "building",
+  "progress_after": 52,
+  "current_state": "S1.1-S1.3 已完成；Agent 证据持久化、IAOS 权威 Entity/Capability/Process、人工审阅 UI、World 调研与金额治理待实现。",
+  "evidence_ref": "docs/plans/2026-08-01-m10-interactive-agent-plant-build.md",
+  "occurred_at": "2026-08-01T10:45:00Z"
+}

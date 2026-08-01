@@ -1,5 +1,7 @@
 # M10 Genesis Plant Build Evidence
 
+> 历史范围说明：本报告证明的是 `hctm-genesis@0.3.0` 固定 fixture 的确定性 reference replay。三个候选、金额、唯一赢家和延期不得作为正式交互版运行时默认值；Agent 生成、人工选择和金额参数化按 DES-011 第 15 节及 PLAN-M10 第 9 节待验收。
+
 - 候选与决策：三个虚构候选先执行 1,500 万预算、2,200 kVA 和 2026-09-01 可用日期硬约束，再输出可解释评分；`SITE-SZ-NORTH-LEASED-SHELL` 是唯一可行方案。
 - 确定性世界：10 帧从 M9 terminal eligibility 推进到 `capability_build_eligible=true`；100 次 canonical hash 一致，snapshot restore 和破损状态失败关闭。
 - 设施与经济：七个 site/building/zone 节点、六项 WBS、公用工程/消防/EHS 验收；承诺 13,500,000、应付/已付 10,000,000、期末现金 10,000,000 CNY。
