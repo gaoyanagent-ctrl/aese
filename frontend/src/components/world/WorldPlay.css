@@ -551,8 +551,83 @@
 .plant-review-actions button.selected { border-color: var(--normal); color: #bcf3d1; background: var(--normal-soft); }
 .plant-review-actions button.danger { border-color: var(--critical); color: #ffb7b7; background: var(--critical-soft); }
 .plant-review-actions .plant-review-submit { margin-left: auto; border-color: var(--normal); color: #bcf3d1; background: var(--normal-soft); }
+.plant-review-actions .plant-investigation-request { flex: 1 0 100%; border-color: var(--accent); color: var(--accent); background: var(--accent-soft); }
 .plant-review-actions button:disabled { cursor: not-allowed; opacity: .55; }
 .plant-review-actions label { flex: 1 0 100%; margin-top: 4px; }
+.plant-investigations {
+  display: grid;
+  gap: 12px;
+  padding: 16px;
+  border: 1px solid var(--border-strong);
+  border-radius: 12px;
+  background: #081923;
+}
+.plant-investigations > header,
+.plant-investigation-card > header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.plant-investigations > header span,
+.plant-investigation-card > header span { color: var(--accent); font-size: 10px; font-weight: 750; letter-spacing: .08em; }
+.plant-investigations > header h2,
+.plant-investigation-card > header h3 { margin: 4px 0; }
+.plant-investigations > header h2 { font-size: 18px; }
+.plant-investigations > header small,
+.plant-investigation-card > p { color: var(--text-muted); font-size: 11px; }
+.plant-investigation-card {
+  padding: 15px;
+  border: 1px solid #8a6326;
+  border-radius: 10px;
+  background: var(--surface);
+}
+.plant-investigation-card.observed { border-color: var(--normal); }
+.plant-investigation-card > header strong { color: #f5d59b; font-size: 11px; }
+.plant-investigation-card.observed > header strong { color: #bcf3d1; }
+.plant-observation-form fieldset {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 12px 0;
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+}
+.plant-observation-form legend { padding: 0 7px; color: var(--accent); font-size: 11px; font-weight: 750; }
+.plant-observation-form label { display: grid; gap: 6px; color: var(--text); font-size: 11px; font-weight: 650; }
+.plant-observation-form input,
+.plant-observation-form select,
+.plant-observation-form textarea {
+  min-height: 44px;
+  width: 100%;
+  padding: 9px 10px;
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  color: var(--text);
+  background: #0b1f2b;
+}
+.plant-observation-form textarea { min-height: 74px; resize: vertical; }
+.plant-observation-form button {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  padding: 0 14px;
+  border: 1px solid var(--normal);
+  border-radius: 8px;
+  color: #bcf3d1;
+  background: var(--normal-soft);
+  cursor: pointer;
+}
+.plant-observation-form button:disabled { cursor: not-allowed; opacity: .55; }
+.plant-observation-form button svg { width: 17px; }
+.plant-observation-form > small { display: block; margin-top: 8px; color: var(--text-subtle); line-height: 1.55; }
+.plant-investigation-facts { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 8px; margin: 12px 0 0; }
+.plant-investigation-facts > div { padding: 10px; border: 1px solid var(--border); border-radius: 7px; }
+.plant-investigation-facts dt { color: var(--text-subtle); font-size: 10px; }
+.plant-investigation-facts dd { margin: 5px 0 0; font-size: 12px; overflow-wrap: anywhere; }
 .plant-reference-replay { margin-top: 20px; }
 .plant-reference-replay > p { margin: 0; padding: 0 15px 12px; color: var(--text-muted); font-size: 11px; }
 .plant-reference-replay .world-controls { border-top: 1px solid var(--border); }
@@ -815,6 +890,10 @@
   .plant-proposal-grid { grid-template-columns: 1fr; }
   .plant-proposal-evidence { grid-template-columns: 1fr; }
   .plant-proposals > header { align-items: flex-start; flex-direction: column; }
+  .plant-investigations > header,
+  .plant-investigation-card > header { flex-direction: column; }
+  .plant-observation-form fieldset,
+  .plant-investigation-facts { grid-template-columns: 1fr; }
 }
 @media (prefers-reduced-motion: reduce) {
   .world-play * {

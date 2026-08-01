@@ -23,6 +23,9 @@ import {
   loadPlantFinancialConstraint,
   loadPlantPlanningStatus,
   loadPlantRequirement,
+  loadSiteInvestigations,
+  requestSiteInvestigation,
+  submitSiteInvestigationObservation,
   submitPlantProposalReview,
   type FacilityRequirement,
   type PlantBuildTrace,
@@ -30,6 +33,7 @@ import {
   type PlantFinancialConstraint,
   type ProposalSet,
   type SiteOptionProposal,
+  type SiteInvestigationItem,
 } from "../../world/plantBuild";
 import "./WorldPlay.css";
 
@@ -100,6 +104,9 @@ function ProposalCard({
   onSubmitReview,
   saved,
   busy,
+  investigation,
+  investigationBusy,
+  onRequestInvestigation,
 }: {
   proposal: SiteOptionProposal;
   review?: ReviewState;
@@ -107,6 +114,9 @@ function ProposalCard({
   onSubmitReview: () => void;
   saved: boolean;
   busy: boolean;
+  investigation?: SiteInvestigationItem;
+  investigationBusy: boolean;
+  onRequestInvestigation: () => void;
 }) {
   const action = review?.action ?? "";
   const formal = proposal.status !== "manual_draft";
@@ -144,9 +154,62 @@ function ProposalCard({
         <button type="button" className="plant-review-submit" disabled={!formal || !action || (review?.reason.trim().length ?? 0) < 6 || busy || saved} onClick={onSubmitReview}>
           {busy ? <LoaderCircle className="gx-spin" /> : formal ? <BadgeCheck /> : <TriangleAlert />}{!formal ? "人工候选仍是本地草稿" : saved ? "已保存审阅" : busy ? "正在保存…" : "提交审阅到 IAOS"}
         </button>
+        {saved && action === "adopt_for_investigation" && <button type="button" className="plant-investigation-request" disabled={investigationBusy || Boolean(investigation)} onClick={onRequestInvestigation}>
+          {investigationBusy ? <LoaderCircle className="gx-spin" /> : <SearchCheck />}{investigation ? investigation.status === "observed" ? "调研事实已提交" : "正在等待外部调研" : investigationBusy ? "正在建立工作项…" : "发起外部调研工作项"}
+        </button>}
       </fieldset>
     </article>
   );
+}
+
+function InvestigationPanel({ item, caseCode, onCommitted }: { item: SiteInvestigationItem; caseCode: string; onCommitted: () => void }) {
+  const [ownership, setOwnership] = useState("verified");
+  const [area, setArea] = useState("");
+  const [electricity, setElectricity] = useState("");
+  const [quote, setQuote] = useState("");
+  const [availableAt, setAvailableAt] = useState("");
+  const [permit, setPermit] = useState("eligible");
+  const [externalActor, setExternalActor] = useState("virtual-park-operator");
+  const [evidence, setEvidence] = useState("");
+  const [notes, setNotes] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const submitObservation = async (event: FormEvent) => {
+    event.preventDefault(); setBusy(true); setError("");
+    try {
+      const observedAt = new Date().toISOString();
+      await submitSiteInvestigationObservation(caseCode, item.request.world_run_id, {
+        schema_version: "1.0", observation_id: `site-observation-${crypto.randomUUID()}`,
+        investigation_request_id: item.request.investigation_request_id, proposal_id: item.request.proposal_id,
+        result: "completed", ownership_status: ownership, available_area_m2: Number(area), electricity_kva: Number(electricity),
+        quoted_amount: { value: quote, currency: "CNY", scale: 2 }, available_at: localDate(availableAt), permit_status: permit,
+        evidence_refs: evidence.split("\n").map((value) => value.trim()).filter(Boolean), notes: notes.trim(),
+        external_actor_id: externalActor.trim(), observed_at: observedAt,
+      });
+      onCommitted();
+    } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setBusy(false); }
+  };
+  return <article className={`plant-investigation-card ${item.status}`}>
+    <header><div><span>World wait · {item.work_item_status}</span><h3>{item.request.investigation_request_id}</h3></div><strong>{item.status === "observed" ? "可信事实已提交" : "等待园区运营方"}</strong></header>
+    <p>候选 {item.request.proposal_id} · 调研范围：{item.request.scope.join("、")}</p>
+    {item.observation ? <dl className="plant-investigation-facts"><div><dt>权属</dt><dd>{item.observation.ownership_status}</dd></div><div><dt>可用面积</dt><dd>{item.observation.available_area_m2} m²</dd></div><div><dt>电力</dt><dd>{item.observation.electricity_kva} kVA</dd></div><div><dt>正式报价</dt><dd>{cny(item.observation.quoted_amount.value)}</dd></div><div><dt>许可状态</dt><dd>{item.observation.permit_status}</dd></div></dl> :
+      <form className="plant-observation-form" onSubmit={submitObservation}>
+        <fieldset><legend>外部参与者回传实地调研事实</legend>
+          <label>外部参与者标识<input required value={externalActor} onChange={(e) => setExternalActor(e.target.value)} placeholder="park-operator-001" /></label>
+          <label>权属核验<select value={ownership} onChange={(e) => setOwnership(e.target.value)}><option value="verified">已核验</option><option value="conditional">有条件有效</option></select></label>
+          <label>实际可用面积（m²）<input required min="1" type="number" value={area} onChange={(e) => setArea(e.target.value)} /></label>
+          <label>可用电力（kVA）<input required min="1" type="number" value={electricity} onChange={(e) => setElectricity(e.target.value)} /></label>
+          <label>正式报价（CNY）<input required min="0.01" step="0.01" type="number" value={quote} onChange={(e) => setQuote(e.target.value)} /></label>
+          <label>最早可用时间<input required type="datetime-local" value={availableAt} onChange={(e) => setAvailableAt(e.target.value)} /></label>
+          <label>许可条件<select value={permit} onChange={(e) => setPermit(e.target.value)}><option value="eligible">满足</option><option value="conditional">有条件满足</option></select></label>
+          <label>证据引用（每行一项）<textarea required value={evidence} onChange={(e) => setEvidence(e.target.value)} placeholder="world-document:园区报价函-001" /></label>
+          <label>补充说明<textarea value={notes} onChange={(e) => setNotes(e.target.value)} /></label>
+        </fieldset>
+        {error && <p role="alert" className="plant-inline-error">{error}</p>}
+        <button disabled={busy}>{busy ? <LoaderCircle className="gx-spin" /> : <BadgeCheck />}{busy ? "正在校验并提交…" : "园区运营方确认并提交 Observation"}</button>
+        <small>提交后先进入 IAOS World Journal，再由 `site.investigation.observation.commit` 校验并完成工作项；不能直接写业务表。</small>
+      </form>}
+  </article>;
 }
 
 function PlantPlanningWorkspace() {
@@ -157,6 +220,8 @@ function PlantPlanningWorkspace() {
   const [reviews, setReviews] = useState<Record<string, ReviewState>>({});
   const [savedReviews, setSavedReviews] = useState<Record<string, boolean>>({});
   const [reviewBusy, setReviewBusy] = useState("");
+  const [investigations, setInvestigations] = useState<SiteInvestigationItem[]>([]);
+  const [investigationBusy, setInvestigationBusy] = useState("");
   const [nextRevision, setNextRevision] = useState(1);
   const [manualOpen, setManualOpen] = useState(false);
   const [manualName, setManualName] = useState("");
@@ -168,12 +233,14 @@ function PlantPlanningWorkspace() {
   const tenant = routeParams.get("tenant") ?? localStorage.getItem("aese_iaos_tenant_id") ?? localStorage.getItem("iaos_tenant_id") ?? "";
   const caseCode = routeParams.get("case") ?? localStorage.getItem("aese_genesis_case_code") ?? "";
   const requirementID = `facility-requirement-${caseCode || "draft"}`;
+  const refreshInvestigations = async () => setInvestigations((await loadSiteInvestigations(caseCode)).items ?? []);
   useEffect(() => {
     const controller = new AbortController();
     Promise.all([
       loadPlantPlanningStatus(controller.signal).then(setStatus),
       loadPlantFinancialConstraint(caseCode, controller.signal).then(setFinancial),
       loadPlantRequirement(requirementID, controller.signal).then((existing) => setNextRevision((existing?.revision ?? 0) + 1)),
+      loadSiteInvestigations(caseCode, controller.signal).then((result) => setInvestigations(result.items ?? [])),
     ]).catch((reason) => { if (reason.name !== "AbortError") setError(String(reason)); });
     return () => controller.abort();
   }, [caseCode, requirementID]);
@@ -266,6 +333,22 @@ function PlantPlanningWorkspace() {
     setManualName(""); setManualRationale(""); setManualAmount(""); setManualOpen(false);
   };
 
+  const startInvestigation = async (proposalID: string) => {
+    if (!proposalSet) return;
+    setInvestigationBusy(proposalID); setError("");
+    try {
+      const now = new Date().toISOString();
+      await requestSiteInvestigation({
+        schema_version: "1.0", investigation_request_id: `site-investigation-${crypto.randomUUID()}`,
+        case_code: caseCode, proposal_set_id: proposalSet.proposal_set_id, proposal_id: proposalID,
+        expected_revision: proposalSet.revision, world_run_id: `plant-build-${caseCode}`,
+        scope: ["ownership", "commercial_quote", "available_area", "electricity_capacity", "available_date", "permit"],
+        requested_by: "resolved-by-aese", requested_at: now, status: "waiting_world",
+      });
+      await refreshInvestigations();
+    } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setInvestigationBusy(""); }
+  };
+
   return (
     <section className="plant-planning-workspace" aria-labelledby="plant-planning-title">
       <header className="plant-planning-heading">
@@ -301,7 +384,8 @@ function PlantPlanningWorkspace() {
       {status?.state === "not_configured" && <p className="plant-inline-warning" role="status"><TriangleAlert />外部模型未启用，不能生成虚拟固定候选；请配置模型，或使用“人工新增候选”。</p>}
       {error && <p className="plant-inline-error" role="alert">{error}</p>}
       {manualOpen && <form className="plant-manual-form" onSubmit={addManual}><h3>人工新增候选草稿</h3><label>候选名称<input required value={manualName} onChange={(e) => setManualName(e.target.value)} /></label><label>业务理由<textarea required value={manualRationale} onChange={(e) => setManualRationale(e.target.value)} /></label><label>初始估算（CNY）<input required min="0" step="0.01" type="number" value={manualAmount} onChange={(e) => setManualAmount(e.target.value)} /></label><button>加入本地审阅列表</button></form>}
-      {proposalSet && <section className="plant-proposals" aria-live="polite"><header><div><span>{proposalSet.status}</span><h2>候选方案 · {proposalSet.proposals.length}</h2></div><small>{proposalSet.evidence.provider} / {proposalSet.evidence.model} · {proposalSet.evidence.prompt_version}</small></header><div className="plant-proposal-grid">{proposalSet.proposals.map((proposal) => <ProposalCard key={proposal.proposal_id} proposal={proposal} review={reviews[proposal.proposal_id]} onReview={(review) => { setReviews((current) => ({ ...current, [proposal.proposal_id]: review })); setSavedReviews((current) => ({ ...current, [proposal.proposal_id]: false })); }} onSubmitReview={() => submitReview(proposal.proposal_id)} saved={Boolean(savedReviews[proposal.proposal_id])} busy={reviewBusy === proposal.proposal_id} />)}</div><p className="plant-persistence-note"><BadgeCheck />Agent 候选和相应人工审阅通过 IAOS Capability 保存；人工新增候选在其正式 Capability 完成前明确保留为本地草稿。“采纳调研”不等于投资批准或合同签署。</p></section>}
+      {proposalSet && <section className="plant-proposals" aria-live="polite"><header><div><span>{proposalSet.status}</span><h2>候选方案 · {proposalSet.proposals.length}</h2></div><small>{proposalSet.evidence.provider} / {proposalSet.evidence.model} · {proposalSet.evidence.prompt_version}</small></header><div className="plant-proposal-grid">{proposalSet.proposals.map((proposal) => <ProposalCard key={proposal.proposal_id} proposal={proposal} review={reviews[proposal.proposal_id]} onReview={(review) => { setReviews((current) => ({ ...current, [proposal.proposal_id]: review })); setSavedReviews((current) => ({ ...current, [proposal.proposal_id]: false })); }} onSubmitReview={() => submitReview(proposal.proposal_id)} saved={Boolean(savedReviews[proposal.proposal_id])} busy={reviewBusy === proposal.proposal_id} investigation={investigations.find((item) => item.request.proposal_id === proposal.proposal_id)} investigationBusy={investigationBusy === proposal.proposal_id} onRequestInvestigation={() => startInvestigation(proposal.proposal_id)} />)}</div><p className="plant-persistence-note"><BadgeCheck />Agent 候选和相应人工审阅通过 IAOS Capability 保存；人工新增候选在其正式 Capability 完成前明确保留为本地草稿。“采纳调研”不等于投资批准或合同签署。</p></section>}
+      {investigations.length > 0 && <section className="plant-investigations" aria-live="polite"><header><div><span>facility.site.investigation.v1</span><h2>场址外部调研工作项</h2></div><small>{investigations.filter((item) => item.status === "waiting_world").length} 条等待 World</small></header>{investigations.map((item) => <InvestigationPanel key={item.request.investigation_request_id} item={item} caseCode={caseCode} onCommitted={refreshInvestigations} />)}</section>}
     </section>
   );
 }

@@ -137,6 +137,20 @@ func (c *Client) PlantRequirement(ctx context.Context, requirementID string) (js
 	return out, nil
 }
 
+func (c *Client) PlantInvestigations(ctx context.Context, caseCode string) (json.RawMessage, error) {
+	caseCode = strings.TrimSpace(caseCode)
+	if caseCode == "" {
+		return nil, fmt.Errorf("case_code is required")
+	}
+	query := url.Values{}
+	query.Set("case_code", caseCode)
+	var out json.RawMessage
+	if err := c.request(ctx, http.MethodGet, "api/v1/genesis/plant/interactive/investigations?"+query.Encode(), nil, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 type UpsertAction string
 
 const (

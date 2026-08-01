@@ -152,6 +152,45 @@ export type SiteProposalReviewInput = {
   expected_revision: number;
 };
 
+export type SiteInvestigationRequest = {
+  schema_version: "1.0";
+  investigation_request_id: string;
+  case_code: string;
+  proposal_set_id: string;
+  proposal_id: string;
+  expected_revision: number;
+  world_run_id: string;
+  scope: string[];
+  requested_by: string;
+  requested_at: string;
+  status: "waiting_world";
+};
+
+export type SiteInvestigationObservation = {
+  schema_version: "1.0";
+  observation_id: string;
+  investigation_request_id: string;
+  proposal_id: string;
+  result: "completed";
+  ownership_status: string;
+  available_area_m2: number;
+  electricity_kva: number;
+  quoted_amount: FacilityMoney;
+  available_at: string;
+  permit_status: string;
+  evidence_refs: string[];
+  notes: string;
+  external_actor_id: string;
+  observed_at: string;
+};
+
+export type SiteInvestigationItem = {
+  request: SiteInvestigationRequest;
+  status: "waiting_world" | "observed" | "cancelled";
+  work_item_status: "waiting_world" | "completed" | "cancelled";
+  observation?: SiteInvestigationObservation;
+};
+
 export async function submitPlantProposalReview(input: SiteProposalReviewInput) {
   const response = await fetch("/api/aese/v1/world/plant-build/reviews", {
     method: "POST",
@@ -162,6 +201,31 @@ export async function submitPlantProposalReview(input: SiteProposalReviewInput) 
     throw new Error(`保存候选审阅 ${response.status}: ${await response.text()}`);
   }
   return response.json() as Promise<{ status: "committed"; proposal_review: SiteProposalReviewInput & { reviewed_by: string; reviewed_at: string } }>;
+}
+
+export async function loadSiteInvestigations(caseCode: string, signal?: AbortSignal) {
+  const response = await fetch(`/api/aese/v1/world/plant-build/investigations?case_code=${encodeURIComponent(caseCode)}`, {
+    headers: iaosHeaders(), signal,
+  });
+  if (!response.ok) throw new Error(`场址调研工作项 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ items: SiteInvestigationItem[] }>;
+}
+
+export async function requestSiteInvestigation(input: SiteInvestigationRequest) {
+  const response = await fetch("/api/aese/v1/world/plant-build/investigations", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() }, body: JSON.stringify(input),
+  });
+  if (!response.ok) throw new Error(`发起场址调研 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ status: "waiting_world"; investigation_request: SiteInvestigationRequest }>;
+}
+
+export async function submitSiteInvestigationObservation(caseCode: string, worldRunID: string, observation: SiteInvestigationObservation) {
+  const response = await fetch("/api/aese/v1/world/plant-build/observations", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() },
+    body: JSON.stringify({ case_code: caseCode, world_run_id: worldRunID, observation }),
+  });
+  if (!response.ok) throw new Error(`提交外部调研事实 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ status: "committed"; world_message_id: string; observation: SiteInvestigationObservation }>;
 }
 export async function loadPlantBuild(
   signal?: AbortSignal,

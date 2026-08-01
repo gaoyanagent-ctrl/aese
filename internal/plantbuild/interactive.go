@@ -108,6 +108,38 @@ type ProposalReview struct {
 	ExpectedRevision int    `json:"expected_revision"`
 }
 
+type InvestigationRequest struct {
+	SchemaVersion          string   `json:"schema_version"`
+	InvestigationRequestID string   `json:"investigation_request_id"`
+	CaseCode               string   `json:"case_code"`
+	ProposalSetID          string   `json:"proposal_set_id"`
+	ProposalID             string   `json:"proposal_id"`
+	ExpectedRevision       int      `json:"expected_revision"`
+	WorldRunID             string   `json:"world_run_id"`
+	Scope                  []string `json:"scope"`
+	RequestedBy            string   `json:"requested_by"`
+	RequestedAt            string   `json:"requested_at"`
+	Status                 string   `json:"status"`
+}
+
+type InvestigationObservation struct {
+	SchemaVersion          string   `json:"schema_version"`
+	ObservationID          string   `json:"observation_id"`
+	InvestigationRequestID string   `json:"investigation_request_id"`
+	ProposalID             string   `json:"proposal_id"`
+	Result                 string   `json:"result"`
+	OwnershipStatus        string   `json:"ownership_status"`
+	AvailableAreaM2        int      `json:"available_area_m2"`
+	ElectricityKVA         int      `json:"electricity_kva"`
+	QuotedAmount           Money    `json:"quoted_amount"`
+	AvailableAt            string   `json:"available_at"`
+	PermitStatus           string   `json:"permit_status"`
+	EvidenceRefs           []string `json:"evidence_refs"`
+	Notes                  string   `json:"notes"`
+	ExternalActorID        string   `json:"external_actor_id"`
+	ObservedAt             string   `json:"observed_at"`
+}
+
 type PlanningProvider interface {
 	Status() PlanningProviderStatus
 	Generate(context.Context, FacilityRequirement) (ProposalSet, error)
@@ -274,6 +306,44 @@ func ValidateReview(v ProposalReview) error {
 	}
 	if _, err := time.Parse(time.RFC3339, v.ReviewedAt); err != nil {
 		return fmt.Errorf("reviewed_at must be RFC3339: %w", err)
+	}
+	return nil
+}
+
+func ValidateInvestigationRequest(v InvestigationRequest) error {
+	if v.SchemaVersion != InteractiveSchemaVersion || v.InvestigationRequestID == "" || v.CaseCode == "" ||
+		v.ProposalSetID == "" || v.ProposalID == "" || v.ExpectedRevision < 1 || v.WorldRunID == "" ||
+		v.RequestedBy == "" || v.Status != "waiting_world" || len(v.Scope) == 0 {
+		return errors.New("investigation request is incomplete")
+	}
+	if _, err := time.Parse(time.RFC3339, v.RequestedAt); err != nil {
+		return fmt.Errorf("requested_at must be RFC3339: %w", err)
+	}
+	allowed := map[string]bool{"ownership": true, "commercial_quote": true, "available_area": true, "electricity_capacity": true, "available_date": true, "permit": true}
+	seen := map[string]bool{}
+	for _, item := range v.Scope {
+		if !allowed[item] || seen[item] {
+			return fmt.Errorf("unsupported or duplicated investigation scope: %s", item)
+		}
+		seen[item] = true
+	}
+	return nil
+}
+
+func ValidateInvestigationObservation(v InvestigationObservation) error {
+	if v.SchemaVersion != InteractiveSchemaVersion || v.ObservationID == "" || v.InvestigationRequestID == "" ||
+		v.ProposalID == "" || v.Result != "completed" || v.OwnershipStatus == "" || v.AvailableAreaM2 <= 0 ||
+		v.ElectricityKVA <= 0 || v.PermitStatus == "" || len(v.EvidenceRefs) == 0 || v.ExternalActorID == "" {
+		return errors.New("completed investigation observation is incomplete")
+	}
+	if err := validateMoney(v.QuotedAmount); err != nil {
+		return fmt.Errorf("quoted_amount: %w", err)
+	}
+	if _, err := time.Parse(time.RFC3339, v.AvailableAt); err != nil {
+		return fmt.Errorf("available_at must be RFC3339: %w", err)
+	}
+	if _, err := time.Parse(time.RFC3339, v.ObservedAt); err != nil {
+		return fmt.Errorf("observed_at must be RFC3339: %w", err)
 	}
 	return nil
 }

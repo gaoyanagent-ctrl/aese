@@ -18,13 +18,13 @@
 
 最后更新：2026-08-01。
 
-2026-08-01 M10 交互首个纵切：Plant Build Play 已能从 IAOS 已过账银行科目和已批
-预算读取只读 snapshot，人员填写 Facility Requirement 后由真实 provider 生成可解释
-ProposalSet，并通过 AESE 定向 BFF 以 `facility.requirement.define`、
-`site.proposal.record`、`site.proposal.review` 保存需求、候选和人工审阅。IAOS 首个权威切片
-具备 tenant RLS、Capability 写门、幂等、版本、Audit 与 Outbox，Agent 技术证据保存在
-AESE CreativeJob。该纵切尚未实现调查请求、Effective Process Artifact、World 调研、
-正式选址/投资审批、项目/WBS、施工、付款、验收和工程财务，因此 M10 仍为
+2026-08-01 M10 交互纵切：Plant Build Play 已能从 IAOS 已过账银行科目和已批预算读取
+只读 snapshot，人员填写 Facility Requirement 后由真实 provider 生成可解释 ProposalSet，
+并经 AESE 定向 BFF 保存需求、候选和人工审阅。对已采纳候选可创建
+`facility.site.investigation.v1` 持久 `waiting_world` 工作项和 World Intent；AESE 外部参与者
+以结构化表单返回报价、权属、面积、容量、许可和日期，IAOS 只消费匹配的受信 Journal
+Observation 并完成工作项。该纵切尚未实现完整 Effective Process Run、正式评分/选址和
+投资审批、项目/WBS、施工、付款、验收及工程财务，因此 M10 仍为
 `Reference Replay Complete; Interactive Revision Pending`。
 
 2026-07-31 M9 原子能力运行合同：IAOS DES-076 已交付 19 项真实可执行 V1 原子能力
@@ -115,7 +115,7 @@ Schema/UI/Agent Context、Capability API/Agent Tool 和 Process Run 收敛到同
 | GX Enterprise Genesis Game Experience | AI 企业身份、人工/Agent 协作和 2.5D 世界中的 M9 游戏化开局 | Completed | DES-028/DES-029、从空白 case 创建、23 工作项游戏内操作、G1–G7、三个 World wait、首页 AI 创意官可访问入口与三视口 live 浏览器验收 |
 | GX-ZERO Zero-start Enterprise Genesis | 从产品主页创建独立 tenant、World Run、真实 AI 企业身份和 M9 企业 | Completed | IAOS Player 注册/密码登录与既有账号安全提升、生产 Workspace 控制面、八 checkpoint、tenant-only owner session、旧 local Workspace 安全接管、五步向导、持久 CreativeJob、动态 Player subject，以及全新 Workspace 的 23/23 节点、7 审批门、3 World wait、6 Agent run 验收 |
 | M9-FIN Manufacturing Finance Foundation | 在 M9 建立财务组织、账套、科目、期初资本会计和开业报表，并在 M10–M13 接通 AP/AR/资金/资产/成本/总账 | F11A Complete; F5E Deferred; M10–M13 Planned | M9 开业纵切、多组织/共享数据、账簿/伙伴/产品已交付；Runtime 2.11.0 新增通用凭证过账能力并修复凭证主子写入所有者；模块期间和 F15–F35 仍不得计入完成 |
-| M10 Genesis Plant Build | Agent 辅助候选、人工选址、参数化投资、场地控制、设施项目、公用工程、异常重排与验收 | Reference Replay Complete; Interactive Revision Pending | 已实现 M9 机器终态→M10 上下文交接、AESE 生命周期入口、`业务智造层 → M10 工厂规划` 工作台、只读 IAOS 财务快照、参数化 Requirement、真实 Agent Proposal、CreativeJob 证据、AESE BFF 和 IAOS Human Review 首个纵切；调查/Process/World/项目/WBS/工程财务与全链现场验收仍未完成 |
+| M10 Genesis Plant Build | Agent 辅助候选、人工选址、参数化投资、场地控制、设施项目、公用工程、异常重排与验收 | Reference Replay Complete; Interactive Revision Pending | 已实现 M9→M10 上下文交接、M10 工作台、只读财务快照、参数化 Requirement、真实 Agent Proposal、Human Review、调查请求、持久 World wait、Intent 和受信外部 Observation；完整选址 Process/审批、项目/WBS/工程财务与全链现场验收仍未完成 |
 | M11 Genesis Capability Build | 资金补足、设备/实验室/仓储能力、核心团队与岗位资格 | Reference Replay Complete; D22 Pending | hctm-genesis@0.4.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
 | M12 Genesis Industrialization | RFQ/定点、产品/工艺、供应商/工装、APQP、试制、PPAP 与量产批准 | Reference Replay Complete; D22 Pending | hctm-genesis@0.5.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
 | M13 Genesis First Delivery | 正式 O2D、三批交付、客户接受、开票/回款、实际成本与项目毛利 | Reference Replay Complete; D22 Pending | hctm-genesis@0.6.0 与既有 evidence 仅证明确定性 replay；交互式工作项未验收 |
@@ -138,9 +138,10 @@ M3、M3V、M4、M5、M6、M7 和跨里程碑的 X1 System Atlas 已完成。联�
 
 PLAN-M8-001 至 PLAN-M24-001 均已完成。M17-M24 严格消费前一 terminal，统一证据输出 `industry_simulation_platform_ready=true`。
 
-当前 active 主计划为 `PLAN-M10-INTERACTIVE-001`；当前可操作边界只到
-FinancialConstraint → FacilityRequirement → Agent Proposal → Human Review，不得把
-Review 解释为审批，也不得把 Agent 估算解释为外部报价。`PLAN-GXZ-001` 与 M9 场景知识计划已完成，`PLAN-M9-FIN-001` 继续作为跨 M10–M13 的财务依赖子计划。`PLAN-M9-NATIVE-001` 曾因通用平台资产缺口恢复为 active remediation。专用状态机、
+当前 active 主计划为 `PLAN-M10-INTERACTIVE-001`；当前可操作边界为
+FinancialConstraint → FacilityRequirement → Agent Proposal → Human Review →
+Investigation Request → World Observation。Review 不等于审批，Agent 估算不等于外部报价；
+只有匹配 Intent 的受信 Observation 才是外部事实。`PLAN-GXZ-001` 与 M9 场景知识计划已完成，`PLAN-M9-FIN-001` 继续作为跨 M10–M13 的财务依赖子计划。`PLAN-M9-NATIVE-001` 曾因通用平台资产缺口恢复为 active remediation。专用状态机、
 事务、身份、G1–G7、World Bridge 与 trace 证据保留；完成 D19–D21 的通用资产注册、
 十工作区、逐步骤追踪及可解释配置合同已经交付，但用户验收证明这些查看入口不能替代
 持久化工作项和真实参与者推进。M9N 因 DES-027 D22 再次打开；只有人工、Agent、审批、

@@ -282,6 +282,8 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/world/plant-build/requirements/:requirement_id",
 			"/api/aese/v1/world/plant-build/proposals",
 			"/api/aese/v1/world/plant-build/reviews",
+			"/api/aese/v1/world/plant-build/investigations",
+			"/api/aese/v1/world/plant-build/observations",
 			"/api/aese/v1/world/capability-build",
 			"/api/aese/v1/world/industrialization",
 			"/api/aese/v1/world/first-delivery",
@@ -837,6 +839,91 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "committed", "proposal_review": review})
 			return
 		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "investigations" && r.Method == http.MethodGet {
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, _, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_investigation_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			result, err := authority.PlantInvestigations(ctx, r.URL.Query().Get("case_code"))
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_investigations_unavailable")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(result)
+			return
+		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "investigations" && r.Method == http.MethodPost {
+			var request plantbuild.InvestigationRequest
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &request); err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_site_investigation_request", err.Error(), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_investigation_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			request.RequestedBy = actorID
+			request.Status = "waiting_world"
+			if err := plantbuild.ValidateInvestigationRequest(request); err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "invalid_site_investigation_request", err.Error(), false, "", "")
+				return
+			}
+			if err := postPlantAuthorityCommand(ctx, authority, "site.investigation.request", actorID, request.CaseCode, request.InvestigationRequestID, request.ExpectedRevision, request); err != nil {
+				s.writePlantAuthorityError(w, err, "site_investigation_request_not_committed")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "waiting_world", "investigation_request": request})
+			return
+		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "observations" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode    string                              `json:"case_code"`
+				WorldRunID  string                              `json:"world_run_id"`
+				Observation plantbuild.InvestigationObservation `json:"observation"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_site_investigation_observation", err.Error(), false, "", "")
+				return
+			}
+			if err := plantbuild.ValidateInvestigationObservation(input.Observation); err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "invalid_site_investigation_observation", err.Error(), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_observation_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			correlationID := "corr-m10-" + strings.TrimSpace(input.CaseCode)
+			messageID := "world-" + input.Observation.ObservationID
+			envelope := map[string]any{
+				"schema_version": "1.0", "message_id": messageID, "kind": "observation", "tenant_id": tenantID,
+				"world_pack_key": "genesis-plant-planning", "world_pack_version": "1.0.0", "world_run_id": input.WorldRunID,
+				"branch_id": "main", "sim_occurred_at": input.Observation.ObservedAt, "correlation_id": correlationID,
+				"idempotency_key": messageID, "producer": map[string]string{"system": "aese", "component": "plant-investigation-world"},
+				"subject_ref":  map[string]string{"type": "site_investigation_request", "code": input.Observation.InvestigationRequestID},
+				"payload_type": "site.investigation.observed.v1", "payload": input.Observation,
+			}
+			rawEnvelope, _ := json.Marshal(envelope)
+			if _, err := authority.PostGovernedCommand(ctx, "api/v1/world-bridge/observations", rawEnvelope); err != nil {
+				s.writePlantAuthorityError(w, err, "site_investigation_world_observation_not_accepted")
+				return
+			}
+			commit := map[string]any{"schema_version": "1.0", "investigation_request_id": input.Observation.InvestigationRequestID, "world_message_id": messageID}
+			if err := postPlantAuthorityCommand(ctx, authority, "site.investigation.observation.commit", actorID, input.CaseCode, input.Observation.ObservationID, 1, commit); err != nil {
+				s.writePlantAuthorityError(w, err, "site_investigation_observation_not_committed")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "committed", "world_message_id": messageID, "observation": input.Observation})
+			return
+		}
 		if len(rest) != 2 || r.Method != http.MethodGet {
 			s.writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "method not allowed", false, "", "")
 			return
@@ -1106,6 +1193,10 @@ func postPlantAuthorityCommand(ctx context.Context, client *iaosclient.Client, c
 		field = "proposal_set"
 	case "site.proposal.review":
 		field = "proposal_review"
+	case "site.investigation.request":
+		field = "investigation_request"
+	case "site.investigation.observation.commit":
+		field = "investigation_observation"
 	default:
 		return fmt.Errorf("unsupported M10 capability %q", capabilityCode)
 	}

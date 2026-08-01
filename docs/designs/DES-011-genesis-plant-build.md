@@ -278,9 +278,11 @@ genesis.facility.accepted.v1
 2. 用户填写 `FacilityRequirement` 后，浏览器只调用 AESE 同源 BFF；AESE 严格校验合同、调用已配置的 `plant-planning-agent` provider，并保存模型、prompt、request、token、输入/输出 hash 与校验结果等 CreativeJob 技术证据。
 3. AESE 分别以 `facility.requirement.define` 和 `site.proposal.record` 向 IAOS 提交 Requirement 与 candidate-only ProposalSet。IAOS 使用当前 tenant/actor、FORCE RLS、Capability Execution、幂等键、版本检查、Audit 和 Outbox 保存业务事实。
 4. 项目负责人可对候选执行采纳调研、退回重生成或淘汰，并填写业务理由；AESE 从 IAOS profile 解析实际人员身份，再以 `site.proposal.review` 保存审阅，浏览器不能指定 `reviewed_by`。
-5. 外部模型未配置、财务快照缺失或已变化、Agent 输出不满足 Schema、候选超过投资申请上限、身份/权限不足或 revision 冲突时失败关闭，不用固定候选兜底。
+5. 对已保存且审阅结论为“采纳调研”的候选，人员可发起外部调研。IAOS 创建 `facility.site.investigation.v1` 持久 `waiting_world` 工作项，并通过 World Bridge 写入带 correlation/subject 的 Intent。
+6. AESE 外部参与者使用结构化表单返回权属、可用面积、电力容量、正式报价、可用日期、许可、证据引用和备注。AESE 必须先写受信 World Journal Observation；IAOS 的 `site.investigation.observation.commit` 只消费与 Intent/correlation 匹配的 Journal 事实，保存权威 Observation 并完成工作项。
+7. 外部模型未配置、财务快照缺失或已变化、Agent 输出不满足 Schema、候选超过投资申请上限、身份/权限不足、revision 冲突或 World Observation 不受信时失败关闭，不用固定候选或页面 JSON 兜底。
 
-以下仍未实现：人工新增候选的权威提交、调查请求、human task → agent task → human review → world wait 的 Effective Process Artifact、World 报价/权属/容量/许可 Observation、正式比较与选址审批、场地控制、项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
+以下仍未实现：人工新增候选的权威提交、从 Requirement 到选址审批的完整 Effective Process Run、外部事实评分与正式选址审批、场地控制、项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
 
 ## 16. 用户配置、操作、验证与恢复
 
@@ -293,6 +295,7 @@ M10 的 IAOS 用户入口是左侧导航的 `业务智造层 → M10 工厂规�
 - `设施需求`：查看人员提交的版本化 Requirement。
 - `Agent 候选方案`：查看 candidate-only ProposalSet、假设、风险和待验证事实。
 - `人工评审`：查看采纳调研、退回或淘汰及其理由；评审不等于投资审批。
+- `外部调研工作项`：查看调查请求、`facility.site.investigation.v1`、等待能力、World 状态与已返回 Observation。
 - `穿透证据`：解释 IAOS 业务事实、AESE Agent 技术证据和后续 World Observation 的关系。
 
 用户先在工作台选择一个满足 M9 前置条件的设立案件，再点击 `打开 AESE M10 World` 进入
@@ -324,6 +327,7 @@ AESE 首页同时把原“世界地图”命名为 `企业生命周期 · M9–M
 3. 点击“保存需求并让 Agent 生成候选”。成功表示 Requirement 与 ProposalSet 均已进入 IAOS；这不表示投资已获批。
 4. 阅读每个候选的业务理由、金额/工期区间、估算依据、假设、待验证事实、风险、来源和置信度。
 5. 选择“采纳调研”“退回重生成”或“淘汰”，填写至少 6 个字符的理由并提交。成功表示 Review 已保存；“采纳调研”仍不等于外部事实已确认。
+6. 对已采纳候选点击“发起外部调研工作项”。页面显示 `waiting_world` 后，模拟登记/园区/产权等外部角色填写权属、面积、电力、正式报价、可用日期、许可和证据引用并提交；只有 IAOS 显示工作项 `completed` 才代表事实已进入权威闭环。
 
 ### 16.3 关系与证据
 

@@ -64,6 +64,9 @@ describe("PlantBuildPlay interactive planning", () => {
       if (path.endsWith("planning-status")) return { ok: true, json: async () => ({ state: "connected", provider: "MiniMax", model: "MiniMax-M2.5", prompt_version: "plant-planning-v1" }) };
       if (path.includes("financial-constraints")) return { ok: true, json: async () => ({ case_code: "INC-GX-TEST", legal_entity_code: "LE-GX-TEST", financial_constraint: { available_cash: { value: "20000000.00", currency: "CNY", scale: 2 }, approved_budget: { value: "15000000.00", currency: "CNY", scale: 2 }, cash_source_ref: "gl:BOOK:1002", budget_source_ref: "budget:BUD-1", snapshot_hash: "sha256:authority" } }) };
       if (path.includes("/requirements/")) return { ok: true, status: 200, json: async () => ({ revision: 3 }) };
+      if (path.endsWith("investigations")) return init?.method === "POST"
+        ? { ok: true, json: async () => ({ status: "waiting_world", investigation_request: {}, work_item: {} }) }
+        : { ok: true, json: async () => ({ items: [] }) };
       if (path.endsWith("reviews")) return { ok: true, json: async () => ({ status: "committed", proposal_review: {} }) };
       if (path.endsWith("proposals")) return { ok: true, json: async () => ({ proposal_set: {
         schema_version: "1.0", proposal_set_id: "set-1", requirement_id: "facility-requirement-INC-GX-TEST", revision: 1, status: "candidate_only",
@@ -93,6 +96,8 @@ describe("PlantBuildPlay interactive planning", () => {
     fireEvent.change(screen.getByLabelText("审阅理由"), { target: { value: "优先核验供电容量和消防改造周期" } });
     fireEvent.click(screen.getByRole("button", { name: "提交审阅到 IAOS" }));
     await waitFor(() => expect(screen.getByRole("button", { name: "已保存审阅" })).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "发起外部调研工作项" }));
+    await waitFor(() => expect(fetchMock.mock.calls.some(([path, init]) => String(path).endsWith("investigations") && init?.method === "POST")).toBe(true));
     const request = JSON.parse(fetchMock.mock.calls.find(([path]) => String(path).endsWith("proposals"))?.[1]?.body as string);
     expect(request.investment_request.value).toBe("15000000");
     expect(request.revision).toBe(4);
@@ -101,5 +106,8 @@ describe("PlantBuildPlay interactive planning", () => {
     const review = JSON.parse(fetchMock.mock.calls.find(([path]) => String(path).endsWith("reviews"))?.[1]?.body as string);
     expect(review.action).toBe("adopt_for_investigation");
     expect(review.proposal_set_id).toBe("set-1");
+    const investigation = JSON.parse(fetchMock.mock.calls.find(([path, init]) => String(path).endsWith("investigations") && init?.method === "POST")?.[1]?.body as string);
+    expect(investigation.proposal_id).toBe("site-1");
+    expect(investigation.scope).toContain("commercial_quote");
   });
 });

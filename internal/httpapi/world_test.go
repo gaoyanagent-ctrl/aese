@@ -285,6 +285,34 @@ func TestPlantProposalReviewOverwritesActorFromAuthenticatedProfile(t *testing.T
 	}
 }
 
+func TestPlantInvestigationObservationUsesWorldBridgeBeforeCapabilityCommit(t *testing.T) {
+	paths := []string{}
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/v1/profile" {
+			_, _ = w.Write([]byte(`{"username":"project-owner","tenant_id":"tenant-a"}`))
+			return
+		}
+		paths = append(paths, r.URL.Path)
+		w.WriteHeader(http.StatusCreated)
+		_, _ = w.Write([]byte(`{"status":"committed"}`))
+	}))
+	defer iaos.Close()
+	server := New(Config{IAOSBaseURL: iaos.URL})
+	body := `{"case_code":"INC-1","world_run_id":"plant-build-INC-1","observation":{"schema_version":"1.0","observation_id":"OBS-1","investigation_request_id":"INV-1","proposal_id":"SITE-1","result":"completed","ownership_status":"verified","available_area_m2":9000,"electricity_kva":3000,"quoted_amount":{"value":"9800000.00","currency":"CNY","scale":2},"available_at":"2026-10-01T00:00:00Z","permit_status":"eligible","evidence_refs":["world-document:QUOTE-1"],"notes":"现场核验完成","external_actor_id":"virtual-park-operator","observed_at":"2026-08-01T11:00:00Z"}}`
+	req := httptest.NewRequest(http.MethodPost, "/api/aese/v1/world/plant-build/observations", strings.NewReader(body))
+	req.Header.Set("Authorization", "Bearer owner-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-a")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusCreated {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
+	want := "/api/v1/world-bridge/observations,/api/v1/genesis/plant/interactive/actions"
+	if strings.Join(paths, ",") != want {
+		t.Fatalf("paths=%v, want governed World-first order", paths)
+	}
+}
+
 func TestAESE3CompletionAPI(t *testing.T) {
 	server := New(Config{})
 	req := httptest.NewRequest(http.MethodGet, "/api/aese/v1/world/aese3", nil)

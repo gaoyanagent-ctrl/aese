@@ -60,6 +60,21 @@ func TestProposalReviewRequiresReasonAndHumanIdentity(t *testing.T) {
 	}
 }
 
+func TestInvestigationContractsRequireTraceableWorldFacts(t *testing.T) {
+	request := InvestigationRequest{SchemaVersion: "1.0", InvestigationRequestID: "INV-1", CaseCode: "INC-1", ProposalSetID: "SET-1", ProposalID: "P-1", ExpectedRevision: 1, WorldRunID: "world-1", Scope: []string{"ownership"}, RequestedBy: "project-lead", RequestedAt: "2026-08-01T10:00:00Z", Status: "waiting_world"}
+	if err := ValidateInvestigationRequest(request); err != nil {
+		t.Fatal(err)
+	}
+	observation := InvestigationObservation{SchemaVersion: "1.0", ObservationID: "OBS-1", InvestigationRequestID: "INV-1", ProposalID: "P-1", Result: "completed", OwnershipStatus: "verified", AvailableAreaM2: 9000, ElectricityKVA: 3000, QuotedAmount: Money{"9800000.00", "CNY", 2}, AvailableAt: "2026-10-01T00:00:00Z", PermitStatus: "eligible", EvidenceRefs: []string{"world-document:QUOTE-1"}, ExternalActorID: "park-operator", ObservedAt: "2026-08-01T11:00:00Z"}
+	if err := ValidateInvestigationObservation(observation); err != nil {
+		t.Fatal(err)
+	}
+	observation.EvidenceRefs = nil
+	if ValidateInvestigationObservation(observation) == nil {
+		t.Fatal("observation without evidence accepted")
+	}
+}
+
 func TestAIPlanningProviderProducesValidatedCandidateOnlySet(t *testing.T) {
 	content := `{"proposals":[{"option_type":"leased_shell","display_name":"快速租赁改造","business_rationale":"缩短投产周期","estimated_amount":{"minimum":{"value":"12000000.00","currency":"CNY","scale":2},"likely":{"value":"15000000.00","currency":"CNY","scale":2},"maximum":{"value":"18000000.00","currency":"CNY","scale":2},"basis":"需求参数与待验证市场估算"},"estimated_schedule":{"earliest":"2026-10-01T00:00:00+08:00","likely":"2026-11-01T00:00:00+08:00","latest":"2026-12-01T00:00:00+08:00"},"assumptions":["存在标准厂房"],"facts_required":["租赁报价"],"risks":["增容延期"],"source_refs":["requirement:REQ-1"],"confidence":"0.62"},{"option_type":"build_to_suit","display_name":"定制代建","business_rationale":"平衡控制权和周期","estimated_amount":{"minimum":{"value":"16000000.00","currency":"CNY","scale":2},"likely":{"value":"18000000.00","currency":"CNY","scale":2},"maximum":{"value":"20000000.00","currency":"CNY","scale":2},"basis":"需求参数与待验证市场估算"},"estimated_schedule":{"earliest":"2026-11-01T00:00:00+08:00","likely":"2026-12-01T00:00:00+08:00","latest":"2027-01-01T00:00:00+08:00"},"assumptions":["园区可代建"],"facts_required":["交付承诺"],"risks":["承包商履约"],"source_refs":["requirement:REQ-1"],"confidence":"0.55"}]}`
 	provider := AIPlanningProvider{Completer: planningCompleterStub{content}, Provider: "MiniMax", Model: "MiniMax-M3", Now: func() time.Time { return time.Date(2026, 8, 1, 10, 0, 0, 0, time.UTC) }}
@@ -78,7 +93,7 @@ func TestAIPlanningProviderProducesValidatedCandidateOnlySet(t *testing.T) {
 
 func TestAIPlanningProviderRejectsMalformedOrUngroundedOutput(t *testing.T) {
 	for name, content := range map[string]string{
-		"bad_json": `{not-json}`,
+		"bad_json":   `{not-json}`,
 		"no_sources": `{"proposals":[{"option_type":"leased_shell","display_name":"方案一","business_rationale":"用于验证无来源失败关闭","estimated_amount":{"minimum":{"value":"1.00","currency":"CNY","scale":2},"likely":{"value":"2.00","currency":"CNY","scale":2},"maximum":{"value":"3.00","currency":"CNY","scale":2},"basis":"估算"},"estimated_schedule":{"earliest":"2026-10-01T00:00:00+08:00","likely":"2026-11-01T00:00:00+08:00","latest":"2026-12-01T00:00:00+08:00"},"assumptions":["假设"],"facts_required":["报价"],"risks":["风险"],"source_refs":[],"confidence":"0.50"},{"option_type":"build_to_suit","display_name":"方案二","business_rationale":"用于验证无来源失败关闭","estimated_amount":{"minimum":{"value":"1.00","currency":"CNY","scale":2},"likely":{"value":"2.00","currency":"CNY","scale":2},"maximum":{"value":"3.00","currency":"CNY","scale":2},"basis":"估算"},"estimated_schedule":{"earliest":"2026-10-01T00:00:00+08:00","likely":"2026-11-01T00:00:00+08:00","latest":"2026-12-01T00:00:00+08:00"},"assumptions":["假设"],"facts_required":["报价"],"risks":["风险"],"source_refs":[],"confidence":"0.50"}]}`,
 	} {
 		t.Run(name, func(t *testing.T) {

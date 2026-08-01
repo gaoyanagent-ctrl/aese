@@ -1,6 +1,6 @@
 # M10 Genesis Plant Build Runbook
 
-> 本 Runbook 分成两个边界明确的部分：第一部分验收当前可操作的“设施需求 → Agent 候选 → 人工审阅”在线纵切；第二部分只验收历史 reference replay。World 调研、选址/投资审批、项目/WBS、施工、付款、验收和工程财务尚未接通，不能据此宣称完整 M10 完成。
+> 本 Runbook 分成两个边界明确的部分：第一部分验收当前可操作的“设施需求 → Agent 候选 → 人工审阅 → 调查请求 → World Observation”在线纵切；第二部分只验收历史 reference replay。正式评分、选址/投资审批、项目/WBS、施工、付款、验收和工程财务尚未接通，不能据此宣称完整 M10 完成。
 
 ## 交互规划纵切验收
 
@@ -18,7 +18,10 @@
 3. 填写目标区域、设施用途、最小面积、最小电力、目标日期、候选数量、允许类型、投资申请额、最低现金保留额、业务偏好和修订原因。
 4. 点击“保存需求并让 Agent 生成候选”。候选数量必须等于填写值（2–8），每张卡必须展示金额/工期区间、依据、假设、待验证事实、风险、来源、置信度和模型/prompt 证据。
 5. 对一个候选选择“采纳调研”，填写至少 6 个字符的业务理由并点击“提交审阅到 IAOS”。按钮变为“已保存审阅”。再用另一候选验证“退回重生成”或“淘汰”。
-6. 展开页面底部的“已封存的确定性参考回放”，确认它有 `fixture-only` 提示且不会自动写入上方候选列表。
+6. 在已保存审阅的候选卡点击“发起外部调研工作项”。页面应出现 `facility.site.investigation.v1` 和 `waiting_world`，刷新页面后仍存在。
+7. 在“场址外部调研工作项”填写外部参与者标识、权属、可用面积、电力、正式报价、可用日期、许可、证据引用和备注，点击“园区运营方确认并提交 Observation”。成功后状态变为“可信事实已提交”且工作项为 `completed`。
+8. 回到 IAOS `业务智造层 → M10 工厂规划 → 外部调研工作项`，确认同一请求、候选、流程、等待能力和 Observation 可穿透查看。
+9. 展开页面底部的“已封存的确定性参考回放”，确认它有 `fixture-only` 提示且不会自动写入上方候选列表。
 
 ### API 与权威证据
 
@@ -30,6 +33,8 @@
 | `GET /api/aese/v1/world/plant-build/financial-constraints?case_code=...` | 200，带 source refs 与 snapshot hash | IAOS 权威现金/预算只读快照 |
 | `POST /api/aese/v1/world/plant-build/proposals` | 200，`authority_status=committed` | IAOS 已分别保存 Requirement 与 candidate-only ProposalSet |
 | `POST /api/aese/v1/world/plant-build/reviews` | 201，`status=committed` | IAOS 已保存当前用户的 ProposalReview |
+| `POST /api/aese/v1/world/plant-build/investigations` | 201，`status=waiting_world` | IAOS 已保存调查请求、持久工作项和 World Intent |
+| `POST /api/aese/v1/world/plant-build/observations` | 201，`status=committed` | AESE 先写受信 Journal，IAOS 再保存 Observation 并完成工作项 |
 
 写操作不得从浏览器直接请求 IAOS `:8082`。AESE BFF 使用当前用户身份调用 IAOS
 `POST /api/v1/genesis/plant/interactive/actions`，只允许：
@@ -37,8 +42,10 @@
 - `facility.requirement.define`
 - `site.proposal.record`
 - `site.proposal.review`
+- `site.investigation.request`
+- `site.investigation.observation.commit`
 
-IAOS 侧应能读取最新 Requirement、ProposalSet 和 Review；每次提交同时产生 tenant-scoped Audit 与 Outbox。Agent 模型、prompt、request、token 和输入/输出 hash 保存在 AESE CreativeJob 技术证据中。两类证据必须分别存在，不能用页面展示或 Agent 文本替代。
+IAOS 侧应能读取最新 Requirement、ProposalSet、Review、Investigation Request、Work Item 和 Observation；每次提交同时产生 tenant-scoped Audit 与 Outbox。Agent 模型、prompt、request、token 和输入/输出 hash 保存在 AESE CreativeJob 技术证据中。两类证据必须分别存在，不能用页面展示或 Agent 文本替代。
 
 ### 失败与恢复验收
 
@@ -48,11 +55,12 @@ IAOS 侧应能读取最新 Requirement、ProposalSet 和 Review；每次提交�
 - 提交同一 revision 相同输入：幂等返回既有结果；同一幂等键不同输入返回冲突。
 - 在生成候选后改变 IAOS 现金或预算：保存 Proposal 时拒绝旧 snapshot，用户必须重读并创建 Requirement 新 revision。
 - 同一 ProposalSet revision 并发审阅：冲突方刷新最新 Review 后重新决定，不得覆盖。
+- 未采纳候选直接发起调研：返回 422；没有匹配 Intent 的 Observation、篡改 subject/correlation 或重复键不同输入同样失败关闭。
+- Observation 提交成功但页面断线：重新加载调查列表，以 IAOS Journal/工作项状态恢复，不得重新伪造事实。
 
 ### 当前限制
 
 - “人工新增候选”当前只加入本地审阅列表，不是 IAOS 权威记录，不能发起外部调查。
-- “采纳调研”只保存人工意图；`site.investigation.request`、World Observation 和等待节点尚未实现。
 - 尚无交互式选址/投资审批、场地控制、项目/WBS、合同、施工、变更、付款、验收、AP/CIP/总账闭环。
 - 现场部署、纯人工路径和完整断线/重启/并发证据属于 S5，完成前 M10 保持 `Interactive Revision Pending`。
 
