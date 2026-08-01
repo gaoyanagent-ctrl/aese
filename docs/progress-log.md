@@ -1951,3 +1951,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：实施人员现在可在左侧业务菜单和数据模型工坊穿透查看各阶段事实、主子候选和唯一写入所有者；数据修改仍必须回到 M10 工作台、AESE Command Gateway 或受治理 Process/Agent。
 - 验证：IAOS 全量 Go、vet、治理写入、Code Map 与 Atlas 检查通过；后端已发布，四个 active 租户升级到 `genesis-m9@1.11.0`。在线 Schema 验证九个 Entity 均为 `domain_projection` 和正确写入所有者，通用写入返回 405 `entity_write_owner_enforced`，菜单权限仅 READ；AESE 文档、计划和 Atlas 校验通过。两仓 Atlas 同步写端点仍返回 404，声明已保留待服务路由恢复后补录。
 - 后续：实现 S2.3 单一全程 Effective Process Run、S3.3 人工候选权威提交，以及项目/WBS、合同、施工、付款、验收和工程财务闭环。
+
+## 2026-08-01 - M10 单一全程 Effective Process Run
+
+- 变更：IAOS 发布 `facility.plant.planning.v1`，将 Requirement、Agent Proposal、Human Review、World wait、推荐、审批与正式选址串成同一可恢复 `process_run`；M10 工作台新增流程运行页和流程工作室深链。
+- 原因：原有两个专题 Process Artifact 没有共同运行实例，用户只能看到业务结果，无法证明人员、Agent、World 和审批是否按同一流程顺序参与。
+- 影响：每个受治理 Capability 与最终审批决定在原事务追加 trace 并固定 Process Artifact version/hash；流程禁止通用一键运行，避免重复审批与伪造 World Observation；升级前推荐可从权威事实恢复 Run。
+- 验证：IAOS 全仓 Go/vet、治理/Code Map/Atlas、TypeScript、Process Studio 23 项和正式 Next/Turbopack 构建通过；8082/3000 发布健康，四个 active 租户升级到 `genesis-m9@1.12.0`；线上主流程 Artifact 为 10 节点，通用运行按合同返回 409。AESE 8090/4173 健康。Atlas 声明同步端点仍返回 404，声明保留待路由恢复后补录。
+- 后续：实现 S3.3 人工候选权威提交，并继续项目/WBS、合同、施工、付款、验收和工程财务纵切。

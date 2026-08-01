@@ -26,8 +26,10 @@
 11. 确认页面显示推荐编号、`genesis.site.selection.approval`、审批请求和权威输入哈希。浏览器 Network 中的提交体不得包含审批人或页面计算出的总分；IAOS 必须重新读取 Requirement、指定 ProposalSet revision 与可信 Observation 后计算。
 12. 点击“打开 IAOS 审批中心”。由审批流当前版本解析出的有权人员审阅事项、推荐理由、替代方案、硬约束、评分和证据后作出批准或拒绝。不要用提交推荐的人员伪装审批人；如客户需要 CEO/CFO、多阶段或会签，应先在审批中心发布审批流新版本。
 13. 审批通过后返回 AESE，刷新状态并点击“同步批准并正式选址”。确认只有 `approval_status=approved` 时按钮可用，完成后显示“已正式选址”。拒绝、待审批或不属于该推荐的审批请求必须失败关闭。
-14. 回到 IAOS `业务智造层 → M10 工厂规划 → 推荐与审批`，确认推荐、审批状态和正式决定可以穿透查看，并可从审批请求按钮进入审批中心。再从左侧业务菜单或“数据模型工坊”依次打开设施需求、场址候选方案集、场址候选方案、人工评审、外部调研请求、外部调研事实、工厂规划工作项、场址选择推荐和正式场址决定；应看到同一案件的明细及存储写入所有者，但不应出现通用新增、修改或删除按钮。
-15. 展开页面底部的“已封存的确定性参考回放”，确认它有 `fixture-only` 提示且不会自动写入上方候选列表。
+14. 回到 IAOS `业务智造层 → M10 工厂规划 → 推荐与审批`，确认推荐、审批状态和正式决定可以穿透查看，并可从审批请求按钮进入审批中心。
+15. 打开“流程运行”，确认流程键为 `facility.plant.planning.v1`、Run ID 从需求建立到正式选址不变、当前状态为 `succeeded`、节点为 `end`，trace 中依次可见 human/agent/world/approval。点击“打开流程运行”应在流程工作室直接打开该 Run；该流程的通用“运行”按钮必须禁用。
+16. 从左侧业务菜单或“数据模型工坊”依次打开设施需求、场址候选方案集、场址候选方案、人工评审、外部调研请求、外部调研事实、工厂规划工作项、场址选择推荐和正式场址决定；应看到同一案件的明细及存储写入所有者，但不应出现通用新增、修改或删除按钮。
+17. 展开页面底部的“已封存的确定性参考回放”，确认它有 `fixture-only` 提示且不会自动写入上方候选列表。
 
 ### API 与权威证据
 
@@ -45,6 +47,7 @@
 | `GET /api/aese/v1/world/plant-build/site-selections?case_code=...` | 200，返回推荐、审批状态和决定 | 从 IAOS 恢复权威推荐与正式选址状态 |
 | `POST /api/aese/v1/world/plant-build/site-selections` | 201，返回 Approval Request | IAOS 重算、固化推荐并按已发布审批流路由 |
 | `POST /api/aese/v1/world/plant-build/site-selections/finalize` | 201，仅批准后成功 | 独立 Capability 消费批准并写正式选址决定 |
+| `GET /api/v1/process-runs?process_key=facility.plant.planning.v1&case_code=...` | 200，返回单一 Run | IAOS 按案件返回完整 M10 运行，详情 API 可读取 context/trace |
 
 写操作不得从浏览器直接请求 IAOS `:8082`。AESE BFF 使用当前用户身份调用 IAOS
 `POST /api/v1/genesis/plant/interactive/actions`，只允许：
@@ -74,6 +77,7 @@ IAOS 侧应能读取最新 Requirement、ProposalSet、Review、Investigation Re
 - 少于两个合格候选且没有合格的单一来源说明：推荐返回 422，不创建 Approval Request。
 - 推荐提交后修改 Requirement、ProposalSet 或 Observation：既有请求仍冻结原 revision/hash；若要采用新事实，必须提交新推荐，不能覆盖在途审批。
 - 待审批、已拒绝、已消费或属于其他推荐的 Approval Request：`site.selection.formalize` 必须拒绝且不产生部分写入。
+- 直接调用 `POST /api/v1/processes/facility.plant.planning.v1/run`：必须返回 409 `business_command_driven_process`；该门防止一键跳步、重复审批和伪造 World 事实。
 
 ### 当前限制
 

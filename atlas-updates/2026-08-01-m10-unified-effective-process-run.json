@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.unified-effective-process-run.2026-08-01",
+  "node_key": "aese.genesis.m10-plant-build",
+  "update_type": "implementation",
+  "summary": "M10 交互选址接入单一全程 Effective Process Run",
+  "detail": "IAOS facility.plant.planning.v1 把 AESE 需求输入、Agent proposal、人工评审、可信 World Observation、推荐、审批和正式选址追加到同一 process_run；AESE Runbook、设计、路线图和操作入口同步说明该流程必须逐项推进，不能一键自动执行。",
+  "status_after": "building",
+  "current_state": "M10 选址纵切具备单一可恢复运行证据；人工候选权威提交、项目/WBS、合同、施工、付款、验收和工程财务仍待实现。",
+  "evidence_ref": "docs/designs/DES-011-genesis-plant-build.md",
+  "occurred_at": "2026-08-01T16:20:00Z"
+}

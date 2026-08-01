@@ -300,14 +300,16 @@ genesis.facility.accepted.v1
 7. 人员在可解释比较下选择合格候选并填写推荐理由、替代方案比较；AESE Command Gateway 调用 `site.selection.recommend`，IAOS 重算并创建统一审批。用户从深链进入 IAOS 审批中心决定，批准后返回点击“同步批准并正式选址”，由 `site.selection.formalize` 原子消费审批。
 8. 外部模型未配置、财务快照缺失或已变化、Agent 输出不满足 Schema、候选超过投资申请上限、身份/权限不足、revision 冲突、World Observation 不受信或审批不匹配时失败关闭，不用固定候选或页面 JSON 兜底。
 
-以下仍未实现：人工新增候选的权威提交、从 Requirement 到选址的单一持久 Effective Process Run、场地控制、项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
+Requirement 到正式选址现已统一为 `facility.plant.planning.v1@1.0.0` 单一持久 Effective Process Run。七个业务 Capability 成功时在同一事务追加人、Agent 或 World 节点证据；调查请求进入 `waiting_event`，推荐进入 `waiting_approval`，审批决定恢复到正式选址或失败结束，正式选择后为 `succeeded`。流程工作室只允许查看该业务命令驱动流程，不能一键运行而重复创建审批或伪造外部事实。
+
+以下仍未实现：人工新增候选的权威提交、场地控制、项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
 
 ## 16. 用户配置、操作、验证与恢复
 
 ### 16.0 IAOS 菜单入口与双系统职责
 
 M10 的 IAOS 用户入口是左侧导航的 `业务智造层 → M10 工厂规划`，不是隐藏 API，
-也不要求用户先记住 AESE URL。该工作台提供五个可解释标签页：
+也不要求用户先记住 AESE URL。该工作台提供八个可解释标签页：
 
 - `权威资金约束`：读取当前案件已过账现金和已批准预算，只读展示来源与快照哈希。
 - `设施需求`：查看人员提交的版本化 Requirement。
@@ -315,6 +317,7 @@ M10 的 IAOS 用户入口是左侧导航的 `业务智造层 → M10 工厂规�
 - `人工评审`：查看采纳调研、退回或淘汰及其理由；评审不等于投资审批。
 - `外部调研工作项`：查看调查请求、`facility.site.investigation.v1`、等待能力、World 状态与已返回 Observation。
 - `推荐与审批`：查看权威评分输入 hash、推荐候选、审批流/请求状态和正式选址决定。
+- `流程运行`：查看同一 Process Run 的状态、当前节点、context 和完整 trace，并深链流程工作室。
 - `穿透证据`：解释 IAOS 业务事实、AESE Agent 技术证据和后续 World Observation 的关系。
 
 用户先在工作台选择一个满足 M9 前置条件的设立案件，再点击 `打开 AESE M10 World` 进入
@@ -365,6 +368,7 @@ M9 已过账现金 + 已批预算
 -> site.selection.recommend（IAOS 权威重算 + 版本化推荐）
 -> genesis.site.selection.approval（冻结事项、版本和处理人）
 -> site.selection.formalize（消费批准并形成正式决定）
+-> facility.plant.planning.v1 Process Run（全程参与、等待、审批与 Artifact 证据）
 -> [待实现] Project / WBS / Contract / Payment / Acceptance / Finance
 ```
 
