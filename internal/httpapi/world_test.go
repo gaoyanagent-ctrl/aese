@@ -335,6 +335,42 @@ func TestPlantInvestigationObservationUsesWorldBridgeBeforeCapabilityCommit(t *t
 	}
 }
 
+func TestPlantSiteRecommendationUsesAuthenticatedCommandGateway(t *testing.T) {
+	var command map[string]any
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/v1/profile" {
+			_, _ = w.Write([]byte(`{"username":"project-owner","tenant_id":"tenant-a"}`))
+			return
+		}
+		if r.URL.Path != "/api/v1/genesis/plant/interactive/actions" {
+			http.NotFound(w, r)
+			return
+		}
+		if err := json.NewDecoder(r.Body).Decode(&command); err != nil {
+			t.Fatal(err)
+		}
+		w.WriteHeader(http.StatusCreated)
+		_, _ = w.Write([]byte(`{"status":"committed","result":{"approval_request_id":"APR-1"}}`))
+	}))
+	defer iaos.Close()
+	server := New(Config{IAOSBaseURL: iaos.URL})
+	body := `{"schema_version":"1.0","recommendation_id":"REC-1","case_code":"INC-1","proposal_set_id":"SET-1","proposal_set_revision":1,"selected_proposal_id":"SITE-1","assessment_policy_version":"site-assessment-v1","weights":{"cost":35,"schedule":25,"capacity":20,"control":20},"recommendation_reason":"综合可信现场事实推荐候选一","alternative_comparison":"候选二在工期和产能方面劣于候选一","recommended_at":"2026-08-01T12:00:00Z"}`
+	req := httptest.NewRequest(http.MethodPost, "/api/aese/v1/world/plant-build/site-selections", strings.NewReader(body))
+	req.Header.Set("Authorization", "Bearer owner-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-a")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusCreated || !strings.Contains(res.Body.String(), `"approval_request_id":"APR-1"`) {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
+	if command["capability_code"] != "site.selection.recommend" || command["actor_id"] != "project-owner" {
+		t.Fatalf("command=%v", command)
+	}
+	if command["site_selection_recommendation"].(map[string]any)["selected_proposal_id"] != "SITE-1" {
+		t.Fatalf("recommendation=%v", command)
+	}
+}
+
 func TestAESE3CompletionAPI(t *testing.T) {
 	server := New(Config{})
 	req := httptest.NewRequest(http.MethodGet, "/api/aese/v1/world/aese3", nil)

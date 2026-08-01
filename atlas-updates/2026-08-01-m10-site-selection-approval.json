@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m10.site-selection-approval.2026-08-01",
+  "node_key": "aese.world.genesis.plant-build",
+  "update_type": "implementation",
+  "summary": "M10 场址推荐接入 IAOS 统一审批并形成正式选址",
+  "detail": "AESE Plant Build Play 在可信 Observation 比较后采集人工推荐、替代方案和单一来源例外，经定向 Command Gateway 提交 IAOS 权威重算；页面只读取审批状态，批准后由独立 Capability 正式选址，浏览器不能指定审批人或直接写决定。",
+  "status_after": "building",
+  "current_state": "M10 已形成 Requirement → Agent Proposal → Human Review → World Observation → IAOS Recommendation → Approval → Formal Selection 的在线纵切；项目/WBS、合同、施工、付款、验收和工程财务仍待实现。",
+  "evidence_ref": "docs/runbooks/genesis-plant-build.md",
+  "occurred_at": "2026-08-01T15:08:04Z"
+}

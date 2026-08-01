@@ -160,8 +160,8 @@
 | SOL-007 | [实缴资本核验差异 422 与纠正审批](solutions/SOL-007-capital-contribution-mismatch-422.md) | Completed |
 | SOL-008 | [MiniMax 企业名称生成未启用](solutions/SOL-008-minimax-provider-startup-config.md) | Completed |
 | M9N Risk Register | [IAOS-native M9 risk register](reports/m9-native-risk-register.json) | Active |
-| M10 Runbook | [Genesis Plant Build Runbook](runbooks/genesis-plant-build.md) | Completed |
-| M10 Evidence | [Genesis Plant Build Evidence](reports/m10-genesis-plant-build-evidence.md) | Completed |
+| M10 Runbook | [Genesis Plant Build Runbook](runbooks/genesis-plant-build.md) | Active（交互纵切 + 历史 reference replay） |
+| M10 Evidence | [Genesis Plant Build Evidence](reports/m10-genesis-plant-build-evidence.md) | Reference Replay Complete；交互验收待补 |
 | M11 Runbook | [Genesis Capability Build Runbook](runbooks/genesis-capability-build.md) | Completed |
 | M11 Evidence | [Genesis Capability Build Evidence](reports/m11-genesis-production-capability-evidence.md) | Completed |
 

@@ -1935,3 +1935,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：不合格候选不能被权重抬高；权重只改变当前派生比较，不写 IAOS、不形成推荐或批准。DES-011、active plan、Roadmap、Code Map 和 Runbook 已同步实现边界。
 - 验证：评分单元测试覆盖合格解释与硬约束失败；Plant Build 组件测试覆盖已送达 Observation、证据和“非批准”提示；Go 全仓、前端 24 文件/70 项、TypeScript、生产构建、三视口 Playwright 和 Atlas tracking 均通过。AESE `:8090` 已部署，ProposalSet 新读路由无身份时按预期返回 401，四端口健康；Atlas 声明同步端点仍返回 404，声明保留待路由恢复后幂等补录。
 - 后续：将版本化评分策略与结果固化为 IAOS Effective Artifact/Capability 输入，接正式推荐和统一 Approval Flow，再推进项目/WBS、合同、施工与工程财务。
+
+## 2026-08-01 - M10 场址推荐、统一审批与正式选址闭环
+
+- 变更：Plant Build Play 在可信 Observation 比较后增加合格候选选择、推荐理由、替代方案和单一来源例外表单；AESE 定向 BFF 调用 IAOS `site.selection.recommend`，IAOS 以 `site-assessment-v1` 重算并创建版本化 Approval Request；批准后由 `site.selection.formalize` 独立消费并写正式选址决定，IAOS 工作台增加推荐/审批穿透页。
+- 原因：浏览器预览分数、Agent 建议和人工推荐都不能直接成为正式场址事实，审批人也不能由提交页面自行指定。
+- 影响：M10 已形成 Requirement → Agent Proposal → Human Review → World Observation → IAOS Recommendation → Approval → Formal Selection 的在线纵切；默认审批流按 `chair` 岗位解析，客户可在审批中心发布多阶段/会签新版本，在途请求冻结原版本和处理人。
+- 验证：IAOS API/平台包定向 Go 测试、Next 生产构建以及 AESE BFF、TypeScript、24 个前端测试文件/70 项测试已通过；完整全仓、治理、Atlas、部署和 live 证据在本次发布收口中继续执行。
+- 后续：实现平台 Entity 元数据、人工候选权威提交、完整单一 Effective Process Run、项目/WBS、合同、施工、付款、验收和工程财务纵切；在这些范围完成前不把交互式 M10 标记为 Completed。

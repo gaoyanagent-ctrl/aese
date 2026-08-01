@@ -25,8 +25,11 @@ import {
   loadPlantProposalSet,
   loadPlantRequirement,
   loadSiteInvestigations,
+  loadSiteSelections,
   requestSiteInvestigation,
+  finalizeSiteSelection,
   submitSiteInvestigationObservation,
+  submitSiteSelectionRecommendation,
   submitPlantProposalReview,
   type FacilityRequirement,
   type PlantBuildTrace,
@@ -35,6 +38,7 @@ import {
   type ProposalSet,
   type SiteOptionProposal,
   type SiteInvestigationItem,
+  type SiteSelectionItem,
 } from "../../world/plantBuild";
 import {
   assessObservedSites,
@@ -255,6 +259,12 @@ function PlantPlanningWorkspace() {
   const [investigations, setInvestigations] = useState<SiteInvestigationItem[]>([]);
   const [investigationBusy, setInvestigationBusy] = useState("");
   const [assessmentWeights, setAssessmentWeights] = useState<SiteAssessmentWeights>({ cost: 35, schedule: 25, capacity: 20, control: 20 });
+  const [siteSelections, setSiteSelections] = useState<SiteSelectionItem[]>([]);
+  const [selectedProposalID, setSelectedProposalID] = useState("");
+  const [recommendationReason, setRecommendationReason] = useState("");
+  const [alternativeComparison, setAlternativeComparison] = useState("");
+  const [singleSourceReason, setSingleSourceReason] = useState("");
+  const [selectionBusy, setSelectionBusy] = useState(false);
   const [nextRevision, setNextRevision] = useState(1);
   const [manualOpen, setManualOpen] = useState(false);
   const [manualName, setManualName] = useState("");
@@ -267,6 +277,7 @@ function PlantPlanningWorkspace() {
   const caseCode = routeParams.get("case") ?? localStorage.getItem("aese_genesis_case_code") ?? "";
   const requirementID = `facility-requirement-${caseCode || "draft"}`;
   const refreshInvestigations = async () => setInvestigations((await loadSiteInvestigations(caseCode)).items ?? []);
+  const refreshSiteSelections = async () => setSiteSelections((await loadSiteSelections(caseCode)).items ?? []);
   useEffect(() => {
     const controller = new AbortController();
     Promise.all([
@@ -278,6 +289,7 @@ function PlantPlanningWorkspace() {
       }),
       loadPlantProposalSet(requirementID, controller.signal).then(setProposalSet),
       loadSiteInvestigations(caseCode, controller.signal).then((result) => setInvestigations(result.items ?? [])),
+      loadSiteSelections(caseCode, controller.signal).then((result) => setSiteSelections(result.items ?? [])),
     ]).catch((reason) => { if (reason.name !== "AbortError") setError(String(reason)); });
     return () => controller.abort();
   }, [caseCode, requirementID]);
@@ -289,6 +301,13 @@ function PlantPlanningWorkspace() {
     [activeRequirement, assessmentWeights, investigations, proposalSet],
   );
   const normalizedWeightTotal = Object.values(assessmentWeights).reduce((sum, value) => sum + Math.max(0, value), 0);
+  const eligibleAssessments = assessments.filter((item) => item.eligible);
+  const latestSelection = siteSelections[0];
+  useEffect(() => {
+    if (!eligibleAssessments.some((item) => item.proposal_id === selectedProposalID)) {
+      setSelectedProposalID(eligibleAssessments[0]?.proposal_id ?? "");
+    }
+  }, [eligibleAssessments, selectedProposalID]);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -392,6 +411,36 @@ function PlantPlanningWorkspace() {
     } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setInvestigationBusy(""); }
   };
 
+  const submitRecommendation = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!proposalSet || !selectedProposalID) return;
+    setSelectionBusy(true); setError("");
+    try {
+      await submitSiteSelectionRecommendation({
+        schema_version: "1.0", recommendation_id: `site-recommendation-${crypto.randomUUID()}`,
+        case_code: caseCode, proposal_set_id: proposalSet.proposal_set_id, proposal_set_revision: proposalSet.revision,
+        selected_proposal_id: selectedProposalID, assessment_policy_version: "site-assessment-v1",
+        weights: assessmentWeights, recommendation_reason: recommendationReason.trim(),
+        alternative_comparison: alternativeComparison.trim(),
+        ...(eligibleAssessments.length < 2 ? { single_source_exception_reason: singleSourceReason.trim() } : {}),
+        recommended_at: new Date().toISOString(),
+      });
+      await refreshSiteSelections();
+      setRecommendationReason(""); setAlternativeComparison(""); setSingleSourceReason("");
+    } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setSelectionBusy(false); }
+  };
+
+  const formalizeSelection = async (item: SiteSelectionItem) => {
+    setSelectionBusy(true); setError("");
+    try {
+      await finalizeSiteSelection(caseCode, item.recommendation.recommendation_id, item.recommendation.approval_request_id);
+      await refreshSiteSelections();
+    } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setSelectionBusy(false); }
+  };
+
+  const approvalURL = latestSelection && typeof window !== "undefined"
+    ? `http://${window.location.hostname}:3000/#approvals?request=${encodeURIComponent(latestSelection.recommendation.approval_request_id)}` : "#";
+
   return (
     <section className="plant-planning-workspace" aria-labelledby="plant-planning-title">
       <header className="plant-planning-heading">
@@ -433,7 +482,17 @@ function PlantPlanningWorkspace() {
         <header><div><span>OBSERVATION-ONLY COMPARISON</span><h2 id="plant-assessment-title">外部事实比较</h2><p>只有已送达的 World Observation 参与评分；Agent 估算只用于对照，不会覆盖正式报价或现场事实。</p></div><small>{assessments.filter((item) => item.eligible).length}/{assessments.length} 个候选通过硬约束</small></header>
         <fieldset className="plant-assessment-weights"><legend>本次比较权重（自动归一化）</legend>{SCORE_DIMENSIONS.map(([key, label, help]) => <label key={key}>{label}<small>{help}</small><input aria-label={`${label}权重`} type="number" min="0" max="100" value={assessmentWeights[key]} onChange={(event) => setAssessmentWeights((current) => ({ ...current, [key]: Math.max(0, Number(event.target.value) || 0) }))} /></label>)}<p>当前权重合计 {normalizedWeightTotal}。权重只改变合格候选的比较视图；任何硬约束失败都不会被高分抵消。</p></fieldset>
         <div className="plant-assessment-grid">{assessments.map((assessment) => <AssessmentCard key={assessment.observation_id} assessment={assessment} />)}</div>
-        <p className="plant-assessment-governance"><TriangleAlert />当前结果是可解释的派生比较，不是正式推荐、选址批准或投资批准。正式决定将在后续 Capability + Approval Flow 中由有权人员提交。</p>
+        <p className="plant-assessment-governance"><TriangleAlert />页面分数只是预览，不是正式推荐、选址批准或投资批准。提交推荐时 IAOS 会从权威需求、候选版本和 Observation 重新计算；浏览器不能指定审批人或篡改批准结果。</p>
+        {!latestSelection?.decision && <form className="plant-selection-form" onSubmit={submitRecommendation}>
+          <fieldset><legend>提交人工场址推荐</legend>
+            <div className="plant-selection-options" role="radiogroup" aria-label="选择合格候选">{eligibleAssessments.map((assessment) => <label key={assessment.proposal_id} className={selectedProposalID === assessment.proposal_id ? "selected" : ""}><input type="radio" name="selected-site" value={assessment.proposal_id} checked={selectedProposalID === assessment.proposal_id} onChange={() => setSelectedProposalID(assessment.proposal_id)} /><span>{assessment.display_name}</span><strong>{assessment.total_score?.toFixed(1)} 分</strong></label>)}</div>
+            <label>推荐理由 <small>说明为什么该候选最符合经营目标；至少 12 个字符</small><textarea required minLength={12} value={recommendationReason} onChange={(event) => setRecommendationReason(event.target.value)} /></label>
+            <label>替代方案比较 <small>明确与其他候选的差异和未选原因；至少 12 个字符</small><textarea required minLength={12} value={alternativeComparison} onChange={(event) => setAlternativeComparison(event.target.value)} /></label>
+            {eligibleAssessments.length < 2 && <label>单一来源例外说明 <small>当前少于两个合格候选，必须解释为何仍可进入审批；至少 20 个字符</small><textarea required minLength={20} value={singleSourceReason} onChange={(event) => setSingleSourceReason(event.target.value)} /></label>}
+            <button disabled={selectionBusy || !selectedProposalID}>{selectionBusy ? <LoaderCircle className="gx-spin" /> : <BadgeCheck />}{selectionBusy ? "正在提交…" : "提交 IAOS 选址审批"}</button>
+          </fieldset>
+        </form>}
+        {latestSelection && <article className="plant-selection-status" aria-live="polite"><header><div><span>{latestSelection.recommendation.approval_flow_key}</span><h3>推荐与审批状态</h3></div><strong>{latestSelection.decision ? "已正式选址" : latestSelection.approval_status}</strong></header><dl><div><dt>推荐候选</dt><dd>{latestSelection.recommendation.selected_proposal_id}</dd></div><div><dt>推荐编号</dt><dd>{latestSelection.recommendation.recommendation_id}</dd></div><div><dt>审批请求</dt><dd>{latestSelection.recommendation.approval_request_id}</dd></div><div><dt>权威输入哈希</dt><dd>{latestSelection.recommendation.input_hash}</dd></div></dl><div className="plant-selection-actions"><a href={approvalURL} target="_blank" rel="noreferrer">打开 IAOS 审批中心</a><button type="button" disabled={selectionBusy || latestSelection.approval_status !== "approved" || Boolean(latestSelection.decision)} onClick={() => formalizeSelection(latestSelection)}>{latestSelection.decision ? "正式选择已落地" : latestSelection.approval_status === "approved" ? "同步批准并正式选址" : "等待审批决定"}</button></div></article>}
       </section>}
     </section>
   );

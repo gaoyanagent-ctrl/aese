@@ -138,10 +138,11 @@ country / region / city（用户需求）
 4. Agent 估算额和预计日期只与 Observation 并列展示；正式报价、可用日期、面积、电力、权属和许可始终来自 Observation，二者不得覆盖。
 5. 每个比较卡必须展示 Observation ID、硬约束结果、分项分数和证据引用。该比较不是推荐、选址批准或投资批准。
 
-当前权重只控制当前页面的比较视图，尚未成为可发布、可审批的 `SiteAssessmentPolicy`。
-正式推荐纵切必须把评分版本、权重、Requirement revision、Observation IDs、计算结果和人员理由
-固化为 IAOS Effective Artifact/Capability 输入，再进入统一 Approval Flow；在该纵切完成前，AESE
-不得提供会造成“已经批准”误解的按钮。
+页面权重仍只控制预览，但正式推荐纵切已经交付：`site.selection.recommend` 不信任页面分数，
+而是在 IAOS 事务中从权威 Requirement、ProposalSet revision 和已提交 Observation 重算
+`site-assessment-v1`，冻结权重、结果、Observation IDs、证据、人员理由和输入 hash，再进入
+`genesis.site.selection.approval`。推荐、审批和正式落地分离；只有审批状态 approved 时，
+`site.selection.formalize` 才能消费该请求并写正式决定。少于两个合格候选必须填写单一来源例外说明。
 
 ### 7.1 Agent 生成与人工选择合同
 
@@ -294,9 +295,10 @@ genesis.facility.accepted.v1
 4. 项目负责人可对候选执行采纳调研、退回重生成或淘汰，并填写业务理由；AESE 从 IAOS profile 解析实际人员身份，再以 `site.proposal.review` 保存审阅，浏览器不能指定 `reviewed_by`。
 5. 对已保存且审阅结论为“采纳调研”的候选，人员可发起外部调研。IAOS 创建 `facility.site.investigation.v1` 持久 `waiting_world` 工作项，并通过 World Bridge 写入带 correlation/subject 的 Intent。
 6. AESE 外部参与者使用结构化表单返回权属、可用面积、电力容量、正式报价、可用日期、许可、证据引用和备注。AESE 必须先写受信 World Journal Observation；IAOS 的 `site.investigation.observation.commit` 只消费与 Intent/correlation 匹配的 Journal 事实，保存权威 Observation 并完成工作项。
-7. 外部模型未配置、财务快照缺失或已变化、Agent 输出不满足 Schema、候选超过投资申请上限、身份/权限不足、revision 冲突或 World Observation 不受信时失败关闭，不用固定候选或页面 JSON 兜底。
+7. 人员在可解释比较下选择合格候选并填写推荐理由、替代方案比较；AESE Command Gateway 调用 `site.selection.recommend`，IAOS 重算并创建统一审批。用户从深链进入 IAOS 审批中心决定，批准后返回点击“同步批准并正式选址”，由 `site.selection.formalize` 原子消费审批。
+8. 外部模型未配置、财务快照缺失或已变化、Agent 输出不满足 Schema、候选超过投资申请上限、身份/权限不足、revision 冲突、World Observation 不受信或审批不匹配时失败关闭，不用固定候选或页面 JSON 兜底。
 
-以下仍未实现：人工新增候选的权威提交、从 Requirement 到选址审批的完整 Effective Process Run、评分策略/结果的 IAOS 权威固化与正式选址审批、场地控制、项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
+以下仍未实现：人工新增候选的权威提交、从 Requirement 到选址的单一持久 Effective Process Run、场地控制、项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
 
 ## 16. 用户配置、操作、验证与恢复
 
@@ -310,6 +312,7 @@ M10 的 IAOS 用户入口是左侧导航的 `业务智造层 → M10 工厂规�
 - `Agent 候选方案`：查看 candidate-only ProposalSet、假设、风险和待验证事实。
 - `人工评审`：查看采纳调研、退回或淘汰及其理由；评审不等于投资审批。
 - `外部调研工作项`：查看调查请求、`facility.site.investigation.v1`、等待能力、World 状态与已返回 Observation。
+- `推荐与审批`：查看权威评分输入 hash、推荐候选、审批流/请求状态和正式选址决定。
 - `穿透证据`：解释 IAOS 业务事实、AESE Agent 技术证据和后续 World Observation 的关系。
 
 用户先在工作台选择一个满足 M9 前置条件的设立案件，再点击 `打开 AESE M10 World` 进入
@@ -343,6 +346,8 @@ AESE 首页同时把原“世界地图”命名为 `企业生命周期 · M9–M
 5. 选择“采纳调研”“退回重生成”或“淘汰”，填写至少 6 个字符的理由并提交。成功表示 Review 已保存；“采纳调研”仍不等于外部事实已确认。
 6. 对已采纳候选点击“发起外部调研工作项”。页面显示 `waiting_world` 后，模拟登记/园区/产权等外部角色填写权属、面积、电力、正式报价、可用日期、许可和证据引用并提交；只有 IAOS 显示工作项 `completed` 才代表事实已进入权威闭环。
 7. 至少一个 Observation 完成后，页面显示“外部事实比较”。用户可调整成本、工期、容量和控制权重；系统先显示六类硬约束，再显示分项与综合分。Agent 估算与 World 正式事实分栏显示，任何权重都不能抵消硬约束失败。
+8. 选择合格候选，填写至少 12 个字符的推荐理由和替代方案比较；少于两个合格候选时再填写至少 20 个字符的单一来源例外说明，提交 IAOS 选址审批。
+9. 点击“打开 IAOS 审批中心”查看事项、证据与冻结处理人并作出决定。approved 只表示有权主体同意；返回 AESE 点击“同步批准并正式选址”后，看到正式选择 ID 才表示落地。
 
 ### 16.3 关系与证据
 
@@ -355,7 +360,9 @@ M9 已过账现金 + 已批预算
 -> ProposalReview（IAOS 人工决定、Audit、Outbox）
 -> Investigation Request / persistent World wait / World Observation（IAOS 权威事实）
 -> SiteAssessment derived comparison（AESE 只读、Observation-only）
--> [待实现] 版本化评分 Artifact / 正式推荐 / Process / Approval
+-> site.selection.recommend（IAOS 权威重算 + 版本化推荐）
+-> genesis.site.selection.approval（冻结事项、版本和处理人）
+-> site.selection.formalize（消费批准并形成正式决定）
 -> [待实现] Project / WBS / Contract / Payment / Acceptance / Finance
 ```
 

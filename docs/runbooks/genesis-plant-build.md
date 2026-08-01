@@ -1,6 +1,6 @@
 # M10 Genesis Plant Build Runbook
 
-> 本 Runbook 分成两个边界明确的部分：第一部分验收当前可操作的“设施需求 → Agent 候选 → 人工审阅 → 调查请求 → World Observation → 只读事实比较”在线纵切；第二部分只验收历史 reference replay。评分策略/结果的权威固化、正式推荐、选址/投资审批、项目/WBS、施工、付款、验收和工程财务尚未接通，不能据此宣称完整 M10 完成。
+> 本 Runbook 分成两个边界明确的部分：第一部分验收当前可操作的“设施需求 → Agent 候选 → 人工审阅 → 调查请求 → World Observation → IAOS 权威重算 → 人工推荐 → 统一审批 → 正式选址”在线纵切；第二部分只验收历史 reference replay。项目/WBS、合同、施工、付款、验收和工程财务尚未接通，不能据此宣称完整 M10 完成。
 
 ## 交互规划纵切验收
 
@@ -22,8 +22,12 @@
 7. 在“场址外部调研工作项”填写外部参与者标识、权属、可用面积、电力、正式报价、可用日期、许可、证据引用和备注，点击“园区运营方确认并提交 Observation”。成功后状态变为“可信事实已提交”且工作项为 `completed`。
 8. 页面应出现“外部事实比较”。调整成本、工期、容量和控制权重，确认合格候选综合分变化；另选候选发起调查并提交一个面积、电力、报价或可用日期不满足 Requirement 的 Observation，确认候选显示“硬约束不通过”且不再有综合分。
 9. 在比较卡中确认 Agent 估算标为“非正式事实”、World Observation 标为“评分事实”，并可展开查看 Observation ID、权属、许可和证据引用。页面必须提示该结果不是正式推荐或批准。
-10. 回到 IAOS `业务智造层 → M10 工厂规划 → 外部调研工作项`，确认同一请求、候选、流程、等待能力和 Observation 可穿透查看。
-11. 展开页面底部的“已封存的确定性参考回放”，确认它有 `fixture-only` 提示且不会自动写入上方候选列表。
+10. 在“提交人工场址推荐”中选择一个合格候选，填写至少 12 个字符的推荐理由和替代方案比较。若当前只有一个合格候选，还必须填写至少 20 个字符的单一来源例外说明。点击“提交 IAOS 选址审批”。
+11. 确认页面显示推荐编号、`genesis.site.selection.approval`、审批请求和权威输入哈希。浏览器 Network 中的提交体不得包含审批人或页面计算出的总分；IAOS 必须重新读取 Requirement、指定 ProposalSet revision 与可信 Observation 后计算。
+12. 点击“打开 IAOS 审批中心”。由审批流当前版本解析出的有权人员审阅事项、推荐理由、替代方案、硬约束、评分和证据后作出批准或拒绝。不要用提交推荐的人员伪装审批人；如客户需要 CEO/CFO、多阶段或会签，应先在审批中心发布审批流新版本。
+13. 审批通过后返回 AESE，刷新状态并点击“同步批准并正式选址”。确认只有 `approval_status=approved` 时按钮可用，完成后显示“已正式选址”。拒绝、待审批或不属于该推荐的审批请求必须失败关闭。
+14. 回到 IAOS `业务智造层 → M10 工厂规划 → 推荐与审批`，确认推荐、审批状态和正式决定可以穿透查看，并可从审批请求按钮进入审批中心。
+15. 展开页面底部的“已封存的确定性参考回放”，确认它有 `fixture-only` 提示且不会自动写入上方候选列表。
 
 ### API 与权威证据
 
@@ -38,6 +42,9 @@
 | `POST /api/aese/v1/world/plant-build/reviews` | 201，`status=committed` | IAOS 已保存当前用户的 ProposalReview |
 | `POST /api/aese/v1/world/plant-build/investigations` | 201，`status=waiting_world` | IAOS 已保存调查请求、持久工作项和 World Intent |
 | `POST /api/aese/v1/world/plant-build/observations` | 201，`status=committed` | AESE 先写受信 Journal，IAOS 再保存 Observation 并完成工作项 |
+| `GET /api/aese/v1/world/plant-build/site-selections?case_code=...` | 200，返回推荐、审批状态和决定 | 从 IAOS 恢复权威推荐与正式选址状态 |
+| `POST /api/aese/v1/world/plant-build/site-selections` | 201，返回 Approval Request | IAOS 重算、固化推荐并按已发布审批流路由 |
+| `POST /api/aese/v1/world/plant-build/site-selections/finalize` | 201，仅批准后成功 | 独立 Capability 消费批准并写正式选址决定 |
 
 写操作不得从浏览器直接请求 IAOS `:8082`。AESE BFF 使用当前用户身份调用 IAOS
 `POST /api/v1/genesis/plant/interactive/actions`，只允许：
@@ -47,8 +54,10 @@
 - `site.proposal.review`
 - `site.investigation.request`
 - `site.investigation.observation.commit`
+- `site.selection.recommend`
+- `site.selection.formalize`
 
-IAOS 侧应能读取最新 Requirement、ProposalSet、Review、Investigation Request、Work Item 和 Observation；每次提交同时产生 tenant-scoped Audit 与 Outbox。Agent 模型、prompt、request、token 和输入/输出 hash 保存在 AESE CreativeJob 技术证据中。两类证据必须分别存在，不能用页面展示或 Agent 文本替代。
+IAOS 侧应能读取最新 Requirement、ProposalSet、Review、Investigation Request、Work Item、Observation、Recommendation、Approval Request 和 Site Selection Decision；每次提交同时产生 tenant-scoped Audit 与 Outbox。Agent 模型、prompt、request、token 和输入/输出 hash 保存在 AESE CreativeJob 技术证据中。两类证据必须分别存在，不能用页面展示或 Agent 文本替代。
 
 ### 失败与恢复验收
 
@@ -61,12 +70,16 @@ IAOS 侧应能读取最新 Requirement、ProposalSet、Review、Investigation Re
 - 未采纳候选直接发起调研：返回 422；没有匹配 Intent 的 Observation、篡改 subject/correlation 或重复键不同输入同样失败关闭。
 - Observation 提交成功但页面断线：重新加载调查列表，以 IAOS Journal/工作项状态恢复，不得重新伪造事实。
 - 把某个评分权重改为 0 或修改权重比例：只影响当前比较视图；硬约束结果、IAOS Observation 和任何业务事实不得改变。
+- 修改浏览器中的分数、审批人或状态：IAOS 重读权威事实并拒绝未声明字段；客户端数据不能成为批准依据。
+- 少于两个合格候选且没有合格的单一来源说明：推荐返回 422，不创建 Approval Request。
+- 推荐提交后修改 Requirement、ProposalSet 或 Observation：既有请求仍冻结原 revision/hash；若要采用新事实，必须提交新推荐，不能覆盖在途审批。
+- 待审批、已拒绝、已消费或属于其他推荐的 Approval Request：`site.selection.formalize` 必须拒绝且不产生部分写入。
 
 ### 当前限制
 
 - “人工新增候选”当前只加入本地审阅列表，不是 IAOS 权威记录，不能发起外部调查。
-- 当前评分是 AESE 只读派生视图，尚未把版本化评分策略/结果、正式推荐和选址批准写入 IAOS。
-- 尚无交互式选址/投资审批、场地控制、项目/WBS、合同、施工、变更、付款、验收、AP/CIP/总账闭环。
+- 当前页面评分是只读预览；提交推荐时 IAOS 使用 `site-assessment-v1` 独立重算并固化，当前尚未提供租户自定义评分策略版本的 UI。
+- 正式场址选择已进入统一审批；投资额度、租赁/用地合同、场地控制、项目/WBS、施工、变更、付款、验收、AP/CIP/总账闭环仍未实现。
 - 现场部署、纯人工路径和完整断线/重启/并发证据属于 S5，完成前 M10 保持 `Interactive Revision Pending`。
 
 ## 历史 reference replay 页面验收

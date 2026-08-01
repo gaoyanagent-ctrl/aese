@@ -167,6 +167,23 @@ func (c *Client) PlantInvestigations(ctx context.Context, caseCode string) (json
 	return out, nil
 }
 
+// PlantSiteSelections returns versioned recommendations, their routed approval
+// status and the formal decision. AESE may present this projection but never
+// mutates IAOS approval tables directly.
+func (c *Client) PlantSiteSelections(ctx context.Context, caseCode string) (json.RawMessage, error) {
+	caseCode = strings.TrimSpace(caseCode)
+	if caseCode == "" {
+		return nil, fmt.Errorf("case_code is required")
+	}
+	query := url.Values{}
+	query.Set("case_code", caseCode)
+	var out json.RawMessage
+	if err := c.request(ctx, http.MethodGet, "api/v1/genesis/plant/interactive/site-selections?"+query.Encode(), nil, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 type UpsertAction string
 
 const (

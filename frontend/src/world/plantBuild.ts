@@ -191,6 +191,37 @@ export type SiteInvestigationItem = {
   observation?: SiteInvestigationObservation;
 };
 
+export type SiteSelectionRecommendationInput = {
+  schema_version: "1.0";
+  recommendation_id: string;
+  case_code: string;
+  proposal_set_id: string;
+  proposal_set_revision: number;
+  selected_proposal_id: string;
+  assessment_policy_version: "site-assessment-v1";
+  weights: { cost: number; schedule: number; capacity: number; control: number };
+  recommendation_reason: string;
+  alternative_comparison: string;
+  single_source_exception_reason?: string;
+  recommended_at: string;
+};
+
+export type SiteSelectionItem = {
+  recommendation: SiteSelectionRecommendationInput & {
+    requirement_id: string;
+    input_hash: string;
+    approval_flow_key: string;
+    approval_request_id: string;
+    eligible_count: number;
+    status: string;
+    recommended_by: string;
+    assessments: unknown[];
+  };
+  record_status: string;
+  approval_status: "pending" | "approved" | "rejected" | "consumed";
+  decision?: { selection_id: string; selected_proposal_id: string; formalized_at: string };
+};
+
 export async function submitPlantProposalReview(input: SiteProposalReviewInput) {
   const response = await fetch("/api/aese/v1/world/plant-build/reviews", {
     method: "POST",
@@ -226,6 +257,31 @@ export async function submitSiteInvestigationObservation(caseCode: string, world
   });
   if (!response.ok) throw new Error(`提交外部调研事实 ${response.status}: ${await response.text()}`);
   return response.json() as Promise<{ status: "committed"; world_message_id: string; observation: SiteInvestigationObservation }>;
+}
+
+export async function loadSiteSelections(caseCode: string, signal?: AbortSignal) {
+  const response = await fetch(`/api/aese/v1/world/plant-build/site-selections?case_code=${encodeURIComponent(caseCode)}`, {
+    headers: iaosHeaders(), signal,
+  });
+  if (!response.ok) throw new Error(`场址推荐与审批 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ items: SiteSelectionItem[] }>;
+}
+
+export async function submitSiteSelectionRecommendation(input: SiteSelectionRecommendationInput) {
+  const response = await fetch("/api/aese/v1/world/plant-build/site-selections", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() }, body: JSON.stringify(input),
+  });
+  if (!response.ok) throw new Error(`提交正式推荐 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ status: "committed"; result: SiteSelectionItem["recommendation"] }>;
+}
+
+export async function finalizeSiteSelection(caseCode: string, recommendationID: string, approvalRequestID: string) {
+  const response = await fetch("/api/aese/v1/world/plant-build/site-selections/finalize", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() },
+    body: JSON.stringify({ schema_version: "1.0", case_code: caseCode, recommendation_id: recommendationID, approval_request_id: approvalRequestID, formalized_at: new Date().toISOString() }),
+  });
+  if (!response.ok) throw new Error(`正式选址落地 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ status: "committed"; result: SiteSelectionItem["decision"] }>;
 }
 export async function loadPlantBuild(
   signal?: AbortSignal,

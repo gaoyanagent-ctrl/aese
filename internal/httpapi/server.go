@@ -284,6 +284,8 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/world/plant-build/reviews",
 			"/api/aese/v1/world/plant-build/investigations",
 			"/api/aese/v1/world/plant-build/observations",
+			"/api/aese/v1/world/plant-build/site-selections",
+			"/api/aese/v1/world/plant-build/site-selections/finalize",
 			"/api/aese/v1/world/capability-build",
 			"/api/aese/v1/world/industrialization",
 			"/api/aese/v1/world/first-delivery",
@@ -951,6 +953,87 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "committed", "world_message_id": messageID, "observation": input.Observation})
 			return
 		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "site-selections" && r.Method == http.MethodGet {
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, _, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_selection_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			result, err := authority.PlantSiteSelections(ctx, r.URL.Query().Get("case_code"))
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_selections_unavailable")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(result)
+			return
+		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "site-selections" && r.Method == http.MethodPost {
+			var input struct {
+				SchemaVersion               string         `json:"schema_version"`
+				RecommendationID            string         `json:"recommendation_id"`
+				CaseCode                    string         `json:"case_code"`
+				ProposalSetID               string         `json:"proposal_set_id"`
+				ProposalSetRevision         int            `json:"proposal_set_revision"`
+				SelectedProposalID          string         `json:"selected_proposal_id"`
+				AssessmentPolicyVersion     string         `json:"assessment_policy_version"`
+				Weights                     map[string]int `json:"weights"`
+				RecommendationReason        string         `json:"recommendation_reason"`
+				AlternativeComparison       string         `json:"alternative_comparison"`
+				SingleSourceExceptionReason string         `json:"single_source_exception_reason,omitempty"`
+				RecommendedAt               string         `json:"recommended_at"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_site_selection_recommendation", err.Error(), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_selection_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			result, err := postPlantAuthorityCommandResult(ctx, authority, "site.selection.recommend", actorID, input.CaseCode, input.RecommendationID, input.ProposalSetRevision, input)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "site_selection_recommendation_not_committed")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write(result)
+			return
+		}
+		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "site-selections" && rest[3] == "finalize" && r.Method == http.MethodPost {
+			var input struct {
+				SchemaVersion     string `json:"schema_version"`
+				RecommendationID  string `json:"recommendation_id"`
+				ApprovalRequestID string `json:"approval_request_id"`
+				FormalizedAt      string `json:"formalized_at"`
+				CaseCode          string `json:"case_code"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_site_selection_formalization", err.Error(), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_selection_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			payload := map[string]any{"schema_version": input.SchemaVersion, "recommendation_id": input.RecommendationID, "approval_request_id": input.ApprovalRequestID, "formalized_at": input.FormalizedAt}
+			result, err := postPlantAuthorityCommandResult(ctx, authority, "site.selection.formalize", actorID, input.CaseCode, input.RecommendationID, 1, payload)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "site_selection_not_formalized")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write(result)
+			return
+		}
 		if len(rest) != 2 || r.Method != http.MethodGet {
 			s.writeError(w, http.StatusMethodNotAllowed, "method_not_allowed", "method not allowed", false, "", "")
 			return
@@ -1212,6 +1295,11 @@ func (s *Server) plantAuthorityClient(ctx context.Context, r *http.Request, tena
 }
 
 func postPlantAuthorityCommand(ctx context.Context, client *iaosclient.Client, capabilityCode, actorID, scopeID, objectID string, revision int, payload any) error {
+	_, err := postPlantAuthorityCommandResult(ctx, client, capabilityCode, actorID, scopeID, objectID, revision, payload)
+	return err
+}
+
+func postPlantAuthorityCommandResult(ctx context.Context, client *iaosclient.Client, capabilityCode, actorID, scopeID, objectID string, revision int, payload any) (json.RawMessage, error) {
 	field := ""
 	switch capabilityCode {
 	case "facility.requirement.define":
@@ -1224,8 +1312,12 @@ func postPlantAuthorityCommand(ctx context.Context, client *iaosclient.Client, c
 		field = "investigation_request"
 	case "site.investigation.observation.commit":
 		field = "investigation_observation"
+	case "site.selection.recommend":
+		field = "site_selection_recommendation"
+	case "site.selection.formalize":
+		field = "site_selection_formalization"
 	default:
-		return fmt.Errorf("unsupported M10 capability %q", capabilityCode)
+		return nil, fmt.Errorf("unsupported M10 capability %q", capabilityCode)
 	}
 	command := map[string]any{
 		"capability_code": capabilityCode,
@@ -1236,10 +1328,9 @@ func postPlantAuthorityCommand(ctx context.Context, client *iaosclient.Client, c
 	}
 	raw, err := json.Marshal(command)
 	if err != nil {
-		return err
+		return nil, err
 	}
-	_, err = client.PostGovernedCommand(ctx, "api/v1/genesis/plant/interactive/actions", raw)
-	return err
+	return client.PostGovernedCommand(ctx, "api/v1/genesis/plant/interactive/actions", raw)
 }
 
 func decodeStoredProposalSet(value any) (plantbuild.ProposalSet, bool) {
