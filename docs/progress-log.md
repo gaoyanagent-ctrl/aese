@@ -1895,4 +1895,4 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 原因：需求、Agent 技术输出和人工决定必须成为可区分、可追踪的事实，不能继续用三个固定候选、固定金额或浏览器本地状态冒充正式 M10。
 - 影响：用户现在可完成“权威财务快照 → 需求 → Agent proposal → 人工采纳/退回/淘汰”；实际现金和已批预算不可在页面编辑，Agent 候选仍是 `candidate_only`，审阅不等于外部调查、投资审批或合同承诺。
 - 验证：AESE 全量 Go、合同/HTTP/UI 定向测试、TypeScript、ESLint 与生产构建通过；IAOS 全量 Go 和治理检查通过，后端已部署，`tenant-001`、`tenant-hctm` 均已升级至 `genesis-m9@1.6.0` 且 `up_to_date=true`，三个 Capability 的 Active Artifact 可在线读取。完整业务案件现场 UI/API/DB 证据仍属于 S5。
-- 后续：实现人工候选权威提交、`site.investigation.request`、Effective Process Artifact、World 报价/权属/容量/许可 Observation，以及选址审批、项目/WBS、施工、付款、验收和 AP/CIP/总账闭环。
+- 后续：实现人工候选权威提交、`site.investigation.request`、Effective Process Artifact、World 报价/权属/容量/许可 Observation，以及选址审批、项目/WBS、施工、付款、验收和 AP/CIP/总账闭环。部署后的 System Atlas 声明同步端点 `/api/v1/system-atlas/updates` 当前返回 404，三个声明已保留在仓库，待 IAOS 写入路由恢复后补同步。
