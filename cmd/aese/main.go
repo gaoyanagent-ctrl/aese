@@ -10,6 +10,7 @@ import (
 
 	"github.com/industrial-ai/iaos-aese/internal/application"
 	bridgeiaos "github.com/industrial-ai/iaos-aese/internal/bridge/iaos"
+	"github.com/industrial-ai/iaos-aese/internal/scenarioknowledge"
 	"github.com/industrial-ai/iaos-aese/internal/scenariopack"
 	"github.com/industrial-ai/iaos-aese/internal/validate"
 	"github.com/industrial-ai/iaos-aese/internal/worldcontract"
@@ -22,6 +23,7 @@ const usage = `Usage:
   aese world inspect <world-dir>
   aese world run <world-dir> [--until <RFC3339>] [--apply --output <dir>]
   aese world replay <world-dir> --log <event-log.json> [--apply --output <dir>]
+  aese knowledge validate <knowledge-manifest.json>
   aese reconcile <bridge-journal.json>
   aese experiment validate|inspect|expand|run|compare|evidence|replay [--definition <json>] [--apply]
 
@@ -64,6 +66,8 @@ func run(args []string, stdout, stderr io.Writer) int {
 		return experimentCommand(args[1:], stdout, stderr)
 	case "reconcile":
 		return reconcileCommand(args[1:], stdout, stderr)
+	case "knowledge":
+		return knowledgeCommand(args[1:], stdout, stderr)
 	case "help", "-h", "--help":
 		fmt.Fprint(stdout, usage)
 		return 0
@@ -71,6 +75,31 @@ func run(args []string, stdout, stderr io.Writer) int {
 		fmt.Fprintf(stderr, "unknown command %q\n%s", args[0], usage)
 		return 2
 	}
+}
+
+func knowledgeCommand(args []string, stdout, stderr io.Writer) int {
+	if len(args) != 2 || (args[0] != "validate" && args[0] != "digest") {
+		fmt.Fprintln(stderr, "knowledge requires: validate|digest <knowledge-manifest.json>")
+		return 2
+	}
+	m, err := scenarioknowledge.Load(args[1])
+	if err != nil {
+		fmt.Fprintln(stderr, err)
+		return 1
+	}
+	if args[0] == "digest" {
+		fmt.Fprintln(stdout, m.Digest())
+		return 0
+	}
+	issues := m.Validate()
+	if len(issues) > 0 {
+		for _, issue := range issues {
+			fmt.Fprintln(stderr, issue)
+		}
+		return 1
+	}
+	fmt.Fprintf(stdout, "valid knowledge edition: %s@%s (%d articles, %d nodes) hash=%s\n", m.EditionKey, m.EditionVersion, len(m.Articles), len(m.Nodes), m.ContentHash)
+	return 0
 }
 
 func reconcileCommand(args []string, stdout, stderr io.Writer) int {

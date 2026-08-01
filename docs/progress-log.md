@@ -1823,3 +1823,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：明确 AESE 只拥有场景知识和 World 映射，IAOS 拥有通用知识 Registry、权限和 Copilot；避免复制平台知识系统。
 - 验证：新增文档均带治理头；跨仓引用已核对；Atlas 声明已新增。
 - 后续：建立场景知识 Schema/manifest、Knowledge Edition 安装、节点帮助、上下文 Agent 与双侧证据验收。
+
+## 2026-08-01 - M9 场景知识机器合同与节点深链
+
+- 变更：新增场景 Knowledge Edition JSON Schema、`hctm-m9-incorporation-knowledge@1.0.0` manifest、18 节点 purpose/input/output/actor/evidence/IAOS/World 映射、canonical SHA-256 校验、`aese knowledge validate|digest` 和任务弹窗“这一步是什么”入口。
+- 原因：人工手册不能自动发现流程节点漏配、错误 Capability/World action 引用或内容漂移，也无法从当前任务直接进入 IAOS 权威知识。
+- 影响：AESE 仍不保存知识或 IAOS 业务数据；清单作为待发布场景 Edition 输入，页面通过稳定 article ID 跳转 IAOS。内容哈希不冒充 IAOS 安装完成。
+- 验证：`go test ./internal/scenarioknowledge ./cmd/aese`、`aese knowledge validate`、JSON Schema fixture 校验和 AESE `npm run build` 通过；18 节点覆盖率 100%，hash 为 `0467dd053231ac46fd8f3f56ac4b8e3ad920fd97a391026312dfe74491e134ef`。
+- 后续：实现 IAOS Knowledge Edition 幂等安装、Agent workspace/node 上下文和 World/IAOS 双侧运行证据漂移检查。

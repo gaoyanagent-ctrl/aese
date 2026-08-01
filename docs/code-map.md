@@ -437,7 +437,12 @@ Artifact 执行权威见 IAOS SOL-048 和 DES-072。
 `docs/manuals/m9-incorporation-user-manual.md`，实施计划为
 `docs/plans/2026-08-01-product-knowledge-scenario-integration.md`。通用 Knowledge Registry、
 知识中心、权限和 Copilot 检索由 IAOS DES-077 与 `/api/v1/knowledge/*` 提供；AESE 不新增
-知识数据库。后续机器 manifest 和 World 节点帮助入口必须更新本节。
+知识数据库。机器 Edition Schema/manifest 位于 `scenario-packs/hctm/knowledge/`；加载、稳定
+编码引用和 SHA-256 校验位于 `internal/scenarioknowledge/`；离线入口为
+`aese knowledge validate <manifest>`。M9 任务的“这一步是什么”深链位于
+`frontend/src/components/game/WorkItemActionPanel.tsx`，链接构造位于
+`frontend/src/game/iaosLinks.ts::m9KnowledgeUrl`。经 IAOS 平台包安装 Edition 和传递完整
+Agent workspace/node context 仍属后续切片。
 
 以下改动必须更新本文件：
 

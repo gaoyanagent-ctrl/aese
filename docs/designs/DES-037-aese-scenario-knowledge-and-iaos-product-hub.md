@@ -49,8 +49,11 @@ AESE 平台基线手册保留在 Git 并受场景版本审核；构建时生成 
 由 IAOS 平台包安装器发布为 `scenario` 文章。浏览器不直接读取仓库文件。文章必须带
 `applies_to_version`、AESE pack hash 和 IAOS Edition 依赖。
 
-第一切片以 `docs/manuals/m9-incorporation-user-manual.md` 为人工可读源；机器 manifest、发布
-编译器和每节点完整映射在 PLAN-KNOWLEDGE-AESE-001 后续切片实现。
+人工可读源为 `docs/manuals/m9-incorporation-user-manual.md`；机器 Edition 位于
+`scenario-packs/hctm/knowledge/m9-incorporation.json`，Schema 位于同目录 `schemas/`。
+`internal/scenarioknowledge` 使用严格 JSON 解码、稳定编码 allowlist、18 节点顺序/完整性和
+canonical SHA-256 校验；`aese knowledge validate` 是离线质量门。manifest 当前是可验证的
+发布输入，写入 IAOS 行业 Edition 的幂等安装器仍属于 S6。
 
 # 5. Agent 合同
 
@@ -73,3 +76,11 @@ Capability、Approval 和 World Observation。
 - Agent 能回答“谁做、为什么、输入输出、在哪里查看”，并显示来源；
 - 文章与运行事实冲突时明确提示漂移；
 - AESE 不新增知识数据库，不绕过 IAOS 权限读取跨租户内容。
+
+# 7. 当前实现入口
+
+- `WorkItemActionPanel` 在每个 M9 任务显示“这一步是什么”，携带 tenant、case、capability 和
+  `KB-M9-INCORPORATION` 打开 IAOS 知识中心；
+- 清单逐节点固定 purpose、inputs、outputs、actor、task type、gate、evidence、IAOS menu 和
+  World action；
+- 内容哈希不等同于生产签名或安装完成；只有 IAOS 安装器登记成功后才能宣称 Edition 已发布。

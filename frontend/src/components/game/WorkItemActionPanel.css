@@ -18,6 +18,7 @@
 .gx-action-head h3{margin:3px 0;font-size:21px}
 .gx-action-head>button{width:44px;border:0;border-radius:9px;color:#a8c2c8;background:#12313b}
 .gx-action-card>p{color:#b2c8ce;line-height:1.6}
+.gx-knowledge-link{display:flex;align-items:center;gap:8px;margin:8px 0 14px;padding:10px 12px;border:1px solid #3f7180;border-radius:8px;color:#9de3ec;background:#102f3a;text-decoration:none}.gx-knowledge-link:hover{border-color:#77d2dd;color:#e7fcff}.gx-knowledge-link svg{width:17px;height:17px;flex:none}
 .gx-action-fields{display:grid;gap:10px}
 .gx-output-explainer{display:grid;gap:5px;margin:12px 0;padding:12px 14px;border-left:3px solid #76d4df;border-radius:6px;color:#c8e8eb;background:#12323c;line-height:1.55}
 .gx-output-explainer strong{color:#8ce3eb}.gx-output-explainer span{font-size:12px}

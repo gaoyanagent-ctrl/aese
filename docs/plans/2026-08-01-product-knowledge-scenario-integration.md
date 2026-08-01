@@ -21,18 +21,18 @@ PLAN-KNOWLEDGE-001；本仓只维护场景知识、映射、校验和 AESE 页�
 
 ## S1 机器发布
 
-- [ ] S4 建立场景知识 JSON Schema 和 M9 article manifest。
-- [ ] S5 校验 World action、IAOS Capability/Process/Entity 稳定编码引用。
+- [x] S4 建立场景知识 JSON Schema 和 M9 article manifest。
+- [x] S5 校验 World action、IAOS Capability/Process/Entity 稳定编码引用。
 - [ ] S6 生成签名 Knowledge Edition 并经 IAOS 平台包幂等安装。
 
 ## S2 页面与 Agent
 
-- [ ] S7 World 节点详情增加“这一步是什么”上下文入口。
+- [x] S7 World 节点详情增加“这一步是什么”上下文入口。
 - [ ] S8 将 workspace/case/world run/node/actor 传入受治理知识问答。
 - [ ] S9 展示 World 与 IAOS 双侧实际证据和配置漂移。
 
 ## S3 验收
 
-- [ ] S10 M9 全节点人工、Agent、Approval、World 分类覆盖率 100%。
+- [x] S10 M9 全节点人工、Agent、Approval、World 分类覆盖率 100%。
 - [ ] S11 越权、旧版本、缺失资产和无运行证据失败关闭。
 - [ ] S12 UI/API/runbook、Atlas、code map 和 evidence 全部收口。

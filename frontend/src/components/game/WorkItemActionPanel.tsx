@@ -3,6 +3,7 @@ import {
   Building2,
   CheckCircle2,
   FileCheck2,
+	CircleHelp,
   KeyRound,
   Landmark,
   LoaderCircle,
@@ -23,6 +24,7 @@ import {
   type WorkItemInput,
 } from "../../game/api";
 import type { GameProjection, GameWorkItem } from "../../game/types";
+import { m9KnowledgeUrl } from "../../game/iaosLinks";
 import { RPGEventIntro } from "./RPGEventIntro";
 
 const labels: Record<
@@ -411,6 +413,7 @@ export function WorkItemActionPanel({
       </div>
       <RPGEventIntro item={item} />
       <p>{meta.description}</p>
+	  <a className="gx-knowledge-link" href={m9KnowledgeUrl(projection,item.capability)} target="_blank" rel="noreferrer"><CircleHelp/>这一步是什么？查看业务目的、输入输出与 IAOS 证据</a>
       {item.capability === "registration.submit" && (
         <ApplicationPackage
           title="本次提交的企业设立登记申请"

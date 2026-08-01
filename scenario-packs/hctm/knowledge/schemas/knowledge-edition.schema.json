@@ -1,0 +1,14 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://iaos.local/aese/knowledge-edition.schema.json",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema_version", "edition_key", "edition_version", "iaos_edition", "iaos_process", "language", "content_hash", "articles", "nodes"],
+  "properties": {
+    "schema_version": {"const": "1.0"}, "edition_key": {"type": "string", "minLength": 1}, "edition_version": {"type": "string", "minLength": 1},
+    "iaos_edition": {"type": "string", "minLength": 1}, "iaos_process": {"const": "enterprise.incorporation.lifecycle.v1"}, "language": {"enum": ["zh-CN", "en-US"]},
+    "content_hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "articles": {"type": "array", "minItems": 1, "items": {"type": "object", "additionalProperties": false, "required": ["article_id", "title", "source_ref", "applies_to_version"], "properties": {"article_id":{"type":"string"},"title":{"type":"string"},"source_ref":{"type":"string"},"applies_to_version":{"type":"string"}}}},
+    "nodes": {"type": "array", "minItems": 18, "maxItems": 18, "items": {"type":"object","additionalProperties":false,"required":["sequence","capability","task_type","actor","article_id","purpose","inputs","outputs","evidence_types","iaos_menus","world_actions"],"properties":{"sequence":{"type":"integer","minimum":1},"capability":{"type":"string"},"task_type":{"enum":["human_task","agent_task","approval","world_wait","capability"]},"actor":{"type":"string"},"gate":{"type":"string"},"article_id":{"type":"string"},"purpose":{"type":"string"},"inputs":{"type":"array","minItems":1,"items":{"type":"string"}},"outputs":{"type":"array","minItems":1,"items":{"type":"string"}},"evidence_types":{"type":"array","minItems":1,"items":{"type":"string"}},"iaos_menus":{"type":"array","minItems":1,"items":{"type":"string"}},"world_actions":{"type":"array","items":{"type":"string"}}}}}
+  }
+}

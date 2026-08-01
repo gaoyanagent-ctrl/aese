@@ -4,13 +4,15 @@
 
 - 已完成 AESE/IAOS 知识所有权、场景 Article 扩展和 Agent 回答合同设计（DES-037）。
 - 已建立 M9 企业设立用户手册第一版，明确 human/agent/approval/world 四类节点与证据入口。
-- IAOS 已实现产品知识中枢第一纵向切片；AESE 下一步按
-  PLAN-KNOWLEDGE-AESE-001 交付机器 manifest、Knowledge Edition 安装、节点帮助和双侧证据。
+- 已交付场景知识 Schema、带 canonical hash 的 M9 manifest、18 节点稳定引用校验和任务弹窗
+  “这一步是什么”入口；IAOS 已实现租户知识发布和正式只读 Agent Tool。
+- 下一步按 PLAN-KNOWLEDGE-AESE-001 完成 Knowledge Edition 幂等安装、完整 Agent 上下文和
+  World/IAOS 双侧实际证据与漂移验收。
 - 该计划是 PLAN-GXZ-001 的并行知识治理计划，不改变 M9 财务未完成项状态。
 
 本文件是 AESE 当前里程碑状态和下一步优先级的权威来源。
 
-最后更新：2026-07-31。
+最后更新：2026-08-01。
 
 2026-07-31 M9 原子能力运行合同：IAOS DES-076 已交付 19 项真实可执行 V1 原子能力
 （18 active、1 deprecated），同一目录驱动 Analyzer、Artifact、Runtime、API 和 Studio。
