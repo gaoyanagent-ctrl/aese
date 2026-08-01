@@ -1981,5 +1981,5 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 变更：AESE Command Gateway 将 completed/valid Agent Run Evidence 随 Agent Proposal 提交；IAOS `site.proposal.record` 逐字段匹配 provider/model/prompt/request/token/input/output hash，并在同一事务写 ProposalSet、Agent Run、Capability Execution、Process trace、Audit、Outbox 和投影。IAOS M10 工作台新增 Agent 运行页签。
 - 原因：CreativeJob 文件只证明 AESE 调过模型，不能证明 IAOS 接受的候选与哪次运行一致，也无法保证候选与运行证据同时成功或同时失败。
 - 影响：Agent 候选缺少或篡改运行证据会失败关闭；人员候选禁止伪造 Agent Run。World Journal 仍只接受外部 Intent/Observation，不混入模型运行。
-- 验证：新增 Agent Run/Proposal 匹配、篡改拒绝、人工路径隔离和 BFF 命令证据测试；完整回归与在线发布证据在本次发布后补录。
+- 验证：IAOS 全仓 Go、vet、治理写检查、Code Map/Atlas tracking、TypeScript 与 Next 生产构建通过；AESE 全仓 Go、vet、24 个前端测试文件/71 项测试、TypeScript 与 Vite 生产构建通过。IAOS 全量前端 Vitest 有 7 个既有测试文件共 18 项失败（超时、中文界面与旧英文断言不一致、`window is not defined` 清理问题），其余 63 个文件/355 项通过，本次 M10 工作台 TypeScript 与生产构建无失败。8082/8090/3000/4173 均健康，四个 active 租户升级到 `genesis-m9@1.15.0` 且 `up_to_date=true`；线上 Artifact 包含 Agent Run 条件合同，新查询入口未认证返回 401，`genesis_plant_agent_run` 已启用 FORCE RLS 和治理写触发器。历史候选未伪造补录，因此当前 Agent Run 为 0 条符合预期。两仓 System Atlas 同步端点仍返回 404，声明保留待路由恢复后幂等补录。
 - 后续：推进 S4.3 项目/WBS、空间和承包策略的 Agent 建议与人员决定纵切。
