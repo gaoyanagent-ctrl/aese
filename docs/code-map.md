@@ -291,7 +291,8 @@ M9 I0-I5 的当前入口如下：
 | Agent provider 与技术证据 | `internal/creative/minimax_provider.go::CompleteJSON`、CreativeJob store；失败时不返回 fixture 候选 |
 | 交互 Plant Build Play | `frontend/src/components/world/PlantBuildPlay.tsx`、`frontend/src/world/plantBuild.ts`、`frontend/src/components/world/PlantBuildPlay.test.tsx`、`/#world-plant-build` |
 | AESE 定向 BFF | `internal/httpapi/server.go`：`planning-status`、`financial-constraints`、`proposals`、`reviews`；`internal/iaosclient/client.go` 只暴露命名的 IAOS adapter |
-| IAOS 交互权威切片 | `/iaos/iaos-go-m10-interactive-authority/platform/internal/api/plant_interactive.go`：只读财务快照、Requirement/Proposal/Review、RLS、Capability 写门、幂等、Audit/Outbox；尚未包含 investigation/Process/World/WBS/财务全链 |
+| IAOS M10 菜单与解释型工作台 | `/iaos/iaos-go/frontend/src/components/genesis/PlantPlanningWorkspace.tsx`、`menu.genesis_plant_planning`；由 `genesis-plant-planning` 包随平台基础包 `1.8.0` 安装，入口为 `业务智造层 → M10 工厂规划`，并深链 AESE `/#world-plant-build` |
+| IAOS 交互权威切片 | `/iaos/iaos-go/platform/internal/api/plant_interactive.go`：只读财务快照、Requirement/Proposal/Review、RLS、Capability 写门、幂等、Audit/Outbox；尚未包含 investigation/Process/World/WBS/财务全链 |
 | 历史场址/空间/项目 tracer | `internal/plantbuild/`、`world-contracts/schemas/plant-build-campaign.schema.json`、`world-packs/hctm-genesis/campaigns/plant-build/`；只允许 fixture replay |
 | 历史 IAOS 投资与项目治理 | `/iaos/iaos-go-m10-plant/platform/internal/api/plant_governance.go`；DES-052；revision `23be02a`，尚未接入新交互 Process |
 | M10 runbook / reference evidence | `docs/runbooks/genesis-plant-build.md`、`docs/reports/m10-genesis-plant-build-evidence.md`；evidence 仍只证明 reference replay |

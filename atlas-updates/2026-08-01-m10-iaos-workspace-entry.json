@@ -1,0 +1,14 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m10.iaos-workspace-entry.2026-08-01",
+  "node_key": "aese.world.genesis.plant-build",
+  "update_type": "implementation",
+  "summary": "补齐 M10 IAOS 可发现菜单与权威规划工作台",
+  "detail": "genesis-plant-planning 包现在安装 menu.genesis_plant_planning；IAOS 业务智造层的 M10 工厂规划工作台展示案件、权威资金约束、设施需求、Agent 候选、人工评审和穿透证据，并深链 AESE M10 World。菜单和页面补齐可发现性，但不冒充后续调查、Process、工程执行和工程财务已完成。",
+  "status_after": "building",
+  "progress_after": 62,
+  "current_state": "M10 首个交互纵切已具备 IAOS 菜单入口和解释型工作台；Investigation、Effective Process Artifact、World Observation、项目/WBS、施工、付款、验收与工程财务仍待实现。",
+  "evidence_ref": "docs/designs/DES-011-genesis-plant-build.md",
+  "commit_sha": "36b5f1f",
+  "occurred_at": "2026-08-01T16:30:00Z"
+}

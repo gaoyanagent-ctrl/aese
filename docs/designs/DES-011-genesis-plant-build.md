@@ -284,6 +284,26 @@ genesis.facility.accepted.v1
 
 ## 16. 用户配置、操作、验证与恢复
 
+### 16.0 IAOS 菜单入口与双系统职责
+
+M10 的 IAOS 用户入口是左侧导航的 `业务智造层 → M10 工厂规划`，不是隐藏 API，
+也不要求用户先记住 AESE URL。该工作台提供五个可解释标签页：
+
+- `权威资金约束`：读取当前案件已过账现金和已批准预算，只读展示来源与快照哈希。
+- `设施需求`：查看人员提交的版本化 Requirement。
+- `Agent 候选方案`：查看 candidate-only ProposalSet、假设、风险和待验证事实。
+- `人工评审`：查看采纳调研、退回或淘汰及其理由；评审不等于投资审批。
+- `穿透证据`：解释 IAOS 业务事实、AESE Agent 技术证据和后续 World Observation 的关系。
+
+用户先在工作台选择一个满足 M9 前置条件的设立案件，再点击 `打开 AESE M10 World` 进入
+`/#world-plant-build` 完成需求录入、Agent 生成和人工评审。AESE 负责交互式世界与 Agent
+技术运行，IAOS 负责资金约束、Requirement、Proposal、Review、权限、审计和 Outbox；
+工作台不得在浏览器本地伪造这些权威事实。
+
+该菜单随 `genesis-plant-planning` 平台包安装，平台基础包版本从 `1.8.0` 起包含
+`menu.genesis_plant_planning`。升级后的既有租户若仍看不到菜单，应重新登录或强制刷新，
+使会话重新加载租户菜单投影；不能以手工 URL 代替缺失的菜单授权。
+
 ### 16.1 前置条件
 
 - 当前用户已通过 IAOS 登录并进入正确 Genesis Workspace；AESE 只能透传该用户的 token 和 tenant context。
@@ -292,7 +312,7 @@ genesis.facility.accepted.v1
 
 ### 16.2 当前可操作步骤
 
-1. 进入“工厂建设 Campaign”，确认“可用现金快照”和“已批准预算快照”均为只读，并能看到 `gl:`、`budget:` 来源引用。
+1. 在 IAOS 进入 `业务智造层 → M10 工厂规划`，选择案件并确认权威资金约束；再点击 `打开 AESE M10 World`，确认“可用现金快照”和“已批准预算快照”均为只读，并能看到 `gl:`、`budget:` 来源引用。
 2. 填写目标区域、设施用途、最小面积、电力容量、目标日期、2–8 个候选、允许的方案类型、投资申请额、最低现金保留额、偏好和修订原因。
 3. 点击“保存需求并让 Agent 生成候选”。成功表示 Requirement 与 ProposalSet 均已进入 IAOS；这不表示投资已获批。
 4. 阅读每个候选的业务理由、金额/工期区间、估算依据、假设、待验证事实、风险、来源和置信度。

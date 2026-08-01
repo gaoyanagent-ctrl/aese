@@ -1904,3 +1904,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：企业预算不再受平台固定金额限制；真正形成承诺或资金事实的 binding 能力仍保留 Agent Mandate 限额，最终预算仍不得突破权威已核验资金。
 - 验证：IAOS `go test ./internal/incorporation ./internal/api`、governed-write 检查、Atlas tracking 和 `git diff --check` 通过；AESE 文档与计划完成一致性更新。
 - 后续：部署 Runtime 2.14.0 / `genesis-m9@1.7.0` 后，以新案件验证节点 21 大额草案、节点 22 只读引用和租户策略调整。
+
+## 2026-08-01 - M10 IAOS 菜单与权威工作台补齐
+
+- 变更：为 `genesis-plant-planning` 包增加 `menu.genesis_plant_planning`，在 IAOS `业务智造层` 发布 `M10 工厂规划` 工作台；工作台提供案件选择、权威资金约束、设施需求、Agent 候选、人工评审、穿透证据和 AESE M10 World 深链。
+- 原因：M10 已有 API、Capability 和 Agent，但缺少租户可发现的菜单资产与页面路由，用户无法从 IAOS 导航进入已实现的交互纵切。
+- 影响：平台基础包升级至 `1.8.0` 后，既有与新租户通过同一包清单获得 M10 入口；IAOS 继续拥有权威业务事实，AESE 继续拥有 World/Agent 交互。该入口不改变 M10 尚未完成调查、Process、工程执行和财务全链的事实。
+- 验证：IAOS 新增菜单包回归测试先失败后通过；`go test ./internal/incorporation ./internal/api`、生产构建、治理写入检查、Atlas tracking 和线上菜单/财务约束 API 验证通过；`tenant-001`、`tenant-hctm` 与当前 GX 租户均已升级到 `1.8.0`。
+- 后续：从新工作台完成 Requirement → Agent Proposal → Human Review 现场验收，再实现 Investigation、Effective Process Artifact、World Observation、项目/WBS、施工、付款、验收和工程财务闭环。
