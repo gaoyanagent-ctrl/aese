@@ -1973,5 +1973,5 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 变更：修正人工候选必须依赖既有 Agent ProposalSet 的缺口；AESE 在权威 Requirement 已存在、候选集不存在时生成服务端稳定候选集编码，IAOS 允许 `site.proposal.record` 建立含一个人工候选的 revision 1，已有版本仍只能逐版追加。
 - 原因：模型未配置时 Requirement 可以先提交成功，但旧实现要求已有候选集才能打开人工路径，导致“人工接管”无法真正从零启动。
 - 影响：外部模型和人工路径不再互为前置条件；首版与追加版都固定认证 actor、输入/输出 hash、金额边界和来源，仍不能伪造 Agent 或 World 事实。
-- 验证：IAOS 与 AESE 新增首版人工候选、身份和 hash 回归；前端验证无 ProposalSet 时表单可用。完整两仓回归、发布与在线验收见本次发布记录。
+- 验证：IAOS 全模块 Go/vet、治理写入和 Atlas tracking 通过；AESE 全仓 Go/vet、24 文件/71 项 Vitest、TypeScript 与 Vite 生产构建通过。8082/8090/3000/4173 健康，四个 active 租户均升级到 `genesis-m9@1.14.0` 且 `up_to_date=true`；线上 Process Artifact 仍为 `business_command_driven` 并声明 Agent/项目负责人双参与入口，未认证人工入口按预期返回 401。System Atlas 同步端点仍返回 404，声明已保留。
 - 后续：完成 S2.4 Agent Run 与业务 Proposal 同事务证据，并继续 M10 项目/WBS 纵切。
