@@ -145,6 +145,7 @@
 | M9N Frozen Contract | [IAOS-native M9 lifecycle contract](contracts/m9-native-incorporation-contract.json) | Active |
 | M9N Final Evidence | [IAOS-native M9 final evidence](reports/m9-native-final-evidence.md) | Completed |
 | M9 Finance Inventory | [M9–M13 财务对象与历史数据盘点](reports/m9-m13-finance-object-inventory.md) | Completed |
+| M9 Knowledge Context Evidence | [M9 知识场景上下文验证证据](reports/2026-08-01-knowledge-scenario-context-evidence.md) | Completed |
 | M9N Closed-loop Runbook | [IAOS-native M9 operations](runbooks/m9-native-closed-loop.md) | Completed |
 | Enterprise Genesis Runbook | [AI 企业身份、2.5D M9 游戏与 live IAOS 验收](runbooks/enterprise-genesis-game.md) | Completed |
 | Enterprise Genesis RPG / Multi-tenant Evidence | [全 RPG、生成精灵、双租户与失败恢复验收](reports/genesis-rpg-and-multi-tenant-acceptance.md) | Completed |

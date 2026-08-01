@@ -6,8 +6,9 @@
 - 已建立 M9 企业设立用户手册第一版，明确 human/agent/approval/world 四类节点与证据入口。
 - 已交付场景知识 Schema、带 canonical hash 的 M9 manifest、18 节点稳定引用校验和任务弹窗
   “这一步是什么”入口；IAOS 已实现租户知识发布和正式只读 Agent Tool。
-- 下一步按 PLAN-KNOWLEDGE-AESE-001 完成完整 Agent 上下文和
-  World/IAOS 双侧实际证据与漂移验收。
+- 已完成 workspace/case/world run/node/actor/capability 封闭导航上下文深链；IAOS 知识中心
+  可见展示、允许清除并在 Copilot BFF 二次校验，明确不能把浏览器参数当作运行事实。
+- 下一步按 PLAN-KNOWLEDGE-AESE-001 完成 World/IAOS 双侧实际证据、配置漂移和失败关闭验收。
 - 该计划是 PLAN-GXZ-001 的并行知识治理计划，不改变 M9 财务未完成项状态。
 
 本文件是 AESE 当前里程碑状态和下一步优先级的权威来源。

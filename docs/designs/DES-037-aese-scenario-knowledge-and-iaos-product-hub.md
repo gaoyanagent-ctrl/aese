@@ -72,6 +72,30 @@ AESE 对话框将当前 workspace、case、world run、剧情节点和用户角�
 对话框只提供知识查询时不得调用写 API；推进剧情继续走 AESE Command Gateway、IAOS
 Capability、Approval 和 World Observation。
 
+## 5.1 场景导航上下文合同
+
+AESE 从当前 `WorldProjection`、`GameWorkItem` 和 Genesis session 生成以下封闭字段，并通过
+知识深链传给 IAOS：
+
+| 字段 | 来源 | 含义 |
+| --- | --- | --- |
+| `workspace_id` | 当前 Genesis workspace | 企业空间稳定编码 |
+| `case_code` | `projection.case_id` | 当前设立案编码 |
+| `world_run_id` | `projection.world_run_id` | 当前 World 运行编码 |
+| `node_id` | `work_item_id` | 当前剧情/流程节点 |
+| `actor_id` | `owner_id` | 当前责任主体 |
+| `actor_type` | `owner_type` | 人、Agent、审批或外部主体类型 |
+| `task_type` | `kind` | 当前任务类型 |
+| `capability` | `capability_code` | 对应 IAOS Capability |
+
+该对象是**导航上下文**，不是 IAOS 运行事实或 World Observation。IAOS 必须：
+
+- 只接受上述字段和稳定编码格式，忽略未知、超长或提示注入文本；
+- 在 BFF 再次归一化，不能信任浏览器传入对象；
+- 在知识中心可见展示并允许用户清除，不能将其作为隐藏 Agent 指令；
+- Copilot 回答当前状态前，重新读取有权访问的 IAOS Runtime/业务 API；无证据时明确失败关闭；
+- S9 前不宣称已完成双侧证据核验或配置漂移检测。
+
 # 6. 验收
 
 - 用户从任一 M9 节点可打开对应场景说明；
@@ -83,7 +107,9 @@ Capability、Approval 和 World Observation。
 # 7. 当前实现入口
 
 - `WorkItemActionPanel` 在每个 M9 任务显示“这一步是什么”，携带 tenant、case、capability 和
-  `KB-M9-INCORPORATION` 打开 IAOS 知识中心；
+  `KB-M9-INCORPORATION` 打开 IAOS 知识中心；深链同时携带 5.1 节定义的封闭场景导航上下文；
+- IAOS 知识中心明确展示该上下文，Copilot 请求经前端和 BFF 双重归一化后使用；它不能替代
+  Runtime、Journal、Outbox 或 World Observation 证据；
 - 清单逐节点固定 purpose、inputs、outputs、actor、task type、gate、evidence、IAOS menu 和
   World action；
 - 内容哈希不等同于生产签名或安装完成；只有 IAOS 安装器登记成功后才能宣称 Edition 已发布。

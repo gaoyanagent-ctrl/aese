@@ -413,7 +413,14 @@ export function WorkItemActionPanel({
       </div>
       <RPGEventIntro item={item} />
       <p>{meta.description}</p>
-	  <a className="gx-knowledge-link" href={m9KnowledgeUrl(projection,item.capability)} target="_blank" rel="noreferrer"><CircleHelp/>这一步是什么？查看业务目的、输入输出与 IAOS 证据</a>
+      <a
+        className="gx-knowledge-link"
+        href={m9KnowledgeUrl(projection, item)}
+        target="_blank"
+        rel="noreferrer"
+      >
+        <CircleHelp />这一步是什么？查看业务目的、输入输出与 IAOS 证据
+      </a>
       {item.capability === "registration.submit" && (
         <ApplicationPackage
           title="本次提交的企业设立登记申请"

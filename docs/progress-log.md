@@ -1839,3 +1839,15 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：AESE 继续拥有场景内容、不保存 IAOS 业务数据；IAOS 继续拥有权限、RLS、审计、安装目录和有效解析。M9 深链改用独立行业文章 ID，避免与平台基线无痕覆盖。
 - 验证：manifest/schema、编译器、CLI、IAOS 全量 Go、Product Knowledge/API 定向 Go 测试、AESE 全量 Go/生产构建/深链 Vitest 通过；live dry-run 验签通过，缺少 `genesis-m9@1.5.0` 时 409 失败关闭；升级依赖后重复 apply 返回 `no_op=true,writes=0`，`tenant-hctm` 可见行业文章而 `tenant-001` 返回 404，额外行业包不影响基础包 `up_to_date=true`。Edition hash 为 `1afd39e1ce2139c1254aea2e01f250d480796e001121e85bbbe72b9d1e59ec47`。
 - 后续：推进 Agent workspace/node 上下文和 World/IAOS 双侧证据漂移。
+
+## 2026-08-01 - M9 知识问答接入封闭场景导航上下文
+
+- 变更：M9 节点知识深链增加 workspace、case、world run、node、actor、task 和 capability；
+  IAOS 知识中心可见展示并允许清除，Copilot 前端与 BFF 使用同一封闭字段归一化合同。
+- 原因：仅传 tenant/case/capability 无法让用户和 Agent 确认正在解释哪个运行和节点，同时任意
+  URL 文本直接进入提示会形成注入与伪造运行事实风险。
+- 影响：Agent 可用稳定编码定位下一步应查询的 IAOS/World 证据，但导航上下文本身不证明节点
+  状态、审批结果或外部 Observation；未知、超长和提示式字段被丢弃。
+- 验证：AESE 深链单测与 TypeScript 通过；IAOS 归一化单测、TypeScript 和生产构建通过；
+  详细证据见两仓对应的 2026-08-01 scenario context evidence。
+- 后续：S9 接入有权限的 World/IAOS 双侧实际证据读取和配置漂移提示。

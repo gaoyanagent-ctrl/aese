@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9.knowledge-scenario-context.2026-08-01",
+  "node_key": "aese.world.knowledge",
+  "update_type": "implementation",
+  "summary": "M9 知识问答接入封闭且可见的场景导航上下文",
+  "detail": "AESE 知识深链传递 workspace、case、world run、node、actor、task 和 capability 稳定编码；IAOS 知识中心可见展示并在 Copilot BFF 二次归一化，明确导航上下文不等同运行证据。",
+  "status_after": "validating",
+  "progress_after": 88,
+  "current_state": "S8 场景上下文已完成；S9 继续接入 World/IAOS 双侧实际证据和配置漂移。",
+  "evidence_ref": "docs/designs/DES-037-aese-scenario-knowledge-and-iaos-product-hub.md",
+  "occurred_at": "2026-08-01T08:30:00Z"
+}

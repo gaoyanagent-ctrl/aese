@@ -443,8 +443,10 @@ Artifact 执行权威见 IAOS SOL-048 和 DES-072。
 `aese knowledge install <bundle> --target <IAOS URL> [--apply]`。编译产物位于
 `scenario-packs/hctm/knowledge/dist/`，IAOS 消费 bundle 而不读取 AESE 文件系统。M9 任务的“这一步是什么”深链位于
 `frontend/src/components/game/WorkItemActionPanel.tsx`，链接构造位于
-`frontend/src/game/iaosLinks.ts::m9KnowledgeUrl`。经 IAOS 平台包安装 Edition 和传递完整
-Agent workspace/node context 仍属后续切片。
+`frontend/src/game/iaosLinks.ts::m9KnowledgeUrl`；该函数从 WorldProjection、GameWorkItem 和
+Genesis session 生成封闭 workspace/case/world run/node/actor/task/capability 导航上下文。
+IAOS 知识中心与 Copilot BFF 负责二次归一化和可见展示。World/IAOS 双侧实际证据和漂移检测
+仍属后续 S9，导航参数不得被解释为运行事实。
 
 以下改动必须更新本文件：
 

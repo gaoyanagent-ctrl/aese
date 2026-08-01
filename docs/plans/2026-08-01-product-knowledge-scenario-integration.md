@@ -28,7 +28,8 @@ PLAN-KNOWLEDGE-001；本仓只维护场景知识、映射、校验和 AESE 页�
 ## S2 页面与 Agent
 
 - [x] S7 World 节点详情增加“这一步是什么”上下文入口。
-- [ ] S8 将 workspace/case/world run/node/actor 传入受治理知识问答。
+- [x] S8 将 workspace/case/world run/node/actor 作为封闭导航上下文传入受治理知识问答，并在
+  IAOS BFF 二次校验、可见展示和明确区分运行证据。
 - [ ] S9 展示 World 与 IAOS 双侧实际证据和配置漂移。
 
 ## S3 验收
