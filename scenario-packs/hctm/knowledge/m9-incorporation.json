@@ -2,10 +2,10 @@
   "schema_version": "1.0",
   "edition_key": "hctm-m9-incorporation-knowledge",
   "edition_version": "1.0.0",
-  "iaos_edition": "genesis-m9@1.4.0",
+  "iaos_edition": "genesis-m9@1.5.0",
   "iaos_process": "enterprise.incorporation.lifecycle.v1",
   "language": "zh-CN",
-  "content_hash": "0467dd053231ac46fd8f3f56ac4b8e3ad920fd97a391026312dfe74491e134ef",
+  "content_hash": "6a73c7735970e14adbbe198f5ebc07bd7b580cf6fc3f32da3137c3633efd6543",
   "articles": [
     {"article_id":"KB-M9-INCORPORATION","title":"M9 企业设立人机协作验收手册","source_ref":"docs/manuals/m9-incorporation-user-manual.md","applies_to_version":"hctm-m9-incorporation-knowledge@1.0.0"}
   ],

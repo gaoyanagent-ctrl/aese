@@ -4,7 +4,7 @@
   "node_key": "aese.knowledge",
   "update_type": "implementation",
   "summary": "交付 M9 场景知识机器清单、离线校验和节点上下文入口",
-  "detail": "新增 18 节点 purpose/input/output/actor/evidence/IAOS/World 映射、JSON Schema、canonical SHA-256 校验与 aese knowledge validate；任务弹窗通过稳定文章 ID 打开 IAOS 知识中心。",
+  "detail": "新增 18 节点 purpose/input/output/actor/evidence/IAOS/World 映射、JSON Schema、canonical SHA-256 校验与 aese knowledge validate；任务弹窗通过稳定文章 ID 打开 IAOS 知识中心，并锁定 IAOS genesis-m9@1.5.0 依赖。",
   "status_after": "validating",
   "progress_after": 62,
   "current_state": "M9 全节点机器知识覆盖和页面深链已完成；IAOS Edition 幂等安装、完整 Agent 上下文与双侧证据漂移仍待完成。",
