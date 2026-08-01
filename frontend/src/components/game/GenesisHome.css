@@ -173,6 +173,9 @@
 .genesis-home__build-note > span { color: #c6a766; font-size: 9px; letter-spacing: .1em; }
 .genesis-home__build-note strong { display: block; margin-top: 9px; font-size: 12px; }
 .genesis-home__build-note p { margin: 7px 0 0; color: #8e8b7e; font-size: 9px; line-height: 1.55; }
+.genesis-home__build-note button { min-height: 40px; display: flex; align-items: center; justify-content: center; gap: 7px; width: 100%; margin-top: 15px; border: 1px solid #665a37; border-radius: 8px; color: #ead7a7; background: #292416; cursor: pointer; font-weight: 800; }
+.genesis-home__build-note button:hover,.genesis-home__build-note button:focus-visible { border-color: #9c844a; background: #332c19; outline: 2px solid #d4ad5b33; outline-offset: 2px; }
+.genesis-home__build-note button svg { width: 14px; }
 
 @media (max-width: 900px) {
   .genesis-home__hero { grid-template-columns: 1fr; padding-top: 52px; }

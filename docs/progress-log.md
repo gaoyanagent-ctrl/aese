@@ -1912,3 +1912,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：平台基础包升级至 `1.8.0` 后，既有与新租户通过同一包清单获得 M10 入口；IAOS 继续拥有权威业务事实，AESE 继续拥有 World/Agent 交互。该入口不改变 M10 尚未完成调查、Process、工程执行和财务全链的事实。
 - 验证：IAOS 新增菜单包回归测试先失败后通过；`go test ./internal/incorporation ./internal/api`、生产构建、治理写入检查、Atlas tracking 和线上菜单/财务约束 API 验证通过；`tenant-001`、`tenant-hctm` 与当前 GX 租户均已升级到 `1.8.0`。
 - 后续：从新工作台完成 Requirement → Agent Proposal → Human Review 现场验收，再实现 Investigation、Effective Process Artifact、World Observation、项目/WBS、施工、付款、验收和工程财务闭环。部署后 Atlas 同步端点仍返回 404，本次声明已保留在仓库，待 IAOS 写入路由恢复后补同步。
+
+## 2026-08-01 - AESE M9 到 M10 阶段交接入口补齐
+
+- 变更：Enterprise Genesis 在 M9 `enterprise_operational_ready`、100% 且无未完成工作项时显示完成卡和 `开始 M10 工厂选址与设施规划` 主按钮；深链携带 tenant、case、workspace，M10 返回同一企业。首页“世界地图”改为 `企业生命周期 · M9–M24` 并增加 M10 可发现说明。
+- 原因：M10 路由虽然存在，但 M9 终态只显示“当前章节已完成”，没有下一阶段提示或按钮；用户无法发现入口，且手工路由不能证明沿用当前企业上下文。
+- 影响：用户完成 M9 后可以在原页面连续进入 M10，M10 读取同一租户案件的实际现金、预算与法人资料；阶段总览仍只是导航，不能绕过 M9 资格门产生业务事实。
+- 验证：新增终态组件回归测试先稳定复现“找不到交接标题/按钮”，修复后前端 23 个测试文件/67 项测试、定向 ESLint、TypeScript、生产构建通过；Playwright 在 1440×900、1280×720 和 390×844 三个视口验证交接标题、按钮和完整上下文 URL。全仓 ESLint 仍有 4 个既有 Fast Refresh 警告，与本次文件无关。
+- 后续：执行 live 企业终态浏览器验收，并继续 M10 Investigation、Effective Process Artifact、World Observation 和工程执行闭环。

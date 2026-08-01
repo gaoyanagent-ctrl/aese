@@ -31,6 +31,7 @@ import { WorldJourneyBar, WorldLifecycleHub } from "./components/world/WorldLife
 import { GenesisOnboarding } from "./components/game/GenesisOnboarding";
 import { GenesisLogin } from "./components/game/GenesisLogin";
 import { GenesisCompanyLobby } from "./components/game/GenesisCompanyLobby";
+import type { GenesisNextStageContext } from "./components/game/EnterpriseGenesisGame";
 import { currentGenesisUsername } from "./game/api";
 import type { GenesisWorkspaceResult } from "./game/types";
 const EnterpriseGenesisGame=lazy(()=>import("./components/game/EnterpriseGenesisGame").then(module=>({default:module.EnterpriseGenesisGame})));
@@ -338,6 +339,21 @@ export default function App() {
     setMode("enterprise-genesis");
     window.location.hash=`enterprise-genesis?tenant=${encodeURIComponent(workspace.tenant_id)}&case=${encodeURIComponent(workspace.case_code)}&workspace=${encodeURIComponent(workspace.workspace_id)}`;
   };
+  const continueToPlantBuild = (context: GenesisNextStageContext) => {
+    localStorage.setItem("aese_iaos_tenant_id", context.tenantId);
+    localStorage.setItem("iaos_tenant_id", context.tenantId);
+    localStorage.setItem("aese_genesis_case_code", context.caseCode);
+    if (context.workspaceId)
+      localStorage.setItem("aese_genesis_workspace_id", context.workspaceId);
+    setMode("world-plant-build");
+    const search = new URLSearchParams({
+      tenant: context.tenantId,
+      case: context.caseCode,
+      from: "enterprise-genesis",
+    });
+    if (context.workspaceId) search.set("workspace", context.workspaceId);
+    window.location.hash = `world-plant-build?${search.toString()}`;
+  };
   if (mode === "home"&&!genesisUsername)
     return <GenesisLogin onSignedIn={setGenesisUsername}/>;
   if (mode === "home")
@@ -397,13 +413,24 @@ export default function App() {
   const journey = (current: string, content: React.ReactNode) => <><WorldJourneyBar current={current} />{content}</>;
   if (mode === "world") return <WorldLifecycleHub onExit={() => navigate("preview")} />;
   if (mode === "enterprise-genesis")
-    return <Suspense fallback={<main className="loading-state">正在加载企业创生世界…</main>}><EnterpriseGenesisGame onExit={() => navigate("home")} /></Suspense>;
+    return <Suspense fallback={<main className="loading-state">正在加载企业创生世界…</main>}><EnterpriseGenesisGame onExit={() => navigate("home")} onContinueToPlantBuild={continueToPlantBuild} /></Suspense>;
   if (mode === "world-tristate")
     return journey("world-tristate", <WorldPlay onExit={() => navigate("world")} />);
   if (mode === "world-incorporation")
     return journey("world-incorporation", <IncorporationPlay onExit={() => navigate("world")} />);
   if (mode === "world-plant-build")
-    return journey("world-plant-build", <PlantBuildPlay onExit={() => navigate("world-incorporation")} />);
+    return journey("world-plant-build", <PlantBuildPlay onExit={() => {
+      const search = new URLSearchParams(window.location.hash.split("?")[1] ?? "");
+      if (search.get("from") === "enterprise-genesis") {
+        const back = new URLSearchParams();
+        for (const key of ["tenant", "case", "workspace"])
+          if (search.get(key)) back.set(key, search.get(key)!);
+        setMode("enterprise-genesis");
+        window.location.hash = `enterprise-genesis?${back.toString()}`;
+        return;
+      }
+      navigate("world-incorporation");
+    }} />);
   if (mode === "world-capability-build")
     return journey("world-capability-build", <CapabilityBuildPlay onExit={() => navigate("world-plant-build")} />);
   if (mode === "world-industrialization")

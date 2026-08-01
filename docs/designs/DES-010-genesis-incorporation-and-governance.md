@@ -126,6 +126,9 @@ genesis.budget.approved.v1
 - 增加显式 pre-incorporation 初态；M8 已有 10,000,000 CNY 不得被静默解释为公司现金，必须迁移为有 owner 的账户和可追溯资本事件。
 - M7 `scenario-packs/hctm/order-expedite-01` 继续独立运行；M9 不要求旧故事从企业成立阶段开始。
 - M10 只能消费 M9 机器可验证的 `plant_project_eligible=true` 输出，不能凭 UI 状态开始。
+- AESE 收到 IAOS `enterprise_operational_ready`、100% 进度且不存在未完成工作项后，必须显示
+  明确的 M9 terminal handoff，而不能只显示“没有待处理事件”。交接按钮携带当前
+  `tenant_id`、`case_code` 和 Workspace，进入 M10 后继续读取同一企业的资金、预算和法人事实。
 
 ## 9. 非目标
 
@@ -143,3 +146,5 @@ genesis.budget.approved.v1
 - 人类与 Agent 对 CEO/CFO 岗位使用同一治理能力且越权失败关闭。
 - 资金、任命和预算不变量通过，重复执行无重复资金或业务副作用。
 - M7 和 M8 全链回归通过，runbook/evidence 与两仓 revision 完整。
+- M9 终态页面必须同时显示完成证据、下一阶段目的和 `开始 M10 工厂选址与设施规划` 主动作；
+  返回时回到同一企业，不能丢失租户或案件上下文。

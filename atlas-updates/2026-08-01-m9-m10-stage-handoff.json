@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m9-m10.stage-handoff.2026-08-01",
+  "node_key": "aese.world.genesis.plant-build",
+  "update_type": "implementation",
+  "summary": "补齐 AESE M9 终态到 M10 的上下文交接入口",
+  "detail": "Enterprise Genesis 在 IAOS M9 机器终态显示明确完成卡与 M10 主动作，携带 tenant、case、workspace 进入工厂规划并可返回同一企业；首页同时提供可发现的企业生命周期总览入口。导航不替代 plant_project_eligible 资格或创建业务事实。",
+  "status_after": "building",
+  "progress_after": 64,
+  "current_state": "M9 到 M10 的用户导航与企业上下文已闭环；M10 的调查请求、Effective Process Artifact、World 调研、项目/WBS、施工、付款、验收和工程财务仍未完成。",
+  "evidence_ref": "frontend/src/components/game/EnterpriseGenesisGame.test.tsx",
+  "occurred_at": "2026-08-01T17:20:00Z"
+}

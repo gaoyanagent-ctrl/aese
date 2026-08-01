@@ -289,7 +289,7 @@ M9 I0-I5 的当前入口如下：
 | M10 设计与计划 | `docs/designs/DES-011-genesis-plant-build.md`、`docs/plans/2026-08-01-m10-interactive-agent-plant-build.md`；旧 completed plan 只治理 reference replay |
 | 交互 Requirement/Proposal/Review 合同 | `internal/plantbuild/interactive.go`、`world-contracts/schemas/plant-build-interactive.schema.json` |
 | Agent provider 与技术证据 | `internal/creative/minimax_provider.go::CompleteJSON`、CreativeJob store；失败时不返回 fixture 候选 |
-| 交互 Plant Build Play | `frontend/src/components/world/PlantBuildPlay.tsx`、`frontend/src/world/plantBuild.ts`、`frontend/src/components/world/PlantBuildPlay.test.tsx`、`/#world-plant-build` |
+| M9→M10 阶段交接与交互 Plant Build Play | `frontend/src/components/game/EnterpriseGenesisGame.tsx` 在 IAOS M9 终态显示携带 tenant/case/workspace 的交接主动作；`frontend/src/App.tsx` 负责双向深链；`frontend/src/components/world/PlantBuildPlay.tsx`、`frontend/src/world/plantBuild.ts`、组件测试、`frontend/e2e/m9-m10-handoff.spec.ts` 与 `/#world-plant-build` |
 | AESE 定向 BFF | `internal/httpapi/server.go`：`planning-status`、`financial-constraints`、`proposals`、`reviews`；`internal/iaosclient/client.go` 只暴露命名的 IAOS adapter |
 | IAOS M10 菜单与解释型工作台 | `/iaos/iaos-go/frontend/src/components/genesis/PlantPlanningWorkspace.tsx`、`menu.genesis_plant_planning`；由 `genesis-plant-planning` 包随平台基础包 `1.8.0` 安装，入口为 `业务智造层 → M10 工厂规划`，并深链 AESE `/#world-plant-build` |
 | IAOS 交互权威切片 | `/iaos/iaos-go/platform/internal/api/plant_interactive.go`：只读财务快照、Requirement/Proposal/Review、RLS、Capability 写门、幂等、Audit/Outbox；尚未包含 investigation/Process/World/WBS/财务全链 |

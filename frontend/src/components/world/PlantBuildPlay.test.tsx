@@ -29,6 +29,7 @@ const trace = {
 
 describe("PlantBuildPlay interactive planning", () => {
   beforeEach(() => {
+    window.location.hash = "";
     localStorage.clear();
     localStorage.setItem("aese_iaos_tenant_id", "tenant-gx-test");
     localStorage.setItem("aese_genesis_case_code", "INC-GX-TEST");

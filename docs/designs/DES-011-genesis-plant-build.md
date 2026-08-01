@@ -300,6 +300,13 @@ M10 的 IAOS 用户入口是左侧导航的 `业务智造层 → M10 工厂规�
 技术运行，IAOS 负责资金约束、Requirement、Proposal、Review、权限、审计和 Outbox；
 工作台不得在浏览器本地伪造这些权威事实。
 
+AESE 内部还有同一条受治理入口：当 Enterprise Genesis 游戏投影满足
+`enterprise_operational_ready`、进度 100% 且没有未完成 M9 工作项时，终态卡显示
+`开始 M10 工厂选址与设施规划`。该按钮把当前 tenant、case 和 workspace 放入 M10 深链并
+同步会话上下文；M10 返回动作回到同一 M9 企业，而不是 reference replay 或空白默认案件。
+AESE 首页同时把原“世界地图”命名为 `企业生命周期 · M9–M24`，作为阶段总览入口，但总览
+入口不能绕过上述 M9 机器资格校验创建业务事实。
+
 该菜单随 `genesis-plant-planning` 平台包安装，平台基础包版本从 `1.8.0` 起包含
 `menu.genesis_plant_planning`。升级后的既有租户若仍看不到菜单，应重新登录或强制刷新，
 使会话重新加载租户菜单投影；不能以手工 URL 代替缺失的菜单授权。

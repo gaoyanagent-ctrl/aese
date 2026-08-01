@@ -1,8 +1,10 @@
 import {
   ArrowLeft,
+  ArrowRight,
   Bot,
   Building2,
   FileCheck2,
+  Factory,
   Home,
   Landmark,
   MapPinned,
@@ -76,7 +78,19 @@ const money = (v: string) =>
     maximumFractionDigits: 0,
   }).format(Number(v) / 100);
 
-export function EnterpriseGenesisGame({ onExit }: { onExit: () => void }) {
+export type GenesisNextStageContext = {
+  tenantId: string;
+  caseCode: string;
+  workspaceId: string;
+};
+
+export function EnterpriseGenesisGame({
+  onExit,
+  onContinueToPlantBuild,
+}: {
+  onExit: () => void;
+  onContinueToPlantBuild: (context: GenesisNextStageContext) => void;
+}) {
   const params = new URLSearchParams(window.location.hash.split("?")[1] ?? "");
   const caseCode = params.get("case") ?? "INC-GAME-DEMO-001",
     handedOff = params.get("auth_token"),
@@ -202,6 +216,18 @@ export function EnterpriseGenesisGame({ onExit }: { onExit: () => void }) {
   const currentMission = projection.work_items.find(
     (item) => item.status !== "completed" && item.status !== "locked",
   );
+  const m9Complete =
+    projection.lifecycle.state === "enterprise_operational_ready" &&
+    projection.lifecycle.progress >= 100 &&
+    !currentMission;
+  const nextStageContext: GenesisNextStageContext = {
+    tenantId: projection.tenant_id || tenantParam || "",
+    caseCode: projection.case_code || caseCode,
+    workspaceId:
+      params.get("workspace") ??
+      localStorage.getItem("aese_genesis_workspace_id") ??
+      "",
+  };
   return (
     <div className="gx-shell">
       <header className="gx-header">
@@ -275,10 +301,16 @@ export function EnterpriseGenesisGame({ onExit }: { onExit: () => void }) {
           <div className="gx-title">
             <span>{projection.chapter.replaceAll("_", " ")}</span>
             <h2>
-              {missionTitles[currentMission?.capability ?? ""] ??
-                "企业世界正在运行"}
+              {m9Complete
+                ? "企业已经具备开业与工厂规划资格"
+                : missionTitles[currentMission?.capability ?? ""] ??
+                  "企业世界正在运行"}
             </h2>
-            <p>前往带有事件标记的地点，与人物和场景互动</p>
+            <p>
+              {m9Complete
+                ? "M9 的治理、资本、组织、财务和预算事实已经提交 IAOS"
+                : "前往带有事件标记的地点，与人物和场景互动"}
+            </p>
           </div>
           <div
             className="gx-isometric"
@@ -347,6 +379,31 @@ export function EnterpriseGenesisGame({ onExit }: { onExit: () => void }) {
               );
             })}
           </div>
+          {m9Complete && (
+            <section
+              className="gx-next-stage"
+              aria-labelledby="gx-m9-complete-title"
+              aria-live="polite"
+            >
+              <span className="gx-next-stage__icon"><Factory aria-hidden="true" /></span>
+              <div>
+                <small>MILESTONE HANDOFF · M9 → M10</small>
+                <h2 id="gx-m9-complete-title">M9 企业创生已完成</h2>
+                <p>
+                  下一阶段将使用本企业的实际现金、已批准预算和法人资料，定义设施需求，
+                  再由规划 Agent 生成候选方案并由你审阅。
+                </p>
+                <code>{projection.case_code} · {projection.tenant_id}</code>
+              </div>
+              <button
+                type="button"
+                onClick={() => onContinueToPlantBuild(nextStageContext)}
+              >
+                开始 M10 工厂选址与设施规划
+                <ArrowRight aria-hidden="true" />
+              </button>
+            </section>
+          )}
           {currentMission && (
             <MissionBriefing
               item={currentMission}
@@ -499,12 +556,20 @@ export function EnterpriseGenesisGame({ onExit }: { onExit: () => void }) {
                   </button>
                 </article>
               ) : (
-                <article>
+                <article className={m9Complete ? "gx-task-ready gx-task-ready--complete" : ""}>
                   <ShieldCheck />
                   <div>
-                    <b>当前章节已完成</b>
-                    <small>企业世界没有待处理事件</small>
+                    <b>{m9Complete ? "M9 全部任务已完成" : "当前章节已完成"}</b>
+                    <small>{m9Complete ? "下一阶段：M10 工厂选址与设施规划" : "企业世界没有待处理事件"}</small>
                   </div>
+                  {m9Complete && (
+                    <button
+                      className="gx-task-action"
+                      onClick={() => onContinueToPlantBuild(nextStageContext)}
+                    >
+                      进入 M10
+                    </button>
+                  )}
                 </article>
               ))}
             {tab === "team" &&

@@ -40,6 +40,7 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 
 ### S3 用户表单与人工选择
 
+- [x] S3.0 M9 `enterprise_operational_ready` 终态显示 M9→M10 交接卡与主按钮，携带当前 tenant/case/workspace；首页提供可发现的 `企业生命周期 · M9–M24` 总览入口。
 - [x] S3.1 Plant Build Play 增加需求表单、字段解释、来源标识和金额/日期/候选边界校验；实际现金与已批预算只读显示 IAOS 来源引用。
 - [x] S3.2 候选卡展示依据、金额/工期区间、假设、未知事实、风险、来源、置信度和 Agent 生成证据。
 - [ ] S3.3 支持采纳调研、退回重生成、人工新增和淘汰；所有决定要求理由。采纳/退回/淘汰已通过 BFF 持久化到 IAOS；人工新增仍是明确标识的本地草稿，尚不能提交调查或成为权威候选。
@@ -70,7 +71,7 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 
 ## 4. 当前执行
 
-S0、S1、S3.1、S3.2、S3.4 和 S4.4a 已完成。当前首个在线纵切为：IAOS 只读财务快照 → 人员填写 Facility Requirement → AESE 调用真实 Agent → IAOS 保存 Requirement/Proposal → 人员提交采纳/退回/淘汰 Review。该纵切不等于完整 M10：S2 的调查请求与 Effective Process Artifact、S3 的人工候选权威提交、S4 的 World 调研/选址审批/项目/WBS/合同/施工/会计、S5 的两路径和现场验收仍未完成。既有未跟踪 M7 验收产物不属于本计划，不修改、不提交。
+S0、S1、S3.0、S3.1、S3.2、S3.4 和 S4.4a 已完成。当前首个在线纵切为：M9 机器终态交接 → IAOS 只读财务快照 → 人员填写 Facility Requirement → AESE 调用真实 Agent → IAOS 保存 Requirement/Proposal → 人员提交采纳/退回/淘汰 Review。该纵切不等于完整 M10：S2 的调查请求与 Effective Process Artifact、S3 的人工候选权威提交、S4 的 World 调研/选址审批/项目/WBS/合同/施工/会计、S5 的两路径和现场验收仍未完成。既有未跟踪 M7 验收产物不属于本计划，不修改、不提交。
 
 ## 5. 当前接口与事实所有权
 

@@ -164,8 +164,9 @@ function PlantPlanningWorkspace() {
   const [manualAmount, setManualAmount] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const tenant = localStorage.getItem("aese_iaos_tenant_id") ?? localStorage.getItem("iaos_tenant_id") ?? "";
-  const caseCode = localStorage.getItem("aese_genesis_case_code") ?? "";
+  const routeParams = new URLSearchParams(window.location.hash.split("?")[1] ?? "");
+  const tenant = routeParams.get("tenant") ?? localStorage.getItem("aese_iaos_tenant_id") ?? localStorage.getItem("iaos_tenant_id") ?? "";
+  const caseCode = routeParams.get("case") ?? localStorage.getItem("aese_genesis_case_code") ?? "";
   const requirementID = `facility-requirement-${caseCode || "draft"}`;
   useEffect(() => {
     const controller = new AbortController();

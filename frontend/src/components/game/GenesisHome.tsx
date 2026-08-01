@@ -54,7 +54,7 @@ export function GenesisHome({
             本地开发环境
           </span>
           <button className="genesis-home__text-button" onClick={onOpenWorld}>
-            世界地图
+            企业生命周期 · M9–M24
           </button>
           {username&&<span className="genesis-home__user"><UserRound aria-hidden="true"/>{username}</span>}
           {onSignOut&&<button className="genesis-home__text-button" onClick={onSignOut}>退出</button>}
@@ -165,9 +165,10 @@ export function GenesisHome({
           <button onClick={onOpenDemo}>进入演示 <ArrowRight aria-hidden="true" /></button>
         </article>
         <article className="genesis-home__build-note">
-          <span>运行状态</span>
-          <strong>独立租户创建通道已启用</strong>
-          <p>每家新企业获得独立 IAOS 租户；可从“我的企业”返回并继续原有创生进度。</p>
+          <span>完成 M9 后的下一阶段</span>
+          <strong>M10 · 工厂选址与设施规划</strong>
+          <p>从企业创生终态继续使用当前公司的现金、预算和法人上下文，不需要重新建立企业。</p>
+          <button type="button" onClick={onOpenWorld}>查看完整经营路线 <ArrowRight aria-hidden="true" /></button>
         </article>
       </section>
     </main>
