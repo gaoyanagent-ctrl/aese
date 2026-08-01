@@ -82,7 +82,7 @@ type ProposalEvidence struct {
 	Model          string         `json:"model"`
 	PromptVersion  string         `json:"prompt_version"`
 	SourceType     string         `json:"source_type,omitempty"`
-	ParentRevision int            `json:"parent_revision,omitempty"`
+	ParentRevision int            `json:"parent_revision"`
 	RequestID      string         `json:"request_id,omitempty"`
 	InputHash      string         `json:"input_hash"`
 	OutputHash     string         `json:"output_hash"`
@@ -268,7 +268,7 @@ func ValidateProposalSet(requirement FacilityRequirement, set ProposalSet) error
 	}
 	manualRevision := set.Evidence.Provider == "human"
 	if (!manualRevision && len(set.Proposals) != requirement.CandidateCount) ||
-		(manualRevision && (len(set.Proposals) <= requirement.CandidateCount || len(set.Proposals) > 12)) {
+		(manualRevision && (len(set.Proposals) < 1 || len(set.Proposals) > 12)) {
 		return fmt.Errorf("proposal count %d does not match requested %d", len(set.Proposals), requirement.CandidateCount)
 	}
 	seen := map[string]bool{}
@@ -301,7 +301,7 @@ func ValidateProposalSet(requirement FacilityRequirement, set ProposalSet) error
 		return errors.New("agent generation evidence is incomplete")
 	}
 	if manualRevision {
-		if set.Revision < 2 || set.Evidence.Model != "manual-entry" || set.Evidence.PromptVersion != "manual-candidate-v1" ||
+		if set.Revision < 1 || set.Evidence.Model != "manual-entry" || set.Evidence.PromptVersion != "manual-candidate-v1" ||
 			set.Evidence.SourceType != "human_manual" || set.Evidence.ParentRevision != set.Revision-1 {
 			return errors.New("manual proposal revision evidence is incomplete")
 		}

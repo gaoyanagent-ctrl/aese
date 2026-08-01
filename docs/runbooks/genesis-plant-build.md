@@ -17,7 +17,7 @@
 2. 检查“可用现金快照”“已批准预算快照”为只读，并分别显示 `gl:` 与 `budget:` 来源；若无数据，先回 M9 完成预算和资本入账，不能在 M10 页面伪造。
 3. 填写目标区域、设施用途、最小面积、最小电力、目标日期、候选数量、允许类型、投资申请额、最低现金保留额、业务偏好和修订原因。
 4. 点击“保存需求并让 Agent 生成候选”。候选数量必须等于填写值（2–8），每张卡必须展示金额/工期区间、依据、假设、待验证事实、风险、来源、置信度和模型/prompt 证据。
-5. 点击“人工新增候选”，填写方案类型、业务理由、最小/最可能/最大金额、估算依据、可用日期、假设、待核验事实和风险，点击“提交到 IAOS 候选集”。应看到候选集 revision 加 1、原有候选不变、新候选来源为当前认证人员；若其他人已更新该候选集，应提示刷新而不是覆盖。
+5. 点击“人工新增候选”，填写方案类型、业务理由、最小/最可能/最大金额、估算依据、可用日期、假设、待核验事实和风险，点击“提交到 IAOS 候选集”。若没有 Agent 候选，应建立 revision 1；已有候选时应看到 revision 加 1、原有候选不变、新候选来源为当前认证人员。若其他人已更新该候选集，应提示刷新而不是覆盖。
 6. 对一个候选选择“采纳调研”，填写至少 6 个字符的业务理由并点击“提交审阅到 IAOS”。按钮变为“已保存审阅”。再用另一候选验证“退回重生成”或“淘汰”。
 7. 在已保存审阅的候选卡点击“发起外部调研工作项”。页面应出现 `facility.site.investigation.v1` 和 `waiting_world`，刷新页面后仍存在。
 8. 在“场址外部调研工作项”填写外部参与者标识、权属、可用面积、电力、正式报价、可用日期、许可、证据引用和备注，点击“园区运营方确认并提交 Observation”。成功后状态变为“可信事实已提交”且工作项为 `completed`。
@@ -41,7 +41,7 @@
 | `GET /api/aese/v1/world/plant-build/planning-status` | `connected` 或明确 `not_configured` | 只说明 Agent provider 状态 |
 | `GET /api/aese/v1/world/plant-build/financial-constraints?case_code=...` | 200，带 source refs 与 snapshot hash | IAOS 权威现金/预算只读快照 |
 | `GET /api/aese/v1/world/plant-build/proposals?requirement_id=...` | 200 或尚无候选时 404 | 从 IAOS 恢复最新 candidate-only ProposalSet，刷新后仍可对照 Agent 估算 |
-| `POST /api/aese/v1/world/plant-build/proposals/manual` | 201，返回新 revision | 认证人员在最新 ProposalSet 追加一个同构候选，旧候选不可覆盖 |
+| `POST /api/aese/v1/world/plant-build/proposals/manual` | 201，返回 revision 1 或新 revision | 认证人员可建立首个人工 ProposalSet；已有版本时追加一个同构候选，旧候选不可覆盖 |
 | `POST /api/aese/v1/world/plant-build/proposals` | 200，`authority_status=committed` | IAOS 已分别保存 Requirement 与 candidate-only ProposalSet |
 | `POST /api/aese/v1/world/plant-build/reviews` | 201，`status=committed` | IAOS 已保存当前用户的 ProposalReview |
 | `POST /api/aese/v1/world/plant-build/investigations` | 201，`status=waiting_world` | IAOS 已保存调查请求、持久工作项和 World Intent |

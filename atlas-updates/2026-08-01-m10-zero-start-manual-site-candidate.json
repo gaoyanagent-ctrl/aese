@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.zero-start-manual-site-candidate.2026-08-01",
+  "node_key": "aese.genesis.m10-plant-build",
+  "update_type": "implementation",
+  "summary": "M10 在无外部模型和无候选集时支持人工建立首版场址候选",
+  "detail": "AESE Command Gateway 从 IAOS 权威 Requirement 建立服务端稳定 ProposalSet 编码；无既有候选时提交 revision 1，已有候选时继续执行逐版只追加约束，UI 不再错误要求先生成 Agent 候选。",
+  "status_after": "building",
+  "current_state": "Agent 与纯人工路径均可从已保存 Requirement 进入同一 Review、World 调研、推荐和审批链；Agent Run 同事务证据及项目/WBS 等后续范围仍待实现。",
+  "evidence_ref": "docs/designs/DES-011-genesis-plant-build.md",
+  "occurred_at": "2026-08-01T16:45:00Z"
+}

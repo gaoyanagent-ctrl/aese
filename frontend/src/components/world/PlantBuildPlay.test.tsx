@@ -58,6 +58,30 @@ describe("PlantBuildPlay interactive planning", () => {
     expect(screen.getByText(/来自 IAOS 权威账务/)).toBeInTheDocument();
   });
 
+  it("allows a project lead to establish the first manual proposal set", async () => {
+    const requirement = {
+      schema_version: "1.0", requirement_id: "facility-requirement-INC-GX-TEST", tenant_id: "tenant-gx-test", case_code: "INC-GX-TEST", legal_entity_code: "LE-GX-TEST",
+      target_region: "苏州", facility_purpose: "制造基地", minimum_area_m2: 8000, minimum_electricity_kva: 2000, target_available_at: "2026-12-01T00:00:00Z",
+      candidate_count: 2, allowed_option_types: ["lease_and_retrofit"], investment_request: { value: "10000000.00", currency: "CNY", scale: 2 }, minimum_cash_reserve: { value: "2000000.00", currency: "CNY", scale: 2 },
+      financial_constraint: { available_cash: { value: "20000000.00", currency: "CNY", scale: 2 }, approved_budget: { value: "15000000.00", currency: "CNY", scale: 2 }, cash_source_ref: "gl:BOOK:1002", budget_source_ref: "budget:BUD-1", snapshot_hash: "sha256:authority" },
+      preferences: [], revision: 1, revision_reason: "首次规划",
+    };
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith("planning-status")) return { ok: true, json: async () => ({ state: "not_configured", provider: "none", prompt_version: "plant-planning-v1" }) };
+      if (path.includes("financial-constraints")) return { ok: true, json: async () => ({ case_code: "INC-GX-TEST", legal_entity_code: "LE-GX-TEST", financial_constraint: requirement.financial_constraint }) };
+      if (path.includes("/requirements/")) return { ok: true, json: async () => requirement };
+      if (path.includes("/proposals?")) return { ok: false, status: 404, text: async () => "not found" };
+      if (path.includes("/investigations") || path.includes("/site-selections")) return { ok: true, json: async () => ({ items: [] }) };
+      return { ok: true, json: async () => trace };
+    }));
+    render(<PlantBuildPlay onExit={() => undefined} />);
+    await waitFor(() => expect(screen.getByText("未启用外部模型")).toBeInTheDocument());
+    fireEvent.click(screen.getByRole("button", { name: "人工新增候选" }));
+    expect(screen.getByText(/建立第 1 版人工候选/)).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /提交到 IAOS 候选集/ })).toBeEnabled();
+  });
+
   it("submits editable requirements and renders agent evidence for human review", async () => {
     const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
       const path = String(input);

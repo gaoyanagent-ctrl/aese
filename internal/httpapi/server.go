@@ -758,16 +758,6 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				s.writeError(w, http.StatusUnauthorized, "plant_planning_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
 				return
 			}
-			setRaw, err := authority.PlantProposalSet(ctx, input.RequirementID)
-			if err != nil {
-				s.writePlantAuthorityError(w, err, "site_proposal_previous_revision_unavailable")
-				return
-			}
-			var previous plantbuild.ProposalSet
-			if err := json.Unmarshal(setRaw, &previous); err != nil || previous.ProposalSetID != input.ProposalSetID || previous.Revision != input.ExpectedRevision {
-				s.writeError(w, http.StatusConflict, "site_proposal_revision_conflict", "候选集已变化，请刷新后重新提交人工候选", false, "", "")
-				return
-			}
 			requirementRaw, err := authority.PlantRequirement(ctx, input.RequirementID)
 			if err != nil {
 				s.writePlantAuthorityError(w, err, "facility_requirement_unavailable")
@@ -778,6 +768,22 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				s.writeError(w, http.StatusBadGateway, "facility_requirement_invalid", err.Error(), false, "", "")
 				return
 			}
+			var previous plantbuild.ProposalSet
+			hasPrevious := false
+			setRaw, err := authority.PlantProposalSet(ctx, input.RequirementID)
+			if err != nil {
+				var apiErr *iaosclient.APIError
+				if !errors.As(err, &apiErr) || apiErr.StatusCode != http.StatusNotFound || input.ExpectedRevision != 0 {
+					s.writePlantAuthorityError(w, err, "site_proposal_previous_revision_unavailable")
+					return
+				}
+			} else {
+				if err := json.Unmarshal(setRaw, &previous); err != nil || previous.ProposalSetID != input.ProposalSetID || previous.Revision != input.ExpectedRevision || input.ExpectedRevision < 1 {
+					s.writeError(w, http.StatusConflict, "site_proposal_revision_conflict", "候选集已变化，请刷新后重新提交人工候选", false, "", "")
+					return
+				}
+				hasPrevious = true
+			}
 			proposalID, err := resetToken()
 			if err != nil {
 				s.writeError(w, http.StatusInternalServerError, "manual_site_proposal_id_failed", err.Error(), true, "", "")
@@ -786,13 +792,22 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			input.Proposal.ProposalID = "manual-site-" + proposalID
 			input.Proposal.Status = "proposed"
 			input.Proposal.SourceRefs = append(input.Proposal.SourceRefs, "human:"+actorID)
-			next := previous
-			next.Revision = previous.Revision + 1
-			next.Proposals = append(append([]plantbuild.SiteOptionProposal{}, previous.Proposals...), input.Proposal)
+			next := plantbuild.ProposalSet{
+				SchemaVersion: "1.0", ProposalSetID: "manual-proposal-set-" + requirement.RequirementID,
+				RequirementID: requirement.RequirementID, Revision: 1, Status: "candidate_only",
+				Proposals: []plantbuild.SiteOptionProposal{input.Proposal},
+			}
+			inputHash := plantbuild.CanonicalHash(requirement)
+			if hasPrevious {
+				next = previous
+				next.Revision = previous.Revision + 1
+				next.Proposals = append(append([]plantbuild.SiteOptionProposal{}, previous.Proposals...), input.Proposal)
+				inputHash = plantbuild.CanonicalHash(previous)
+			}
 			next.Evidence = plantbuild.ProposalEvidence{
 				Provider: "human", Model: "manual-entry", PromptVersion: "manual-candidate-v1",
 				SourceType: "human_manual", ParentRevision: previous.Revision,
-				InputHash: plantbuild.CanonicalHash(previous), OutputHash: plantbuild.CanonicalHash(next.Proposals),
+				InputHash: inputHash, OutputHash: plantbuild.CanonicalHash(next.Proposals),
 				ValidatedAt: time.Now().UTC().Format(time.RFC3339),
 			}
 			if err := plantbuild.ValidateProposalSet(requirement, next); err != nil {

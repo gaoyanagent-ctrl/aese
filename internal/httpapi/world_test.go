@@ -327,6 +327,50 @@ func TestManualPlantProposalAppendsAuthorityRevisionWithAuthenticatedActor(t *te
 	}
 }
 
+func TestManualPlantProposalCreatesFirstAuthorityRevisionWithoutAgentSet(t *testing.T) {
+	var command map[string]any
+	requirement := `{"schema_version":"1.0","requirement_id":"REQ-1","tenant_id":"tenant-a","case_code":"INC-1","legal_entity_code":"LE-1","target_region":"华东","facility_purpose":"制造","minimum_area_m2":5000,"minimum_electricity_kva":2000,"target_available_at":"2027-01-01T00:00:00Z","candidate_count":2,"allowed_option_types":["lease_and_retrofit","build_to_suit"],"investment_request":{"value":"12000000.00","currency":"CNY","scale":2},"minimum_cash_reserve":{"value":"3000000.00","currency":"CNY","scale":2},"financial_constraint":{"available_cash":{"value":"20000000.00","currency":"CNY","scale":2},"approved_budget":{"value":"12000000.00","currency":"CNY","scale":2},"cash_source_ref":"ledger:CASH","budget_source_ref":"budget:B1","snapshot_hash":"sha256:authority"},"preferences":["工期"],"revision":1,"revision_reason":"首次规划"}`
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/api/v1/profile":
+			_, _ = w.Write([]byte(`{"username":"project-owner","tenant_id":"tenant-a"}`))
+		case r.URL.Path == "/api/v1/genesis/plant/interactive/requirements/REQ-1":
+			_, _ = w.Write([]byte(requirement))
+		case r.URL.Path == "/api/v1/genesis/plant/interactive/proposal-sets":
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusNotFound)
+			_, _ = w.Write([]byte(`{"error":"proposal set not found","code":"not_found"}`))
+		case r.URL.Path == "/api/v1/genesis/plant/interactive/actions":
+			if err := json.NewDecoder(r.Body).Decode(&command); err != nil {
+				t.Fatal(err)
+			}
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"status":"committed"}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer iaos.Close()
+	server := New(Config{IAOSBaseURL: iaos.URL})
+	body := `{"requirement_id":"REQ-1","proposal_set_id":"","expected_revision":0,"proposal":{"option_type":"lease_and_retrofit","display_name":"人工首个候选","business_rationale":"项目负责人在模型不可用时建立首个权威候选","estimated_amount":{"minimum":{"value":"7000000.00","currency":"CNY","scale":2},"likely":{"value":"8000000.00","currency":"CNY","scale":2},"maximum":{"value":"9000000.00","currency":"CNY","scale":2},"basis":"人工概念估算"},"estimated_schedule":{"earliest":"2026-10-01T00:00:00Z","likely":"2026-10-01T00:00:00Z","latest":"2026-10-01T00:00:00Z"},"assumptions":["园区存在可租赁空间"],"facts_required":["权属与正式报价"],"risks":["交付日期未核验"],"source_refs":["manual:user-input"],"confidence":"0.40"}}`
+	req := httptest.NewRequest(http.MethodPost, "/api/aese/v1/world/plant-build/proposals/manual", strings.NewReader(body))
+	req.Header.Set("Authorization", "Bearer owner-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-a")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusCreated {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
+	set := command["proposal_set"].(map[string]any)
+	if set["revision"] != float64(1) || set["proposal_set_id"] != "manual-proposal-set-REQ-1" || len(set["proposals"].([]any)) != 1 {
+		t.Fatalf("set=%v", set)
+	}
+	evidence := set["evidence"].(map[string]any)
+	if evidence["parent_revision"] != float64(0) || !strings.HasPrefix(evidence["input_hash"].(string), "sha256:") {
+		t.Fatalf("evidence=%v", evidence)
+	}
+}
+
 func TestPlantProposalReviewOverwritesActorFromAuthenticatedProfile(t *testing.T) {
 	var received map[string]any
 	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
