@@ -2101,3 +2101,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：玩家只确认开工、推进施工和验收；施工数据由可重放 World 规则生成，IAOS 必须校验同 Intent/subject/correlation 的可信 Observation。验收结果固定 `payment_status=not_requested`，不会自动创建发票、应付、付款或在建工程转固。
 - 验证：IAOS 相关包及全平台 Go 测试/vet、Atlas tracking 通过；AESE Go 全仓测试/vet、前端 26 文件/104 项测试、TypeScript 和生产构建通过。完整新案件 API/UI/DB 现场验收仍归 S5。
 - 后续：实现施工延期/质量缺陷/工程变更闭环，再接工程发票、AP、CIP、付款和最终设施验收。
+
+## 2026-08-02 - M10 施工闭环运行态发布
+
+- 变更：将玩家企业 `tenant-gx-472324ae8bac4af39519` 通过 IAOS 受治理 Runtime Install API 升级至 2.25.0，确认 `facility.construction.milestone.v1@1.0.0` 已发布；同时把 AESE Atlas 声明修正为已存在的 `aese.world.genesis` 节点。
+- 原因：后端部署只更新平台程序，已存在企业仍可能停留在旧 Effective Runtime；Atlas 也会对不存在的节点失败关闭。
+- 影响：当前 M10 测试企业可直接执行施工包、World 现场事实和里程碑验收 Capability；以后 Genesis 企业每次创建会话时仍会自动对齐当前 Runtime。
+- 验证：Runtime Install 返回 HTTP 201 且 `platform_asset_writes=1118`；数据库读回 Runtime 2.25.0 和已发布施工 Process；IAOS Atlas 声明已同步。
+- 后续：重新同步 AESE Atlas 声明，并完成 8082/8090/4173 与线上 BFF 路由验收。
