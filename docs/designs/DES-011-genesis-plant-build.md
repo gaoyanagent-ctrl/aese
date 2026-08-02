@@ -305,6 +305,11 @@ genesis.facility.accepted.v1
 5. 对已保存且审阅结论为“采纳调研”的候选，人员可发起外部调研。IAOS 创建 `facility.site.investigation.v1` 持久 `waiting_world` 工作项，并通过 World Bridge 写入带 correlation/subject 的 Intent。
 6. AESE 外部参与者使用结构化表单返回权属、可用面积、电力容量、正式报价、可用日期、许可、证据引用和备注。AESE 必须先写受信 World Journal Observation；IAOS 的 `site.investigation.observation.commit` 只消费与 Intent/correlation 匹配的 Journal 事实，保存权威 Observation 并完成工作项。
 7. 人员在可解释比较下选择合格候选并填写推荐理由、替代方案比较；AESE Command Gateway 调用 `site.selection.recommend`，IAOS 重算并创建统一审批。用户从深链进入 IAOS 审批中心决定，批准后返回点击“同步批准并正式选址”，由 `site.selection.formalize` 原子消费审批。
+
+浏览器生成的 Intent/Observation/Recommendation 请求编码只承担幂等关联，不作为授权身份。
+LAN HTTP 浏览器可能不提供 secure-context-only 的 `crypto.randomUUID()`；前端必须通过统一
+兼容函数生成编码，优先 randomUUID、其次 getRandomValues UUID v4。任何页面不得直接调用
+randomUUID，以免点击在进入 AESE Command Gateway 前静默中断。
 8. 外部模型未配置、财务快照缺失或已变化、Agent 输出不满足 Schema、候选超过投资申请上限、身份/权限不足、revision 冲突、World Observation 不受信或审批不匹配时失败关闭，不用固定候选或页面 JSON 兜底。
 
 Requirement 到正式选址现已统一为 `facility.plant.planning.v1@1.0.0` 单一持久 Effective Process Run。七个业务 Capability 成功时在同一事务追加人、Agent 或 World 节点证据；调查请求进入 `waiting_event`，推荐进入 `waiting_approval`，审批决定恢复到正式选址或失败结束，正式选择后为 `succeeded`。流程工作室只允许查看该业务命令驱动流程，不能一键运行而重复创建审批或伪造外部事实。

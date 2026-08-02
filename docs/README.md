@@ -32,6 +32,7 @@
 | [SOL-009 Genesis 投影会话与 Runtime 自动恢复](solutions/SOL-009-genesis-projection-session-and-runtime-recovery.md) | 旧租户会话造成 projection 404、Runtime stale 422 时刷新受管 Workspace session 并安全重试 | Completed |
 | [SOL-010 M9 Command Gateway 与 Process Artifact 权威](solutions/SOL-010-m9-command-gateway-and-process-artifact-authority.md) | M9 浏览器写操作统一经白名单 BFF，IAOS 工作项只消费已发布 Process Artifact | Completed |
 | [SOL-011 M10 Agent 候选投资上限与重放](solutions/SOL-011-m10-agent-proposal-investment-ceiling.md) | Agent 候选越过 Requirement 投资上限且 completed 证据被永久重放 | Completed |
+| [SOL-012 M10 LAN HTTP UUID 兼容](solutions/SOL-012-m10-lan-http-random-uuid.md) | 非安全上下文缺少 randomUUID 导致调研按钮无响应 | Completed |
 
 ### 华辰场景文档
 

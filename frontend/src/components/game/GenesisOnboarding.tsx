@@ -1,6 +1,7 @@
 import { ArrowLeft, ArrowRight, Building2, LoaderCircle, ShieldCheck, Sparkles } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createGenesisWorkspace } from "../../game/api";
+import { createClientRequestId } from "../../lib/clientRequestId";
 import type { GenesisWorkspaceResult } from "../../game/types";
 import "./GenesisOnboarding.css";
 
@@ -24,7 +25,7 @@ function restoreDraft():Draft{
 export function restoreGenesisOnboardingIdempotencyKey(){
   const existing=localStorage.getItem(idempotencyKey)?.trim();
   if(existing)return existing;
-  const created=`genesis-create-${Date.now()}-${crypto.randomUUID?.()??Math.random().toString(16).slice(2)}`;
+  const created=createClientRequestId("genesis-create");
   localStorage.setItem(idempotencyKey,created);
   return created;
 }

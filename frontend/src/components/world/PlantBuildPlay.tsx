@@ -46,6 +46,7 @@ import {
   type SiteAssessment,
   type SiteAssessmentWeights,
 } from "../../world/siteAssessment";
+import { createClientRequestId } from "../../lib/clientRequestId";
 import "./WorldPlay.css";
 
 const cny = (value: string) =>
@@ -190,7 +191,7 @@ function InvestigationPanel({ item, caseCode, onCommitted }: { item: SiteInvesti
     try {
       const observedAt = new Date().toISOString();
       await submitSiteInvestigationObservation(caseCode, item.request.world_run_id, {
-        schema_version: "1.0", observation_id: `site-observation-${crypto.randomUUID()}`,
+        schema_version: "1.0", observation_id: createClientRequestId("site-observation"),
         investigation_request_id: item.request.investigation_request_id, proposal_id: item.request.proposal_id,
         result: "completed", ownership_status: ownership, available_area_m2: Number(area), electricity_kva: Number(electricity),
         quoted_amount: { value: quote, currency: "CNY", scale: 2 }, available_at: localDate(availableAt), permit_status: permit,
@@ -438,7 +439,7 @@ function PlantPlanningWorkspace() {
     try {
       const now = new Date().toISOString();
       await requestSiteInvestigation({
-        schema_version: "1.0", investigation_request_id: `site-investigation-${crypto.randomUUID()}`,
+        schema_version: "1.0", investigation_request_id: createClientRequestId("site-investigation"),
         case_code: caseCode, proposal_set_id: proposalSet.proposal_set_id, proposal_id: proposalID,
         expected_revision: proposalSet.revision, world_run_id: `plant-build-${caseCode}`,
         scope: ["ownership", "commercial_quote", "available_area", "electricity_capacity", "available_date", "permit"],
@@ -454,7 +455,7 @@ function PlantPlanningWorkspace() {
     setSelectionBusy(true); setError("");
     try {
       await submitSiteSelectionRecommendation({
-        schema_version: "1.0", recommendation_id: `site-recommendation-${crypto.randomUUID()}`,
+        schema_version: "1.0", recommendation_id: createClientRequestId("site-recommendation"),
         case_code: caseCode, proposal_set_id: proposalSet.proposal_set_id, proposal_set_revision: proposalSet.revision,
         selected_proposal_id: selectedProposalID, assessment_policy_version: "site-assessment-v1",
         weights: assessmentWeights, recommendation_reason: recommendationReason.trim(),

@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.lan-http-request-id.2026-08-02",
+  "node_key": "aese.genesis.m10-plant-build",
+  "update_type": "implementation",
+  "summary": "M10 浏览器请求编码兼容 LAN HTTP",
+  "detail": "统一客户端请求编码生成器，在 randomUUID 不可用时使用 getRandomValues UUID v4，修复调研、Observation 和推荐按钮在非安全上下文提前中断。",
+  "status_after": "building",
+  "current_state": "M10 人员与 World 交互可在 LAN HTTP 和 HTTPS 一致进入 AESE Command Gateway。",
+  "evidence_ref": "docs/solutions/SOL-012-m10-lan-http-random-uuid.md",
+  "occurred_at": "2026-08-02T02:40:00Z"
+}

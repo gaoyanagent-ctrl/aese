@@ -1999,3 +1999,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：资金硬门在 Agent 输出、BFF 和 IAOS 三层一致失败关闭；系统不会静默压低金额或把不可行方案包装成合规方案，用户仍可修订投资申请额或走人工候选。
 - 验证：新增超额候选拒绝、一次修订、Token 累计和旧 completed 非法证据重生成测试；AESE 全仓 Go test/vet、文档 diff、Atlas tracking 与 JSON 校验通过。标准脚本已部署 8090，M10 在线状态为 `connected / MiniMax / MiniMax-M3 / plant-planning-v2`；故障案件 active Requirement 为 revision 3，旧越界作业将在原用户重试时自动失效。System Atlas 同步端点仍返回 404，声明保留待路由恢复后幂等补录。
 - 后续：标准部署后由原用户重试并核对 MiniMax 修订、IAOS Agent Run 和 Proposal 原子提交。
+
+## 2026-08-02 - M10 LAN HTTP 请求编码兼容
+
+- 变更：新增统一 `createClientRequestId`，HTTPS 优先使用 randomUUID，LAN HTTP 缺失该 API 时用 getRandomValues 生成 UUID v4，并保留旧浏览器唯一性兜底；M10 调研、Observation、推荐和 Genesis Workspace 全部切换到该入口。
+- 原因：通过 `http://192.168.50.222:4173` 访问时浏览器没有 `crypto.randomUUID`，点击“发起外部调研工作项”在发请求前抛异常，页面看似无响应；Observation 和推荐存在同类隐患。
+- 影响：LAN 演示环境与 HTTPS 使用相同业务流程，客户端编码只承担幂等关联，认证仍来自 IAOS 会话，未降低治理边界。
+- 验证：新增 randomUUID、getRandomValues 和极端 fallback 三类测试；全量前端 25 文件/74 项测试、TypeScript 与 Vite 生产构建通过。ESLint 仅因 SystemAtlas、GenesisOnboarding、LocationScene 四条既有 Fast Refresh warning 在 `--max-warnings 0` 下退出，本次未新增 lint warning。System Atlas tracking 通过，同步端点仍返回 404，声明保留待路由恢复后补录。
+- 后续：完成全量前端回归与生产构建后由用户重试调研按钮。
