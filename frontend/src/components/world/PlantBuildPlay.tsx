@@ -23,6 +23,7 @@ import {
   loadPlantFinancialConstraint,
   loadPlantPlanningStatus,
   loadPlantProposalSet,
+  loadPlantProposalReviews,
   loadPlantRequirement,
   loadSiteInvestigations,
   loadSiteSelections,
@@ -156,12 +157,12 @@ function ProposalCard({
       </div>
       <fieldset className="plant-review-actions">
         <legend>人工审阅决定</legend>
-        <button type="button" className={action === "adopt_for_investigation" ? "selected" : ""} onClick={() => onReview({ action: "adopt_for_investigation", reason: review?.reason ?? "" })}><SearchCheck />采纳调研</button>
-        <button type="button" className={action === "request_revision" ? "selected" : ""} onClick={() => onReview({ action: "request_revision", reason: review?.reason ?? "" })}><RotateCcw />退回重生成</button>
-        <button type="button" className={action === "discard" ? "selected danger" : ""} onClick={() => onReview({ action: "discard", reason: review?.reason ?? "" })}><XCircle />淘汰</button>
+        <button type="button" disabled={saved} className={action === "adopt_for_investigation" ? "selected" : ""} onClick={() => onReview({ action: "adopt_for_investigation", reason: review?.reason ?? "" })}><SearchCheck />采纳调研</button>
+        <button type="button" disabled={saved} className={action === "request_revision" ? "selected" : ""} onClick={() => onReview({ action: "request_revision", reason: review?.reason ?? "" })}><RotateCcw />退回重生成</button>
+        <button type="button" disabled={saved} className={action === "discard" ? "selected danger" : ""} onClick={() => onReview({ action: "discard", reason: review?.reason ?? "" })}><XCircle />淘汰</button>
         <label>
           审阅理由
-          <textarea minLength={6} value={review?.reason ?? ""} onChange={(event) => onReview({ action, reason: event.target.value })} placeholder="说明采纳、退回或淘汰的业务理由（至少 6 个字符）" />
+          <textarea disabled={saved} minLength={6} value={review?.reason ?? ""} onChange={(event) => onReview({ action, reason: event.target.value })} placeholder="说明采纳、退回或淘汰的业务理由（至少 6 个字符）" />
         </label>
         <button type="button" className="plant-review-submit" disabled={!formal || !action || (review?.reason.trim().length ?? 0) < 6 || busy || saved} onClick={onSubmitReview}>
           {busy ? <LoaderCircle className="gx-spin" /> : formal ? <BadgeCheck /> : <TriangleAlert />}{!formal ? "人工候选仍是本地草稿" : saved ? "已保存审阅" : busy ? "正在保存…" : "提交审阅到 IAOS"}
@@ -298,7 +299,19 @@ function PlantPlanningWorkspace() {
         setActiveRequirement(existing?.investment_request && existing.target_available_at ? existing : null);
         setNextRevision((existing?.revision ?? 0) + 1);
       }),
-      loadPlantProposalSet(requirementID, controller.signal).then(setProposalSet),
+      loadPlantProposalSet(requirementID, controller.signal).then(async (set) => {
+        setProposalSet(set);
+        if (!set?.proposal_set_id) return;
+        const persisted = await loadPlantProposalReviews(set.proposal_set_id, controller.signal);
+        const reviewState: Record<string, ReviewState> = {};
+        const savedState: Record<string, boolean> = {};
+        for (const review of persisted.items ?? []) {
+          reviewState[review.proposal_id] = { action: review.action, reason: review.reason };
+          savedState[review.proposal_id] = true;
+        }
+        setReviews(reviewState);
+        setSavedReviews(savedState);
+      }),
       loadSiteInvestigations(caseCode, controller.signal).then((result) => setInvestigations(result.items ?? [])),
       loadSiteSelections(caseCode, controller.signal).then((result) => setSiteSelections(result.items ?? [])),
     ]).catch((reason) => { if (reason.name !== "AbortError") setError(String(reason)); });

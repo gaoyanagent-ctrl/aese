@@ -167,6 +167,11 @@ score_preview[] / confidence / source_refs[]
 
 Agent 输出先进入 `proposed`，不得直接创建协议、承诺、付款或批准结果。项目负责人必须在工作项中逐项执行 `adopt_for_investigation`、`request_revision`、`add_manual_option` 或 `discard`；只有采纳后的候选才能请求外部调研。若外部模型未启用、输出不符合 Schema 或缺少来源，工作项保持可人工处理，系统只提供同构空白表单。reference fixture 只能由测试人员在显式 replay 模式加载，并显示醒目标识，不能出现在正式候选下拉框或自动成为业务事实。
 
+每个 ProposalSet revision 对同一候选只允许一个不可变 Review。页面加载或刷新必须从 IAOS
+恢复 Review，而不是依赖 React 本地状态；已提交决定锁定编辑并按 action 显示下一业务动作。
+完全相同的重复提交返回幂等成功，改变 action/reason 必须通过新的候选集修订，不能覆盖历史
+人员决定。
+
 Agent 候选还必须在 AESE 提交前通过与 IAOS 相同的投资边界：每项金额区间使用
 Requirement 的币种和精度，且 `maximum <= investment_request.value`。首次输出越界时，
 Provider 可携带具体校验错误进行一次完整 JSON 修订，但不得截断、按比例缩放或静默修改

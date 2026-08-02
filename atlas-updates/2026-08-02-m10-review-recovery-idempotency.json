@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.review-recovery-idempotency.2026-08-02",
+  "node_key": "aese.genesis.m10-plant-build",
+  "update_type": "implementation",
+  "summary": "M10 页面恢复不可变 Review 并支持相同提交幂等",
+  "detail": "新增 Review 命名读 adapter/BFF；页面锁定已保存决定，相同 action/reason/revision 返回幂等成功，变更要求新候选集修订。",
+  "status_after": "building",
+  "current_state": "已采纳候选刷新后可直接进入 World 调研，不再因重复 Review revision 返回难以处理的 409。",
+  "evidence_ref": "docs/solutions/SOL-013-m10-review-recovery-and-idempotency.md",
+  "occurred_at": "2026-08-02T02:50:00Z"
+}

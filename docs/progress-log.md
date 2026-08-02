@@ -2007,3 +2007,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：LAN 演示环境与 HTTPS 使用相同业务流程，客户端编码只承担幂等关联，认证仍来自 IAOS 会话，未降低治理边界。
 - 验证：新增 randomUUID、getRandomValues 和极端 fallback 三类测试；全量前端 25 文件/74 项测试、TypeScript 与 Vite 生产构建通过。ESLint 仅因 SystemAtlas、GenesisOnboarding、LocationScene 四条既有 Fast Refresh warning 在 `--max-warnings 0` 下退出，本次未新增 lint warning。System Atlas tracking 通过，同步端点仍返回 404，声明保留待路由恢复后补录。
 - 后续：完成全量前端回归与生产构建后由用户重试调研按钮。
+
+## 2026-08-02 - M10 Review 恢复与幂等提交
+
+- 变更：AESE 新增命名 Review 只读 adapter/BFF，PlantBuild 加载 ProposalSet 时恢复 IAOS 已保存 Review 并锁定不可变决定；POST 对相同 action/reason/revision 返回 already_committed，对变更返回明确 409 并要求新候选修订。
+- 原因：页面只在本地记录 saved 状态，刷新后或再次点选会重复提交已存在的 Review revision，IAOS 正确拒绝但用户无法继续发起调研。
+- 影响：人员决定可恢复、不可覆盖且可安全重复点击；成功采纳的候选刷新后直接展示外部调研入口，不需要再次审阅。
+- 验证：新增完全重复 Review 幂等测试；AESE 全仓 Go test/vet、前端 25 文件/74 项测试、TypeScript 与 Vite 生产构建通过。8090 已部署，线上 BFF 读回故障候选的 `adopt_for_investigation / genesis-owner / revision 1`。System Atlas tracking 通过，同步端点仍返回 404，声明保留待补录。
+- 后续：执行全量回归和发布记录后由用户刷新并发起 World 调研工作项。

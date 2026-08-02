@@ -428,6 +428,10 @@ func TestPlantProposalReviewOverwritesActorFromAuthenticatedProfile(t *testing.T
 			_, _ = w.Write([]byte(`{"username":"project-owner","tenant_id":"tenant-a"}`))
 			return
 		}
+		if r.Method == http.MethodGet && r.URL.Path == "/api/v1/genesis/plant/interactive/reviews" {
+			_, _ = w.Write([]byte(`{"items":[]}`))
+			return
+		}
 		if err := json.NewDecoder(r.Body).Decode(&received); err != nil {
 			t.Fatal(err)
 		}
@@ -450,6 +454,31 @@ func TestPlantProposalReviewOverwritesActorFromAuthenticatedProfile(t *testing.T
 	review := received["proposal_review"].(map[string]any)
 	if review["reviewed_by"] != "project-owner" || review["reviewed_at"] == "" {
 		t.Fatalf("review=%v", review)
+	}
+}
+
+func TestPlantProposalReviewExactDuplicateReturnsIdempotentSuccess(t *testing.T) {
+	actionCalls := 0
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/api/v1/profile":
+			_, _ = w.Write([]byte(`{"username":"project-owner","tenant_id":"tenant-a"}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/genesis/plant/interactive/reviews":
+			_, _ = w.Write([]byte(`{"items":[{"proposal_set_id":"SET-1","proposal_id":"SITE-1","action":"adopt_for_investigation","reason":"进入外部调研并核验权属","reviewed_by":"project-owner","reviewed_at":"2026-08-02T02:31:30Z","expected_revision":1}]}`))
+		default:
+			actionCalls++
+			w.WriteHeader(http.StatusCreated)
+		}
+	}))
+	defer iaos.Close()
+	server := New(Config{IAOSBaseURL: iaos.URL})
+	req := httptest.NewRequest(http.MethodPost, "/api/aese/v1/world/plant-build/reviews", strings.NewReader(`{"proposal_set_id":"SET-1","proposal_id":"SITE-1","action":"adopt_for_investigation","reason":"进入外部调研并核验权属","expected_revision":1}`))
+	req.Header.Set("Authorization", "Bearer owner-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-a")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusOK || actionCalls != 0 || !strings.Contains(res.Body.String(), `"idempotent_replay":true`) {
+		t.Fatalf("status=%d action_calls=%d body=%s", res.Code, actionCalls, res.Body.String())
 	}
 }
 

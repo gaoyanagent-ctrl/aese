@@ -153,6 +153,22 @@ func (c *Client) PlantProposalSet(ctx context.Context, requirementID string) (js
 	return out, nil
 }
 
+// PlantProposalReviews restores immutable human decisions for one ProposalSet
+// so AESE can render the persisted state instead of offering a duplicate write.
+func (c *Client) PlantProposalReviews(ctx context.Context, proposalSetID string) (json.RawMessage, error) {
+	proposalSetID = strings.TrimSpace(proposalSetID)
+	if proposalSetID == "" {
+		return nil, fmt.Errorf("proposal_set_id is required")
+	}
+	query := url.Values{}
+	query.Set("proposal_set_id", proposalSetID)
+	var out json.RawMessage
+	if err := c.request(ctx, http.MethodGet, "api/v1/genesis/plant/interactive/reviews?"+query.Encode(), nil, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 func (c *Client) PlantInvestigations(ctx context.Context, caseCode string) (json.RawMessage, error) {
 	caseCode = strings.TrimSpace(caseCode)
 	if caseCode == "" {

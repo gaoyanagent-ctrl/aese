@@ -933,6 +933,23 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			s.writeJSON(w, http.StatusOK, map[string]any{"proposal_set": set, "agent_job": job, "idempotent_replay": false, "authority_status": "committed"})
 			return
 		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "reviews" && r.Method == http.MethodGet {
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, _, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_review_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			result, err := authority.PlantProposalReviews(ctx, r.URL.Query().Get("proposal_set_id"))
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_reviews_unavailable")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(result)
+			return
+		}
 		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "reviews" && r.Method == http.MethodPost {
 			var review plantbuild.ProposalReview
 			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &review); err != nil {
@@ -949,6 +966,29 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			review.ReviewedAt = time.Now().UTC().Format(time.RFC3339)
 			if err := plantbuild.ValidateReview(review); err != nil {
 				s.writeError(w, http.StatusUnprocessableEntity, "invalid_site_proposal_review", err.Error(), false, "", "")
+				return
+			}
+			existingRaw, err := authority.PlantProposalReviews(ctx, review.ProposalSetID)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_reviews_unavailable")
+				return
+			}
+			var existingEnvelope struct {
+				Items []plantbuild.ProposalReview `json:"items"`
+			}
+			if err := json.Unmarshal(existingRaw, &existingEnvelope); err != nil {
+				s.writeError(w, http.StatusBadGateway, "plant_reviews_invalid", "IAOS review projection is invalid", true, "", "")
+				return
+			}
+			for _, existing := range existingEnvelope.Items {
+				if existing.ProposalID != review.ProposalID || existing.ExpectedRevision != review.ExpectedRevision {
+					continue
+				}
+				if existing.Action == review.Action && strings.TrimSpace(existing.Reason) == strings.TrimSpace(review.Reason) {
+					s.writeJSON(w, http.StatusOK, map[string]any{"status": "already_committed", "proposal_review": existing, "idempotent_replay": true})
+					return
+				}
+				s.writeError(w, http.StatusConflict, "site_proposal_review_immutable", "该候选版本已提交审阅；如需改变决定，请创建新的候选集修订", false, "", "")
 				return
 			}
 			if err := postPlantAuthorityCommand(ctx, authority, "site.proposal.review", actorID, review.ProposalSetID, review.ProposalID, review.ExpectedRevision, review); err != nil {

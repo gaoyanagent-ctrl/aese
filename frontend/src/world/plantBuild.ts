@@ -236,6 +236,14 @@ export async function submitPlantProposalReview(input: SiteProposalReviewInput) 
   return response.json() as Promise<{ status: "committed"; proposal_review: SiteProposalReviewInput & { reviewed_by: string; reviewed_at: string } }>;
 }
 
+export async function loadPlantProposalReviews(proposalSetID: string, signal?: AbortSignal) {
+  const response = await fetch(`/api/aese/v1/world/plant-build/reviews?proposal_set_id=${encodeURIComponent(proposalSetID)}`, {
+    headers: iaosHeaders(), signal,
+  });
+  if (!response.ok) throw new Error(`候选审阅记录 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ items: Array<SiteProposalReviewInput & { reviewed_by: string; reviewed_at: string }> }>;
+}
+
 export async function loadSiteInvestigations(caseCode: string, signal?: AbortSignal) {
   const response = await fetch(`/api/aese/v1/world/plant-build/investigations?case_code=${encodeURIComponent(caseCode)}`, {
     headers: iaosHeaders(), signal,
