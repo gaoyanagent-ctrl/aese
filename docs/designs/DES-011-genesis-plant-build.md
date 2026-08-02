@@ -341,7 +341,7 @@ Requirement 到正式选址现已统一为 `facility.plant.planning.v1@1.0.0` �
 
 人工新增候选现已进入权威链：人员填写方案类型、理由、金额区间/依据、预计可用日期、假设、待核验事实和风险；AESE BFF 读取最新 Requirement 与可选 ProposalSet。若外部模型未启用且尚无候选集，IAOS 允许 `site.proposal.record` 创建只含一个人工候选的第 1 版；已有版本时只允许在下一 revision 追加一项，并逐项校验既有候选、人员来源和 hash。人工输入不冒充 Agent 输出或 World 外部事实。
 
-场址控制现由 `facility.plant.delivery.v1@1.0.0` 承载：人员发起后进入持久 World wait，只有可信协议/交接 Observation 才成功；延迟或拒绝会关闭本次 Run，并保留历史后允许重新发起。交付确认采用“最小玩家命令 + 服务端 World 事实”边界：玩家命令只有案件、控制请求和 `accept_delivery`，AESE 必须重读 IAOS 权威请求并按 `genesis-plant-delivery@1.1.0` 生成稳定 Observation ID、协议号、交接号、三类证据和模拟发生时间；同一请求重放必须得到同一 payload。项目/WBS 与首个工程合同授予纵切现已实现；仍未实现的是施工/进度、变更、里程碑、付款、验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
+场址控制现由 `facility.plant.delivery.v1@1.0.0` 承载：人员发起后进入持久 World wait，只有可信协议/交接 Observation 才成功；延迟或拒绝会关闭本次 Run，并保留历史后允许重新发起。交付确认采用“最小玩家命令 + 服务端 World 事实”边界：玩家命令只有案件、控制请求和 `accept_delivery`，AESE 必须重读 IAOS 权威请求并按版本化规则生成稳定 Observation。项目/WBS、工程合同授予与首个施工里程碑纵切现已实现；`facility.construction.milestone.v1` 强制分开开工意图、World 进度质量事实和人员验收，并固定验收后的付款状态为 `not_requested`。仍未实现的是延期/缺陷/变更、工程发票/AP/CIP/付款、最终设施验收及总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
 
 ## 16. 用户配置、操作、验证与恢复
 
@@ -467,7 +467,7 @@ replay 控件。玩家像 M9 一样在内部组织与外部世界之间切换，
 | 治理决策会议室 | 场址、项目基线与合同授予审批 | 玩家、治理协调人、有权审批主体 |
 | 工程承包商市场 | RFQ、虚构承包商密封投标与资质 Observation | 玩家、World 市场协调人 |
 
-项目办公室、施工现场、付款里程碑和验收现场随 S4.3–S4.5 的权威业务对象实现后加入，不能用
+施工现场现已随首个施工里程碑权威对象加入；付款里程碑和最终验收现场随 S4.4–S4.5 的权威业务对象实现后加入，不能用
 没有事实来源的空场景冒充建设进度。
 
 ### 17.2 Game Projection 编译

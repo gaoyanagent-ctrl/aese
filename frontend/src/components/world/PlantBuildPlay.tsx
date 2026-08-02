@@ -6,6 +6,7 @@ import {
   FilePlus2,
   Gavel,
   Handshake,
+  HardHat,
   LoaderCircle,
   RotateCcw,
   SearchCheck,
@@ -43,6 +44,10 @@ import {
   generateContractRecommendation,
   submitContractRecommendation,
   awardContract,
+  loadConstructionMilestones,
+  startConstructionPackage,
+  confirmConstructionProgress,
+  acceptConstructionMilestone,
   decidePlantApproval,
   submitPlantProposalReview,
   submitManualPlantProposal,
@@ -64,6 +69,7 @@ import {
   type ContractAwardItem,
   type ContractRecommendationAdvice,
   type ContractRFQ,
+  type ConstructionMilestoneItem,
 } from "../../world/plantBuild";
 import {
   DEFAULT_SITE_ASSESSMENT_WEIGHTS,
@@ -329,6 +335,8 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
   const [selectedPackageCode, setSelectedPackageCode] = useState("");
   const [sourcingStrategy, setSourcingStrategy] = useState<ContractRFQ["sourcing_strategy"]>("specialist_packages");
   const [contractBusy, setContractBusy] = useState(false);
+  const [constructionMilestones, setConstructionMilestones] = useState<ConstructionMilestoneItem[]>([]);
+  const [constructionBusy, setConstructionBusy] = useState(false);
   const [controlMode, setControlMode] = useState<SiteControlRequest["agreement_mode"]>("lease");
   const [controlHandoverAt, setControlHandoverAt] = useState("");
   const [controlBusy, setControlBusy] = useState(false);
@@ -367,6 +375,7 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
   const refreshSiteControls = async () => setSiteControls((await loadSiteControls(caseCode)).items ?? []);
   const refreshFacilityProjects = async () => setFacilityProjects((await loadFacilityProjects(caseCode)).items ?? []);
   const refreshContractAwards = async () => setContractAwards((await loadContractAwards(caseCode)).items ?? []);
+  const refreshConstructionMilestones = async () => setConstructionMilestones((await loadConstructionMilestones(caseCode)).items ?? []);
   useEffect(() => {
     const controller = new AbortController();
     Promise.all([
@@ -394,6 +403,7 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
       loadSiteControls(caseCode, controller.signal).then((result) => setSiteControls(result.items ?? [])),
       loadFacilityProjects(caseCode, controller.signal).then((result) => setFacilityProjects(result.items ?? [])),
       loadContractAwards(caseCode, controller.signal).then((result) => setContractAwards(result.items ?? [])),
+      loadConstructionMilestones(caseCode, controller.signal).then((result) => setConstructionMilestones(result.items ?? [])),
     ]).catch((reason) => { if (reason.name !== "AbortError") setError(String(reason)); });
     return () => controller.abort();
   }, [caseCode, requirementID]);
@@ -457,6 +467,7 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
   const latestSiteControl = siteControls[0];
   const latestFacilityProject = facilityProjects.at(-1);
   const latestContractAward = contractAwards.at(-1);
+  const latestConstructionMilestone = constructionMilestones.at(-1);
   const projectCanRevise = latestFacilityProject?.approval_status === "rejected";
   useEffect(() => {
     const approvalID = latestSelection?.recommendation.approval_request_id;
@@ -506,6 +517,9 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
     hasContractRecommendation: Boolean(latestContractAward?.recommendation?.recommendation_id),
     contractApprovalStatus: latestContractAward?.approval_status ?? "",
     hasAwardedContract: Boolean(latestContractAward?.contract?.contract_id),
+    hasConstructionExecution: Boolean(latestConstructionMilestone?.execution?.execution_id),
+    hasConstructionObservation: Boolean(latestConstructionMilestone?.observation?.observation_id),
+    hasMilestoneAcceptance: Boolean(latestConstructionMilestone?.acceptance?.acceptance_id),
   });
   const gameStage = derivedGameStage.key === "proposal" && !proposalSet
     ? { ...derivedGameStage, anchor: "plant-task-requirement", actionLabel: "继续填写需求并生成候选" }
@@ -611,6 +625,9 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
       summary: `${latestContractAward.contract.contractor_name} · ${latestContractAward.contract.committed_amount ? cny(latestContractAward.contract.committed_amount.value) : "已承诺"}`,
       evidence: latestContractAward.contract.contract_id,
     }] : []),
+    ...(latestConstructionMilestone?.execution?.execution_id ? [{ id: latestConstructionMilestone.execution.execution_id, location: "construction" as const, title: `施工执行 · ${latestConstructionMilestone.execution.package_name}`, state: latestConstructionMilestone.status, summary: `${latestConstructionMilestone.execution.contractor_name} · ${latestConstructionMilestone.execution.package_code}`, evidence: `construction.package.start:${latestConstructionMilestone.execution.execution_id}` }] : []),
+    ...(latestConstructionMilestone?.observation?.observation_id ? [{ id: latestConstructionMilestone.observation.observation_id, location: "construction" as const, title: "施工进度与质量事实", state: "World Observation", summary: `进度 ${latestConstructionMilestone.observation.progress_bps / 100}% · 质量 ${latestConstructionMilestone.observation.quality_status} · 安全 ${latestConstructionMilestone.observation.safety_status}`, evidence: latestConstructionMilestone.observation.evidence_refs.join(" · ") }] : []),
+    ...(latestConstructionMilestone?.acceptance?.acceptance_id ? [{ id: latestConstructionMilestone.acceptance.acceptance_id, location: "headquarters" as const, title: "施工里程碑验收", state: "已验收", summary: `付款状态：${latestConstructionMilestone.acceptance.payment_status ?? "not_requested"}`, evidence: `construction.milestone.accept:${latestConstructionMilestone.acceptance.acceptance_id}` }] : []),
   ];
   useEffect(() => {
     if (!eligibleAssessments.some((item) => item.proposal_id === selectedProposalID)) {
@@ -921,6 +938,32 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
     finally { setContractBusy(false); }
   };
 
+  const startConstruction = async () => {
+    const contractID = latestContractAward?.contract?.contract_id; if (!contractID) return;
+    setConstructionBusy(true); setError("");
+    try { await startConstructionPackage(caseCode, contractID); await refreshConstructionMilestones(); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }
+    finally { setConstructionBusy(false); }
+  };
+
+  const advanceConstruction = async () => {
+    const executionID = latestConstructionMilestone?.execution?.execution_id; if (!executionID) return;
+    setConstructionBusy(true); setError("");
+    try { await confirmConstructionProgress(caseCode, executionID); await refreshConstructionMilestones(); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }
+    finally { setConstructionBusy(false); }
+  };
+
+  const acceptMilestone = async () => {
+    const executionID = latestConstructionMilestone?.execution?.execution_id;
+    const observationID = latestConstructionMilestone?.observation?.observation_id;
+    if (!executionID || !observationID) return;
+    setConstructionBusy(true); setError("");
+    try { await acceptConstructionMilestone(caseCode, executionID, observationID); await refreshConstructionMilestones(); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }
+    finally { setConstructionBusy(false); }
+  };
+
   const decideApproval = async (decision: "approve" | "reject") => {
     if (!latestSelection || approvalNote.trim().length < 6) return;
     setSelectionBusy(true); setError("");
@@ -1058,6 +1101,13 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
         {latestContractAward?.observation?.observation_id && <div className="plant-contract-bids"><header><div><strong>可信投标已送达</strong><p>以下价格和条件来自 World Observation，不是 Agent 估算。</p></div><small>{latestContractAward.observation.bids.length} 份合格投标</small></header><div className="plant-contract-bid-grid">{latestContractAward.observation.bids.map((bid) => <article key={bid.bid_id} className={(contractAdvice?.selected_bid_id ?? latestContractAward.recommendation?.selected_bid_id) === bid.bid_id ? "selected" : ""}><span>{bid.qualification === "eligible" ? "资质通过" : bid.qualification}</span><strong>{bid.contractor_name}</strong><b>{cny(bid.quoted_amount.value)}</b><p>承诺 {new Date(bid.promised_ready_at).toLocaleDateString("zh-CN")} · 质保 {bid.warranty_months} 月 · {bid.milestone_count} 个里程碑</p></article>)}</div>{!latestContractAward.recommendation?.recommendation_id && !contractAdvice && <button type="button" className="plant-project-confirm" disabled={contractBusy || status?.state !== "connected"} onClick={askContractAgent}>{contractBusy ? <LoaderCircle className="gx-spin" /> : <Bot />}{contractBusy ? "Agent 正在比选…" : "让 Agent 评审正式投标"}</button>}{contractAdvice && <div className="plant-contract-advice"><Bot /><div><small>{contractAdvice.evidence.provider} · {contractAdvice.evidence.model}</small><strong>Agent 推荐 {latestContractAward.observation.bids.find((bid) => bid.bid_id === contractAdvice.selected_bid_id)?.contractor_name}</strong><p>{contractAdvice.recommendation_reason}</p><em>{contractAdvice.alternative_comparison}</em></div><button type="button" disabled={contractBusy} onClick={confirmContractRecommendation}><BadgeCheck />确认推荐并提交审批</button></div>}</div>}
         {latestContractAward?.recommendation?.recommendation_id && !latestContractAward.contract?.contract_id && <div className="plant-project-governance"><div className="plant-project-summary"><Gavel /><div><small>{contractApprovalDetail?.detail.flow_name ?? "genesis.facility.contract.award.approval"}</small><strong>{contractApprovalDetail?.detail.subject.title ?? latestContractAward.rfq.package_name}</strong><p>{contractApprovalDetail?.detail.subject.summary ?? latestContractAward.recommendation.recommendation_reason}</p></div><em>{latestContractAward.approval_status}</em></div>{contractApprovalDetail && <div className="plant-approval-routing">{contractApprovalDetail.detail.assignments.map((assignment) => <article key={assignment.id}><Gavel /><span><strong>{assignment.stage_name}</strong><small>{assignment.display_name}</small></span><em>{assignment.status}</em></article>)}</div>}{latestContractAward.approval_status === "pending" && contractApprovalDetail?.detail.can_decide && <div className="plant-project-decision"><p>点击即提交预置、可审计的审批意见；无需输入 JSON 或系统编号。</p><div><button type="button" disabled={contractBusy} onClick={() => decideContractApproval("approve")}><BadgeCheck />批准合同授予</button><button type="button" className="danger" disabled={contractBusy} onClick={() => decideContractApproval("reject")}><XCircle />驳回并重新寻源</button></div></div>}{latestContractAward.approval_status === "approved" && <button type="button" className="plant-project-confirm" disabled={contractBusy} onClick={finalizeContractAward}><BadgeCheck />批准已生效 · 归档正式合同</button>}{latestContractAward.approval_status === "rejected" && <p className="plant-inline-error"><XCircle />合同授予已驳回，本轮 RFQ 与投标保留审计；下一版本将重新寻源。</p>}</div>}
         {latestContractAward?.contract?.contract_id && <div className="plant-control-complete"><BadgeCheck /><div><strong>正式工程合同已归档</strong><p>{latestContractAward.contract.contractor_name} · {latestContractAward.contract.committed_amount ? cny(latestContractAward.contract.committed_amount.value) : "金额已承诺"}</p><small>{latestContractAward.contract.contract_id} · 当前只形成合同承诺，不会自动生成发票、应付或付款。</small></div></div>}
+      </section>}
+      {latestContractAward?.contract?.contract_id && <section id="plant-task-construction" className="plant-construction-milestone">
+        <header><div><span>facility.construction.milestone.v1</span><h2>施工现场与里程碑验收</h2><p>正式合同启动施工意图；World 提供进度质量事实；项目负责人另行验收。三者不会自动生成付款。</p></div><strong>{latestConstructionMilestone?.acceptance?.acceptance_id ? "已验收" : latestConstructionMilestone?.status || "待启动"}</strong></header>
+        {!latestConstructionMilestone && <div className="plant-control-confirmation"><div className="plant-control-world-badge"><HardHat /><span><small>项目负责人 · 施工启动</small><strong>{latestContractAward.contract.package_name}</strong></span></div><p>施工范围、承包商和 WBS 全部引用正式合同。点击只发送开工意图，不预填进度、质量或现场证据。</p><button type="button" disabled={constructionBusy} onClick={startConstruction}>{constructionBusy ? <LoaderCircle className="gx-spin" /> : <HardHat />}{constructionBusy ? "正在建立施工意图…" : "确认启动合同施工包"}</button></div>}
+        {latestConstructionMilestone?.status === "waiting_world" && <div className="plant-control-confirmation"><div className="plant-control-world-badge"><HardHat /><span><small>WORLD ENGINE · 施工现场</small><strong>{latestConstructionMilestone.execution.contractor_name}</strong></span></div><p>推进剧情后，World 会生成虚构但可重放的进度、质量、安全、遗留项和现场证据；玩家无需填写工程表单。</p><button type="button" disabled={constructionBusy} onClick={advanceConstruction}>{constructionBusy ? <LoaderCircle className="gx-spin" /> : <HardHat />}{constructionBusy ? "施工现场正在推进…" : "推进施工并提交检查报告"}</button></div>}
+        {latestConstructionMilestone?.observation?.observation_id && !latestConstructionMilestone.acceptance?.acceptance_id && <div className="plant-contract-bids"><header><div><strong>可信现场报告已送达</strong><p>下列结论来自 World Observation；验收是独立的人工作用。</p></div><small>{latestConstructionMilestone.observation.result}</small></header><div className="plant-contract-bid-grid"><article className="selected"><span>完成进度</span><strong>{latestConstructionMilestone.observation.progress_bps / 100}%</strong><p>达到本里程碑检查条件</p></article><article className="selected"><span>质量门</span><strong>{latestConstructionMilestone.observation.quality_status === "passed" ? "检查通过" : "未通过"}</strong><p>{latestConstructionMilestone.observation.evidence_refs[1]}</p></article><article className="selected"><span>安全门</span><strong>{latestConstructionMilestone.observation.safety_status === "clear" ? "无事故" : "存在事故"}</strong><p>遗留项 {latestConstructionMilestone.observation.punch_items.length} 条</p></article></div><button type="button" className="plant-project-confirm" disabled={constructionBusy || latestConstructionMilestone.observation.progress_bps !== 10000 || latestConstructionMilestone.observation.quality_status !== "passed" || latestConstructionMilestone.observation.safety_status !== "clear" || latestConstructionMilestone.observation.punch_items.length > 0} onClick={acceptMilestone}>{constructionBusy ? <LoaderCircle className="gx-spin" /> : <BadgeCheck />}{constructionBusy ? "正在提交验收…" : "核验通过并验收里程碑"}</button></div>}
+        {latestConstructionMilestone?.acceptance?.acceptance_id && <div className="plant-control-complete"><BadgeCheck /><div><strong>施工事实与里程碑验收已分别入账</strong><p>{latestConstructionMilestone.execution.package_name} · {latestConstructionMilestone.acceptance.decision}</p><small>{latestConstructionMilestone.acceptance.acceptance_id} · 付款状态 {latestConstructionMilestone.acceptance.payment_status ?? "not_requested"}，未创建发票、应付或付款。</small></div></div>}
       </section>}
           </div>
         </section>

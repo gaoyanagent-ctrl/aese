@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.construction-milestone-game-loop.2026-08-02",
+  "node_key": "aese.m10.plant-build",
+  "update_type": "implementation",
+  "summary": "M10 增加施工现场 World 事实与独立里程碑验收游戏闭环",
+  "detail": "全屏 M10 游戏新增施工现场组织地点和三段任务：玩家确认合同施工包开工、World 确定性生成进度/质量/安全/现场证据、项目负责人明确验收。浏览器不填写外部事实，所有写入经过 AESE Command Gateway 和 IAOS Capability；验收不会自动付款。",
+  "status_after": "building",
+  "current_state": "正式选址到首个施工里程碑验收已可连续推进；延期/缺陷/变更、工程财务和最终设施验收仍待实现。",
+  "evidence_ref": "docs/designs/DES-011-genesis-plant-build.md",
+  "occurred_at": "2026-08-02T17:00:00Z"
+}

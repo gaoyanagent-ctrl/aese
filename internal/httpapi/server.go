@@ -294,6 +294,10 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/world/plant-build/contract-bids/confirm",
 			"/api/aese/v1/world/plant-build/contract-recommendations",
 			"/api/aese/v1/world/plant-build/contracts/award",
+			"/api/aese/v1/world/plant-build/construction-milestones",
+			"/api/aese/v1/world/plant-build/construction-packages",
+			"/api/aese/v1/world/plant-build/construction-observations/confirm",
+			"/api/aese/v1/world/plant-build/construction-milestones/accept",
 			"/api/aese/v1/world/capability-build",
 			"/api/aese/v1/world/industrialization",
 			"/api/aese/v1/world/first-delivery",
@@ -1577,6 +1581,163 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "awarded", "result": json.RawMessage(result)})
 			return
 		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "construction-milestones" && r.Method == http.MethodGet {
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, _, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_construction_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			result, err := authority.PlantConstructionMilestones(ctx, r.URL.Query().Get("case_code"))
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "construction_milestones_unavailable")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(result)
+			return
+		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "construction-packages" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode   string `json:"case_code"`
+				ContractID string `json:"contract_id"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil || input.CaseCode == "" || input.ContractID == "" {
+				s.writeError(w, http.StatusBadRequest, "invalid_construction_start", firstNonEmptyString(errorString(err), "case_code and contract_id are required"), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_construction_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			rawContracts, err := authority.PlantContractAwards(ctx, input.CaseCode)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_contract_awards_unavailable")
+				return
+			}
+			var contracts struct {
+				Items []plantbuild.ContractAwardItem `json:"items"`
+			}
+			if json.Unmarshal(rawContracts, &contracts) != nil {
+				s.writeError(w, http.StatusBadGateway, "plant_contract_awards_invalid", "IAOS contract projection is invalid", true, "", "")
+				return
+			}
+			var contract map[string]any
+			for _, item := range contracts.Items {
+				if value, _ := item.Contract["contract_id"].(string); value == input.ContractID {
+					contract = item.Contract
+					break
+				}
+			}
+			if contract == nil {
+				s.writeError(w, http.StatusConflict, "active_contractor_contract_required", "必须先完成正式合同授予", false, "", "")
+				return
+			}
+			projectID, _ := contract["project_id"].(string)
+			packageCode, _ := contract["package_code"].(string)
+			now := time.Now().UTC()
+			suffix := strings.TrimPrefix(plantbuild.CanonicalHash(map[string]any{"contract_id": input.ContractID, "package_code": packageCode}), "sha256:")[:16]
+			execution := map[string]any{"schema_version": "1.0", "execution_id": "construction-" + suffix, "case_code": input.CaseCode, "project_id": projectID, "contract_id": input.ContractID, "package_code": packageCode, "world_run_id": "world-run-" + input.CaseCode, "started_by": actorID, "started_at": now.Format(time.RFC3339)}
+			result, err := postPlantAuthorityCommandResult(ctx, authority, "construction.package.start", actorID, input.CaseCode, "construction-"+suffix, 1, execution)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "construction_package_not_started")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "waiting_world", "result": json.RawMessage(result)})
+			return
+		}
+		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "construction-observations" && rest[3] == "confirm" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode    string `json:"case_code"`
+				ExecutionID string `json:"execution_id"`
+				Action      string `json:"action"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil || input.CaseCode == "" || input.ExecutionID == "" || input.Action != "advance_construction" {
+				s.writeError(w, http.StatusBadRequest, "invalid_construction_world_action", firstNonEmptyString(errorString(err), "advance_construction is required"), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_construction_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			raw, err := authority.PlantConstructionMilestones(ctx, input.CaseCode)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "construction_milestones_unavailable")
+				return
+			}
+			var items struct {
+				Items []plantbuild.ConstructionMilestoneItem `json:"items"`
+			}
+			if json.Unmarshal(raw, &items) != nil {
+				s.writeError(w, http.StatusBadGateway, "construction_milestones_invalid", "IAOS construction projection is invalid", true, "", "")
+				return
+			}
+			var selected *plantbuild.ConstructionMilestoneItem
+			for i := range items.Items {
+				if items.Items[i].Execution.ExecutionID == input.ExecutionID {
+					selected = &items.Items[i]
+					break
+				}
+			}
+			if selected == nil {
+				s.writeError(w, http.StatusNotFound, "construction_execution_not_found", "施工执行不存在", false, "", "")
+				return
+			}
+			if selected.Observation.ObservationID != "" {
+				s.writeJSON(w, http.StatusOK, map[string]any{"status": "committed", "idempotent_replay": true, "observation": selected.Observation})
+				return
+			}
+			observation, err := plantbuild.GenerateConstructionProgressObservation(selected.Execution)
+			if err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "construction_world_generation_failed", err.Error(), false, "", "")
+				return
+			}
+			messageID := "world-" + observation.ObservationID
+			envelope := map[string]any{"schema_version": "1.0", "message_id": messageID, "kind": "observation", "tenant_id": tenantID, "world_pack_key": "genesis-construction-site", "world_pack_version": "1.0.0", "world_run_id": selected.Execution.WorldRunID, "branch_id": "main", "sim_occurred_at": observation.ObservedAt, "correlation_id": "corr-m10-" + input.CaseCode, "idempotency_key": messageID, "producer": map[string]string{"system": "aese", "component": "construction-site-world"}, "subject_ref": map[string]string{"type": "construction_execution", "code": selected.Execution.ExecutionID}, "payload_type": "construction.progress.observed.v1", "payload": observation}
+			rawEnvelope, _ := json.Marshal(envelope)
+			if _, err := authority.PostGovernedCommand(ctx, "api/v1/world-bridge/observations", rawEnvelope); err != nil {
+				s.writePlantAuthorityError(w, err, "construction_world_observation_not_accepted")
+				return
+			}
+			commit := map[string]any{"schema_version": "1.0", "execution_id": selected.Execution.ExecutionID, "world_message_id": messageID}
+			if err := postPlantAuthorityCommand(ctx, authority, "construction.progress.observation.commit", actorID, input.CaseCode, observation.ObservationID, 1, commit); err != nil {
+				s.writePlantAuthorityError(w, err, "construction_observation_not_committed")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "ready_for_acceptance", "observation": observation})
+			return
+		}
+		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "construction-milestones" && rest[3] == "accept" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode      string `json:"case_code"`
+				ExecutionID   string `json:"execution_id"`
+				ObservationID string `json:"observation_id"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil || input.CaseCode == "" || input.ExecutionID == "" || input.ObservationID == "" {
+				s.writeError(w, http.StatusBadRequest, "invalid_milestone_acceptance", firstNonEmptyString(errorString(err), "case_code, execution_id and observation_id are required"), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_construction_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			acceptanceID := "milestone-acceptance-" + strings.TrimPrefix(plantbuild.CanonicalHash(map[string]any{"execution_id": input.ExecutionID, "observation_id": input.ObservationID}), "sha256:")[:16]
+			payload := map[string]any{"schema_version": "1.0", "acceptance_id": acceptanceID, "execution_id": input.ExecutionID, "observation_id": input.ObservationID, "decision": "accept", "decision_note": "已核验施工进度、质量、安全与现场证据，确认本里程碑验收。", "accepted_by": actorID, "accepted_at": time.Now().UTC().Format(time.RFC3339)}
+			result, err := postPlantAuthorityCommandResult(ctx, authority, "construction.milestone.accept", actorID, input.CaseCode, acceptanceID, 1, payload)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "construction_milestone_not_accepted")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "accepted", "result": json.RawMessage(result)})
+			return
+		}
 		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "facility-projects" && r.Method == http.MethodPost {
 			var input struct {
 				CaseCode string                       `json:"case_code"`
@@ -2201,6 +2362,12 @@ func postPlantAuthorityCommandResultWithAgentRun(ctx context.Context, client *ia
 		field = "contract_award_recommendation"
 	case "contractor.contract.award":
 		field = "contract_award"
+	case "construction.package.start":
+		field = "construction_package_start"
+	case "construction.progress.observation.commit":
+		field = "construction_progress_observation"
+	case "construction.milestone.accept":
+		field = "construction_milestone_acceptance"
 	default:
 		return nil, fmt.Errorf("unsupported M10 capability %q", capabilityCode)
 	}

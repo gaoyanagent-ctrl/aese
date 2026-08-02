@@ -13,7 +13,11 @@ export type PlantGameStage =
   | "contract_world"
   | "contract_comparison"
   | "contract_approval"
-  | "contract_awarded";
+  | "contract_awarded"
+  | "construction_start"
+  | "construction_world"
+  | "milestone_acceptance"
+  | "milestone_accepted";
 
 export type PlantGameFacts = {
   hasRequirement: boolean;
@@ -33,12 +37,15 @@ export type PlantGameFacts = {
   hasContractRecommendation: boolean;
   contractApprovalStatus: string;
   hasAwardedContract: boolean;
+  hasConstructionExecution: boolean;
+  hasConstructionObservation: boolean;
+  hasMilestoneAcceptance: boolean;
 };
 
 export type PlantGameStageDefinition = {
   key: PlantGameStage;
   label: string;
-  location: "headquarters" | "city" | "site" | "boardroom" | "contractor";
+  location: "headquarters" | "city" | "site" | "boardroom" | "contractor" | "construction";
   npc: string;
   npcRole: string;
   mission: string;
@@ -210,13 +217,32 @@ export const PLANT_GAME_STAGES: PlantGameStageDefinition[] = [
     npcRole: "工厂项目负责人",
     mission: "查验工程合同与承诺金额",
     dialogue: "正式合同已进入 IAOS 权威账。后续施工进度、变更、发票和付款只能引用这份合同。",
-    actionLabel: "查看合同档案",
-    anchor: "plant-task-contract",
+    actionLabel: "启动合同施工包",
+    anchor: "plant-task-construction",
+  },
+  {
+    key: "construction_start", label: "启动施工包", location: "headquarters", npc: "顾远", npcRole: "工厂项目负责人",
+    mission: "按正式合同启动施工", dialogue: "合同只代表承诺。点击确认后，我会向施工现场发出受治理开工意图；不会预填工程进度。", actionLabel: "确认启动施工", anchor: "plant-task-construction",
+  },
+  {
+    key: "construction_world", label: "现场施工与检查", location: "construction", npc: "现场经理", npcRole: "World 施工承包商",
+    mission: "推进施工并提交可信现场报告", dialogue: "进度、质量、安全和现场证据由施工 World 生成。你只需推进剧情，不填写工程数据。", actionLabel: "推进施工并提交检查报告", anchor: "plant-task-construction",
+  },
+  {
+    key: "milestone_acceptance", label: "验收施工里程碑", location: "construction", npc: "顾远", npcRole: "工厂项目负责人",
+    mission: "核验现场事实并明确验收", dialogue: "现场报告已送达。只有进度、质量、安全和遗留项门全部通过，才能确认里程碑；验收不会自动付款。", actionLabel: "核验并验收里程碑", anchor: "plant-task-construction",
+  },
+  {
+    key: "milestone_accepted", label: "里程碑已验收", location: "headquarters", npc: "顾远", npcRole: "工厂项目负责人",
+    mission: "查验施工与验收档案", dialogue: "施工事实和验收已经分别入账，付款状态仍为未申请。下一步将建立工程发票、应付和付款治理。", actionLabel: "查看施工验收档案", anchor: "plant-task-construction",
   },
 ];
 
 export function derivePlantGameStage(facts: PlantGameFacts): PlantGameStageDefinition {
-  if (facts.hasAwardedContract) return PLANT_GAME_STAGES[14];
+  if (facts.hasMilestoneAcceptance) return PLANT_GAME_STAGES[18];
+  if (facts.hasConstructionObservation) return PLANT_GAME_STAGES[17];
+  if (facts.hasConstructionExecution) return PLANT_GAME_STAGES[16];
+  if (facts.hasAwardedContract) return PLANT_GAME_STAGES[15];
   if (facts.hasContractRecommendation) return PLANT_GAME_STAGES[13];
   if (facts.hasContractBids) return PLANT_GAME_STAGES[12];
   if (facts.hasContractRFQ) return PLANT_GAME_STAGES[11];

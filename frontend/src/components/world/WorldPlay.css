@@ -1168,6 +1168,7 @@
 .plant-task-dialog .plant-site-control,
 .plant-task-dialog .plant-project-baseline,
 .plant-task-dialog .plant-contract-award { display: none; }
+.plant-task-dialog .plant-construction-milestone { display: none; }
 .plant-task-dialog[data-stage="requirement"] .plant-requirement-form,
 .plant-task-dialog[data-stage="proposal"] .plant-requirement-form,
 .plant-task-dialog[data-stage="requirement-revision"] .plant-requirement-form {
@@ -1196,6 +1197,15 @@
 .plant-task-dialog[data-stage="contract_comparison"] .plant-contract-award,
 .plant-task-dialog[data-stage="contract_approval"] .plant-contract-award,
 .plant-task-dialog[data-stage="contract_awarded"] .plant-contract-award { display: grid; }
+.plant-task-dialog[data-stage="construction_start"] .plant-construction-milestone,
+.plant-task-dialog[data-stage="construction_world"] .plant-construction-milestone,
+.plant-task-dialog[data-stage="milestone_acceptance"] .plant-construction-milestone,
+.plant-task-dialog[data-stage="milestone_accepted"] .plant-construction-milestone { display: grid; }
+.plant-construction-milestone { gap: 14px; }
+.plant-construction-milestone > header { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; padding: 14px; border: 1px solid #8d7341; border-radius: 10px; background: rgba(74, 56, 25, .22); }
+.plant-construction-milestone > header span { color: #d9bd78; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
+.plant-construction-milestone > header h2 { margin: 4px 0; color: #fff1c8; font-size: 18px; }
+.plant-construction-milestone > header p { margin: 0; color: var(--text-muted); line-height: 1.6; }
 .plant-site-control { gap: 14px; }
 .plant-site-control > header { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; padding: 14px; border: 1px solid #8d7341; border-radius: 10px; background: rgba(74, 56, 25, .22); }
 .plant-site-control > header span { color: #d9bd78; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }

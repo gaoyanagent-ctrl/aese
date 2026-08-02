@@ -34,6 +34,7 @@ const locations: Array<{ key: PlantLocation; label: string; shortLabel: string; 
   { key: "site", label: "候选场址与园区服务中心", shortLabel: "候选场址", description: "现场调研与外部事实", kind: "外部", icon: Factory },
   { key: "boardroom", label: "企业治理决策会议室", shortLabel: "治理会议室", description: "推荐、审批与正式决定", kind: "内部", icon: Landmark },
   { key: "contractor", label: "工程承包商市场", shortLabel: "承包商市场", description: "正式邀标、密封报价与外部资质事实", kind: "外部", icon: Handshake },
+  { key: "construction", label: "工厂建设现场", shortLabel: "施工现场", description: "工程进度、质量、安全与里程碑检查", kind: "外部", icon: HardHat },
 ];
 
 export function PlantBuildGameScene({ stage, caseCode, companyCode, proposalNames, observedCount, archives, onExit, onOpenTask }: {
@@ -52,7 +53,7 @@ export function PlantBuildGameScene({ stage, caseCode, companyCode, proposalName
   useEffect(() => { setLocation(stage.location); setTravelling(false); setTab("event"); }, [stage.key, stage.location]);
   const currentLocation = useMemo(() => locations.find((item) => item.key === location) ?? locations[0], [location]);
   const locationArchives = archives.filter((item) => item.location === location);
-  const NPCIcon = stage.key === "investigation" || stage.key === "contract_world" ? UserRound : stage.key === "selected" || stage.key === "contract_sourcing" ? HardHat : Bot;
+  const NPCIcon = stage.key === "investigation" || stage.key === "contract_world" || stage.key === "construction_world" ? UserRound : stage.key === "selected" || stage.key === "contract_sourcing" || stage.key === "construction_start" || stage.key === "milestone_acceptance" ? HardHat : Bot;
   const LocationIcon = currentLocation.icon;
   const enter = (next: PlantLocation) => {
     if (next === location) return;
@@ -90,6 +91,7 @@ export function PlantBuildGameScene({ stage, caseCode, companyCode, proposalName
           {location === "site" && <div className="plant-game-site-assets" aria-hidden="true"><Trees /><Factory /><HardHat /></div>}
           {location === "boardroom" && <div className="plant-game-board" aria-hidden="true"><ShieldCheck /><span>INVESTMENT & SITE GOVERNANCE</span></div>}
           {location === "contractor" && <div className="plant-game-site-assets" aria-hidden="true"><Handshake /><Building2 /><HardHat /></div>}
+          {location === "construction" && <div className="plant-game-site-assets" aria-hidden="true"><HardHat /><Factory /><ShieldCheck /></div>}
           <div className={`plant-game-player ${travelling ? "travelling" : ""}`}><img src="/assets/enterprise-genesis/sprites/founder-v1.png" alt="你的创始人角色" /><span>你</span></div>
           {missionHere && <button type="button" className="plant-game-npc" onClick={openMission} aria-label={`${stage.npc}：${stage.actionLabel}`}><span className="plant-game-npc-avatar"><NPCIcon /></span><span className="plant-game-npc-bubble"><small>{stage.npcRole}</small><strong>{stage.npc}</strong><em>{stage.dialogue}</em><b>{stage.actionLabel}<ChevronRight /></b></span></button>}
           {!missionHere && <div className="plant-game-scene-quiet"><LocationIcon /><div><strong>这里目前没有待处理事件</strong><p>可检查本地点已经确认的事实档案，或前往带有事件标记的地点。</p></div></div>}

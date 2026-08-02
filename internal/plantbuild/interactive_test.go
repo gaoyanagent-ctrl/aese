@@ -307,6 +307,24 @@ func TestGenerateContractBidObservationIsReplayStableAndBounded(t *testing.T) {
 	}
 }
 
+func TestGenerateConstructionProgressObservationIsReplayStableAndWorldOwned(t *testing.T) {
+	execution := ConstructionExecution{SchemaVersion: "1.0", ExecutionID: "construction-1", CaseCode: "INC-1", ProjectID: "PROJECT-1", ContractID: "CONTRACT-1", PackageCode: "WBS-1", PackageName: "厂房工程", ContractorCode: "WORLD-CONTRACTOR-01", ContractorName: "澄岳工程（虚构）", WorldRunID: "world-run-1", StartedBy: "founder-principal", StartedAt: "2026-08-02T00:00:00Z", Status: "waiting_world"}
+	first, err := GenerateConstructionProgressObservation(execution)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := GenerateConstructionProgressObservation(execution)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if CanonicalHash(first) != CanonicalHash(second) {
+		t.Fatalf("construction fact is not replay stable: first=%+v second=%+v", first, second)
+	}
+	if first.ExternalActorID != "world-construction-contractor" || first.ProgressBPS != 10000 || first.QualityStatus != "passed" || first.SafetyStatus != "clear" || len(first.EvidenceRefs) < 3 {
+		t.Fatalf("invalid governed construction fact: %+v", first)
+	}
+}
+
 func TestContractRecommendationEvidenceMatchesIAOSCanonicalContract(t *testing.T) {
 	rfq := ContractRFQ{SchemaVersion: "1.0", RFQID: "RFQ-2", CaseCode: "INC-2", ProjectID: "PROJECT-2", PackageCode: "WBS-03", PackageName: "现场施工", SourcingStrategy: "specialist_packages", BidCount: 3, ContractCeiling: Money{Value: "9000000.00", Currency: "CNY", Scale: 2}, RequiredReadyAt: "2027-03-01T00:00:00Z", WorldRunID: "world-run-2", RequestedBy: "founder-principal", RequestedAt: "2026-08-02T12:00:00Z", Status: "waiting_world"}
 	observation, err := GenerateContractBidObservation(rfq)

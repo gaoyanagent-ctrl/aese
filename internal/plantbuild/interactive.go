@@ -189,6 +189,45 @@ type ContractAwardItem struct {
 	Contract          map[string]any         `json:"contract"`
 }
 
+type ConstructionExecution struct {
+	SchemaVersion  string `json:"schema_version"`
+	ExecutionID    string `json:"execution_id"`
+	CaseCode       string `json:"case_code"`
+	ProjectID      string `json:"project_id"`
+	ContractID     string `json:"contract_id"`
+	PackageCode    string `json:"package_code"`
+	PackageName    string `json:"package_name"`
+	ContractorCode string `json:"contractor_code"`
+	ContractorName string `json:"contractor_name"`
+	WorldRunID     string `json:"world_run_id"`
+	StartedBy      string `json:"started_by"`
+	StartedAt      string `json:"started_at"`
+	Status         string `json:"status"`
+}
+
+type ConstructionProgressObservation struct {
+	SchemaVersion   string   `json:"schema_version"`
+	ObservationID   string   `json:"observation_id"`
+	ExecutionID     string   `json:"execution_id"`
+	ContractID      string   `json:"contract_id"`
+	PackageCode     string   `json:"package_code"`
+	Result          string   `json:"result"`
+	ProgressBPS     int      `json:"progress_bps"`
+	QualityStatus   string   `json:"quality_status"`
+	SafetyStatus    string   `json:"safety_status"`
+	PunchItems      []string `json:"punch_items"`
+	EvidenceRefs    []string `json:"evidence_refs"`
+	ExternalActorID string   `json:"external_actor_id"`
+	ObservedAt      string   `json:"observed_at"`
+}
+
+type ConstructionMilestoneItem struct {
+	Execution   ConstructionExecution           `json:"execution"`
+	Status      string                          `json:"status"`
+	Observation ConstructionProgressObservation `json:"observation"`
+	Acceptance  map[string]any                  `json:"acceptance"`
+}
+
 type FinancialConstraint struct {
 	AvailableCash   Money  `json:"available_cash"`
 	ApprovedBudget  Money  `json:"approved_budget"`
@@ -958,6 +997,21 @@ func GenerateContractBidObservation(rfq ContractRFQ) (ContractBidObservation, er
 		})
 	}
 	return ContractBidObservation{SchemaVersion: InteractiveSchemaVersion, ObservationID: "contract-bid-observation-" + strings.ToLower(suffix), RFQID: rfq.RFQID, ExternalActorID: "world-contractor-market", Bids: bids, ObservedAt: requested.Add(6 * time.Hour).Format(time.RFC3339)}, nil
+}
+
+// GenerateConstructionProgressObservation is the deterministic fictional
+// construction-site actor. The browser only confirms advancing time; it never
+// types progress, quality, safety or evidence values.
+func GenerateConstructionProgressObservation(execution ConstructionExecution) (ConstructionProgressObservation, error) {
+	if execution.SchemaVersion != InteractiveSchemaVersion || execution.ExecutionID == "" || execution.ContractID == "" || execution.PackageCode == "" || execution.Status != "waiting_world" {
+		return ConstructionProgressObservation{}, errors.New("construction execution is incomplete or not waiting for World")
+	}
+	started, err := time.Parse(time.RFC3339, execution.StartedAt)
+	if err != nil {
+		return ConstructionProgressObservation{}, errors.New("construction started_at is invalid")
+	}
+	suffix := strings.ToLower(strings.TrimPrefix(CanonicalHash(execution), "sha256:")[:12])
+	return ConstructionProgressObservation{SchemaVersion: InteractiveSchemaVersion, ObservationID: "construction-observation-" + suffix, ExecutionID: execution.ExecutionID, ContractID: execution.ContractID, PackageCode: execution.PackageCode, Result: "ready_for_inspection", ProgressBPS: 10000, QualityStatus: "passed", SafetyStatus: "clear", PunchItems: []string{}, EvidenceRefs: []string{"world-document:completion-report-" + suffix, "world-evidence:quality-inspection-" + suffix, "world-evidence:safety-clearance-" + suffix}, ExternalActorID: "world-construction-contractor", ObservedAt: started.AddDate(0, 1, 0).Format(time.RFC3339)}, nil
 }
 
 // GenerateInvestigationObservation produces a replay-stable external report

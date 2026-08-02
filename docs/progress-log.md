@@ -2093,3 +2093,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：玩家只选择已批准 WBS 包和寻源策略、确认接收投标、确认 Agent 推荐、作出受派审批决定并归档合同；金额/日期由项目基线推导，外部投标由 World 生成，合同不会自动形成发票、应付或付款。
 - 验证：IAOS 全仓 Go/vet 与治理门已通过并部署 8082；AESE 全仓 Go/vet、101 项前端测试、TypeScript 和生产构建通过。完整新案件 UI/API/DB 现场验收仍归 S5。
 - 后续：继续实现施工进度/质量 Observation、变更与里程碑验收，再接工程财务和最终设施验收。
+
+## 2026-08-02 - M10 施工现场与里程碑验收游戏闭环
+
+- 变更：IAOS Runtime 2.25.0/平台包 1.19.0 新增施工包启动、可信进度质量 Observation 提交和里程碑验收三项 Capability、`facility.construction.milestone.v1`、三张权威表和三个只读 Entity；AESE 增加施工现场组织场景、NPC 引导、World 自动生成现场报告、玩家一键验收和按地点档案。
+- 原因：正式合同归档后原界面没有下一项可执行剧情；若让玩家填写进度、质量、安全和证据，会再次把仿真游戏退化为施工管理后台，并混淆现场报告、验收和付款三种事实。
+- 影响：玩家只确认开工、推进施工和验收；施工数据由可重放 World 规则生成，IAOS 必须校验同 Intent/subject/correlation 的可信 Observation。验收结果固定 `payment_status=not_requested`，不会自动创建发票、应付、付款或在建工程转固。
+- 验证：IAOS 相关包及全平台 Go 测试/vet、Atlas tracking 通过；AESE Go 全仓测试/vet、前端 26 文件/104 项测试、TypeScript 和生产构建通过。完整新案件 API/UI/DB 现场验收仍归 S5。
+- 后续：实现施工延期/质量缺陷/工程变更闭环，再接工程发票、AP、CIP、付款和最终设施验收。

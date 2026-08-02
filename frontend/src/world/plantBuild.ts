@@ -363,6 +363,22 @@ export type ContractAwardItem = {
   contract?: { contract_id?: string; contractor_name?: string; committed_amount?: PBMoney; status?: string; package_name?: string };
 };
 
+export type ConstructionExecution = {
+  schema_version: "1.0"; execution_id: string; case_code: string; project_id: string;
+  contract_id: string; package_code: string; package_name: string; contractor_code: string;
+  contractor_name: string; world_run_id: string; started_by: string; started_at: string; status: string;
+};
+export type ConstructionProgressObservation = {
+  schema_version: "1.0"; observation_id: string; execution_id: string; contract_id: string;
+  package_code: string; result: string; progress_bps: number; quality_status: string;
+  safety_status: string; punch_items: string[]; evidence_refs: string[];
+  external_actor_id: string; observed_at: string;
+};
+export type ConstructionMilestoneItem = {
+  execution: ConstructionExecution; status: string; observation?: ConstructionProgressObservation;
+  acceptance?: { acceptance_id?: string; decision?: string; accepted_by?: string; accepted_at?: string; payment_status?: string };
+};
+
 export type PlantApprovalDetail = {
   item: {
     id: string;
@@ -598,6 +614,27 @@ export async function awardContract(caseCode: string, recommendationID: string, 
     body: JSON.stringify({ case_code: caseCode, recommendation_id: recommendationID, approval_request_id: approvalRequestID }),
   });
   if (!response.ok) throw new Error(`归档正式工程合同 ${response.status}: ${await response.text()}`);
+  return response.json();
+}
+
+export async function loadConstructionMilestones(caseCode: string, signal?: AbortSignal) {
+  const response = await fetch(`/api/aese/v1/world/plant-build/construction-milestones?case_code=${encodeURIComponent(caseCode)}`, { headers: iaosHeaders(), signal });
+  if (!response.ok) throw new Error(`施工里程碑档案 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ items: ConstructionMilestoneItem[] }>;
+}
+export async function startConstructionPackage(caseCode: string, contractID: string) {
+  const response = await fetch("/api/aese/v1/world/plant-build/construction-packages", { method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() }, body: JSON.stringify({ case_code: caseCode, contract_id: contractID }) });
+  if (!response.ok) throw new Error(`启动施工包 ${response.status}: ${await response.text()}`);
+  return response.json();
+}
+export async function confirmConstructionProgress(caseCode: string, executionID: string) {
+  const response = await fetch("/api/aese/v1/world/plant-build/construction-observations/confirm", { method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() }, body: JSON.stringify({ case_code: caseCode, execution_id: executionID, action: "advance_construction" }) });
+  if (!response.ok) throw new Error(`推进施工现场 ${response.status}: ${await response.text()}`);
+  return response.json();
+}
+export async function acceptConstructionMilestone(caseCode: string, executionID: string, observationID: string) {
+  const response = await fetch("/api/aese/v1/world/plant-build/construction-milestones/accept", { method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() }, body: JSON.stringify({ case_code: caseCode, execution_id: executionID, observation_id: observationID }) });
+  if (!response.ok) throw new Error(`验收施工里程碑 ${response.status}: ${await response.text()}`);
   return response.json();
 }
 export async function loadPlantBuild(
