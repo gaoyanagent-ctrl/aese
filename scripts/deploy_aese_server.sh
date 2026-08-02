@@ -117,13 +117,22 @@ for _ in $(seq 1 50); do
   fi
   if curl -fsS "http://127.0.0.1:${listen#:}/health" >/dev/null 2>&1; then
     status="$(curl -fsS "http://127.0.0.1:${listen#:}/api/aese/v1/game/creative/status")"
-    if [[ -n "${MINMAX_API_KEY:-}" ]] && ! jq -e '.state=="connected" and .provider=="MiniMax"' <<<"$status" >/dev/null; then
-      echo "AESE started but MiniMax provider is not connected" >&2
-      jq '{state,provider,model,prompt_version}' <<<"$status" >&2
-      exit 1
+    planning_status="$(curl -fsS "http://127.0.0.1:${listen#:}/api/aese/v1/world/plant-build/planning-status")"
+    if [[ -n "${MINMAX_API_KEY:-}" ]]; then
+      if ! jq -e '.state=="connected" and .provider=="MiniMax"' <<<"$status" >/dev/null; then
+        echo "AESE started but M9 creative provider is not connected" >&2
+        jq '{state,provider,model,prompt_version}' <<<"$status" >&2
+        exit 1
+      fi
+      if ! jq -e '.state=="connected" and .provider=="MiniMax"' <<<"$planning_status" >/dev/null; then
+        echo "AESE started but M10 plant-planning provider is not connected" >&2
+        jq '{state,provider,model,prompt_version}' <<<"$planning_status" >&2
+        exit 1
+      fi
     fi
     echo "AESE server deployed (pid=$pid listen=$listen log=$log_file)"
-    jq '{state,provider,model,base_url_host,prompt_version}' <<<"$status"
+    jq -n --argjson creative "$status" --argjson planning "$planning_status" \
+      '{creative:($creative|{state,provider,model,base_url_host,prompt_version}),plant_planning:($planning|{state,provider,model,prompt_version})}'
     exit 0
   fi
   sleep 0.2

@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.minimax-provider-release-gate.2026-08-02",
+  "node_key": "aese.genesis.m10-plant-build",
+  "update_type": "implementation",
+  "summary": "AESE 发布门同时验证 M9 与 M10 MiniMax Provider",
+  "detail": "标准部署脚本安全加载本机 MiniMax 配置，并分别验证 Creative Provider 与 Plant Planning Provider 均已连接；避免手工启动遗漏环境变量后把 M10 发布为 not_configured。",
+  "status_after": "building",
+  "current_state": "M10 Agent 候选生成恢复使用 MiniMax-M3；无模型时继续失败关闭并保留人工候选入口。",
+  "evidence_ref": "docs/solutions/SOL-008-minimax-provider-startup-config.md",
+  "occurred_at": "2026-08-02T02:15:00Z"
+}

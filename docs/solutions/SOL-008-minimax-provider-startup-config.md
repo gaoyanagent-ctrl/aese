@@ -20,6 +20,11 @@ Enterprise Genesis 身份工作室可以生成候选企业名称，但
 
 这表示请求没有调用 MiniMax，界面得到的是离线确定性候选。
 
+同一根因也会使 M10 `GET /api/aese/v1/world/plant-build/planning-status`
+返回 `not_configured / none`，随后“保存需求并让 Agent 生成候选”在 Requirement
+已保存或校验完成后返回 503。M9 的 deterministic 命名 fallback 不能冒充 M10
+规划 Agent；M10 没有外部模型时只能显式走人工候选表单。
+
 ## 2. 根因
 
 本机权限为 `0600` 的 `.env` 已配置 `MINMAX_API_KEY`、
@@ -35,7 +40,7 @@ Enterprise Genesis 身份工作室可以生成候选企业名称，但
 - 要求 secret 文件权限为 `0600`；
 - MiniMax key、base 和 model 必须同时配置，否则失败关闭；
 - 重建并重启 `:8090` 上的 AESE 服务，只停止命令行为 `aese-server` 的进程；
-- 启动后校验健康端点和 Provider 状态；
+- 启动后同时校验 M9 Creative Provider 与 M10 Plant Planning Provider 状态；任一未连接都使发布失败；
 - 密钥只进入子进程环境，不进入命令行、日志或 Git。
 
 `.env.example` 提供无密钥模板。运行手册和 Code Map 同步记录该入口。
@@ -66,7 +71,8 @@ chmod 600 .env
 # 填写三项 MINMAX_* 配置
 scripts/deploy_aese_server.sh
 curl -s http://127.0.0.1:8090/api/aese/v1/game/creative/status | jq
+curl -s http://127.0.0.1:8090/api/aese/v1/world/plant-build/planning-status | jq
 ```
 
-预期状态为 `connected / MiniMax / MiniMax-M3`。正式验收还必须在身份工作室执行一次
-生成，并检查 CreativeJob，而不是只检查状态端点。
+两个端点均应为 `connected / MiniMax / MiniMax-M3`。正式验收还必须分别在身份工作室
+和 M10 工厂规划执行一次生成，并检查 CreativeJob/Agent Run，而不是只检查状态端点。

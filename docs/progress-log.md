@@ -1983,3 +1983,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：Agent 候选缺少或篡改运行证据会失败关闭；人员候选禁止伪造 Agent Run。World Journal 仍只接受外部 Intent/Observation，不混入模型运行。
 - 验证：IAOS 全仓 Go、vet、治理写检查、Code Map/Atlas tracking、TypeScript 与 Next 生产构建通过；AESE 全仓 Go、vet、24 个前端测试文件/71 项测试、TypeScript 与 Vite 生产构建通过。IAOS 全量前端 Vitest 有 7 个既有测试文件共 18 项失败（超时、中文界面与旧英文断言不一致、`window is not defined` 清理问题），其余 63 个文件/355 项通过，本次 M10 工作台 TypeScript 与生产构建无失败。8082/8090/3000/4173 均健康，四个 active 租户升级到 `genesis-m9@1.15.0` 且 `up_to_date=true`；线上 Artifact 包含 Agent Run 条件合同，新查询入口未认证返回 401，`genesis_plant_agent_run` 已启用 FORCE RLS 和治理写触发器。历史候选未伪造补录，因此当前 Agent Run 为 0 条符合预期。两仓 System Atlas 同步端点仍返回 404，声明保留待路由恢复后幂等补录。
 - 后续：推进 S4.3 项目/WBS、空间和承包策略的 Agent 建议与人员决定纵切。
+
+## 2026-08-02 - M10 MiniMax Provider 发布门修复
+
+- 变更：标准 AESE 部署脚本在加载权限为 0600 的本机配置后，同时校验 M9 Creative Provider 和 M10 Plant Planning Provider；任一不是 `connected / MiniMax` 都使发布失败，并在成功输出中分别展示两条状态。
+- 原因：上次手工启动 8090 绕过 `.env`，M9 明确回退 deterministic，而 M10 为 not_configured，导致保存设施需求并生成候选返回 503；旧部署门只检查 M9 状态，无法阻止该错误发布。
+- 影响：M9 与 M10 继续复用同一个 MiniMax adapter 和密钥配置，但每个业务 Provider 都有独立可观测状态和发布门；没有模型时 M10 仍失败关闭并要求显式人工候选，不能用固定方案冒充 Agent。
+- 验证：`bash -n`、配置检查、creative/plantbuild/httpapi/server 定向 Go 测试与 vet 通过；标准脚本重建并部署 8090 后，直连和 4173 BFF 的 M9/M10 状态均为 `connected / MiniMax / MiniMax-M3`，服务健康且写入口不再因 Provider 缺失返回 503。故障案件已确认保存 Requirement revision 1/2，并留下两条明确的 `model not configured` failed CreativeJob，可由原用户会话重试。System Atlas 同步端点仍返回 404，声明保留待路由恢复后幂等补录。
+- 后续：由测试用户重试当前案件生成，核对 completed/valid CreativeJob、IAOS Agent Run 和 Proposal revision；继续 S4.3 项目/WBS 纵切。
