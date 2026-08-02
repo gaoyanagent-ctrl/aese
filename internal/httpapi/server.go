@@ -279,6 +279,7 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/world/plant-build",
 			"/api/aese/v1/world/plant-build/planning-status",
 			"/api/aese/v1/world/plant-build/financial-constraints",
+			"/api/aese/v1/world/plant-build/requirement-options",
 			"/api/aese/v1/world/plant-build/requirements/:requirement_id",
 			"/api/aese/v1/world/plant-build/proposals",
 			"/api/aese/v1/world/plant-build/reviews",
@@ -687,6 +688,51 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			_, _ = w.Write(result)
 			return
 		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "requirement-options" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode string `json:"case_code"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil || strings.TrimSpace(input.CaseCode) == "" {
+				s.writeError(w, http.StatusBadRequest, "invalid_requirement_adviser_request", firstNonEmptyString(errorString(err), "case_code is required"), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, _, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_requirement_adviser_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			raw, err := authority.PlantFinancialConstraint(ctx, input.CaseCode)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_financial_constraint_unavailable")
+				return
+			}
+			var financial struct {
+				CaseCode            string                         `json:"case_code"`
+				LegalEntityCode     string                         `json:"legal_entity_code"`
+				FinancialConstraint plantbuild.FinancialConstraint `json:"financial_constraint"`
+			}
+			if err := json.Unmarshal(raw, &financial); err != nil || financial.CaseCode != input.CaseCode {
+				s.writeError(w, http.StatusBadGateway, "plant_financial_constraint_invalid", "IAOS financial constraint is invalid", true, "", "")
+				return
+			}
+			adviser, ok := s.plantPlanningProvider.(plantbuild.RequirementAdviser)
+			if !ok {
+				s.writeError(w, http.StatusServiceUnavailable, "plant_requirement_adviser_unavailable", "设施规划模型不支持需求草案", false, "", "")
+				return
+			}
+			options, err := adviser.GenerateRequirementOptions(ctx, plantbuild.RequirementOptionSeed{TenantID: tenantID, CaseCode: input.CaseCode, LegalEntityCode: financial.LegalEntityCode, FinancialConstraint: financial.FinancialConstraint})
+			if errors.Is(err, plantbuild.ErrPlanningModelNotConfigured) {
+				s.writeError(w, http.StatusServiceUnavailable, "plant_planning_model_not_configured", "外部设施规划模型未启用", false, "", "")
+				return
+			}
+			if err != nil {
+				s.writeError(w, http.StatusBadGateway, "plant_requirement_adviser_failed", err.Error(), true, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, options)
+			return
+		}
 		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "requirements" && r.Method == http.MethodGet {
 			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
 			token := bearerToken(r.Header.Get("Authorization"))
@@ -1041,17 +1087,13 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "observations" && r.Method == http.MethodPost {
-			var input struct {
-				CaseCode    string                              `json:"case_code"`
-				WorldRunID  string                              `json:"world_run_id"`
-				Observation plantbuild.InvestigationObservation `json:"observation"`
-			}
+			var input plantbuild.InvestigationConfirmation
 			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil {
-				s.writeError(w, http.StatusBadRequest, "invalid_site_investigation_observation", err.Error(), false, "", "")
+				s.writeError(w, http.StatusBadRequest, "invalid_site_investigation_confirmation", err.Error(), false, "", "")
 				return
 			}
-			if err := plantbuild.ValidateInvestigationObservation(input.Observation); err != nil {
-				s.writeError(w, http.StatusUnprocessableEntity, "invalid_site_investigation_observation", err.Error(), false, "", "")
+			if err := plantbuild.ValidateInvestigationConfirmation(input); err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "invalid_site_investigation_confirmation", err.Error(), false, "", "")
 				return
 			}
 			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
@@ -1060,27 +1102,102 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				s.writeError(w, http.StatusUnauthorized, "plant_observation_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
 				return
 			}
+			rawInvestigations, err := authority.PlantInvestigations(ctx, input.CaseCode)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_investigations_unavailable")
+				return
+			}
+			var investigations struct {
+				Items []struct {
+					Request     plantbuild.InvestigationRequest      `json:"request"`
+					Status      string                               `json:"status"`
+					Observation *plantbuild.InvestigationObservation `json:"observation,omitempty"`
+				} `json:"items"`
+			}
+			if err := json.Unmarshal(rawInvestigations, &investigations); err != nil {
+				s.writeError(w, http.StatusBadGateway, "plant_investigations_invalid", "IAOS investigation projection is invalid", true, "", "")
+				return
+			}
+			var selected *struct {
+				Request     plantbuild.InvestigationRequest      `json:"request"`
+				Status      string                               `json:"status"`
+				Observation *plantbuild.InvestigationObservation `json:"observation,omitempty"`
+			}
+			for index := range investigations.Items {
+				if investigations.Items[index].Request.InvestigationRequestID == input.InvestigationRequestID {
+					selected = &investigations.Items[index]
+					break
+				}
+			}
+			if selected == nil || selected.Request.CaseCode != input.CaseCode {
+				s.writeError(w, http.StatusNotFound, "site_investigation_request_not_found", "authoritative investigation request was not found", false, "", "")
+				return
+			}
+			if selected.Status == "observed" && selected.Observation != nil {
+				s.writeJSON(w, http.StatusOK, map[string]any{"status": "committed", "idempotent_replay": true, "world_message_id": "world-" + selected.Observation.ObservationID, "observation": selected.Observation})
+				return
+			}
+			if selected.Status != "waiting_world" {
+				s.writeError(w, http.StatusConflict, "site_investigation_not_waiting", "investigation request is not waiting for a World report", false, "", "")
+				return
+			}
+			requirementRaw, err := authority.PlantRequirement(ctx, input.RequirementID)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "facility_requirement_unavailable")
+				return
+			}
+			var requirement plantbuild.FacilityRequirement
+			if err := json.Unmarshal(requirementRaw, &requirement); err != nil || requirement.CaseCode != input.CaseCode {
+				s.writeError(w, http.StatusBadGateway, "facility_requirement_invalid", "IAOS facility requirement is invalid", true, "", "")
+				return
+			}
+			proposalRaw, err := authority.PlantProposalSet(ctx, input.RequirementID)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "site_proposal_unavailable")
+				return
+			}
+			var proposalSet plantbuild.ProposalSet
+			if err := json.Unmarshal(proposalRaw, &proposalSet); err != nil || proposalSet.ProposalSetID != selected.Request.ProposalSetID {
+				s.writeError(w, http.StatusConflict, "site_proposal_revision_conflict", "authoritative proposal set does not match the investigation request", false, "", "")
+				return
+			}
+			var proposal *plantbuild.SiteOptionProposal
+			for index := range proposalSet.Proposals {
+				if proposalSet.Proposals[index].ProposalID == selected.Request.ProposalID {
+					proposal = &proposalSet.Proposals[index]
+					break
+				}
+			}
+			if proposal == nil {
+				s.writeError(w, http.StatusNotFound, "site_proposal_not_found", "authoritative proposal was not found", false, "", "")
+				return
+			}
+			observation, err := plantbuild.GenerateInvestigationObservation(selected.Request, requirement, *proposal)
+			if err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "site_investigation_world_generation_failed", err.Error(), false, "", "")
+				return
+			}
 			correlationID := "corr-m10-" + strings.TrimSpace(input.CaseCode)
-			messageID := "world-" + input.Observation.ObservationID
+			messageID := "world-" + observation.ObservationID
 			envelope := map[string]any{
 				"schema_version": "1.0", "message_id": messageID, "kind": "observation", "tenant_id": tenantID,
-				"world_pack_key": "genesis-plant-planning", "world_pack_version": "1.0.0", "world_run_id": input.WorldRunID,
-				"branch_id": "main", "sim_occurred_at": input.Observation.ObservedAt, "correlation_id": correlationID,
+				"world_pack_key": "genesis-plant-planning", "world_pack_version": "1.1.0", "world_run_id": selected.Request.WorldRunID,
+				"branch_id": "main", "sim_occurred_at": observation.ObservedAt, "correlation_id": correlationID,
 				"idempotency_key": messageID, "producer": map[string]string{"system": "aese", "component": "plant-investigation-world"},
-				"subject_ref":  map[string]string{"type": "site_investigation_request", "code": input.Observation.InvestigationRequestID},
-				"payload_type": "site.investigation.observed.v1", "payload": input.Observation,
+				"subject_ref":  map[string]string{"type": "site_investigation_request", "code": observation.InvestigationRequestID},
+				"payload_type": "site.investigation.observed.v1", "payload": observation,
 			}
 			rawEnvelope, _ := json.Marshal(envelope)
 			if _, err := authority.PostGovernedCommand(ctx, "api/v1/world-bridge/observations", rawEnvelope); err != nil {
 				s.writePlantAuthorityError(w, err, "site_investigation_world_observation_not_accepted")
 				return
 			}
-			commit := map[string]any{"schema_version": "1.0", "investigation_request_id": input.Observation.InvestigationRequestID, "world_message_id": messageID}
-			if err := postPlantAuthorityCommand(ctx, authority, "site.investigation.observation.commit", actorID, input.CaseCode, input.Observation.ObservationID, 1, commit); err != nil {
+			commit := map[string]any{"schema_version": "1.0", "investigation_request_id": observation.InvestigationRequestID, "world_message_id": messageID}
+			if err := postPlantAuthorityCommand(ctx, authority, "site.investigation.observation.commit", actorID, input.CaseCode, observation.ObservationID, 1, commit); err != nil {
 				s.writePlantAuthorityError(w, err, "site_investigation_observation_not_committed")
 				return
 			}
-			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "committed", "world_message_id": messageID, "observation": input.Observation})
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "committed", "idempotent_replay": false, "world_message_id": messageID, "observation": observation})
 			return
 		}
 		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "site-selections" && r.Method == http.MethodGet {
@@ -1115,6 +1232,211 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusOK)
 			_, _ = w.Write(result)
+			return
+		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "project-options" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode string `json:"case_code"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil || strings.TrimSpace(input.CaseCode) == "" {
+				s.writeError(w, http.StatusBadRequest, "invalid_facility_project_seed", firstNonEmptyString(errorString(err), "case_code is required"), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, _, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_project_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			requirementRaw, err := authority.PlantRequirement(ctx, "facility-requirement-"+input.CaseCode)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "facility_requirement_unavailable")
+				return
+			}
+			var requirement plantbuild.FacilityRequirement
+			if json.Unmarshal(requirementRaw, &requirement) != nil {
+				s.writeError(w, http.StatusBadGateway, "facility_requirement_invalid", "IAOS facility requirement is invalid", true, "", "")
+				return
+			}
+			controlsRaw, err := authority.PlantSiteControls(ctx, input.CaseCode)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_site_controls_unavailable")
+				return
+			}
+			var controls struct {
+				Items []plantbuild.SiteControlItem `json:"items"`
+			}
+			if json.Unmarshal(controlsRaw, &controls) != nil {
+				s.writeError(w, http.StatusBadGateway, "plant_site_controls_invalid", "IAOS site control projection is invalid", true, "", "")
+				return
+			}
+			var controlled *plantbuild.SiteControlItem
+			for index := range controls.Items {
+				if controls.Items[index].Status == "controlled" && controls.Items[index].Observation != nil {
+					controlled = &controls.Items[index]
+					break
+				}
+			}
+			if controlled == nil {
+				s.writeError(w, http.StatusConflict, "site_control_required", "可信场地控制事实尚未形成", false, "", "")
+				return
+			}
+			planner, ok := s.plantPlanningProvider.(plantbuild.ProjectBaselinePlanner)
+			if !ok {
+				s.writeError(w, http.StatusServiceUnavailable, "facility_project_agent_unavailable", "设施项目 Agent 未启用", true, "", "")
+				return
+			}
+			result, err := planner.GenerateProjectPlanOptions(ctx, plantbuild.ProjectPlanSeed{TenantID: tenantID, CaseCode: input.CaseCode,
+				SelectionID: controlled.Request.SelectionID, ControlObservationID: controlled.Observation.ObservationID, Requirement: requirement})
+			if err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "facility_project_agent_failed", err.Error(), false, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, result)
+			return
+		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "facility-projects" && r.Method == http.MethodGet {
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, _, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_project_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			result, err := authority.PlantFacilityProjects(ctx, r.URL.Query().Get("case_code"))
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "facility_projects_unavailable")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(result)
+			return
+		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "facility-projects" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode string                       `json:"case_code"`
+				Option   plantbuild.ProjectPlanOption `json:"option"`
+				Evidence plantbuild.ProposalEvidence  `json:"evidence"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_facility_project_option", err.Error(), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_project_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			requirementRaw, err := authority.PlantRequirement(ctx, "facility-requirement-"+input.CaseCode)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "facility_requirement_unavailable")
+				return
+			}
+			var requirement plantbuild.FacilityRequirement
+			if json.Unmarshal(requirementRaw, &requirement) != nil || plantbuild.ValidateProjectPlanOption(input.Option, requirement) != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "invalid_facility_project_option", "项目方案不符合当前设施需求和预算边界", false, "", "")
+				return
+			}
+			controlsRaw, err := authority.PlantSiteControls(ctx, input.CaseCode)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_site_controls_unavailable")
+				return
+			}
+			var controls struct {
+				Items []plantbuild.SiteControlItem `json:"items"`
+			}
+			if json.Unmarshal(controlsRaw, &controls) != nil {
+				s.writeError(w, http.StatusBadGateway, "plant_site_controls_invalid", "IAOS site control projection is invalid", true, "", "")
+				return
+			}
+			var controlled *plantbuild.SiteControlItem
+			for index := range controls.Items {
+				if controls.Items[index].Status == "controlled" && controls.Items[index].Observation != nil {
+					controlled = &controls.Items[index]
+					break
+				}
+			}
+			if controlled == nil {
+				s.writeError(w, http.StatusConflict, "site_control_required", "可信场地控制事实尚未形成", false, "", "")
+				return
+			}
+			optionHash := plantbuild.CanonicalHash(input.Option)
+			planIdentityHash := plantbuild.CanonicalHash(map[string]any{"option": input.Option, "agent_request_id": input.Evidence.RequestID})
+			suffix := strings.TrimPrefix(planIdentityHash, "sha256:")
+			if len(suffix) > 20 {
+				suffix = suffix[:20]
+			}
+			planID := "project-plan-" + suffix
+			plan := map[string]any{"schema_version": "1.0", "plan_id": planID, "case_code": input.CaseCode,
+				"selection_id": controlled.Request.SelectionID, "control_observation_id": controlled.Observation.ObservationID,
+				"project_name": input.Option.ProjectName, "delivery_strategy": input.Option.DeliveryStrategy,
+				"budget_ceiling": input.Option.BudgetCeiling, "target_start_at": input.Option.TargetStartAt, "target_ready_at": input.Option.TargetReadyAt,
+				"wbs_items": input.Option.WBSItems, "agent_evidence": map[string]any{"provider": input.Evidence.Provider, "model": input.Evidence.Model,
+					"prompt_version": input.Evidence.PromptVersion, "request_id": input.Evidence.RequestID, "input_hash": input.Evidence.InputHash,
+					"output_hash": optionHash, "generated_at": input.Evidence.ValidatedAt}, "status": "draft"}
+			if err := postPlantAuthorityCommand(ctx, authority, "facility.project.plan.record", "plant-planning-agent", input.CaseCode, planID, 1, plan); err != nil {
+				s.writePlantAuthorityError(w, err, "facility_project_plan_not_committed")
+				return
+			}
+			planHash := plantbuild.CanonicalHash(plan)
+			submission := map[string]any{"schema_version": "1.0", "plan_id": planID, "expected_hash": planHash, "submitted_at": time.Now().UTC().Format(time.RFC3339)}
+			result, err := postPlantAuthorityCommandResult(ctx, authority, "facility.project.baseline.submit", actorID, input.CaseCode, planID, 1, submission)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "facility_project_baseline_not_submitted")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "waiting_approval", "plan_id": planID, "result": json.RawMessage(result)})
+			return
+		}
+		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "facility-projects" && rest[3] == "activate" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode          string `json:"case_code"`
+				PlanID            string `json:"plan_id"`
+				ApprovalRequestID string `json:"approval_request_id"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_facility_project_activation", err.Error(), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_project_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			payload := map[string]any{"schema_version": "1.0", "plan_id": input.PlanID, "approval_request_id": input.ApprovalRequestID, "activated_at": time.Now().UTC().Format(time.RFC3339)}
+			result, err := postPlantAuthorityCommandResult(ctx, authority, "facility.project.baseline.activate", actorID, input.CaseCode, input.PlanID, 1, payload)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "facility_project_baseline_not_activated")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "activated", "result": json.RawMessage(result)})
+			return
+		}
+		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "facility-projects" && rest[3] == "submit" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode     string `json:"case_code"`
+				PlanID       string `json:"plan_id"`
+				ExpectedHash string `json:"expected_hash"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil || input.CaseCode == "" || input.PlanID == "" || !strings.HasPrefix(input.ExpectedHash, "sha256:") {
+				s.writeError(w, http.StatusBadRequest, "invalid_facility_project_submission", firstNonEmptyString(errorString(err), "case_code, plan_id and expected_hash are required"), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_project_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			payload := map[string]any{"schema_version": "1.0", "plan_id": input.PlanID, "expected_hash": input.ExpectedHash, "submitted_at": time.Now().UTC().Format(time.RFC3339)}
+			result, err := postPlantAuthorityCommandResult(ctx, authority, "facility.project.baseline.submit", actorID, input.CaseCode, input.PlanID, 1, payload)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "facility_project_baseline_not_submitted")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "waiting_approval", "result": json.RawMessage(result)})
 			return
 		}
 		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "site-controls" && r.Method == http.MethodPost {
@@ -1600,6 +1922,12 @@ func postPlantAuthorityCommandResultWithAgentRun(ctx context.Context, client *ia
 		field = "site_control_request"
 	case "site.control.observation.commit":
 		field = "site_control_observation"
+	case "facility.project.plan.record":
+		field = "facility_project_plan"
+	case "facility.project.baseline.submit":
+		field = "facility_project_baseline_submission"
+	case "facility.project.baseline.activate":
+		field = "facility_project_baseline_activation"
 	default:
 		return nil, fmt.Errorf("unsupported M10 capability %q", capabilityCode)
 	}

@@ -16,6 +16,8 @@ import (
 const (
 	InteractiveSchemaVersion = "1.0"
 	PlanningPromptVersion    = "plant-planning-v2"
+	RequirementPromptVersion = "plant-requirement-adviser-v1"
+	ProjectPromptVersion     = "facility-project-wbs-v1"
 )
 
 var ErrPlanningModelNotConfigured = errors.New("external planning model not configured")
@@ -39,6 +41,75 @@ type FacilityRequirement struct {
 	Preferences         []string            `json:"preferences"`
 	Revision            int                 `json:"revision"`
 	RevisionReason      string              `json:"revision_reason"`
+}
+
+type RequirementOptionSeed struct {
+	TenantID            string              `json:"tenant_id"`
+	CaseCode            string              `json:"case_code"`
+	LegalEntityCode     string              `json:"legal_entity_code"`
+	FinancialConstraint FinancialConstraint `json:"financial_constraint"`
+}
+
+type RequirementOption struct {
+	OptionID           string   `json:"option_id"`
+	Title              string   `json:"title"`
+	BusinessRationale  string   `json:"business_rationale"`
+	TargetRegion       string   `json:"target_region"`
+	FacilityPurpose    string   `json:"facility_purpose"`
+	MinimumAreaM2      int      `json:"minimum_area_m2"`
+	MinimumElectricKVA int      `json:"minimum_electricity_kva"`
+	TargetAvailableAt  string   `json:"target_available_at"`
+	CandidateCount     int      `json:"candidate_count"`
+	AllowedOptionTypes []string `json:"allowed_option_types"`
+	InvestmentRequest  Money    `json:"investment_request"`
+	MinimumCashReserve Money    `json:"minimum_cash_reserve"`
+	Preferences        []string `json:"preferences"`
+	Tradeoffs          []string `json:"tradeoffs"`
+}
+
+type RequirementOptionSet struct {
+	SchemaVersion string              `json:"schema_version"`
+	Options       []RequirementOption `json:"options"`
+	Evidence      ProposalEvidence    `json:"evidence"`
+}
+
+type ProjectPlanSeed struct {
+	TenantID             string              `json:"tenant_id"`
+	CaseCode             string              `json:"case_code"`
+	SelectionID          string              `json:"selection_id"`
+	ControlObservationID string              `json:"control_observation_id"`
+	Requirement          FacilityRequirement `json:"facility_requirement"`
+}
+
+type ProjectWBSItem struct {
+	WBSCode            string `json:"wbs_code"`
+	Name               string `json:"name"`
+	Phase              string `json:"phase"`
+	Sequence           int    `json:"sequence"`
+	OwnerPosition      string `json:"owner_position"`
+	PlannedStartAt     string `json:"planned_start_at"`
+	PlannedFinishAt    string `json:"planned_finish_at"`
+	BudgetShareBPS     int    `json:"budget_share_bps"`
+	AcceptanceCriteria string `json:"acceptance_criteria"`
+}
+
+type ProjectPlanOption struct {
+	OptionID          string           `json:"option_id"`
+	Title             string           `json:"title"`
+	BusinessRationale string           `json:"business_rationale"`
+	ProjectName       string           `json:"project_name"`
+	DeliveryStrategy  string           `json:"delivery_strategy"`
+	BudgetCeiling     Money            `json:"budget_ceiling"`
+	TargetStartAt     string           `json:"target_start_at"`
+	TargetReadyAt     string           `json:"target_ready_at"`
+	WBSItems          []ProjectWBSItem `json:"wbs_items"`
+	Tradeoffs         []string         `json:"tradeoffs"`
+}
+
+type ProjectPlanOptionSet struct {
+	SchemaVersion string              `json:"schema_version"`
+	Options       []ProjectPlanOption `json:"options"`
+	Evidence      ProposalEvidence    `json:"evidence"`
 }
 
 type FinancialConstraint struct {
@@ -161,6 +232,18 @@ type InvestigationObservation struct {
 	ObservedAt             string   `json:"observed_at"`
 }
 
+// InvestigationConfirmation is the player's minimal acknowledgement that the
+// park investigation team may publish its report. All external facts are
+// generated server-side from the authoritative request, requirement and Agent
+// proposal; the browser cannot supply quote, capacity or evidence values.
+type InvestigationConfirmation struct {
+	SchemaVersion          string `json:"schema_version"`
+	CaseCode               string `json:"case_code"`
+	RequirementID          string `json:"requirement_id"`
+	InvestigationRequestID string `json:"investigation_request_id"`
+	Action                 string `json:"action"`
+}
+
 type SiteControlRequest struct {
 	SchemaVersion      string   `json:"schema_version"`
 	ControlRequestID   string   `json:"control_request_id"`
@@ -213,6 +296,14 @@ type PlanningProvider interface {
 	Generate(context.Context, FacilityRequirement) (ProposalSet, error)
 }
 
+type RequirementAdviser interface {
+	GenerateRequirementOptions(context.Context, RequirementOptionSeed) (RequirementOptionSet, error)
+}
+
+type ProjectBaselinePlanner interface {
+	GenerateProjectPlanOptions(context.Context, ProjectPlanSeed) (ProjectPlanOptionSet, error)
+}
+
 type JSONCompleter interface {
 	CompleteJSON(context.Context, string, string, float64, int) (string, string, map[string]int, error)
 }
@@ -230,6 +321,141 @@ func (p AIPlanningProvider) Status() PlanningProviderStatus {
 		state = "not_configured"
 	}
 	return PlanningProviderStatus{State: state, Provider: p.Provider, Model: p.Model, PromptVersion: PlanningPromptVersion}
+}
+
+func (p AIPlanningProvider) GenerateRequirementOptions(ctx context.Context, seed RequirementOptionSeed) (RequirementOptionSet, error) {
+	if p.Completer == nil {
+		return RequirementOptionSet{}, ErrPlanningModelNotConfigured
+	}
+	if strings.TrimSpace(seed.TenantID) == "" || strings.TrimSpace(seed.CaseCode) == "" || strings.TrimSpace(seed.LegalEntityCode) == "" ||
+		strings.TrimSpace(seed.FinancialConstraint.SnapshotHash) == "" {
+		return RequirementOptionSet{}, errors.New("requirement adviser seed is incomplete")
+	}
+	input, _ := json.Marshal(seed)
+	user := `你是制造企业设施需求顾问。根据企业身份和 IAOS 权威资金/预算边界，生成 3 个明显不同、但都可执行的设施需求草案。只返回严格 JSON：{"options":[{"title":"","business_rationale":"","target_region":"","facility_purpose":"","minimum_area_m2":1,"minimum_electricity_kva":1,"target_available_at":"RFC3339","candidate_count":3,"allowed_option_types":["lease_and_retrofit"],"investment_request":{"value":"0.00","currency":"CNY","scale":2},"minimum_cash_reserve":{"value":"0.00","currency":"CNY","scale":2},"preferences":[""],"tradeoffs":[""]}]}。方案类型只能来自 lease_and_retrofit、greenfield_build、build_to_suit、existing_plant_purchase。金额必须根据本企业 available_cash 和 approved_budget 推导且可由用户调整；investment_request 不得超过 approved_budget，也不得超过 available_cash 减 minimum_cash_reserve。不得声称已取得场地、报价、权属或许可。不要 Markdown。prompt_version=` + RequirementPromptVersion + `\nseed=` + string(input)
+	content, requestID, usage, err := p.Completer.CompleteJSON(ctx, "Return strict JSON only. Use authority financial limits and never invent verified external facts.", user, 0.55, 8192)
+	if err != nil {
+		return RequirementOptionSet{}, err
+	}
+	var decoded struct {
+		Options []RequirementOption `json:"options"`
+	}
+	if err := json.Unmarshal([]byte(content), &decoded); err != nil {
+		return RequirementOptionSet{}, fmt.Errorf("decode requirement options: %w", err)
+	}
+	if len(decoded.Options) < 2 || len(decoded.Options) > 3 {
+		return RequirementOptionSet{}, errors.New("requirement adviser must return two or three options")
+	}
+	for index := range decoded.Options {
+		decoded.Options[index].OptionID = fmt.Sprintf("requirement-option-%d", index+1)
+		candidate := FacilityRequirement{
+			SchemaVersion: InteractiveSchemaVersion, RequirementID: "adviser-validation", TenantID: seed.TenantID,
+			CaseCode: seed.CaseCode, LegalEntityCode: seed.LegalEntityCode, TargetRegion: decoded.Options[index].TargetRegion,
+			FacilityPurpose: decoded.Options[index].FacilityPurpose, MinimumAreaM2: decoded.Options[index].MinimumAreaM2,
+			MinimumElectricKVA: decoded.Options[index].MinimumElectricKVA, TargetAvailableAt: decoded.Options[index].TargetAvailableAt,
+			CandidateCount: decoded.Options[index].CandidateCount, AllowedOptionTypes: decoded.Options[index].AllowedOptionTypes,
+			InvestmentRequest: decoded.Options[index].InvestmentRequest, MinimumCashReserve: decoded.Options[index].MinimumCashReserve,
+			FinancialConstraint: seed.FinancialConstraint, Preferences: decoded.Options[index].Preferences, Revision: 1, RevisionReason: "Agent 需求草案",
+		}
+		if strings.TrimSpace(decoded.Options[index].Title) == "" || strings.TrimSpace(decoded.Options[index].BusinessRationale) == "" || len(decoded.Options[index].Tradeoffs) == 0 {
+			return RequirementOptionSet{}, fmt.Errorf("requirement option %d lacks explanation", index+1)
+		}
+		if err := ValidateRequirement(candidate); err != nil {
+			return RequirementOptionSet{}, fmt.Errorf("requirement option %d: %w", index+1, err)
+		}
+		investment, _ := new(big.Rat).SetString(candidate.InvestmentRequest.Value)
+		budget, _ := new(big.Rat).SetString(seed.FinancialConstraint.ApprovedBudget.Value)
+		cash, _ := new(big.Rat).SetString(seed.FinancialConstraint.AvailableCash.Value)
+		reserve, _ := new(big.Rat).SetString(candidate.MinimumCashReserve.Value)
+		if investment.Cmp(budget) > 0 || investment.Cmp(new(big.Rat).Sub(cash, reserve)) > 0 {
+			return RequirementOptionSet{}, fmt.Errorf("requirement option %d exceeds authority financial limits", index+1)
+		}
+	}
+	now := time.Now().UTC()
+	if p.Now != nil {
+		now = p.Now().UTC()
+	}
+	set := RequirementOptionSet{SchemaVersion: InteractiveSchemaVersion, Options: decoded.Options}
+	set.Evidence = ProposalEvidence{Provider: p.Provider, Model: p.Model, PromptVersion: RequirementPromptVersion, RequestID: requestID, InputHash: CanonicalHash(seed), OutputHash: CanonicalHash(decoded.Options), TokenUsage: usage, ValidatedAt: now.Format(time.RFC3339)}
+	return set, nil
+}
+
+func (p AIPlanningProvider) GenerateProjectPlanOptions(ctx context.Context, seed ProjectPlanSeed) (ProjectPlanOptionSet, error) {
+	if p.Completer == nil {
+		return ProjectPlanOptionSet{}, ErrPlanningModelNotConfigured
+	}
+	if seed.TenantID == "" || seed.CaseCode == "" || seed.SelectionID == "" || seed.ControlObservationID == "" {
+		return ProjectPlanOptionSet{}, errors.New("facility project planning seed is incomplete")
+	}
+	input, _ := json.Marshal(seed)
+	user := `你是制造企业设施项目总师。基于已交付场址和设施需求，生成 3 个不同的项目/WBS 管理方案。只返回严格 JSON：{"options":[{"title":"","business_rationale":"","project_name":"","delivery_strategy":"design_build","budget_ceiling":{"value":"0.00","currency":"CNY","scale":2},"target_start_at":"RFC3339","target_ready_at":"RFC3339","wbs_items":[{"wbs_code":"WBS-01","name":"","phase":"design","sequence":1,"owner_position":"plant-project-lead","planned_start_at":"RFC3339","planned_finish_at":"RFC3339","budget_share_bps":2500,"acceptance_criteria":""}],"tradeoffs":[""]}]}。delivery_strategy 只能是 design_bid_build、design_build、epcm。每个方案 4–12 个 WBS，phase 只能是 design、procurement、construction、commissioning，sequence 从 1 连续，budget_share_bps 合计 10000。日期必须在项目开始和投产之间；budget_ceiling 不得超过 facility_requirement.investment_request。不要 Markdown。prompt_version=` + ProjectPromptVersion + "\nseed=" + string(input)
+	content, requestID, usage, err := p.Completer.CompleteJSON(ctx, "Return strict JSON only. Build a professional but concise manufacturing-facility WBS inside authority limits.", user, 0.5, 8192)
+	if err != nil {
+		return ProjectPlanOptionSet{}, err
+	}
+	var decoded struct {
+		Options []ProjectPlanOption `json:"options"`
+	}
+	decoder := json.NewDecoder(strings.NewReader(content))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&decoded); err != nil {
+		return ProjectPlanOptionSet{}, fmt.Errorf("decode facility project options: %w", err)
+	}
+	if len(decoded.Options) < 2 || len(decoded.Options) > 3 {
+		return ProjectPlanOptionSet{}, errors.New("facility project planner must return two or three options")
+	}
+	for index := range decoded.Options {
+		decoded.Options[index].OptionID = fmt.Sprintf("project-option-%d", index+1)
+		if err := ValidateProjectPlanOption(decoded.Options[index], seed.Requirement); err != nil {
+			return ProjectPlanOptionSet{}, fmt.Errorf("project option %d: %w", index+1, err)
+		}
+	}
+	now := time.Now().UTC()
+	if p.Now != nil {
+		now = p.Now().UTC()
+	}
+	return ProjectPlanOptionSet{SchemaVersion: InteractiveSchemaVersion, Options: decoded.Options,
+		Evidence: ProposalEvidence{Provider: p.Provider, Model: p.Model, PromptVersion: ProjectPromptVersion,
+			RequestID: requestID, InputHash: CanonicalHash(seed), OutputHash: CanonicalHash(decoded.Options), TokenUsage: usage, ValidatedAt: now.Format(time.RFC3339)}}, nil
+}
+
+func ValidateProjectPlanOption(option ProjectPlanOption, requirement FacilityRequirement) error {
+	strategies := map[string]bool{"design_bid_build": true, "design_build": true, "epcm": true}
+	if option.Title == "" || option.BusinessRationale == "" || option.ProjectName == "" || !strategies[option.DeliveryStrategy] || len(option.Tradeoffs) == 0 {
+		return errors.New("project option purpose, strategy or tradeoff is incomplete")
+	}
+	budget, ok := new(big.Rat).SetString(option.BudgetCeiling.Value)
+	if !ok || budget.Sign() <= 0 {
+		return errors.New("project budget is invalid")
+	}
+	limit, ok := new(big.Rat).SetString(requirement.InvestmentRequest.Value)
+	if !ok || budget.Cmp(limit) > 0 || option.BudgetCeiling.Currency != requirement.InvestmentRequest.Currency || option.BudgetCeiling.Scale != requirement.InvestmentRequest.Scale {
+		return errors.New("project budget exceeds facility investment authority")
+	}
+	start, err1 := time.Parse(time.RFC3339, option.TargetStartAt)
+	ready, err2 := time.Parse(time.RFC3339, option.TargetReadyAt)
+	if err1 != nil || err2 != nil || !ready.After(start) {
+		return errors.New("project dates are invalid")
+	}
+	if len(option.WBSItems) < 4 || len(option.WBSItems) > 12 {
+		return errors.New("project WBS must contain 4–12 work packages")
+	}
+	phases := map[string]bool{"design": true, "procurement": true, "construction": true, "commissioning": true}
+	share := 0
+	seen := map[string]bool{}
+	for index, item := range option.WBSItems {
+		itemStart, e1 := time.Parse(time.RFC3339, item.PlannedStartAt)
+		itemFinish, e2 := time.Parse(time.RFC3339, item.PlannedFinishAt)
+		if item.WBSCode == "" || item.Name == "" || seen[item.WBSCode] || !phases[item.Phase] || item.Sequence != index+1 || item.OwnerPosition == "" || item.AcceptanceCriteria == "" || e1 != nil || e2 != nil || itemFinish.Before(itemStart) || itemStart.Before(start) || itemFinish.After(ready) || item.BudgetShareBPS <= 0 {
+			return fmt.Errorf("WBS item %q is invalid", item.WBSCode)
+		}
+		seen[item.WBSCode] = true
+		share += item.BudgetShareBPS
+	}
+	if share != 10000 {
+		return fmt.Errorf("WBS budget shares total %d, want 10000", share)
+	}
+	return nil
 }
 
 func (p AIPlanningProvider) Generate(ctx context.Context, requirement FacilityRequirement) (ProposalSet, error) {
@@ -309,6 +535,9 @@ func (UnconfiguredPlanningProvider) Status() PlanningProviderStatus {
 }
 func (UnconfiguredPlanningProvider) Generate(context.Context, FacilityRequirement) (ProposalSet, error) {
 	return ProposalSet{}, ErrPlanningModelNotConfigured
+}
+func (UnconfiguredPlanningProvider) GenerateRequirementOptions(context.Context, RequirementOptionSeed) (RequirementOptionSet, error) {
+	return RequirementOptionSet{}, ErrPlanningModelNotConfigured
 }
 
 func ValidateRequirement(v FacilityRequirement) error {
@@ -451,6 +680,17 @@ func ValidateInvestigationObservation(v InvestigationObservation) error {
 	return nil
 }
 
+func ValidateInvestigationConfirmation(v InvestigationConfirmation) error {
+	if v.SchemaVersion != InteractiveSchemaVersion || strings.TrimSpace(v.CaseCode) == "" ||
+		strings.TrimSpace(v.RequirementID) == "" || strings.TrimSpace(v.InvestigationRequestID) == "" {
+		return errors.New("investigation confirmation is incomplete")
+	}
+	if v.Action != "accept_report" {
+		return errors.New("investigation confirmation action is invalid")
+	}
+	return nil
+}
+
 func ValidateSiteControlRequest(v SiteControlRequest) error {
 	if v.SchemaVersion != InteractiveSchemaVersion || strings.TrimSpace(v.ControlRequestID) == "" ||
 		strings.TrimSpace(v.SelectionID) == "" || strings.TrimSpace(v.CaseCode) == "" ||
@@ -548,6 +788,65 @@ func GenerateSiteControlObservation(request SiteControlRequest) (SiteControlObse
 	}
 	if err := ValidateSiteControlObservation(observation); err != nil {
 		return SiteControlObservation{}, err
+	}
+	return observation, nil
+}
+
+// GenerateInvestigationObservation produces a replay-stable external report
+// from authority data. Values deliberately remain distinct from the Agent's
+// estimates while satisfying the verified virtual park offer. This is a World
+// fact generator, not a browser convenience default.
+func GenerateInvestigationObservation(request InvestigationRequest, requirement FacilityRequirement, proposal SiteOptionProposal) (InvestigationObservation, error) {
+	if err := ValidateInvestigationRequest(request); err != nil {
+		return InvestigationObservation{}, err
+	}
+	if err := ValidateRequirement(requirement); err != nil {
+		return InvestigationObservation{}, err
+	}
+	if request.CaseCode != requirement.CaseCode || request.ProposalID != proposal.ProposalID {
+		return InvestigationObservation{}, errors.New("investigation authority references do not match")
+	}
+	hash := strings.TrimPrefix(CanonicalHash(struct {
+		Request     InvestigationRequest
+		Requirement FacilityRequirement
+		Proposal    SiteOptionProposal
+	}{request, requirement, proposal}), "sha256:")
+	suffix := strings.ToUpper(hash[:12])
+	seed := int(hash[0]) + int(hash[1])
+	area := requirement.MinimumAreaM2 * (105 + seed%16) / 100
+	electricity := requirement.MinimumElectricKVA * (105 + (seed/3)%16) / 100
+	quoted := proposal.EstimatedAmount.Likely
+	amount, ok := new(big.Rat).SetString(quoted.Value)
+	if !ok {
+		return InvestigationObservation{}, errors.New("proposal likely amount is invalid")
+	}
+	amount.Mul(amount, big.NewRat(int64(96+seed%5), 100))
+	quoted.Value = amount.FloatString(quoted.Scale)
+	availableAt := proposal.EstimatedSchedule.Likely
+	available, err := time.Parse(time.RFC3339, availableAt)
+	if err != nil {
+		return InvestigationObservation{}, errors.New("proposal likely schedule is invalid")
+	}
+	target, _ := time.Parse(time.RFC3339, requirement.TargetAvailableAt)
+	if available.After(target) {
+		availableAt = target.Format(time.RFC3339)
+	}
+	observed, _ := time.Parse(time.RFC3339, request.RequestedAt)
+	observation := InvestigationObservation{
+		SchemaVersion: InteractiveSchemaVersion, ObservationID: "site-observation-" + strings.ToLower(suffix),
+		InvestigationRequestID: request.InvestigationRequestID, ProposalID: request.ProposalID,
+		Result: "completed", OwnershipStatus: "verified", AvailableAreaM2: area, ElectricityKVA: electricity,
+		QuotedAmount: quoted, AvailableAt: availableAt, PermitStatus: "eligible",
+		EvidenceRefs: []string{
+			"world-document:site-title-report-" + suffix,
+			"world-document:utility-capacity-report-" + suffix,
+			"world-document:commercial-quote-" + suffix,
+		},
+		Notes:           "园区调研团队已核验权属、空间、公用工程、报价、交付日期和许可条件。",
+		ExternalActorID: "world-park-investigation-team", ObservedAt: observed.Add(4 * time.Hour).Format(time.RFC3339),
+	}
+	if err := ValidateInvestigationObservation(observation); err != nil {
+		return InvestigationObservation{}, err
 	}
 	return observation, nil
 }

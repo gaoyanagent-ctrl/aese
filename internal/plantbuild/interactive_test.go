@@ -2,11 +2,22 @@ package plantbuild
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"strings"
 	"testing"
 	"time"
 )
+
+func projectOptionFixture(title string) ProjectPlanOption {
+	items := []ProjectWBSItem{
+		{WBSCode: "WBS-01", Name: "工程设计", Phase: "design", Sequence: 1, OwnerPosition: "plant-project-lead", PlannedStartAt: "2026-09-01T00:00:00Z", PlannedFinishAt: "2026-09-30T00:00:00Z", BudgetShareBPS: 2000, AcceptanceCriteria: "设计包批准"},
+		{WBSCode: "WBS-02", Name: "设备采购", Phase: "procurement", Sequence: 2, OwnerPosition: "procurement-lead", PlannedStartAt: "2026-10-01T00:00:00Z", PlannedFinishAt: "2026-11-30T00:00:00Z", BudgetShareBPS: 3000, AcceptanceCriteria: "设备到货"},
+		{WBSCode: "WBS-03", Name: "现场施工", Phase: "construction", Sequence: 3, OwnerPosition: "construction-lead", PlannedStartAt: "2026-12-01T00:00:00Z", PlannedFinishAt: "2027-01-31T00:00:00Z", BudgetShareBPS: 3500, AcceptanceCriteria: "施工验收"},
+		{WBSCode: "WBS-04", Name: "联调投产", Phase: "commissioning", Sequence: 4, OwnerPosition: "commissioning-lead", PlannedStartAt: "2027-02-01T00:00:00Z", PlannedFinishAt: "2027-02-28T00:00:00Z", BudgetShareBPS: 1500, AcceptanceCriteria: "联调通过"},
+	}
+	return ProjectPlanOption{Title: title, BusinessRationale: "在投资边界内形成可执行交付基线", ProjectName: title + "项目", DeliveryStrategy: "design_build", BudgetCeiling: Money{"18000000.00", "CNY", 2}, TargetStartAt: "2026-09-01T00:00:00Z", TargetReadyAt: "2027-02-28T00:00:00Z", WBSItems: items, Tradeoffs: []string{"周期与控制权平衡"}}
+}
 
 type planningCompleterStub struct{ content string }
 
@@ -152,6 +163,40 @@ func TestWorldEngineGeneratesDeterministicSiteControlEvidence(t *testing.T) {
 	}
 }
 
+func TestWorldEngineGeneratesDeterministicInvestigationEvidence(t *testing.T) {
+	requirement := requirementFixture()
+	proposal := SiteOptionProposal{
+		ProposalID: "P-1", OptionType: "leased_shell", DisplayName: "候选园区", BusinessRationale: "快速投产",
+		EstimatedAmount:   AmountRange{Minimum: Money{"12000000.00", "CNY", 2}, Likely: Money{"15000000.00", "CNY", 2}, Maximum: Money{"18000000.00", "CNY", 2}, Basis: "Agent 估算"},
+		EstimatedSchedule: ScheduleRange{Earliest: "2026-10-01T00:00:00Z", Likely: "2026-11-01T00:00:00Z", Latest: "2026-12-01T00:00:00Z"},
+		Assumptions:       []string{"待调研"}, FactsRequired: []string{"园区报价"}, Risks: []string{"增容"}, SourceRefs: []string{"requirement:REQ-1"}, Confidence: "0.60", Status: "proposed",
+	}
+	request := InvestigationRequest{
+		SchemaVersion: "1.0", InvestigationRequestID: "INV-1", CaseCode: requirement.CaseCode,
+		ProposalSetID: "SET-1", ProposalID: proposal.ProposalID, ExpectedRevision: 1,
+		WorldRunID: "world-1", Scope: []string{"ownership", "commercial_quote", "available_area", "electricity_capacity", "available_date", "permit"},
+		RequestedBy: "project-lead", RequestedAt: "2026-08-02T10:00:00Z", Status: "waiting_world",
+	}
+	first, err := GenerateInvestigationObservation(request, requirement, proposal)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := GenerateInvestigationObservation(request, requirement, proposal)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if CanonicalHash(first) != CanonicalHash(second) {
+		t.Fatalf("world investigation is not replayable: first=%+v second=%+v", first, second)
+	}
+	if first.AvailableAreaM2 < requirement.MinimumAreaM2 || first.ElectricityKVA < requirement.MinimumElectricKVA ||
+		first.ExternalActorID != "world-park-investigation-team" || len(first.EvidenceRefs) < 3 {
+		t.Fatalf("unexpected generated observation %+v", first)
+	}
+	if err := ValidateInvestigationConfirmation(InvestigationConfirmation{SchemaVersion: "1.0", CaseCode: requirement.CaseCode, RequirementID: requirement.RequirementID, InvestigationRequestID: request.InvestigationRequestID, Action: "accept_report"}); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestAIPlanningProviderProducesValidatedCandidateOnlySet(t *testing.T) {
 	content := `{"proposals":[{"option_type":"leased_shell","display_name":"快速租赁改造","business_rationale":"缩短投产周期","estimated_amount":{"minimum":{"value":"12000000.00","currency":"CNY","scale":2},"likely":{"value":"15000000.00","currency":"CNY","scale":2},"maximum":{"value":"18000000.00","currency":"CNY","scale":2},"basis":"需求参数与待验证市场估算"},"estimated_schedule":{"earliest":"2026-10-01T00:00:00+08:00","likely":"2026-11-01T00:00:00+08:00","latest":"2026-12-01T00:00:00+08:00"},"assumptions":["存在标准厂房"],"facts_required":["租赁报价"],"risks":["增容延期"],"source_refs":["requirement:REQ-1"],"confidence":"0.62"},{"option_type":"build_to_suit","display_name":"定制代建","business_rationale":"平衡控制权和周期","estimated_amount":{"minimum":{"value":"15000000.00","currency":"CNY","scale":2},"likely":{"value":"17000000.00","currency":"CNY","scale":2},"maximum":{"value":"18000000.00","currency":"CNY","scale":2},"basis":"需求参数与待验证市场估算"},"estimated_schedule":{"earliest":"2026-11-01T00:00:00+08:00","likely":"2026-12-01T00:00:00+08:00","latest":"2027-01-01T00:00:00+08:00"},"assumptions":["园区可代建"],"facts_required":["交付承诺"],"risks":["承包商履约"],"source_refs":["requirement:REQ-1"],"confidence":"0.55"}]}`
 	provider := AIPlanningProvider{Completer: planningCompleterStub{content}, Provider: "MiniMax", Model: "MiniMax-M3", Now: func() time.Time { return time.Date(2026, 8, 1, 10, 0, 0, 0, time.UTC) }}
@@ -165,6 +210,19 @@ func TestAIPlanningProviderProducesValidatedCandidateOnlySet(t *testing.T) {
 	set.Proposals[1].ProposalID = set.Proposals[0].ProposalID
 	if ValidateProposalSet(requirementFixture(), set) == nil {
 		t.Fatal("duplicate proposal identity accepted")
+	}
+}
+
+func TestAIPlanningProviderProducesRequirementOptionsWithinAuthorityLimits(t *testing.T) {
+	content := `{"options":[{"title":"轻资产快速投产","business_rationale":"优先缩短投产周期","target_region":"江苏苏州及周边","facility_purpose":"电池冷却板制造与质检","minimum_area_m2":9000,"minimum_electricity_kva":1800,"target_available_at":"2026-12-01T00:00:00+08:00","candidate_count":3,"allowed_option_types":["lease_and_retrofit","build_to_suit"],"investment_request":{"value":"15000000.00","currency":"CNY","scale":2},"minimum_cash_reserve":{"value":"6000000.00","currency":"CNY","scale":2},"preferences":["快速投产"],"tradeoffs":["扩展空间有限"]},{"title":"均衡扩展","business_rationale":"兼顾周期与后续扩产","target_region":"长三角制造园区","facility_purpose":"冷却板制造、仓储与扩产预留","minimum_area_m2":12000,"minimum_electricity_kva":2200,"target_available_at":"2027-01-01T00:00:00+08:00","candidate_count":3,"allowed_option_types":["build_to_suit","existing_plant_purchase"],"investment_request":{"value":"18000000.00","currency":"CNY","scale":2},"minimum_cash_reserve":{"value":"7000000.00","currency":"CNY","scale":2},"preferences":["扩展性"],"tradeoffs":["准备周期较长"]}]}`
+	provider := AIPlanningProvider{Completer: planningCompleterStub{content}, Provider: "MiniMax", Model: "MiniMax-M3", Now: func() time.Time { return time.Date(2026, 8, 2, 10, 0, 0, 0, time.UTC) }}
+	requirement := requirementFixture()
+	set, err := provider.GenerateRequirementOptions(context.Background(), RequirementOptionSeed{TenantID: requirement.TenantID, CaseCode: requirement.CaseCode, LegalEntityCode: requirement.LegalEntityCode, FinancialConstraint: requirement.FinancialConstraint})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(set.Options) != 2 || set.Options[0].OptionID != "requirement-option-1" || set.Evidence.PromptVersion != RequirementPromptVersion {
+		t.Fatalf("bad requirement options %+v", set)
 	}
 }
 
@@ -197,5 +255,28 @@ func TestAIPlanningProviderRejectsMalformedOrUngroundedOutput(t *testing.T) {
 				t.Fatal("invalid provider output accepted")
 			}
 		})
+	}
+}
+
+func TestAIPlanningProviderProducesGovernedProjectWBSOptions(t *testing.T) {
+	first := projectOptionFixture("快速总承包")
+	second := projectOptionFixture("分段受控交付")
+	raw, err := json.Marshal(map[string]any{"options": []ProjectPlanOption{first, second}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	provider := AIPlanningProvider{Completer: planningCompleterStub{content: string(raw)}, Provider: "MiniMax", Model: "MiniMax-M3", Now: func() time.Time { return time.Date(2026, 8, 2, 10, 0, 0, 0, time.UTC) }}
+	requirement := requirementFixture()
+	set, err := provider.GenerateProjectPlanOptions(context.Background(), ProjectPlanSeed{TenantID: requirement.TenantID, CaseCode: requirement.CaseCode, SelectionID: "SEL-1", ControlObservationID: "OBS-CTRL-1", Requirement: requirement})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(set.Options) != 2 || set.Options[0].OptionID != "project-option-1" || set.Evidence.PromptVersion != ProjectPromptVersion {
+		t.Fatalf("bad project option set %+v", set)
+	}
+	invalid := set.Options[0]
+	invalid.WBSItems[0].BudgetShareBPS++
+	if ValidateProjectPlanOption(invalid, requirement) == nil {
+		t.Fatal("unbalanced WBS budget shares accepted")
 	}
 }

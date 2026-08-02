@@ -6,7 +6,9 @@ export type PlantGameStage =
   | "governance"
   | "selected"
   | "site_control"
-  | "project_ready";
+  | "project_planning"
+  | "project_approval"
+  | "project_baselined";
 
 export type PlantGameFacts = {
   hasRequirement: boolean;
@@ -18,6 +20,9 @@ export type PlantGameFacts = {
   hasDecision: boolean;
   hasSiteControlRequest: boolean;
   hasSiteControl: boolean;
+  hasProjectPlan: boolean;
+  projectApprovalStatus: string;
+  hasActiveProject: boolean;
 };
 
 export type PlantGameStageDefinition = {
@@ -111,19 +116,44 @@ export const PLANT_GAME_STAGES: PlantGameStageDefinition[] = [
     anchor: "plant-task-site-control",
   },
   {
-    key: "project_ready",
-    label: "场地已受控",
+    key: "project_planning",
+    label: "建立项目基线",
+    location: "headquarters",
+    npc: "纪元",
+    npcRole: "设施项目 Agent",
+    mission: "在项目办公室准备设施项目与 WBS",
+    dialogue: "场地已经交付。我会准备交付策略、预算、日期和专业 WBS；你只需要选择方案并确认管理边界。",
+    actionLabel: "让 Agent 准备项目方案",
+    anchor: "plant-task-project",
+  },
+  {
+    key: "project_approval",
+    label: "审批项目基线",
+    location: "boardroom",
+    npc: "林岚",
+    npcRole: "治理与审批协调人",
+    mission: "审阅设施项目与 WBS 基线",
+    dialogue: "项目草案已经冻结为审批事项。审批流决定有权主体；批准后项目负责人还要显式激活基线。",
+    actionLabel: "进入项目基线审批",
+    anchor: "plant-task-project",
+  },
+  {
+    key: "project_baselined",
+    label: "项目基线已激活",
     location: "headquarters",
     npc: "顾远",
     npcRole: "工厂项目负责人",
-    mission: "建立设施项目与 WBS 基线",
-    dialogue: "场地控制证据已进入 IAOS。下一步由 Agent 提议空间、承包策略和 WBS，再由人员修订并提交项目审批。",
-    actionLabel: "准备设施项目",
-    anchor: "plant-task-site-control",
+    mission: "查验项目与 WBS 档案",
+    dialogue: "项目和 WBS 已进入 IAOS 权威账。接下来的合同、施工和工程财务都必须引用这条基线。",
+    actionLabel: "查看项目基线档案",
+    anchor: "plant-task-project",
   },
 ];
 
 export function derivePlantGameStage(facts: PlantGameFacts): PlantGameStageDefinition {
+  if (facts.hasActiveProject) return PLANT_GAME_STAGES[9];
+  if (facts.hasProjectPlan && facts.projectApprovalStatus !== "rejected") return PLANT_GAME_STAGES[8];
+  if (facts.projectApprovalStatus === "rejected") return PLANT_GAME_STAGES[7];
   if (facts.hasSiteControl) return PLANT_GAME_STAGES[7];
   // A formal decision completes the read-only "selected" checkpoint and must
   // immediately expose the next human/World task. Waiting for a control request

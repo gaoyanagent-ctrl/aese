@@ -11,7 +11,7 @@ tags: [m10, agent, plant-build, interactive, governance]
 
 ## 1. 目标与边界
 
-把既有 `hctm-genesis@0.3.0` 固定十帧 reference replay 升级为真实交互闭环：用户填写设施需求和金额边界，`plant-planning-agent` 生成候选，项目负责人选择调研项，World 返回外部事实，人员与审批流决定选址、投资、项目、WBS、变更、付款和验收。旧回放迁入 `fixture_only`，不再自动成为业务事实。
+把既有 `hctm-genesis@0.3.0` 固定十帧 reference replay 升级为真实交互闭环：`plant-planning-agent` 先基于 IAOS 权威资金边界生成设施需求草案，人员选择并少量调整后再生成场址候选；项目负责人选择调研项，World 生成外部事实，人员与审批流决定选址、投资、项目、WBS、变更、付款和验收。旧回放迁入 `fixture_only`，不再自动成为业务事实。
 
 AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互；IAOS 拥有设施需求、proposal/review、Capability、Process、Approval、Agent Run、资金事实、审计和 Outbox。浏览器写操作统一经过 AESE Command Gateway。
 
@@ -54,11 +54,14 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 
 ### S4 World 调研、参数化项目和资金治理
 
-- [x] S4.1 World 外部参与者通过结构化表单返回正式报价、权属、面积、电力容量、许可、可用日期和证据引用 Observation；AESE 先写 World Journal，再由 IAOS 受治理能力匹配 Intent/correlation 并完成持久工作项。
+- [x] S4.1 World 外部参与者形成正式报价、权属、面积、电力容量、许可、可用日期和证据引用 Observation；AESE 先写 World Journal，再由 IAOS 受治理能力匹配 Intent/correlation 并完成持久工作项。2026-08-02 已移除玩家外部事实表单，改为服务端重读权威请求并确定性生成。
 - [x] S4.2 评分只消费已送达且同时匹配当前 ProposalSet ID、revision 和 proposal ID 的事实；Agent 估算与外部事实并列显示，不得互相覆盖。已交付 Observation-only 派生比较、六类 Requirement/Observation/差额逐项对照、四维可调权重、默认来源与公式解释和证据引用；无合格候选时权重禁用，并可从失败摘要直接带入当前 Requirement、创建下一 revision、重新生成候选。旧候选集 Observation 只进入历史档案，不推进阶段或进入推荐。评分策略/结果由 S2.3/选址审批纵切在 IAOS 权威固化。
 - [x] S4.2b 发布 `site.selection.recommend`、`site.selection.formalize`、`facility.site.selection.v1` 和 `genesis.site.selection.approval`；IAOS 重算评分并冻结推荐/审批证据，AESE 治理会议室通过只读审批详情与受控 Command Gateway 完成受派人批准/驳回，approved 后由独立 Capability 正式落地。
 - [x] S4.2c 正式选址后发布 `site.control.request`、`site.control.observation.commit` 与 `facility.plant.delivery.v1`；项目负责人发起协议/交接请求，玩家只确认接收，园区权利人的协议、交接、占有授权和生效时间由 World 引擎从权威请求确定性生成，延迟/拒绝失败关闭且允许保留历史后重新发起。
 - [ ] S4.3 空间、承包策略、WBS、延期缓解和投资变更均采用 Agent 建议 + 人员决定。
+- [x] S4.3a 按 DES-038 把首次需求改为 Agent 草案、人员选择和少量调整；完整专业参数只在人工接管中展开。
+- [x] S4.3b 把场址调研 Observation 改为最小玩家确认命令，由 World 引擎从 IAOS 权威请求确定性生成并归档全部外部事实。
+- [x] S4.3c 发布设施项目/WBS 的 Effective Capability/Process Artifact 后再解锁下一 NPC；`facility.project.baseline.v1` 依次执行 Agent 草案、人员确认、审批和人员激活，形成项目与 WBS 权威投影；AESE 项目办公室只让玩家生成、选择和确认方案，治理会议室完成审批。
 - [x] S4.4a IAOS 从已过账银行科目与设立案件已批预算读取只读财务快照，返回来源引用和 snapshot hash；AESE BFF 不接受页面伪造该快照。
 - [ ] S4.4b 投资、合同、变更和付款金额可修订但必须重新校验/审批；资金变化使旧 Requirement snapshot 失效并要求修订。
 - [ ] S4.5 AP/CIP/付款/验收按财务 DES-033/034 接通，不以治理 JSON 冒充会计事实。
@@ -79,7 +82,7 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 
 ## 4. 当前执行
 
-S0、S1、S2、S3.0–S3.8a、S4.1、S4.2、S4.2b、S4.2c 和 S4.4a 已完成。当前在线纵切在正式选址后继续到：人员发起场址控制请求 → `facility.plant.delivery.v1` 进入 World wait → 园区权利人提交协议/交接/占有授权 Observation → IAOS 形成 `site_controlled`。选址参与追加到 `facility.plant.planning.v1`，场址控制使用独立可恢复的交付 Process Run；二者均通过 Capability/Process/Audit/Outbox 与只读 Entity 投影穿透。该纵切不等于完整 M10：项目/WBS/合同/施工/会计、对应后续场景和 S5 全链验收仍未完成。既有未跟踪 M7 验收产物不属于本计划，不修改、不提交。
+S0、S1、S2、S3.0–S3.8a、S4.1、S4.2、S4.2b、S4.2c、S4.3a–S4.3c 和 S4.4a 已完成。当前在线纵切在正式选址后继续到：场址控制 World wait/Observation → 设施项目 Agent 生成项目与 WBS 方案 → 人员选择并提交 → 游戏会议室审批 → 人员激活权威项目基线。选址、场址控制和项目基线均通过 Effective Capability/Process、Approval、Audit、Outbox 与只读 Entity 投影穿透。该纵切不等于完整 M10：合同、施工、变更、工程财务、验收、对应后续场景和 S5 全链验收仍未完成。既有未跟踪 M7 验收产物不属于本计划，不修改、不提交。
 
 ## 5. 当前接口与事实所有权
 
@@ -91,11 +94,14 @@ S0、S1、S2、S3.0–S3.8a、S4.1、S4.2、S4.2b、S4.2c 和 S4.4a 已完成。
 | 人工新增候选 | `POST /api/aese/v1/world/plant-build/proposals/manual` | 读取最新 Requirement/ProposalSet、覆盖浏览器身份字段并生成版本证据 | `site.proposal.record` 可在无候选集时建立第 1 版；已有版本时只允许追加一个人员来源候选，既有候选不可修改 |
 | 审阅候选 | `POST /api/aese/v1/world/plant-build/reviews` | 从 IAOS profile 解析实际 actor，禁止浏览器伪造 reviewer | `site.proposal.review` 保存 action、理由、revision、reviewer、Audit 和 Outbox |
 | 发起外部调研 | `POST /api/aese/v1/world/plant-build/investigations` | 只接受已保存且结论为 `adopt_for_investigation` 的候选，服务端解析 actor | `site.investigation.request` 创建调查请求、`facility.site.investigation.v1` 持久 `waiting_world` 工作项和 World Intent |
-| 外部参与者反馈 | `POST /api/aese/v1/world/plant-build/observations` | 校验结构化表单，先向 World Bridge 提交与 Intent 匹配的 Observation | `site.investigation.observation.commit` 只消费受信 Journal，保存外部事实并完成对应工作项；浏览器不能直接伪造 IAOS Observation |
+| 外部参与者反馈 | `POST /api/aese/v1/world/plant-build/observations` | 玩家只确认接收报告；BFF 重读 Requirement、ProposalSet、Investigation Request，生成可重放 World Observation 并先提交 Journal | `site.investigation.observation.commit` 只消费受信 Journal，保存外部事实并完成对应工作项；浏览器不能提供或覆盖外部事实 |
 | 比较已送达事实 | 页面内只读派生计算 | 只读取当前 Requirement 与已完成 Observation；先硬约束、后按可调权重评分并展示证据 | 不产生 IAOS 写入、不创建推荐或审批结果；后续由版本化 Capability/Approval 固化正式决定 |
 | 提交场址推荐 | `POST /api/aese/v1/world/plant-build/site-selections` | 采集候选、权重、推荐理由和例外说明；不接收审批人 | `site.selection.recommend` 重算并固化评分，创建路由后的 Approval Request |
 | 正式选址 | `POST /api/aese/v1/world/plant-build/site-selections/finalize` | 只提交推荐和审批引用 | `site.selection.formalize` 校验/消费 approved 请求并写 `site_selection_decision` |
 | 发起场址控制 | `POST /api/aese/v1/world/plant-build/site-controls` | 服务端解析项目负责人并提交期望交付日、方式和必要证据范围 | `site.control.request` 创建权威请求、交付 Process Run、World wait 与 Intent |
 | 玩家确认接收场址 | `POST /api/aese/v1/world/plant-build/site-controls/observations` | 浏览器只提交案件、控制请求和 `accept_delivery`；BFF 重读 IAOS 权威请求，由 World 引擎生成稳定协议/交接/占有授权 Observation 后先写 Journal | `site.control.observation.commit` 只消费受信 Observation，完成或失败关闭交付 Run 并投影 Entity |
+| 让 Agent 生成项目方案 | `POST /api/aese/v1/world/plant-build/project-options` | 浏览器只提交案件；BFF 重读 Requirement 与可信 Site Control，生成 2–3 套项目/WBS 方案 | 暂不写业务事实；返回模型、prompt、request 和输入/输出 hash 证据 |
+| 选择并提交项目基线 | `POST /api/aese/v1/world/plant-build/facility-projects` | 玩家只选择 Agent 方案；BFF 固化 plan 后依次调用 record 与 submit | `facility.project.plan.record` 写 Agent 草案，`facility.project.baseline.submit` 创建并路由项目审批 |
+| 激活项目基线 | `POST /api/aese/v1/world/plant-build/facility-projects/activate` | 只提交案件、plan 和已批准请求 | `facility.project.baseline.activate` 消费 approved 请求，原子写设施项目和 WBS，并形成 Audit、Outbox、Process trace 与只读 Entity 投影 |
 
 上述 BFF 不是通用 IAOS 代理，也不拥有权威业务表。Requirement 和 ProposalSet 的 GET 只用于恢复 IAOS 已保存事实，不从 AESE 本地重建。外部模型未配置、财务快照不完整或变更、候选 Schema 不合法、权限不足、重复键输入不同、审阅版本冲突时均失败关闭。

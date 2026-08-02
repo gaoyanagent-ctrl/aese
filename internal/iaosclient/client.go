@@ -216,6 +216,22 @@ func (c *Client) PlantSiteControls(ctx context.Context, caseCode string) (json.R
 	return out, nil
 }
 
+// PlantFacilityProjects returns Agent plans, frozen approval state and the
+// activated WBS baseline. AESE renders it but all writes remain IAOS Commands.
+func (c *Client) PlantFacilityProjects(ctx context.Context, caseCode string) (json.RawMessage, error) {
+	caseCode = strings.TrimSpace(caseCode)
+	if caseCode == "" {
+		return nil, fmt.Errorf("case_code is required")
+	}
+	query := url.Values{}
+	query.Set("case_code", caseCode)
+	var out json.RawMessage
+	if err := c.request(ctx, http.MethodGet, "api/v1/genesis/plant/interactive/facility-projects?"+query.Encode(), nil, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ApprovalDetail returns the IAOS-routed subject and immutable assignments for
 // an approval request. AESE uses it only to render the in-world review; the
 // decision still goes through the governed IAOS approval endpoint.

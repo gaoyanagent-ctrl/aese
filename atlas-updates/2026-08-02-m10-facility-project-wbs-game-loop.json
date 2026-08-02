@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.facility-project-wbs-game-loop.2026-08-02",
+  "node_key": "aese.genesis.m10-plant-build",
+  "update_type": "implementation",
+  "summary": "M10 新增设施项目 Agent、游戏内审批和 WBS 基线闭环",
+  "detail": "可信场址交付后，设施项目 Agent 基于 IAOS 权威需求和控制事实生成多套项目/WBS 方案；玩家只选择方案，游戏会议室完成审批，批准后激活设施项目和 WBS 权威基线。IAOS 通过三个 Capability、Effective Process、Approval、Audit、Outbox 和 Entity 投影持久化。",
+  "status_after": "building",
+  "current_state": "M10 已可从设施需求推进到项目/WBS 基线；合同、施工、变更、工程财务、验收和全链故障验收仍待完成。",
+  "evidence_ref": "docs/plans/2026-08-01-m10-interactive-agent-plant-build.md",
+  "occurred_at": "2026-08-02T10:00:00Z"
+}

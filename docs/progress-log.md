@@ -2069,3 +2069,19 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：浏览器写入合同收窄为案件、控制请求和 `accept_delivery`；同一权威请求生成同一 Observation，重复确认可幂等恢复。IAOS 仍严格核验完整可信证据，玩家不能覆盖协议或占有事实。
 - 验证：新增确定性 World 证据单元测试、BFF 权威回读/完整 Observation 测试，以及前端无外部事实输入、最小确认请求组件测试；Go 全仓测试/vet、前端 26 文件/90 项测试、TypeScript、生产构建及 1440/1280/mobile 三视口 12 项 Playwright 全通过。8082、8090、4173 健康；线上故障案件只读恢复到 1 条 `waiting_world` 控制请求。本次 Atlas 声明已定向同步成功（全量历史同步仍有一条既有声明返回 404）。
 - 后续：后续合同交付、施工进度和验收场景继续采用“World 生成事实、玩家选择/确认、IAOS 权威核验”的交互合同，避免重新引入后台式长表单。
+
+## 2026-08-02 - M10 游戏交互一致性与最小玩家输入
+
+- 变更：新增 DES-038，固化 M9 的“权威状态 → NPC → Agent/World 准备 → 玩家选择/确认 → IAOS Capability → 自动下一任务”循环，并建立最多三项经营决定、外部事实禁止手填、未发布节点禁止提前展示、非终态必须有唯一主动作等项目门禁。M10 首次设施需求新增真实规划模型需求顾问，玩家选择 Agent 草案后默认只确认投资上限和目标日期；完整技术参数渐进展开。场址调研改为 `accept_report` 最小确认，AESE 重读 IAOS Requirement、ProposalSet 和 Investigation Request 后确定性生成 World Observation。场址取得完成后改为章节终点和档案入口，不再显示没有实现的“准备设施项目”按钮。
+- 原因：M10 前段要求玩家填写十余项技术/证据字段，后段又提前显示尚无 Capability 的项目/WBS 任务，既偏离 M9 游戏风格，也形成无法继续的假入口。
+- 影响：玩家不再代替 Agent 设计需求或代替园区人员编造权属、报价、容量、许可和证据；浏览器不能覆盖 World 事实。需求金额仍由企业权威资金边界约束并可由人员调整。设施项目/WBS 必须等 Effective Capability/Process、投影、档案与端到端测试齐备后才能解锁 NPC。
+- 验证：Go 测试覆盖需求草案资金边界、World 调研确定性、BFF 权威重读和 World-first 提交；AESE 全仓 Go test/vet、前端 26 文件/92 项测试、TypeScript/Vite 生产构建、JSON 格式、diff 和 Atlas tracking 通过。M10/M9→M10 在 1440、1280、390 三视口 12 项 Playwright 全通过；8090 已部署并确认 MiniMax-M3 规划模型 connected，8082/8090/4173 健康。
+- 后续：在独立 IAOS worktree 交付设施项目/WBS 的 Agent 草案、人员确认、审批和基线激活纵切，再按 DES-038 解锁项目办公室场景。
+
+## 2026-08-02 - M10 设施项目与 WBS 游戏闭环
+
+- 变更：IAOS 独立分支发布 `facility.project.plan.record`、`facility.project.baseline.submit`、`facility.project.baseline.activate`、`facility.project.baseline.v1`、项目审批流及设施项目/WBS 权威表和 Entity 投影；AESE 在可信场址交付后解锁项目办公室，由设施项目 Agent 生成 2–3 套策略、预算、日期与 WBS 方案，玩家选择后进入游戏会议室审批，再显式激活项目基线。
+- 原因：场地交付之后原先没有真实下一任务；直接让玩家填写 WBS 会再次退化为后台操作界面，也无法保证 Agent 产物、人员决定、审批与权威数据一致。
+- 影响：M10 在线纵切已从场址取得延伸至项目/WBS 基线。玩家只作方案选择、审批和激活决定，专业拆分默认折叠；IAOS 保存 Agent 草案、审批请求、项目、WBS、Audit、Outbox、Process trace 和只读投影。合同、施工、变更、工程财务与验收仍未宣称完成。
+- 验证：IAOS 相关包测试、API 测试、Go vet、Code Map/Atlas/governed-write 检查通过；AESE Go 全仓测试/vet、前端 26 文件/96 项测试、TypeScript 与生产构建通过；M9→M10、需求简化、硬约束解释和场址交付→项目办公室在 1440/1280/390 三视口共 15 项 Playwright 通过。8082 实际日志已返回目标案件的设施项目和审批详情；完整新租户从零验收仍归 S5。
+- 后续：按 DES-038 继续交付合同与施工纵切；每个新节点必须同时具备 Effective Artifact、场景主动作、权威档案和无死路测试。

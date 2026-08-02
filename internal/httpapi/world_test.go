@@ -31,6 +31,19 @@ func (p *planningProviderStub) Generate(_ context.Context, request plantbuild.Fa
 	}
 	return plantbuild.ProposalSet{SchemaVersion: "1.0", ProposalSetID: "SET-1", RequirementID: request.RequirementID, Revision: 1, Status: "candidate_only", Proposals: proposals, Evidence: plantbuild.ProposalEvidence{Provider: "MiniMax", Model: "MiniMax-M3", PromptVersion: plantbuild.PlanningPromptVersion, RequestID: "req-1", InputHash: "sha256:input", OutputHash: "sha256:output", TokenUsage: map[string]int{"total_tokens": 12}, ValidatedAt: "2026-08-01T10:00:00Z"}}, nil
 }
+func (p *planningProviderStub) GenerateRequirementOptions(_ context.Context, seed plantbuild.RequirementOptionSeed) (plantbuild.RequirementOptionSet, error) {
+	return plantbuild.RequirementOptionSet{SchemaVersion: "1.0", Options: []plantbuild.RequirementOption{{OptionID: "requirement-option-1", Title: "快速投产", BusinessRationale: "控制现金并缩短周期", TargetRegion: "苏州", FacilityPurpose: "制造基地", MinimumAreaM2: 9000, MinimumElectricKVA: 1800, TargetAvailableAt: "2026-12-01T00:00:00Z", CandidateCount: 3, AllowedOptionTypes: []string{"lease_and_retrofit"}, InvestmentRequest: plantbuild.Money{Value: "12000000.00", Currency: "CNY", Scale: 2}, MinimumCashReserve: plantbuild.Money{Value: "5000000.00", Currency: "CNY", Scale: 2}, Preferences: []string{"快速投产"}, Tradeoffs: []string{"扩展空间有限"}}}, Evidence: plantbuild.ProposalEvidence{Provider: "MiniMax", Model: "MiniMax-M3", PromptVersion: plantbuild.RequirementPromptVersion, InputHash: plantbuild.CanonicalHash(seed), OutputHash: "sha256:output", ValidatedAt: "2026-08-02T10:00:00Z"}}, nil
+}
+func (p *planningProviderStub) GenerateProjectPlanOptions(_ context.Context, seed plantbuild.ProjectPlanSeed) (plantbuild.ProjectPlanOptionSet, error) {
+	items := []plantbuild.ProjectWBSItem{
+		{WBSCode: "WBS-01", Name: "设计", Phase: "design", Sequence: 1, OwnerPosition: "project-lead", PlannedStartAt: "2026-09-01T00:00:00Z", PlannedFinishAt: "2026-09-30T00:00:00Z", BudgetShareBPS: 2000, AcceptanceCriteria: "设计批准"},
+		{WBSCode: "WBS-02", Name: "采购", Phase: "procurement", Sequence: 2, OwnerPosition: "buyer", PlannedStartAt: "2026-10-01T00:00:00Z", PlannedFinishAt: "2026-11-30T00:00:00Z", BudgetShareBPS: 3000, AcceptanceCriteria: "到货"},
+		{WBSCode: "WBS-03", Name: "施工", Phase: "construction", Sequence: 3, OwnerPosition: "site-lead", PlannedStartAt: "2026-12-01T00:00:00Z", PlannedFinishAt: "2027-01-31T00:00:00Z", BudgetShareBPS: 3500, AcceptanceCriteria: "施工验收"},
+		{WBSCode: "WBS-04", Name: "联调", Phase: "commissioning", Sequence: 4, OwnerPosition: "commissioning-lead", PlannedStartAt: "2027-02-01T00:00:00Z", PlannedFinishAt: "2027-02-28T00:00:00Z", BudgetShareBPS: 1500, AcceptanceCriteria: "联调通过"},
+	}
+	option := plantbuild.ProjectPlanOption{OptionID: "project-option-1", Title: "快速总承包", BusinessRationale: "缩短投产周期", ProjectName: "苏州制造基地建设", DeliveryStrategy: "design_build", BudgetCeiling: plantbuild.Money{Value: "12000000.00", Currency: "CNY", Scale: 2}, TargetStartAt: "2026-09-01T00:00:00Z", TargetReadyAt: "2027-02-28T00:00:00Z", WBSItems: items, Tradeoffs: []string{"集中履约风险"}}
+	return plantbuild.ProjectPlanOptionSet{SchemaVersion: "1.0", Options: []plantbuild.ProjectPlanOption{option, option}, Evidence: plantbuild.ProposalEvidence{Provider: "MiniMax", Model: "MiniMax-M3", PromptVersion: plantbuild.ProjectPromptVersion, InputHash: plantbuild.CanonicalHash(seed), OutputHash: "sha256:project-output", ValidatedAt: "2026-08-02T10:00:00Z"}}, nil
+}
 
 func TestGenesisWorldAPI(t *testing.T) {
 	server := New(Config{})
@@ -200,6 +213,54 @@ func TestPlantFinancialConstraintUsesNarrowAuthenticatedIAOSRead(t *testing.T) {
 	res := httptest.NewRecorder()
 	server.ServeHTTP(res, req)
 	if res.Code != http.StatusOK || !strings.Contains(res.Body.String(), `"snapshot_hash":"sha256:authority"`) {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
+}
+
+func TestPlantRequirementOptionsReadAuthorityFinancialsServerSide(t *testing.T) {
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/v1/profile":
+			_, _ = w.Write([]byte(`{"username":"founder","tenant_id":"tenant-live"}`))
+		case "/api/v1/genesis/plant/interactive/financial-constraints":
+			_, _ = w.Write([]byte(`{"case_code":"INC-LIVE","legal_entity_code":"LE-LIVE","financial_constraint":{"available_cash":{"value":"30000000.00","currency":"CNY","scale":2},"approved_budget":{"value":"20000000.00","currency":"CNY","scale":2},"cash_source_ref":"gl:BOOK:1002","budget_source_ref":"budget:BUD-1","snapshot_hash":"sha256:authority"}}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer iaos.Close()
+	server := New(Config{IAOSBaseURL: iaos.URL, PlantPlanningProvider: &planningProviderStub{}})
+	req := httptest.NewRequest(http.MethodPost, "/api/aese/v1/world/plant-build/requirement-options", strings.NewReader(`{"case_code":"INC-LIVE"}`))
+	req.Header.Set("Authorization", "Bearer founder-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-live")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusOK || !strings.Contains(res.Body.String(), `"title":"快速投产"`) || strings.Contains(res.Body.String(), `30000000.00`) {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
+}
+
+func TestPlantProjectOptionsReadRequirementAndSiteControlServerSide(t *testing.T) {
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/v1/profile":
+			_, _ = w.Write([]byte(`{"username":"founder","tenant_id":"tenant-live"}`))
+		case "/api/v1/genesis/plant/interactive/requirements/facility-requirement-INC-LIVE":
+			_, _ = w.Write([]byte(`{"schema_version":"1.0","requirement_id":"facility-requirement-INC-LIVE","tenant_id":"tenant-live","case_code":"INC-LIVE","legal_entity_code":"LE-LIVE","target_region":"苏州","facility_purpose":"制造基地","minimum_area_m2":9000,"minimum_electricity_kva":1800,"target_available_at":"2027-03-01T00:00:00Z","candidate_count":3,"allowed_option_types":["leased_shell"],"investment_request":{"value":"15000000.00","currency":"CNY","scale":2},"minimum_cash_reserve":{"value":"5000000.00","currency":"CNY","scale":2},"financial_constraint":{"available_cash":{"value":"30000000.00","currency":"CNY","scale":2},"approved_budget":{"value":"20000000.00","currency":"CNY","scale":2},"cash_source_ref":"gl:1002","budget_source_ref":"budget:B1","snapshot_hash":"sha256:abc"},"preferences":["快速投产"],"revision":1,"revision_reason":"首次规划"}`))
+		case "/api/v1/genesis/plant/interactive/site-controls":
+			_, _ = w.Write([]byte(`{"items":[{"request":{"selection_id":"SEL-1"},"status":"controlled","observation":{"schema_version":"1.0","observation_id":"OBS-CTRL-1","control_request_id":"CTRL-1","selection_id":"SEL-1","result":"delivered","agreement_ref":"agreement:A1","handover_ref":"handover:H1","effective_at":"2026-09-01T00:00:00Z","evidence_refs":["world:E1"],"external_actor_id":"park-owner","observed_at":"2026-09-01T00:00:00Z"}}]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer iaos.Close()
+	server := New(Config{IAOSBaseURL: iaos.URL, PlantPlanningProvider: &planningProviderStub{}})
+	req := httptest.NewRequest(http.MethodPost, "/api/aese/v1/world/plant-build/project-options", strings.NewReader(`{"case_code":"INC-LIVE"}`))
+	req.Header.Set("Authorization", "Bearer founder-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-live")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusOK || !strings.Contains(res.Body.String(), `"project_name":"苏州制造基地建设"`) || strings.Contains(res.Body.String(), `agreement:A1`) {
 		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
 	}
 }
@@ -485,17 +546,24 @@ func TestPlantProposalReviewExactDuplicateReturnsIdempotentSuccess(t *testing.T)
 func TestPlantInvestigationObservationUsesWorldBridgeBeforeCapabilityCommit(t *testing.T) {
 	paths := []string{}
 	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if r.URL.Path == "/api/v1/profile" {
+		switch {
+		case r.URL.Path == "/api/v1/profile":
 			_, _ = w.Write([]byte(`{"username":"project-owner","tenant_id":"tenant-a"}`))
-			return
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/genesis/plant/interactive/investigations":
+			_, _ = w.Write([]byte(`{"items":[{"request":{"schema_version":"1.0","investigation_request_id":"INV-1","case_code":"INC-1","proposal_set_id":"SET-1","proposal_id":"SITE-1","expected_revision":1,"world_run_id":"plant-build-INC-1","scope":["ownership","commercial_quote","available_area","electricity_capacity","available_date","permit"],"requested_by":"project-owner","requested_at":"2026-08-01T10:00:00Z","status":"waiting_world"},"status":"waiting_world"}]}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/genesis/plant/interactive/requirements/REQ-1":
+			_, _ = w.Write([]byte(`{"schema_version":"1.0","requirement_id":"REQ-1","tenant_id":"tenant-a","case_code":"INC-1","legal_entity_code":"LE-1","target_region":"华东","facility_purpose":"汽车零部件制造","minimum_area_m2":9000,"minimum_electricity_kva":2200,"target_available_at":"2027-01-01T00:00:00Z","candidate_count":2,"allowed_option_types":["leased_shell"],"investment_request":{"value":"18000000.00","currency":"CNY","scale":2},"minimum_cash_reserve":{"value":"5000000.00","currency":"CNY","scale":2},"financial_constraint":{"available_cash":{"value":"30000000.00","currency":"CNY","scale":2},"approved_budget":{"value":"20000000.00","currency":"CNY","scale":2},"cash_source_ref":"ledger:CASH-1","budget_source_ref":"budget:BUD-1","snapshot_hash":"sha256:abc"},"preferences":["快速投产"],"revision":1,"revision_reason":"首次规划"}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/genesis/plant/interactive/proposal-sets":
+			_, _ = w.Write([]byte(`{"schema_version":"1.0","proposal_set_id":"SET-1","requirement_id":"REQ-1","revision":1,"status":"candidate_only","proposals":[{"proposal_id":"SITE-1","option_type":"leased_shell","display_name":"候选园区","business_rationale":"快速投产","estimated_amount":{"minimum":{"value":"12000000.00","currency":"CNY","scale":2},"likely":{"value":"15000000.00","currency":"CNY","scale":2},"maximum":{"value":"18000000.00","currency":"CNY","scale":2},"basis":"Agent估算"},"estimated_schedule":{"earliest":"2026-10-01T00:00:00Z","likely":"2026-11-01T00:00:00Z","latest":"2026-12-01T00:00:00Z"},"assumptions":["待调研"],"facts_required":["报价"],"risks":["增容"],"source_refs":["requirement:REQ-1"],"confidence":"0.60","status":"proposed"}],"evidence":{"provider":"MiniMax","model":"M3","prompt_version":"plant-planning-v2","input_hash":"sha256:a","output_hash":"sha256:b","validated_at":"2026-08-01T10:00:00Z"}}`))
+		default:
+			paths = append(paths, r.URL.Path)
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"status":"committed"}`))
 		}
-		paths = append(paths, r.URL.Path)
-		w.WriteHeader(http.StatusCreated)
-		_, _ = w.Write([]byte(`{"status":"committed"}`))
 	}))
 	defer iaos.Close()
 	server := New(Config{IAOSBaseURL: iaos.URL})
-	body := `{"case_code":"INC-1","world_run_id":"plant-build-INC-1","observation":{"schema_version":"1.0","observation_id":"OBS-1","investigation_request_id":"INV-1","proposal_id":"SITE-1","result":"completed","ownership_status":"verified","available_area_m2":9000,"electricity_kva":3000,"quoted_amount":{"value":"9800000.00","currency":"CNY","scale":2},"available_at":"2026-10-01T00:00:00Z","permit_status":"eligible","evidence_refs":["world-document:QUOTE-1"],"notes":"现场核验完成","external_actor_id":"virtual-park-operator","observed_at":"2026-08-01T11:00:00Z"}}`
+	body := `{"schema_version":"1.0","case_code":"INC-1","requirement_id":"REQ-1","investigation_request_id":"INV-1","action":"accept_report"}`
 	req := httptest.NewRequest(http.MethodPost, "/api/aese/v1/world/plant-build/observations", strings.NewReader(body))
 	req.Header.Set("Authorization", "Bearer owner-token")
 	req.Header.Set("X-IAOS-Tenant-Id", "tenant-a")

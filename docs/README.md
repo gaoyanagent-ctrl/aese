@@ -103,6 +103,7 @@
 | DES-028 | [Enterprise Genesis AI 原生企业创生游戏体验](designs/DES-028-enterprise-genesis-game-experience.md) | Completed |
 | DES-029 | [Enterprise Genesis 零起点主页、独立租户与真实 AI 企业身份](designs/DES-029-genesis-zero-start-and-ai-identity.md) | Approved |
 | DES-037 | [AESE 场景知识与 IAOS 产品知识中枢集成](designs/DES-037-aese-scenario-knowledge-and-iaos-product-hub.md) | Active |
+| DES-038 | [Enterprise Genesis 游戏交互一致性与无死路规范](designs/DES-038-enterprise-genesis-interaction-consistency.md) | Active |
 | DES-030 | [M9–M13 制造企业财务运行体系](designs/finance/DES-030-manufacturing-finance-operating-system.md) | Approved |
 | DES-031 | [IAOS 多组织财务与共享主数据基础](designs/finance/DES-031-multi-organization-and-shared-master-data-foundation.md) | Active |
 | FINANCE | [财务设计模块索引](designs/finance/README.md) | Active |

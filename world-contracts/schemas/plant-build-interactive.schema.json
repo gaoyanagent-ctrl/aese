@@ -7,7 +7,9 @@
     { "$ref": "#/$defs/proposal_set" },
     { "$ref": "#/$defs/proposal_review" },
     { "$ref": "#/$defs/investigation_request" },
-    { "$ref": "#/$defs/investigation_observation" }
+    { "$ref": "#/$defs/investigation_observation" },
+    { "$ref": "#/$defs/investigation_confirmation" },
+    { "$ref": "#/$defs/project_plan_option_set" }
   ],
   "$defs": {
     "money": {
@@ -128,6 +130,61 @@
         "notes": { "type": "string" },
         "external_actor_id": { "type": "string", "minLength": 1 },
         "observed_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "investigation_confirmation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "case_code", "requirement_id", "investigation_request_id", "action"],
+      "properties": {
+        "schema_version": { "const": "1.0" },
+        "case_code": { "type": "string", "minLength": 1 },
+        "requirement_id": { "type": "string", "minLength": 1 },
+        "investigation_request_id": { "type": "string", "minLength": 1 },
+        "action": { "const": "accept_report" }
+      }
+    },
+    "project_wbs_item": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["wbs_code", "name", "phase", "sequence", "owner_position", "planned_start_at", "planned_finish_at", "budget_share_bps", "acceptance_criteria"],
+      "properties": {
+        "wbs_code": { "type": "string", "minLength": 1 },
+        "name": { "type": "string", "minLength": 1 },
+        "phase": { "enum": ["design", "procurement", "construction", "commissioning"] },
+        "sequence": { "type": "integer", "minimum": 1 },
+        "owner_position": { "type": "string", "minLength": 1 },
+        "planned_start_at": { "type": "string", "format": "date-time" },
+        "planned_finish_at": { "type": "string", "format": "date-time" },
+        "budget_share_bps": { "type": "integer", "minimum": 1, "maximum": 10000 },
+        "acceptance_criteria": { "type": "string", "minLength": 1 }
+      }
+    },
+    "project_plan_option": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["option_id", "title", "business_rationale", "project_name", "delivery_strategy", "budget_ceiling", "target_start_at", "target_ready_at", "wbs_items", "tradeoffs"],
+      "properties": {
+        "option_id": { "type": "string", "minLength": 1 },
+        "title": { "type": "string", "minLength": 1 },
+        "business_rationale": { "type": "string", "minLength": 1 },
+        "project_name": { "type": "string", "minLength": 1 },
+        "delivery_strategy": { "enum": ["design_bid_build", "design_build", "epcm"] },
+        "budget_ceiling": { "$ref": "#/$defs/money" },
+        "target_start_at": { "type": "string", "format": "date-time" },
+        "target_ready_at": { "type": "string", "format": "date-time" },
+        "wbs_items": { "type": "array", "minItems": 4, "maxItems": 12, "items": { "$ref": "#/$defs/project_wbs_item" } },
+        "tradeoffs": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 } }
+      }
+    },
+    "project_plan_option_set": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "options", "evidence"],
+      "properties": {
+        "schema_version": { "const": "1.0" },
+        "options": { "type": "array", "minItems": 2, "maxItems": 3, "items": { "$ref": "#/$defs/project_plan_option" } },
+        "evidence": { "type": "object" }
       }
     }
   }

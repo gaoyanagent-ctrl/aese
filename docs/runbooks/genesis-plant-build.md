@@ -47,13 +47,16 @@
 | `POST /api/aese/v1/world/plant-build/proposals` | 200，`authority_status=committed` | IAOS 已分别保存 Requirement 与 candidate-only ProposalSet |
 | `POST /api/aese/v1/world/plant-build/reviews` | 201，`status=committed` | IAOS 已保存当前用户的 ProposalReview |
 | `POST /api/aese/v1/world/plant-build/investigations` | 201，`status=waiting_world` | IAOS 已保存调查请求、持久工作项和 World Intent |
-| `POST /api/aese/v1/world/plant-build/observations` | 201，`status=committed` | AESE 先写受信 Journal，IAOS 再保存 Observation 并完成工作项 |
+| `POST /api/aese/v1/world/plant-build/observations` | 请求体仅含 `case_code`、`requirement_id`、`investigation_request_id`、`accept_report`；201 或幂等 200 | AESE 重读 IAOS 请求/需求/候选并生成确定性园区调研报告，先写受信 Journal，IAOS 再保存 Observation 并完成工作项 |
 | `GET /api/aese/v1/world/plant-build/site-selections?case_code=...` | 200，返回推荐、审批状态和决定 | 从 IAOS 恢复权威推荐与正式选址状态 |
 | `POST /api/aese/v1/world/plant-build/site-selections` | 201，返回 Approval Request | IAOS 重算、固化推荐并按已发布审批流路由 |
 | `POST /api/aese/v1/world/plant-build/site-selections/finalize` | 201，仅批准后成功 | 独立 Capability 消费批准并写正式选址决定 |
 | `GET /api/aese/v1/world/plant-build/site-controls?case_code=...` | 200，返回请求、状态与 Observation | 从 IAOS 恢复场址控制权威事实 |
 | `POST /api/aese/v1/world/plant-build/site-controls` | 201，`waiting_world` | 创建交付 Process Run、工作项和 World Intent |
 | `POST /api/aese/v1/world/plant-build/site-controls/observations` | 请求体仅含 `case_code`、`control_request_id`、`accept_delivery`；201 或幂等 200 | AESE 重读 IAOS 请求、生成确定性 World 证据并先写 Journal，IAOS 再提交控制事实和流程结果 |
+| `POST /api/aese/v1/world/plant-build/project-options` | 请求体仅含 `case_code`；200 返回 2–3 套 Agent 项目/WBS 方案 | BFF 重读 Requirement 与可信 Site Control，玩家无需填写 WBS 或证据编号 |
+| `GET/POST /api/aese/v1/world/plant-build/facility-projects` | GET 恢复项目草案/审批/激活状态；POST 选择方案并提交审批 | IAOS 依次执行 `facility.project.plan.record` 与 `facility.project.baseline.submit` |
+| `POST /api/aese/v1/world/plant-build/facility-projects/activate` | 仅 approved 请求成功 | IAOS 消费审批并原子写设施项目、WBS、Audit、Outbox 和 Process trace |
 | `GET /api/v1/process-runs?process_key=facility.plant.planning.v1&case_code=...` | 200，返回单一 Run | IAOS 按案件返回完整 M10 运行，详情 API 可读取 context/trace |
 
 写操作不得从浏览器直接请求 IAOS `:8082`。AESE BFF 使用当前用户身份调用 IAOS
@@ -68,6 +71,9 @@
 - `site.selection.formalize`
 - `site.control.request`
 - `site.control.observation.commit`
+- `facility.project.plan.record`
+- `facility.project.baseline.submit`
+- `facility.project.baseline.activate`
 
 IAOS 侧应能读取最新 Requirement、ProposalSet、Agent Run、Review、Investigation Request、Work Item、Observation、Recommendation、Approval Request 和 Site Selection Decision；每次提交同时产生 tenant-scoped Audit 与 Outbox。Agent 模型、prompt、request、token 和输入/输出 hash 同时保存在 AESE CreativeJob 技术日志和 IAOS 权威 Agent Run 中；后者必须与 ProposalSet 原子提交并逐字段匹配。两类证据不能用页面展示或 Agent 文本替代。
 
@@ -93,7 +99,7 @@ IAOS 侧应能读取最新 Requirement、ProposalSet、Agent Run、Review、Inve
 
 - “人工新增候选”必须成功提交 IAOS 新 revision 后才能审阅或发起外部调查；浏览器本地数据、旧 revision、修改既有候选或超投资上限均不能形成权威记录。
 - 当前页面评分是只读预览；提交推荐时 IAOS 使用 `site-assessment-v1` 独立重算并固化，当前尚未提供租户自定义评分策略版本的 UI。
-- 正式场址选择已进入统一审批，场址控制已实现协议/交接 World 闭环；合同金额/承诺、项目/WBS、施工、变更、付款、验收、AP/CIP/总账闭环仍未实现。
+- 正式场址选择、场址控制和设施项目/WBS 基线已形成统一审批与权威闭环；合同金额/承诺、施工、变更、付款、验收、AP/CIP/总账闭环仍未实现。
 - 现场部署、纯人工路径和完整断线/重启/并发证据属于 S5，完成前 M10 保持 `Interactive Revision Pending`。
 
 ## 历史 reference replay 页面验收

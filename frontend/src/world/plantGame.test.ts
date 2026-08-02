@@ -11,6 +11,9 @@ const empty: PlantGameFacts = {
   hasDecision: false,
   hasSiteControlRequest: false,
   hasSiteControl: false,
+  hasProjectPlan: false,
+  projectApprovalStatus: "",
+  hasActiveProject: false,
 };
 
 describe("M10 game projection stage", () => {
@@ -24,7 +27,10 @@ describe("M10 game projection stage", () => {
     [{ hasRecommendation: true }, "governance"],
     [{ hasDecision: true }, "site_control"],
     [{ hasDecision: true, hasSiteControlRequest: true }, "site_control"],
-    [{ hasDecision: true, hasSiteControlRequest: true, hasSiteControl: true }, "project_ready"],
+    [{ hasDecision: true, hasSiteControlRequest: true, hasSiteControl: true }, "project_planning"],
+    [{ hasProjectPlan: true }, "project_approval"],
+    [{ hasProjectPlan: true, projectApprovalStatus: "rejected" }, "project_planning"],
+    [{ hasActiveProject: true }, "project_baselined"],
   ])("derives committed facts %o as %s", (partial, expected) => {
     expect(derivePlantGameStage({ ...empty, ...partial }).key).toBe(expected);
   });
@@ -43,6 +49,6 @@ describe("M10 game projection stage", () => {
   it("opens the site-control task without treating the decision as delivered control", () => {
     expect(derivePlantGameStage({ ...empty, hasDecision: true }).key).toBe("site_control");
     expect(derivePlantGameStage({ ...empty, hasDecision: true, hasSiteControlRequest: true }).key).toBe("site_control");
-    expect(derivePlantGameStage({ ...empty, hasDecision: true, hasSiteControl: true }).key).toBe("project_ready");
+    expect(derivePlantGameStage({ ...empty, hasDecision: true, hasSiteControl: true }).key).toBe("project_planning");
   });
 });

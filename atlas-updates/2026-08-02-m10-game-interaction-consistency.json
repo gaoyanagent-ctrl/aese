@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.game-interaction-consistency.2026-08-02",
+  "node_key": "aese.genesis.m10-plant-build",
+  "update_type": "implementation",
+  "summary": "M10 采用 Agent 需求草案、最小玩家确认和无死路游戏规范",
+  "detail": "DES-038 将 M9 交互循环提升为 M10-M24 项目门禁；首次需求由真实规划模型生成草案，玩家只选方案并确认经营边界；园区调研事实由 AESE 重读 IAOS 权威请求后确定性生成；未发布设施项目能力前不再展示虚假下一任务。",
+  "status_after": "building",
+  "current_state": "M10 需求与园区调研已完成游戏式简化，场址取得终点不再形成无响应按钮；设施项目/WBS、合同、施工、工程财务和验收仍待权威纵切。",
+  "evidence_ref": "docs/designs/DES-038-enterprise-genesis-interaction-consistency.md",
+  "occurred_at": "2026-08-02T09:25:00Z"
+}

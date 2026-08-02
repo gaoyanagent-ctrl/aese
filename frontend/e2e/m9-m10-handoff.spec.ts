@@ -69,10 +69,38 @@ test("M10 opens as a playable enterprise scene instead of a standalone form", as
   await expect(page.getByLabel("目标区域")).toHaveCount(0);
   await page.getByRole("button", { name: /纪元：与规划 Agent 制定需求/ }).click();
   await expect(page.getByRole("dialog", { name: "当前经营任务" })).toBeVisible();
-  await expect(page.getByLabel("目标区域")).toBeVisible();
+  await expect(page.getByRole("button", { name: "让 Agent 准备需求方案" })).toBeVisible();
+  await expect(page.getByLabel("目标区域")).toHaveCount(0);
   await page.getByRole("button", { name: "关闭当前任务" }).click();
   await expect(page.getByRole("dialog", { name: "当前经营任务" })).toHaveCount(0);
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
+});
+
+test("trusted site delivery unlocks a real project-office mission", async ({ page }) => {
+  await page.addInitScript(() => {
+    localStorage.setItem("iaos_token", "test-founder-token");
+    localStorage.setItem("aese_iaos_tenant_id", "tenant-gx-handoff");
+    localStorage.setItem("aese_genesis_case_code", "INC-GX-HANDOFF");
+  });
+  const requirement = { schema_version: "1.0", requirement_id: "facility-requirement-INC-GX-HANDOFF", tenant_id: "tenant-gx-handoff", case_code: "INC-GX-HANDOFF", legal_entity_code: "LE-1", target_region: "苏州", facility_purpose: "制造基地", minimum_area_m2: 9000, minimum_electricity_kva: 1800, target_available_at: "2027-03-01T00:00:00Z", candidate_count: 2, allowed_option_types: ["leased_shell"], investment_request: { value: "15000000.00", currency: "CNY", scale: 2 }, minimum_cash_reserve: { value: "5000000.00", currency: "CNY", scale: 2 }, financial_constraint: { available_cash: { value: "30000000.00", currency: "CNY", scale: 2 }, approved_budget: { value: "20000000.00", currency: "CNY", scale: 2 }, cash_source_ref: "gl:1002", budget_source_ref: "budget:B1", snapshot_hash: "sha256:test" }, preferences: [], revision: 1, revision_reason: "test" };
+  await page.route("**/api/aese/v1/world/plant-build**", (route) => {
+    const url = new URL(route.request().url());
+    if (url.pathname.endsWith("/planning-status")) return route.fulfill({ json: { state: "connected", provider: "MiniMax", model: "MiniMax-M3", prompt_version: "plant-planning-v2" } });
+    if (url.pathname.endsWith("/financial-constraints")) return route.fulfill({ json: { case_code: requirement.case_code, legal_entity_code: requirement.legal_entity_code, financial_constraint: requirement.financial_constraint } });
+    if (url.pathname.includes("/requirements/")) return route.fulfill({ json: requirement });
+    if (url.pathname.endsWith("/proposals")) return route.fulfill({ status: 404, body: "not found" });
+    if (url.pathname.endsWith("/investigations")) return route.fulfill({ json: { items: [] } });
+    if (url.pathname.endsWith("/site-selections")) return route.fulfill({ json: { items: [] } });
+    if (url.pathname.endsWith("/site-controls")) return route.fulfill({ json: { items: [{ request: { selection_id: "SEL-1", agreement_mode: "lease", requested_handover_at: "2026-09-01T00:00:00Z" }, status: "controlled", observation: { observation_id: "OBS-CTRL-1", agreement_ref: "agreement:A1", handover_ref: "handover:H1" } }] } });
+    if (url.pathname.endsWith("/facility-projects")) return route.fulfill({ json: { items: [] } });
+    return route.fulfill({ status: 404, body: "not found" });
+  });
+  await page.goto("/#world-plant-build?tenant=tenant-gx-handoff&case=INC-GX-HANDOFF");
+  await expect(page.getByRole("heading", { name: "在项目办公室准备设施项目与 WBS" })).toBeVisible();
+  await page.getByRole("button", { name: /纪元：让 Agent 准备项目方案/ }).click();
+  const mission = page.getByRole("dialog", { name: "当前经营任务" });
+  await expect(mission.getByRole("button", { name: "让 Agent 准备项目方案" })).toBeVisible();
+  await expect(mission.getByText(/不需要填写 WBS、岗位、证据编号或 JSON/)).toBeVisible();
 });
 
 test("M10 explains a failed site gate with requirement, observation and difference", async ({ page }) => {

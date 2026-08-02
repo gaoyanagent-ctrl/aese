@@ -95,6 +95,29 @@ export type PlantFinancialConstraint = {
   financial_constraint: FacilityRequirement["financial_constraint"];
 };
 
+export type PlantRequirementOption = {
+  option_id: string;
+  title: string;
+  business_rationale: string;
+  target_region: string;
+  facility_purpose: string;
+  minimum_area_m2: number;
+  minimum_electricity_kva: number;
+  target_available_at: string;
+  candidate_count: number;
+  allowed_option_types: string[];
+  investment_request: FacilityMoney;
+  minimum_cash_reserve: FacilityMoney;
+  preferences: string[];
+  tradeoffs: string[];
+};
+
+export type PlantRequirementOptionSet = {
+  schema_version: "1.0";
+  options: PlantRequirementOption[];
+  evidence: ProposalSet["evidence"];
+};
+
 export type SiteOptionProposal = {
   proposal_id: string;
   option_type: string;
@@ -268,6 +291,40 @@ export type SiteControlItem = {
   observation?: SiteControlObservation;
 };
 
+export type ProjectWBSItem = {
+  wbs_code: string; name: string; phase: "design" | "procurement" | "construction" | "commissioning";
+  sequence: number; owner_position: string; planned_start_at: string; planned_finish_at: string;
+  budget_share_bps: number; acceptance_criteria: string;
+};
+
+export type ProjectPlanOption = {
+  option_id: string; title: string; business_rationale: string; project_name: string;
+  delivery_strategy: "design_bid_build" | "design_build" | "epcm";
+  budget_ceiling: FacilityMoney; target_start_at: string; target_ready_at: string;
+  wbs_items: ProjectWBSItem[]; tradeoffs: string[];
+};
+
+export type ProjectPlanOptionSet = { schema_version: "1.0"; options: ProjectPlanOption[]; evidence: ProposalSet["evidence"] };
+
+export type FacilityProjectItem = {
+  plan: {
+    schema_version: "1.0";
+    plan_id: string;
+    case_code: string;
+    project_name: string;
+    delivery_strategy: ProjectPlanOption["delivery_strategy"];
+    budget_ceiling: PBMoney;
+    target_start_at: string;
+    target_ready_at: string;
+    wbs_items: ProjectWBSItem[];
+    status: string;
+    agent_evidence: Record<string, string>;
+  };
+  plan_hash: string; status: string; approval_request_id: string;
+  approval_status: "" | "pending" | "approved" | "rejected" | "consumed";
+  project?: { project_id?: string; project_name?: string; status?: string; wbs_items?: ProjectWBSItem[] };
+};
+
 export type PlantApprovalDetail = {
   item: {
     id: string;
@@ -343,13 +400,13 @@ export async function requestSiteInvestigation(input: SiteInvestigationRequest) 
   return response.json() as Promise<{ status: "waiting_world"; investigation_request: SiteInvestigationRequest }>;
 }
 
-export async function submitSiteInvestigationObservation(caseCode: string, worldRunID: string, observation: SiteInvestigationObservation) {
+export async function confirmSiteInvestigationReport(caseCode: string, requirementID: string, investigationRequestID: string) {
   const response = await fetch("/api/aese/v1/world/plant-build/observations", {
     method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() },
-    body: JSON.stringify({ case_code: caseCode, world_run_id: worldRunID, observation }),
+    body: JSON.stringify({ schema_version: "1.0", case_code: caseCode, requirement_id: requirementID, investigation_request_id: investigationRequestID, action: "accept_report" }),
   });
-  if (!response.ok) throw new Error(`提交外部调研事实 ${response.status}: ${await response.text()}`);
-  return response.json() as Promise<{ status: "committed"; world_message_id: string; observation: SiteInvestigationObservation }>;
+  if (!response.ok) throw new Error(`确认接收园区调研报告 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ status: "committed"; idempotent_replay: boolean; world_message_id: string; observation: SiteInvestigationObservation }>;
 }
 
 export async function loadSiteSelections(caseCode: string, signal?: AbortSignal) {
@@ -417,6 +474,45 @@ export async function confirmSiteControlDelivery(caseCode: string, controlReques
   if (!response.ok) throw new Error(`确认接收场地 ${response.status}: ${await response.text()}`);
   return response.json() as Promise<{ status: "committed"; idempotent_replay: boolean; world_message_id: string; observation: SiteControlObservation }>;
 }
+
+export async function generateFacilityProjectOptions(caseCode: string) {
+  const response = await fetch("/api/aese/v1/world/plant-build/project-options", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() }, body: JSON.stringify({ case_code: caseCode }),
+  });
+  if (!response.ok) throw new Error(`项目 Agent 准备方案 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<ProjectPlanOptionSet>;
+}
+
+export async function submitFacilityProjectOption(caseCode: string, option: ProjectPlanOption, evidence: ProposalSet["evidence"]) {
+  const response = await fetch("/api/aese/v1/world/plant-build/facility-projects", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() }, body: JSON.stringify({ case_code: caseCode, option, evidence }),
+  });
+  if (!response.ok) throw new Error(`提交项目基线审批 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ status: "waiting_approval"; plan_id: string; result: { result: { approval_request_id: string } } }>;
+}
+
+export async function loadFacilityProjects(caseCode: string, signal?: AbortSignal) {
+  const response = await fetch(`/api/aese/v1/world/plant-build/facility-projects?case_code=${encodeURIComponent(caseCode)}`, { headers: iaosHeaders(), signal });
+  if (!response.ok) throw new Error(`设施项目与 WBS ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ items: FacilityProjectItem[] }>;
+}
+
+export async function activateFacilityProject(caseCode: string, planID: string, approvalRequestID: string) {
+  const response = await fetch("/api/aese/v1/world/plant-build/facility-projects/activate", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() }, body: JSON.stringify({ case_code: caseCode, plan_id: planID, approval_request_id: approvalRequestID }),
+  });
+  if (!response.ok) throw new Error(`激活设施项目基线 ${response.status}: ${await response.text()}`);
+  return response.json();
+}
+
+export async function submitFacilityProjectBaseline(caseCode: string, planID: string, expectedHash: string) {
+  const response = await fetch("/api/aese/v1/world/plant-build/facility-projects/submit", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() },
+    body: JSON.stringify({ case_code: caseCode, plan_id: planID, expected_hash: expectedHash }),
+  });
+  if (!response.ok) throw new Error(`提交设施项目审批 ${response.status}: ${await response.text()}`);
+  return response.json();
+}
 export async function loadPlantBuild(
   signal?: AbortSignal,
 ): Promise<PlantBuildTrace> {
@@ -469,6 +565,15 @@ export async function loadPlantFinancialConstraint(
     throw new Error(`权威资金与预算快照 ${response.status}: ${detail}`);
   }
   return response.json() as Promise<PlantFinancialConstraint>;
+}
+
+export async function generatePlantRequirementOptions(caseCode: string) {
+  const response = await fetch("/api/aese/v1/world/plant-build/requirement-options", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() },
+    body: JSON.stringify({ case_code: caseCode }),
+  });
+  if (!response.ok) throw new Error(`Agent 准备设施需求草案 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<PlantRequirementOptionSet>;
 }
 
 export async function loadPlantRequirement(

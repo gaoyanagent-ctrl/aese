@@ -320,14 +320,15 @@ genesis.facility.accepted.v1
 
 交互修订当前已形成第一个可操作纵切：
 
-1. Plant Build Play 读取 IAOS 已过账银行科目和已批准预算形成的只读财务快照，显示来源引用和 snapshot hash；用户只能编辑投资申请额、现金保留下限等业务输入，不能覆盖现金或预算事实。
-2. 用户填写 `FacilityRequirement` 后，浏览器只调用 AESE 同源 BFF；AESE 严格校验合同、调用已配置的 `plant-planning-agent` provider，并保存模型、prompt、request、token、输入/输出 hash 与校验结果等 CreativeJob 技术证据。
+1. Plant Build Play 读取 IAOS 已过账银行科目和已批准预算形成的只读财务快照。`plant-planning-agent` 先形成 2–3 个带取舍解释的 Requirement 草案；玩家选择一个草案，默认只确认可调整的投资申请上限和目标日期，专业参数渐进展开。玩家不能覆盖现金或预算事实。
+2. 玩家确认 `FacilityRequirement` 后，浏览器只调用 AESE 同源 BFF；AESE 严格校验合同、调用已配置的 `plant-planning-agent` provider，并保存模型、prompt、request、token、输入/输出 hash 与校验结果等 CreativeJob 技术证据。
 3. AESE 分别以 `facility.requirement.define` 和 `site.proposal.record` 向 IAOS 提交 Requirement 与 candidate-only ProposalSet。Agent 生成时同时携带由服务端形成的 Agent Run Evidence；IAOS 逐字段匹配 Proposal Evidence，并在同一事务保存 ProposalSet、Agent Run、Capability Execution、Process trace、Audit、Outbox 和只读投影。人员候选禁止携带 Agent Run。
 4. 项目负责人可对候选执行采纳调研、退回重生成或淘汰，并填写业务理由；AESE 从 IAOS profile 解析实际人员身份，再以 `site.proposal.review` 保存审阅，浏览器不能指定 `reviewed_by`。
 5. 对已保存且审阅结论为“采纳调研”的候选，人员可发起外部调研。IAOS 创建 `facility.site.investigation.v1` 持久 `waiting_world` 工作项，并通过 World Bridge 写入带 correlation/subject 的 Intent。
-6. AESE 外部参与者使用结构化表单返回权属、可用面积、电力容量、正式报价、可用日期、许可、证据引用和备注。AESE 必须先写受信 World Journal Observation；IAOS 的 `site.investigation.observation.commit` 只消费与 Intent/correlation 匹配的 Journal 事实，保存权威 Observation 并完成工作项。
+6. 玩家点击“确认接收调研报告”时只提交案件、Requirement、调研请求和 `accept_report`。AESE 重读 IAOS 权威 Requirement、ProposalSet 与等待中的 Investigation Request，由版本化 World 策略确定性生成权属、可用面积、电力容量、正式报价、可用日期、许可、证据引用、外部参与者和发生时间。AESE 先写受信 World Journal Observation；IAOS 的 `site.investigation.observation.commit` 只消费与 Intent/correlation 匹配的 Journal 事实，保存权威 Observation 并完成工作项。浏览器不得提交或覆盖这些外部事实。
 7. 人员在可解释比较下选择合格候选并填写推荐理由、替代方案比较；AESE Command Gateway 调用 `site.selection.recommend`，IAOS 重算并创建统一审批。玩家进入 AESE 治理会议室，审阅 IAOS 冻结事项和实际 Assignment；当前受派审批人可在游戏内批准或驳回。批准后由项目负责人点击“批准已生效 · 正式选址”，通过 `site.selection.formalize` 原子消费审批。IAOS 审批中心只作为审计穿透入口。
 8. 正式选址后项目负责人在园区权利人场景发起场址控制请求，选择租赁、购买、代建或使用协议方式并声明期望交付日。园区/权利人是 World 外部参与者；当交付事件到达时，玩家只核对方式、日期和待归档证据范围并点击“确认接收场地”。协议引用、交接引用、生效时间、占有授权证据和外部参与者身份全部由 AESE World 引擎从 IAOS 权威请求确定性生成，浏览器不得填写或覆盖。AESE 先写 `site.control.delivered.v1` Observation，IAOS 再以 `site.control.observation.commit` 形成权威场址控制事实。
+9. 场址控制形成后，设施项目 Agent 从权威 Requirement、正式选址和交付 Observation 生成 2–3 套交付策略、预算上限、日期和 WBS 方案。玩家只选择方案，不手工编 WBS；`facility.project.plan.record` 固化 Agent 草案，`facility.project.baseline.submit` 按 `genesis.facility.project.approval` 路由审批，批准后由 `facility.project.baseline.activate` 原子写入设施项目与 WBS。三步由 Effective Process `facility.project.baseline.v1` 追踪，项目办公室、治理会议室和项目档案分别承担选择、审批和查询。
 
 浏览器生成的 Intent/Observation/Recommendation 请求编码只承担幂等关联，不作为授权身份。
 LAN HTTP 浏览器可能不提供 secure-context-only 的 `crypto.randomUUID()`；前端必须通过统一
@@ -429,6 +430,19 @@ M10 必须延续 DES-028 的 Enterprise Genesis 游戏世界，不能把独立�
 “Plant Build Play”。IAOS 的 `M10 工厂规划` 继续作为配置、穿透和证据工作台；AESE
 `/#world-plant-build` 是玩家、人类角色、Agent 与 World 外部参与者共同工作的游戏入口。
 
+### 交互一致性强制约束
+
+M10 全部玩家任务遵循 DES-038，不再把“结构化合同完整”误解为“要求玩家填写完整合同”。
+完整合同仍由 AESE/IAOS 在服务端校验，但字段来源必须按 Human、Agent、World、IAOS 分工：
+
+- 首次设施需求由 Agent 根据企业身份、M9 资金与预算形成 2–3 个草案。玩家先选方向，只对投资上限、目标日期等真实经营边界作少量调整；面积、电力、候选数量和方案类型作为可展开专业参数。
+- 外部调研的权属、面积、电力、报价、可用日期、许可、证据引用、外部参与者和发生时间由 World 引擎从权威调研请求生成。玩家只发起调研、查看报告并确认接收，不得手填 Observation。
+- 人工完整录入仅作为显式“专业人员接管”路径，不是正常游戏主线。
+- 每个非终态状态必须有唯一可达主动作；未发布 Capability/Process 的后续节点不得提前显示为可操作 NPC。
+
+场地控制完成而设施项目/WBS 纵切尚未发布时，页面应显示“场址取得章节完成”和已归档证据，
+而不是显示没有响应的“准备设施项目”。只有设施项目权威能力发布后，该任务才允许解锁。
+
 ### 17.1 同一全屏游戏壳与机构场景图
 
 M9 交接到 M10 时必须保留 tenant、case、workspace、玩家身份和企业上下文。当前交互纵切
@@ -459,6 +473,9 @@ Recommendation                 -> 治理会议室 / 等待审批
 Formal Decision                -> 园区权利人 / 请求实际场址控制
 Site Control Request           -> 园区权利人 / 等待协议与交接 Observation
 Trusted Site Control           -> 项目准备 / 允许设计项目与 WBS
+Project Plan                   -> 治理会议室 / 等待项目基线审批
+Approved Project Plan          -> 项目办公室 / 激活权威项目与 WBS
+Active Facility Project        -> 项目办公室 / 查询项目基线档案
 ```
 
 更晚阶段的已提交事实优先于较早阶段。地点切换、人物移动和对话只改变观察视角；只有 Capability、
@@ -486,8 +503,9 @@ Approval 或受信 World Observation 成功后重新读取事实，才能改变�
 | --- | --- |
 | Facility Requirement、资金边界 | 企业总部规划中心 |
 | ProposalSet、人工 Review | 产业园区地图 |
-| Investigation、World Observation、正式场址决定 | 候选场址现场 |
+| Investigation、World Observation、正式场址决定、Site Control | 候选场址现场 |
 | Recommendation、Approval | 治理决策会议室 |
+| Facility Project、WBS | 企业总部项目办公室 |
 
 档案展示业务摘要、状态和 evidence reference，并可进一步穿透 IAOS；它是权威事实的只读投影，
 不是浏览器本地日志。旧 reference replay 只保留在 fixture、测试和证据工具中，禁止出现在正式

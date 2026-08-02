@@ -64,9 +64,9 @@ describe("PlantBuildPlay interactive planning", () => {
     expect(screen.queryByLabelText(/目标区域/)).not.toBeInTheDocument();
     await openNpcTask(/纪元：与规划 Agent 制定需求/);
     await waitFor(() => expect(screen.getByText("未启用外部模型")).toBeInTheDocument());
-    expect(screen.getByRole("button", { name: /让 Agent 生成候选/ })).toBeDisabled();
+    expect(screen.getByRole("button", { name: /让 Agent 准备需求方案/ })).toBeDisabled();
     expect(screen.getByText(/不能生成虚拟固定候选/)).toBeInTheDocument();
-    expect(screen.getByText(/来自 IAOS 权威账务/)).toBeInTheDocument();
+    expect(screen.getByText(/IAOS 可用现金/)).toBeInTheDocument();
   });
 
   it("allows a project lead to establish the first manual proposal set", async () => {
@@ -104,6 +104,7 @@ describe("PlantBuildPlay interactive planning", () => {
       const path = String(input);
       if (path.endsWith("planning-status")) return { ok: true, json: async () => ({ state: "connected", provider: "MiniMax", model: "MiniMax-M2.5", prompt_version: "plant-planning-v1" }) };
       if (path.includes("financial-constraints")) return { ok: true, json: async () => ({ case_code: "INC-GX-TEST", legal_entity_code: "LE-GX-TEST", financial_constraint: { available_cash: { value: "20000000.00", currency: "CNY", scale: 2 }, approved_budget: { value: "15000000.00", currency: "CNY", scale: 2 }, cash_source_ref: "gl:BOOK:1002", budget_source_ref: "budget:BUD-1", snapshot_hash: "sha256:authority" } }) };
+      if (path.endsWith("requirement-options") && init?.method === "POST") return { ok: true, json: async () => ({ schema_version: "1.0", options: [{ option_id: "requirement-option-1", title: "轻资产快速投产", business_rationale: "平衡上市时间和现金占用", target_region: "江苏省苏州市", facility_purpose: "冷却板制造基地", minimum_area_m2: 12000, minimum_electricity_kva: 2200, target_available_at: "2026-11-01T08:00:00Z", candidate_count: 3, allowed_option_types: ["lease_and_retrofit"], investment_request: { value: "15000000.00", currency: "CNY", scale: 2 }, minimum_cash_reserve: { value: "3000000.00", currency: "CNY", scale: 2 }, preferences: ["快速投产"], tradeoffs: ["扩展空间有限"] }], evidence: { provider: "MiniMax", model: "MiniMax-M2.5", prompt_version: "plant-requirement-adviser-v1", input_hash: "sha256:brief-in", output_hash: "sha256:brief-out", validated_at: "2026-08-01T08:00:00Z" } }) };
       if (path.includes("/requirements/")) return { ok: true, status: 200, json: async () => ({ revision: 3 }) };
       if (path.endsWith("investigations")) return init?.method === "POST"
         ? { ok: true, json: async () => ({ status: "waiting_world", investigation_request: {}, work_item: {} }) }
@@ -125,17 +126,11 @@ describe("PlantBuildPlay interactive planning", () => {
     render(<PlantBuildPlay onExit={() => undefined} />);
     await openNpcTask(/纪元：与规划 Agent 制定需求/);
     await waitFor(() => expect(screen.getByText(/MiniMax · MiniMax-M2.5/)).toBeInTheDocument());
-    fireEvent.change(screen.getByLabelText(/目标区域/), { target: { value: "江苏省苏州市" } });
-    fireEvent.change(screen.getByLabelText(/设施用途/), { target: { value: "冷却板制造基地" } });
-    fireEvent.change(screen.getByLabelText(/最小面积/), { target: { value: "12000" } });
-    fireEvent.change(screen.getByLabelText(/最小电力容量/), { target: { value: "2200" } });
-    fireEvent.change(screen.getByLabelText(/目标可用时间/), { target: { value: "2026-11-01T08:00" } });
-    fireEvent.change(screen.getByLabelText(/本次投资申请金额/), { target: { value: "15000000" } });
-    fireEvent.change(screen.getByLabelText(/最低现金保留额/), { target: { value: "3000000" } });
-    expect(screen.getByLabelText(/可用现金快照/)).toHaveValue("20000000.00");
-    expect(screen.getByLabelText(/已批准预算快照/)).toHaveValue("15000000.00");
-    fireEvent.click(screen.getByLabelText("租赁并改造"));
-    fireEvent.submit(screen.getByRole("button", { name: /让 Agent 生成候选/ }).closest("form")!);
+    fireEvent.click(screen.getByRole("button", { name: "让 Agent 准备需求方案" }));
+    fireEvent.click(await screen.findByRole("button", { name: /轻资产快速投产/ }));
+    expect(screen.getByLabelText(/本次投资申请金额/)).toHaveValue(15000000);
+    expect(screen.getByLabelText(/目标可用时间/)).toHaveValue("2026-11-01T08:00");
+    fireEvent.submit(screen.getByRole("button", { name: /确认草案并生成场址候选/ }).closest("form")!);
     await waitFor(() => expect(screen.getByRole("heading", { name: "北区租赁改造建议" })).toBeInTheDocument());
     expect(screen.getByText("核验供电容量")).toBeInTheDocument();
     fireEvent.click(screen.getByRole("button", { name: "采纳调研" }));
@@ -146,7 +141,7 @@ describe("PlantBuildPlay interactive planning", () => {
     fireEvent.click(screen.getByRole("button", { name: "发起外部调研工作项" }));
     await waitFor(() => expect(fetchMock.mock.calls.some(([path, init]) => String(path).endsWith("investigations") && init?.method === "POST")).toBe(true));
     const request = JSON.parse(fetchMock.mock.calls.find(([path]) => String(path).endsWith("proposals"))?.[1]?.body as string);
-    expect(request.investment_request.value).toBe("15000000");
+    expect(request.investment_request.value).toBe("15000000.00");
     expect(request.revision).toBe(4);
     expect(request.allowed_option_types).toEqual(["lease_and_retrofit"]);
     expect(request.financial_constraint.snapshot_hash).toBe("sha256:authority");
