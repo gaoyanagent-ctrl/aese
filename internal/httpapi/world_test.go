@@ -19,7 +19,17 @@ func (p *planningProviderStub) Status() plantbuild.PlanningProviderStatus {
 }
 func (p *planningProviderStub) Generate(_ context.Context, request plantbuild.FacilityRequirement) (plantbuild.ProposalSet, error) {
 	p.calls++
-	return plantbuild.ProposalSet{SchemaVersion: "1.0", ProposalSetID: "SET-1", RequirementID: request.RequirementID, Revision: 1, Status: "candidate_only", Evidence: plantbuild.ProposalEvidence{Provider: "MiniMax", Model: "MiniMax-M3", PromptVersion: plantbuild.PlanningPromptVersion, RequestID: "req-1", InputHash: "sha256:input", OutputHash: "sha256:output", TokenUsage: map[string]int{"total_tokens": 12}, ValidatedAt: "2026-08-01T10:00:00Z"}}, nil
+	proposals := []plantbuild.SiteOptionProposal{}
+	for index := 0; index < request.CandidateCount; index++ {
+		proposals = append(proposals, plantbuild.SiteOptionProposal{
+			ProposalID: "P-" + string(rune('1'+index)), OptionType: request.AllowedOptionTypes[index%len(request.AllowedOptionTypes)],
+			DisplayName: "候选方案" + string(rune('一'+index)), BusinessRationale: "满足设施需求并保留人工决策",
+			EstimatedAmount:   plantbuild.AmountRange{Minimum: plantbuild.Money{Value: "12000000.00", Currency: "CNY", Scale: 2}, Likely: plantbuild.Money{Value: "15000000.00", Currency: "CNY", Scale: 2}, Maximum: request.InvestmentRequest, Basis: "概念估算"},
+			EstimatedSchedule: plantbuild.ScheduleRange{Earliest: "2026-10-01T00:00:00Z", Likely: "2026-11-01T00:00:00Z", Latest: "2026-12-01T00:00:00Z"},
+			Assumptions:       []string{"存在合适场址"}, FactsRequired: []string{"正式报价"}, Risks: []string{"交付延期"}, SourceRefs: []string{"requirement:" + request.RequirementID}, Confidence: "0.60", Status: "proposed",
+		})
+	}
+	return plantbuild.ProposalSet{SchemaVersion: "1.0", ProposalSetID: "SET-1", RequirementID: request.RequirementID, Revision: 1, Status: "candidate_only", Proposals: proposals, Evidence: plantbuild.ProposalEvidence{Provider: "MiniMax", Model: "MiniMax-M3", PromptVersion: plantbuild.PlanningPromptVersion, RequestID: "req-1", InputHash: "sha256:input", OutputHash: "sha256:output", TokenUsage: map[string]int{"total_tokens": 12}, ValidatedAt: "2026-08-01T10:00:00Z"}}, nil
 }
 
 func TestGenesisWorldAPI(t *testing.T) {
@@ -230,6 +240,38 @@ func TestPlantPlanningProposalPersistsEvidenceAndReplaysIdempotently(t *testing.
 	}
 	if provider.calls != 1 {
 		t.Fatalf("provider calls=%d", provider.calls)
+	}
+}
+
+func TestPlantPlanningInvalidCompletedEvidenceIsRegenerated(t *testing.T) {
+	body := `{"schema_version":"1.0","requirement_id":"REQ-1","tenant_id":"tenant-a","case_code":"INC-1","legal_entity_code":"LE-1","target_region":"华东","facility_purpose":"汽车零部件制造","minimum_area_m2":12000,"minimum_electricity_kva":2200,"target_available_at":"2027-01-01T00:00:00+08:00","candidate_count":2,"allowed_option_types":["leased_shell","build_to_suit"],"investment_request":{"value":"18000000.00","currency":"CNY","scale":2},"minimum_cash_reserve":{"value":"5000000.00","currency":"CNY","scale":2},"financial_constraint":{"available_cash":{"value":"30000000.00","currency":"CNY","scale":2},"approved_budget":{"value":"20000000.00","currency":"CNY","scale":2},"cash_source_ref":"ledger:CASH-1","budget_source_ref":"budget:BUD-1","snapshot_hash":"sha256:abc"},"preferences":["优先投产速度"],"revision":1,"revision_reason":"首次规划"}`
+	var requirement plantbuild.FacilityRequirement
+	if err := json.Unmarshal([]byte(body), &requirement); err != nil {
+		t.Fatal(err)
+	}
+	provider := &planningProviderStub{}
+	invalid, err := provider.Generate(context.Background(), requirement)
+	if err != nil {
+		t.Fatal(err)
+	}
+	provider.calls = 0
+	invalid.Proposals[0].EstimatedAmount.Maximum.Value = "22000000.00"
+	inputHash := plantbuild.CanonicalHash(requirement)
+	store := creative.NewJobStore(t.TempDir() + "/jobs.json")
+	if err := store.Save(creative.CreativeJob{
+		JobID: "plant-planning-" + strings.TrimPrefix(inputHash, "sha256:")[:24], TenantID: requirement.TenantID,
+		CaseCode: requirement.CaseCode, Kind: "facility_planning", Status: "completed", Provider: "MiniMax",
+		Model: "MiniMax-M3", PromptVersion: "plant-planning-v1", InputHash: inputHash,
+		ValidationResult: "valid", Parameters: map[string]any{"proposal_set": invalid},
+	}); err != nil {
+		t.Fatal(err)
+	}
+	server := New(Config{PlantPlanningProvider: provider, CreativeJobStore: store, AllowLocalPlantAuthority: true})
+	req := httptest.NewRequest(http.MethodPost, "/api/aese/v1/world/plant-build/proposals", strings.NewReader(body))
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusOK || provider.calls != 1 || strings.Contains(res.Body.String(), `"idempotent_replay":true`) {
+		t.Fatalf("status=%d calls=%d body=%s", res.Code, provider.calls, res.Body.String())
 	}
 }
 

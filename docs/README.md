@@ -31,6 +31,7 @@
 | [SOL-002 AESE World 失效设立案恢复](solutions/SOL-002-aese-world-stale-incorporation-case-recovery.md) | 旧 case 深链 404 时保留 World 并引导切换有效案件 | Completed |
 | [SOL-009 Genesis 投影会话与 Runtime 自动恢复](solutions/SOL-009-genesis-projection-session-and-runtime-recovery.md) | 旧租户会话造成 projection 404、Runtime stale 422 时刷新受管 Workspace session 并安全重试 | Completed |
 | [SOL-010 M9 Command Gateway 与 Process Artifact 权威](solutions/SOL-010-m9-command-gateway-and-process-artifact-authority.md) | M9 浏览器写操作统一经白名单 BFF，IAOS 工作项只消费已发布 Process Artifact | Completed |
+| [SOL-011 M10 Agent 候选投资上限与重放](solutions/SOL-011-m10-agent-proposal-investment-ceiling.md) | Agent 候选越过 Requirement 投资上限且 completed 证据被永久重放 | Completed |
 
 ### 华辰场景文档
 

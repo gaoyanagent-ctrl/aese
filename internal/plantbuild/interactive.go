@@ -15,7 +15,7 @@ import (
 
 const (
 	InteractiveSchemaVersion = "1.0"
-	PlanningPromptVersion    = "plant-planning-v1"
+	PlanningPromptVersion    = "plant-planning-v2"
 )
 
 var ErrPlanningModelNotConfigured = errors.New("external planning model not configured")
@@ -193,34 +193,50 @@ func (p AIPlanningProvider) Generate(ctx context.Context, requirement FacilityRe
 		return ProposalSet{}, ErrPlanningModelNotConfigured
 	}
 	input, _ := json.Marshal(requirement)
-	user := `你是制造企业设施规划 Agent。只返回严格 JSON：{"proposals":[{"option_type":"","display_name":"","business_rationale":"","estimated_amount":{"minimum":{"value":"0.00","currency":"CNY","scale":2},"likely":{"value":"0.00","currency":"CNY","scale":2},"maximum":{"value":"0.00","currency":"CNY","scale":2},"basis":""},"estimated_schedule":{"earliest":"RFC3339","likely":"RFC3339","latest":"RFC3339"},"assumptions":[""],"facts_required":[""],"risks":[""],"source_refs":["requirement:<id>"],"confidence":"0.00"}]}。候选数量必须等于 candidate_count，option_type 只能来自 allowed_option_types。估算必须明确依据；不得声称已取得报价、权属、许可或容量证明。不要 Markdown 或思考过程。prompt_version=` + PlanningPromptVersion + `\nrequirement=` + string(input)
-	content, requestID, usage, err := p.Completer.CompleteJSON(ctx, "Return strict JSON only. Never invent verified external facts.", user, 0.6, 8192)
-	if err != nil {
-		return ProposalSet{}, err
-	}
-	var decoded struct {
-		Proposals []SiteOptionProposal `json:"proposals"`
-	}
-	decoder := json.NewDecoder(strings.NewReader(content))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&decoded); err != nil {
-		return ProposalSet{}, fmt.Errorf("invalid plant planning JSON: %w", err)
-	}
+	user := `你是制造企业设施规划 Agent。只返回严格 JSON：{"proposals":[{"option_type":"","display_name":"","business_rationale":"","estimated_amount":{"minimum":{"value":"0.00","currency":"CNY","scale":2},"likely":{"value":"0.00","currency":"CNY","scale":2},"maximum":{"value":"0.00","currency":"CNY","scale":2},"basis":""},"estimated_schedule":{"earliest":"RFC3339","likely":"RFC3339","latest":"RFC3339"},"assumptions":[""],"facts_required":[""],"risks":[""],"source_refs":["requirement:<id>"],"confidence":"0.00"}]}。候选数量必须等于 candidate_count，option_type 只能来自 allowed_option_types。每个候选的 minimum、likely、maximum 必须使用 investment_request 的 currency/scale，且 maximum 不得超过 investment_request.value；超出上限的方案不能作为候选返回，应改为上限内的可行方案并在 risks 说明范围取舍。估算必须明确依据；不得声称已取得报价、权属、许可或容量证明。不要 Markdown 或思考过程。prompt_version=` + PlanningPromptVersion + `\nrequirement=` + string(input)
 	inputHash := CanonicalHash(requirement)
-	for i := range decoded.Proposals {
-		decoded.Proposals[i].ProposalID = fmt.Sprintf("site-%s-r%d-%02d", stableInteractiveCode(requirement.RequirementID), requirement.Revision, i+1)
-		decoded.Proposals[i].Status = "proposed"
-	}
 	now := time.Now().UTC()
 	if p.Now != nil {
 		now = p.Now().UTC()
 	}
-	set := ProposalSet{SchemaVersion: InteractiveSchemaVersion, ProposalSetID: "proposal-set-" + strings.TrimPrefix(inputHash, "sha256:")[:20], RequirementID: requirement.RequirementID, Revision: 1, Status: "candidate_only", Proposals: decoded.Proposals}
-	set.Evidence = ProposalEvidence{Provider: p.Provider, Model: p.Model, PromptVersion: PlanningPromptVersion, RequestID: requestID, InputHash: inputHash, OutputHash: CanonicalHash(set.Proposals), TokenUsage: usage, ValidatedAt: now.Format(time.RFC3339)}
-	if err := ValidateProposalSet(requirement, set); err != nil {
-		return ProposalSet{}, err
+	totalUsage := map[string]int{}
+	var previousContent string
+	var validationErr error
+	for attempt := 0; attempt < 2; attempt++ {
+		attemptUser := user
+		if attempt > 0 {
+			attemptUser += "\n上一版输出未通过治理校验：" + validationErr.Error() + "。请重新生成完整 JSON，不要解释。\nprevious_invalid_output=" + previousContent
+		}
+		content, requestID, usage, err := p.Completer.CompleteJSON(ctx, "Return strict JSON only. Never invent verified external facts or exceed the investment ceiling.", attemptUser, 0.6, 8192)
+		if err != nil {
+			return ProposalSet{}, err
+		}
+		for key, value := range usage {
+			totalUsage[key] += value
+		}
+		previousContent = content
+		var decoded struct {
+			Proposals []SiteOptionProposal `json:"proposals"`
+		}
+		decoder := json.NewDecoder(strings.NewReader(content))
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&decoded); err != nil {
+			validationErr = fmt.Errorf("invalid plant planning JSON: %w", err)
+			continue
+		}
+		for i := range decoded.Proposals {
+			decoded.Proposals[i].ProposalID = fmt.Sprintf("site-%s-r%d-%02d", stableInteractiveCode(requirement.RequirementID), requirement.Revision, i+1)
+			decoded.Proposals[i].Status = "proposed"
+		}
+		set := ProposalSet{SchemaVersion: InteractiveSchemaVersion, ProposalSetID: "proposal-set-" + strings.TrimPrefix(inputHash, "sha256:")[:20], RequirementID: requirement.RequirementID, Revision: 1, Status: "candidate_only", Proposals: decoded.Proposals}
+		set.Evidence = ProposalEvidence{Provider: p.Provider, Model: p.Model, PromptVersion: PlanningPromptVersion, RequestID: requestID, InputHash: inputHash, OutputHash: CanonicalHash(set.Proposals), TokenUsage: totalUsage, ValidatedAt: now.Format(time.RFC3339)}
+		if err := ValidateProposalSet(requirement, set); err != nil {
+			validationErr = err
+			continue
+		}
+		return set, nil
 	}
-	return set, nil
+	return ProposalSet{}, fmt.Errorf("plant planning output invalid after one repair: %w", validationErr)
 }
 
 func stableInteractiveCode(value string) string {
@@ -311,6 +327,15 @@ func ValidateProposalSet(requirement FacilityRequirement, set ProposalSet) error
 		}
 		if err := validateAmountRange(proposal.EstimatedAmount); err != nil {
 			return fmt.Errorf("proposal %s: %w", proposal.ProposalID, err)
+		}
+		if proposal.EstimatedAmount.Maximum.Currency != requirement.InvestmentRequest.Currency ||
+			proposal.EstimatedAmount.Maximum.Scale != requirement.InvestmentRequest.Scale {
+			return fmt.Errorf("proposal %s amount currency or scale differs from investment request", proposal.ProposalID)
+		}
+		maximum, _ := new(big.Rat).SetString(proposal.EstimatedAmount.Maximum.Value)
+		ceiling, _ := new(big.Rat).SetString(requirement.InvestmentRequest.Value)
+		if maximum.Cmp(ceiling) > 0 {
+			return fmt.Errorf("proposal %s maximum amount exceeds investment request", proposal.ProposalID)
 		}
 		if err := validateScheduleRange(proposal.EstimatedSchedule); err != nil {
 			return fmt.Errorf("proposal %s: %w", proposal.ProposalID, err)

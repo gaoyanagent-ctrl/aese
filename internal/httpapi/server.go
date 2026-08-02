@@ -871,18 +871,23 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				}
 				if replay {
 					set, ok := decodeStoredProposalSet(existing.Parameters["proposal_set"])
-					if !ok {
-						s.writeError(w, http.StatusInternalServerError, "plant_planning_evidence_invalid", "stored proposal evidence cannot be decoded", false, "", "")
+					if ok && plantbuild.ValidateProposalSet(request, set) == nil {
+						if authority != nil {
+							if err := postPlantAuthorityProposalCommand(ctx, authority, actorID, request.CaseCode, set, existing); err != nil {
+								s.writePlantAuthorityError(w, err, "site_proposal_not_committed")
+								return
+							}
+						}
+						s.writeJSON(w, http.StatusOK, map[string]any{"proposal_set": set, "agent_job": existing, "idempotent_replay": true, "authority_status": "committed"})
 						return
 					}
-					if authority != nil {
-						if err := postPlantAuthorityProposalCommand(ctx, authority, actorID, request.CaseCode, set, existing); err != nil {
-							s.writePlantAuthorityError(w, err, "site_proposal_not_committed")
-							return
-						}
+					// A completed job created by an older contract may contain a
+					// proposal that the current IAOS authority must reject. Replace
+					// it with a new running attempt instead of replaying it forever.
+					if err := s.creativeJobStore.Save(job); err != nil {
+						s.writeError(w, http.StatusInternalServerError, "plant_planning_evidence_write_failed", err.Error(), true, "", "")
+						return
 					}
-					s.writeJSON(w, http.StatusOK, map[string]any{"proposal_set": set, "agent_job": existing, "idempotent_replay": true, "authority_status": "committed"})
-					return
 				}
 			}
 			set, err := s.plantPlanningProvider.Generate(ctx, request)
@@ -908,15 +913,20 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			job.RequestID, job.TokenUsage = set.Evidence.RequestID, set.Evidence.TokenUsage
 			job.ContentHash, job.Parameters = set.Evidence.OutputHash, map[string]any{"proposal_set": set}
 			job.LatencyMS, job.CompletedAt = time.Since(started).Milliseconds(), time.Now().UTC().Format(time.RFC3339)
-			if s.creativeJobStore != nil {
-				if err := s.creativeJobStore.Save(job); err != nil {
-					s.writeError(w, http.StatusInternalServerError, "plant_planning_evidence_write_failed", err.Error(), true, "", "")
+			if authority != nil {
+				if err := postPlantAuthorityProposalCommand(ctx, authority, actorID, request.CaseCode, set, job); err != nil {
+					job.Status = "failed"
+					job.Error = "IAOS business commit failed: " + err.Error()
+					if s.creativeJobStore != nil {
+						_ = s.creativeJobStore.Save(job)
+					}
+					s.writePlantAuthorityError(w, err, "site_proposal_not_committed")
 					return
 				}
 			}
-			if authority != nil {
-				if err := postPlantAuthorityProposalCommand(ctx, authority, actorID, request.CaseCode, set, job); err != nil {
-					s.writePlantAuthorityError(w, err, "site_proposal_not_committed")
+			if s.creativeJobStore != nil {
+				if err := s.creativeJobStore.Save(job); err != nil {
+					s.writeError(w, http.StatusInternalServerError, "plant_planning_evidence_write_failed", err.Error(), true, "", "")
 					return
 				}
 			}

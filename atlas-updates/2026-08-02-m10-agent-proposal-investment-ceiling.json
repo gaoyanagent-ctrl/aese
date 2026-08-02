@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.agent-proposal-investment-ceiling.2026-08-02",
+  "node_key": "aese.genesis.m10-plant-build",
+  "update_type": "implementation",
+  "summary": "M10 Agent 候选在 AESE 与 IAOS 统一执行投资上限",
+  "detail": "plant-planning-v2 前置校验候选金额并允许一次显式模型修订；IAOS 原子提交成功后 CreativeJob 才完成，旧非法完成证据不再永久重放。",
+  "status_after": "building",
+  "current_state": "Agent 候选的币种、精度和最高金额受 Requirement 约束，失败仍可由人员修订需求或人工接管。",
+  "evidence_ref": "docs/solutions/SOL-011-m10-agent-proposal-investment-ceiling.md",
+  "occurred_at": "2026-08-02T02:30:00Z"
+}

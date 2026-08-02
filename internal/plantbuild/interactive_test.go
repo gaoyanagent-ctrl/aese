@@ -3,6 +3,7 @@ package plantbuild
 import (
 	"context"
 	"errors"
+	"strings"
 	"testing"
 	"time"
 )
@@ -11,6 +12,20 @@ type planningCompleterStub struct{ content string }
 
 func (s planningCompleterStub) CompleteJSON(context.Context, string, string, float64, int) (string, string, map[string]int, error) {
 	return s.content, "request-1", map[string]int{"total_tokens": 42}, nil
+}
+
+type planningSequenceCompleterStub struct {
+	contents []string
+	calls    int
+}
+
+func (s *planningSequenceCompleterStub) CompleteJSON(context.Context, string, string, float64, int) (string, string, map[string]int, error) {
+	index := s.calls
+	if index >= len(s.contents) {
+		index = len(s.contents) - 1
+	}
+	s.calls++
+	return s.contents[index], "request-" + string(rune('1'+index)), map[string]int{"total_tokens": 10 + index}, nil
 }
 
 func requirementFixture() FacilityRequirement {
@@ -76,7 +91,7 @@ func TestInvestigationContractsRequireTraceableWorldFacts(t *testing.T) {
 }
 
 func TestAIPlanningProviderProducesValidatedCandidateOnlySet(t *testing.T) {
-	content := `{"proposals":[{"option_type":"leased_shell","display_name":"快速租赁改造","business_rationale":"缩短投产周期","estimated_amount":{"minimum":{"value":"12000000.00","currency":"CNY","scale":2},"likely":{"value":"15000000.00","currency":"CNY","scale":2},"maximum":{"value":"18000000.00","currency":"CNY","scale":2},"basis":"需求参数与待验证市场估算"},"estimated_schedule":{"earliest":"2026-10-01T00:00:00+08:00","likely":"2026-11-01T00:00:00+08:00","latest":"2026-12-01T00:00:00+08:00"},"assumptions":["存在标准厂房"],"facts_required":["租赁报价"],"risks":["增容延期"],"source_refs":["requirement:REQ-1"],"confidence":"0.62"},{"option_type":"build_to_suit","display_name":"定制代建","business_rationale":"平衡控制权和周期","estimated_amount":{"minimum":{"value":"16000000.00","currency":"CNY","scale":2},"likely":{"value":"18000000.00","currency":"CNY","scale":2},"maximum":{"value":"20000000.00","currency":"CNY","scale":2},"basis":"需求参数与待验证市场估算"},"estimated_schedule":{"earliest":"2026-11-01T00:00:00+08:00","likely":"2026-12-01T00:00:00+08:00","latest":"2027-01-01T00:00:00+08:00"},"assumptions":["园区可代建"],"facts_required":["交付承诺"],"risks":["承包商履约"],"source_refs":["requirement:REQ-1"],"confidence":"0.55"}]}`
+	content := `{"proposals":[{"option_type":"leased_shell","display_name":"快速租赁改造","business_rationale":"缩短投产周期","estimated_amount":{"minimum":{"value":"12000000.00","currency":"CNY","scale":2},"likely":{"value":"15000000.00","currency":"CNY","scale":2},"maximum":{"value":"18000000.00","currency":"CNY","scale":2},"basis":"需求参数与待验证市场估算"},"estimated_schedule":{"earliest":"2026-10-01T00:00:00+08:00","likely":"2026-11-01T00:00:00+08:00","latest":"2026-12-01T00:00:00+08:00"},"assumptions":["存在标准厂房"],"facts_required":["租赁报价"],"risks":["增容延期"],"source_refs":["requirement:REQ-1"],"confidence":"0.62"},{"option_type":"build_to_suit","display_name":"定制代建","business_rationale":"平衡控制权和周期","estimated_amount":{"minimum":{"value":"15000000.00","currency":"CNY","scale":2},"likely":{"value":"17000000.00","currency":"CNY","scale":2},"maximum":{"value":"18000000.00","currency":"CNY","scale":2},"basis":"需求参数与待验证市场估算"},"estimated_schedule":{"earliest":"2026-11-01T00:00:00+08:00","likely":"2026-12-01T00:00:00+08:00","latest":"2027-01-01T00:00:00+08:00"},"assumptions":["园区可代建"],"facts_required":["交付承诺"],"risks":["承包商履约"],"source_refs":["requirement:REQ-1"],"confidence":"0.55"}]}`
 	provider := AIPlanningProvider{Completer: planningCompleterStub{content}, Provider: "MiniMax", Model: "MiniMax-M3", Now: func() time.Time { return time.Date(2026, 8, 1, 10, 0, 0, 0, time.UTC) }}
 	set, err := provider.Generate(context.Background(), requirementFixture())
 	if err != nil {
@@ -88,6 +103,24 @@ func TestAIPlanningProviderProducesValidatedCandidateOnlySet(t *testing.T) {
 	set.Proposals[1].ProposalID = set.Proposals[0].ProposalID
 	if ValidateProposalSet(requirementFixture(), set) == nil {
 		t.Fatal("duplicate proposal identity accepted")
+	}
+}
+
+func TestAIPlanningProviderRepairsProposalAboveInvestmentCeiling(t *testing.T) {
+	tooExpensive := `{"proposals":[{"option_type":"leased_shell","display_name":"越界方案一","business_rationale":"验证投资上限","estimated_amount":{"minimum":{"value":"17000000.00","currency":"CNY","scale":2},"likely":{"value":"19000000.00","currency":"CNY","scale":2},"maximum":{"value":"22000000.00","currency":"CNY","scale":2},"basis":"概念估算"},"estimated_schedule":{"earliest":"2026-10-01T00:00:00+08:00","likely":"2026-11-01T00:00:00+08:00","latest":"2026-12-01T00:00:00+08:00"},"assumptions":["假设"],"facts_required":["报价"],"risks":["超预算"],"source_refs":["requirement:REQ-1"],"confidence":"0.50"},{"option_type":"build_to_suit","display_name":"越界方案二","business_rationale":"验证投资上限","estimated_amount":{"minimum":{"value":"17000000.00","currency":"CNY","scale":2},"likely":{"value":"19000000.00","currency":"CNY","scale":2},"maximum":{"value":"22000000.00","currency":"CNY","scale":2},"basis":"概念估算"},"estimated_schedule":{"earliest":"2026-10-01T00:00:00+08:00","likely":"2026-11-01T00:00:00+08:00","latest":"2026-12-01T00:00:00+08:00"},"assumptions":["假设"],"facts_required":["报价"],"risks":["超预算"],"source_refs":["requirement:REQ-1"],"confidence":"0.50"}]}`
+	valid := strings.ReplaceAll(tooExpensive, "22000000.00", "18000000.00")
+	valid = strings.ReplaceAll(valid, "19000000.00", "17500000.00")
+	completer := &planningSequenceCompleterStub{contents: []string{tooExpensive, valid}}
+	provider := AIPlanningProvider{Completer: completer, Provider: "MiniMax", Model: "MiniMax-M3"}
+	set, err := provider.Generate(context.Background(), requirementFixture())
+	if err != nil {
+		t.Fatal(err)
+	}
+	if completer.calls != 2 {
+		t.Fatalf("calls=%d", completer.calls)
+	}
+	if set.Evidence.TokenUsage["total_tokens"] != 21 {
+		t.Fatalf("usage=%v", set.Evidence.TokenUsage)
 	}
 }
 

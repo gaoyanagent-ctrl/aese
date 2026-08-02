@@ -1991,3 +1991,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：M9 与 M10 继续复用同一个 MiniMax adapter 和密钥配置，但每个业务 Provider 都有独立可观测状态和发布门；没有模型时 M10 仍失败关闭并要求显式人工候选，不能用固定方案冒充 Agent。
 - 验证：`bash -n`、配置检查、creative/plantbuild/httpapi/server 定向 Go 测试与 vet 通过；标准脚本重建并部署 8090 后，直连和 4173 BFF 的 M9/M10 状态均为 `connected / MiniMax / MiniMax-M3`，服务健康且写入口不再因 Provider 缺失返回 503。故障案件已确认保存 Requirement revision 1/2，并留下两条明确的 `model not configured` failed CreativeJob，可由原用户会话重试。System Atlas 同步端点仍返回 404，声明保留待路由恢复后幂等补录。
 - 后续：由测试用户重试当前案件生成，核对 completed/valid CreativeJob、IAOS Agent Run 和 Proposal revision；继续 S4.3 项目/WBS 纵切。
+
+## 2026-08-02 - M10 Agent 候选投资上限前置治理
+
+- 变更：`plant-planning-v2` 明确要求所有候选最高估算额不超过 Requirement 投资申请额；AESE 增加与 IAOS 一致的币种、精度和最高金额预校验，首次非法输出携带错误执行一次完整 JSON 修订并累计 Token；CreativeJob 仅在 IAOS Proposal/Agent Run 原子提交后 completed，旧合同下非法 completed 证据自动失效重生成。
+- 原因：MiniMax 对 5000 万元上限生成了最高 6500 万和 1 亿元的候选，AESE 先把作业记为完成，随后 IAOS 正确返回 422；再次点击又会永久重放相同非法候选。
+- 影响：资金硬门在 Agent 输出、BFF 和 IAOS 三层一致失败关闭；系统不会静默压低金额或把不可行方案包装成合规方案，用户仍可修订投资申请额或走人工候选。
+- 验证：新增超额候选拒绝、一次修订、Token 累计和旧 completed 非法证据重生成测试；AESE 全仓 Go test/vet、文档 diff、Atlas tracking 与 JSON 校验通过。标准脚本已部署 8090，M10 在线状态为 `connected / MiniMax / MiniMax-M3 / plant-planning-v2`；故障案件 active Requirement 为 revision 3，旧越界作业将在原用户重试时自动失效。System Atlas 同步端点仍返回 404，声明保留待路由恢复后幂等补录。
+- 后续：标准部署后由原用户重试并核对 MiniMax 修订、IAOS Agent Run 和 Proposal 原子提交。
