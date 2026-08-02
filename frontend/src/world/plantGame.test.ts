@@ -22,7 +22,7 @@ describe("M10 game projection stage", () => {
     [{ investigationCount: 1 }, "investigation"],
     [{ observedCount: 1 }, "comparison"],
     [{ hasRecommendation: true }, "governance"],
-    [{ hasDecision: true }, "selected"],
+    [{ hasDecision: true }, "site_control"],
     [{ hasDecision: true, hasSiteControlRequest: true }, "site_control"],
     [{ hasDecision: true, hasSiteControlRequest: true, hasSiteControl: true }, "project_ready"],
   ])("derives committed facts %o as %s", (partial, expected) => {
@@ -37,11 +37,12 @@ describe("M10 game projection stage", () => {
       observedCount: 2,
       hasRecommendation: true,
       hasDecision: true,
-    }).key).toBe("selected");
+    }).key).toBe("site_control");
   });
 
-  it("does not treat a formal site decision as physical site control", () => {
-    expect(derivePlantGameStage({ ...empty, hasDecision: true }).key).toBe("selected");
+  it("opens the site-control task without treating the decision as delivered control", () => {
+    expect(derivePlantGameStage({ ...empty, hasDecision: true }).key).toBe("site_control");
     expect(derivePlantGameStage({ ...empty, hasDecision: true, hasSiteControlRequest: true }).key).toBe("site_control");
+    expect(derivePlantGameStage({ ...empty, hasDecision: true, hasSiteControl: true }).key).toBe("project_ready");
   });
 });

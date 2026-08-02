@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m10.site-control-entry-reachability.2026-08-02",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "修复 M10 正式选址后场址控制入口不可达",
+  "detail": "Game Projection 不再停在只能查看档案的 selected 阶段；正式选址决定会立即暴露园区权利方场址控制任务，同时保持 site_controlled 只能由可信协议与交接 Observation 形成。",
+  "status_after": "building",
+  "current_state": "正式选址到场址控制命令的游戏入口已可达；项目/WBS 等后续 M10 节点仍在建设。",
+  "evidence_ref": "frontend/src/components/world/PlantBuildPlay.test.tsx",
+  "occurred_at": "2026-08-02T08:40:00Z"
+}

@@ -2054,3 +2054,10 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：请求后必须等待园区/权利人 World 参与者；只有可信且完整的协议、交接和占有授权 Observation 才形成 `site_controlled`。延迟或拒绝失败关闭本次 Run，并允许保留历史后重新发起；项目/WBS 仍不会自动完成。
 - 验证：IAOS Go 全仓与 vet、治理写检查、Code Map/Atlas tracking 通过；AESE Go 全仓与 vet、26 个前端测试文件/88 项测试、TypeScript、Vite 生产构建及 1440/1280/mobile 三视口 Playwright 9 项通过。8082、8090、4173 已重启且健康，四个 active 租户均升级到平台 Edition `1.16.0`；IAOS 与 AESE 新 site-controls 只读端点在故障案件返回 200，当前无控制请求符合既有事实。两仓本次 Atlas 声明均已成功同步。
 - 后续：实现项目立项、Agent WBS/空间/承包方案、人类确认与审批，再接施工 Observation、工程财务和最终验收。
+## 2026-08-02 - 修复正式选址到场址控制的不可达入口
+
+- 变更：Game Projection 在存在正式选址决定且尚无场址控制请求时，直接完成只读“场址已确定”checkpoint 并进入“取得场地控制”任务；候选场址场景立即显示“园区权利方 · 办理协议与场地交付”。
+- 原因：旧投影停在 `selected`，NPC“顾远”只打开档案；而“园区权利方”要等请求创建后才出现，请求表单又只存在于后一个阶段，形成用户无法打破的阶段死锁。
+- 影响：正式选址仍不等于实际场址受控，但它会立即暴露下一项可执行人/World 任务；只有协议与交接 Observation 成功后才进入 `project_ready`。
+- 验证：新增正式选址后场址控制任务可达的组件回归测试，修复前稳定失败、修复后通过；前端全量 26 文件/89 项、TypeScript 与 Vite 生产构建通过。线上故障案件确认存在 consumed 正式 Decision、场址控制请求为 0，正是本修复覆盖的状态；4173 健康，Atlas 声明已同步。
+- 后续：所有新增 Game Projection 节点都必须测试“前置事实已存在、下一命令尚未创建”时操作入口可达，不能只测试阶段名称。

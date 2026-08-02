@@ -125,8 +125,10 @@ export const PLANT_GAME_STAGES: PlantGameStageDefinition[] = [
 
 export function derivePlantGameStage(facts: PlantGameFacts): PlantGameStageDefinition {
   if (facts.hasSiteControl) return PLANT_GAME_STAGES[7];
-  if (facts.hasSiteControlRequest) return PLANT_GAME_STAGES[6];
-  if (facts.hasDecision) return PLANT_GAME_STAGES[5];
+  // A formal decision completes the read-only "selected" checkpoint and must
+  // immediately expose the next human/World task. Waiting for a control request
+  // before showing the request UI would make that first command unreachable.
+  if (facts.hasDecision) return PLANT_GAME_STAGES[6];
   if (facts.hasRecommendation) return PLANT_GAME_STAGES[4];
   if (facts.observedCount > 0) return PLANT_GAME_STAGES[3];
   if (facts.investigationCount > 0 || facts.adoptedReviewCount > 0) return PLANT_GAME_STAGES[2];

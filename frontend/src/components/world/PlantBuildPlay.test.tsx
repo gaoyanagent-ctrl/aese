@@ -207,6 +207,39 @@ describe("PlantBuildPlay interactive planning", () => {
     expect(screen.getByRole("heading", { name: "外部事实比较" })).toBeInTheDocument();
   });
 
+  it("offers the site control mission immediately after formal site selection", async () => {
+    const recommendation = {
+      schema_version: "1.0", recommendation_id: "REC-CONTROL-1", case_code: "INC-GX-TEST",
+      proposal_set_id: "SET-1", proposal_set_revision: 1, selected_proposal_id: "SITE-1",
+      assessment_policy_version: "site-assessment-v1", weights: { cost: 35, schedule: 25, capacity: 20, control: 20 },
+      recommendation_reason: "完成外部调研后推荐该正式场址", alternative_comparison: "相较其他候选更符合经营约束",
+      recommended_at: "2026-08-01T12:00:00Z", requirement_id: "REQ-1", input_hash: "sha256:recommendation",
+      approval_flow_key: "genesis.site.selection.approval", approval_request_id: "APR-1", eligible_count: 1,
+      status: "formalized", recommended_by: "project-owner", assessments: [],
+    };
+    const decision = {
+      selection_id: "SEL-1", recommendation_id: "REC-CONTROL-1", case_code: "INC-GX-TEST",
+      selected_proposal_id: "SITE-1", approval_request_id: "APR-1", formalized_by: "project-owner",
+      formalized_at: "2026-08-01T13:00:00Z",
+    };
+    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
+      const path = String(input);
+      if (path.endsWith("planning-status")) return { ok: true, json: async () => ({ state: "connected", provider: "MiniMax", model: "MiniMax-M3", prompt_version: "plant-planning-v2" }) };
+      if (path.includes("financial-constraints")) return { ok: true, json: async () => ({ case_code: "INC-GX-TEST", legal_entity_code: "LE-GX-TEST", financial_constraint: { available_cash: { value: "20000000.00", currency: "CNY", scale: 2 }, approved_budget: { value: "15000000.00", currency: "CNY", scale: 2 }, cash_source_ref: "gl:BOOK:1002", budget_source_ref: "budget:BUD-1", snapshot_hash: "sha256:authority" } }) };
+      if (path.includes("/requirements/") || path.includes("/proposals?")) return { ok: false, status: 404, text: async () => "not found" };
+      if (path.includes("/investigations") || path.includes("/site-controls")) return { ok: true, json: async () => ({ items: [] }) };
+      if (path.includes("/site-selections")) return { ok: true, json: async () => ({ items: [{ recommendation, decision, record_status: "formalized", approval_status: "consumed" }] }) };
+      if (path.includes("/plant-build/approvals/APR-1")) return { ok: true, json: async () => ({ item: { id: "APR-1", status: "consumed", requester_id: "project-owner" }, detail: { flow_key: "genesis.site.selection.approval", flow_version: 1, flow_name: "工厂场址正式选择审批", subject: { title: "INC-GX-TEST · 工厂场址正式选择", summary: "正式选址已经生效", operation: "site.selection.formalize" }, assignments: [], can_decide: false } }) };
+      return { ok: true, json: async () => trace };
+    }));
+    render(<PlantBuildPlay onExit={() => undefined} />);
+    const mission = await screen.findByRole("button", { name: /园区权利方：办理协议与场地交付/ });
+    fireEvent.click(mission);
+    await screen.findByRole("dialog", { name: "当前经营任务" });
+    expect(screen.getByRole("heading", { name: "场地控制与实际交付" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "发起场地控制交付工作项" })).toBeInTheDocument();
+  });
+
   it("lets the routed governance authority decide a site approval inside AESE", async () => {
     let approved = false;
     const requirement = {
