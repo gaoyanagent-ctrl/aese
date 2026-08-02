@@ -2052,5 +2052,5 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 变更：正式选址后新增场址控制请求与外部交付 Observation；AESE 园区权利人场景采集协议方式、期望交付日、协议/交接/占有授权证据和生效时间，全部写操作经过命名 Command Gateway。IAOS 发布 `site.control.request`、`site.control.observation.commit`、两个只读 Entity 以及 `facility.plant.delivery.v1` 持久 Process Run。
 - 原因：正式选址只是一项治理决定，不证明企业已经签署协议、取得钥匙或拥有实际占有权；旧游戏在正式场址落地后无操作，错误地把选址终点当作建设起点。
 - 影响：请求后必须等待园区/权利人 World 参与者；只有可信且完整的协议、交接和占有授权 Observation 才形成 `site_controlled`。延迟或拒绝失败关闭本次 Run，并允许保留历史后重新发起；项目/WBS 仍不会自动完成。
-- 验证：IAOS Go 全仓与 vet、治理写检查、Code Map/Atlas tracking 通过；AESE Go 全仓与 vet、26 个前端测试文件/88 项测试、TypeScript 和 Vite 生产构建通过。8082、8090、4173 已重启且健康，四个 active 租户均升级到平台 Edition `1.16.0`；IAOS 与 AESE 新 site-controls 只读端点在故障案件返回 200，当前无控制请求符合既有事实。两仓本次 Atlas 声明均已成功同步。
+- 验证：IAOS Go 全仓与 vet、治理写检查、Code Map/Atlas tracking 通过；AESE Go 全仓与 vet、26 个前端测试文件/88 项测试、TypeScript、Vite 生产构建及 1440/1280/mobile 三视口 Playwright 9 项通过。8082、8090、4173 已重启且健康，四个 active 租户均升级到平台 Edition `1.16.0`；IAOS 与 AESE 新 site-controls 只读端点在故障案件返回 200，当前无控制请求符合既有事实。两仓本次 Atlas 声明均已成功同步。
 - 后续：实现项目立项、Agent WBS/空间/承包方案、人类确认与审批，再接施工 Observation、工程财务和最终验收。
