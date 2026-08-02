@@ -121,6 +121,37 @@ func TestSiteControlContractsRequireAgreementAndHandoverEvidence(t *testing.T) {
 	}
 }
 
+func TestWorldEngineGeneratesDeterministicSiteControlEvidence(t *testing.T) {
+	request := SiteControlRequest{
+		SchemaVersion: "1.0", ControlRequestID: "CTRL-1", SelectionID: "SEL-1",
+		CaseCode: "INC-1", SelectedProposalID: "P-1", WorldRunID: "world-1",
+		AgreementMode: "lease", RequestedHandover: "2026-10-01T00:00:00Z",
+		RequiredEvidence: []string{"executed_agreement", "handover_record", "possession_authority"},
+		RequestedBy:      "project-lead", RequestedAt: "2026-08-02T10:00:00Z", Status: "waiting_world",
+	}
+	first, err := GenerateSiteControlObservation(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := GenerateSiteControlObservation(request)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if CanonicalHash(first) != CanonicalHash(second) {
+		t.Fatalf("world delivery is not replayable: first=%+v second=%+v", first, second)
+	}
+	if first.EffectiveAt != request.RequestedHandover || first.ObservedAt != request.RequestedHandover ||
+		!strings.HasPrefix(first.AgreementRef, "agreement:LEASE-") || !strings.HasPrefix(first.HandoverRef, "handover:HO-") {
+		t.Fatalf("unexpected generated observation %+v", first)
+	}
+	if len(first.EvidenceRefs) != 3 || !strings.Contains(first.EvidenceRefs[2], request.ControlRequestID) {
+		t.Fatalf("missing generated authority evidence %+v", first.EvidenceRefs)
+	}
+	if err := ValidateSiteControlConfirmation(SiteControlConfirmation{SchemaVersion: "1.0", CaseCode: "INC-1", ControlRequestID: "CTRL-1", Action: "accept_delivery"}); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestAIPlanningProviderProducesValidatedCandidateOnlySet(t *testing.T) {
 	content := `{"proposals":[{"option_type":"leased_shell","display_name":"快速租赁改造","business_rationale":"缩短投产周期","estimated_amount":{"minimum":{"value":"12000000.00","currency":"CNY","scale":2},"likely":{"value":"15000000.00","currency":"CNY","scale":2},"maximum":{"value":"18000000.00","currency":"CNY","scale":2},"basis":"需求参数与待验证市场估算"},"estimated_schedule":{"earliest":"2026-10-01T00:00:00+08:00","likely":"2026-11-01T00:00:00+08:00","latest":"2026-12-01T00:00:00+08:00"},"assumptions":["存在标准厂房"],"facts_required":["租赁报价"],"risks":["增容延期"],"source_refs":["requirement:REQ-1"],"confidence":"0.62"},{"option_type":"build_to_suit","display_name":"定制代建","business_rationale":"平衡控制权和周期","estimated_amount":{"minimum":{"value":"15000000.00","currency":"CNY","scale":2},"likely":{"value":"17000000.00","currency":"CNY","scale":2},"maximum":{"value":"18000000.00","currency":"CNY","scale":2},"basis":"需求参数与待验证市场估算"},"estimated_schedule":{"earliest":"2026-11-01T00:00:00+08:00","likely":"2026-12-01T00:00:00+08:00","latest":"2027-01-01T00:00:00+08:00"},"assumptions":["园区可代建"],"facts_required":["交付承诺"],"risks":["承包商履约"],"source_refs":["requirement:REQ-1"],"confidence":"0.55"}]}`
 	provider := AIPlanningProvider{Completer: planningCompleterStub{content}, Provider: "MiniMax", Model: "MiniMax-M3", Now: func() time.Time { return time.Date(2026, 8, 1, 10, 0, 0, 0, time.UTC) }}

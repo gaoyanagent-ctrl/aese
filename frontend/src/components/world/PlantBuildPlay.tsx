@@ -29,7 +29,7 @@ import {
   finalizeSiteSelection,
   submitSiteInvestigationObservation,
   submitSiteSelectionRecommendation,
-  submitSiteControlObservation,
+  confirmSiteControlDelivery,
   decidePlantApproval,
   submitPlantProposalReview,
   submitManualPlantProposal,
@@ -320,10 +320,6 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
   const [siteControls, setSiteControls] = useState<SiteControlItem[]>([]);
   const [controlMode, setControlMode] = useState<SiteControlRequest["agreement_mode"]>("lease");
   const [controlHandoverAt, setControlHandoverAt] = useState("");
-  const [controlAgreementRef, setControlAgreementRef] = useState("");
-  const [controlHandoverRef, setControlHandoverRef] = useState("");
-  const [controlEffectiveAt, setControlEffectiveAt] = useState("");
-  const [controlNotes, setControlNotes] = useState("");
   const [controlBusy, setControlBusy] = useState(false);
   const [selectedProposalID, setSelectedProposalID] = useState("");
   const [recommendationReason, setRecommendationReason] = useState("");
@@ -691,25 +687,11 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
     } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setControlBusy(false); }
   };
 
-  const commitSiteControl = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!latestSiteControl || !controlAgreementRef || !controlHandoverRef || !controlEffectiveAt) return;
+  const confirmSiteDelivery = async () => {
+    if (!latestSiteControl) return;
     setControlBusy(true); setError("");
     try {
-      await submitSiteControlObservation(caseCode, latestSiteControl.request.world_run_id, {
-        schema_version: "1.0",
-        observation_id: createClientRequestId("site-control-observation"),
-        control_request_id: latestSiteControl.request.control_request_id,
-        selection_id: latestSiteControl.request.selection_id,
-        result: "delivered",
-        agreement_ref: controlAgreementRef.trim(),
-        handover_ref: controlHandoverRef.trim(),
-        effective_at: localDate(controlEffectiveAt),
-        evidence_refs: [controlAgreementRef.trim(), controlHandoverRef.trim(), `possession:${latestSiteControl.request.selection_id}`],
-        notes: controlNotes.trim(),
-        external_actor_id: "world-park-rights-holder",
-        observed_at: new Date().toISOString(),
-      });
+      await confirmSiteControlDelivery(caseCode, latestSiteControl.request.control_request_id);
       await refreshSiteControls();
     } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setControlBusy(false); }
   };
@@ -807,16 +789,17 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
             <button disabled={controlBusy || !controlHandoverAt}>{controlBusy ? <LoaderCircle className="gx-spin" /> : <SearchCheck />}{controlBusy ? "正在发起…" : "发起场地控制交付工作项"}</button>
           </fieldset>
         </form>}
-        {latestSiteControl?.status === "waiting_world" && <form onSubmit={commitSiteControl}>
-          <fieldset><legend>园区权利方提交可信交付事实</legend>
-            <p>这里代表外部园区/出租方角色；提交后先进入 World Journal，再由 IAOS Capability 核验并关闭等待工作项。</p>
-            <label>已签协议引用<input required value={controlAgreementRef} onChange={(event) => setControlAgreementRef(event.target.value)} placeholder="例如 agreement:LEASE-2026-001" /></label>
-            <label>交付记录引用<input required value={controlHandoverRef} onChange={(event) => setControlHandoverRef(event.target.value)} placeholder="例如 handover:HO-2026-001" /></label>
-            <label>控制权生效时间<input required type="datetime-local" value={controlEffectiveAt} onChange={(event) => setControlEffectiveAt(event.target.value)} /></label>
-            <label>交付说明<textarea value={controlNotes} onChange={(event) => setControlNotes(event.target.value)} placeholder="钥匙、门禁、占有范围和遗留事项" /></label>
-            <button disabled={controlBusy || !controlAgreementRef || !controlHandoverRef || !controlEffectiveAt}>{controlBusy ? <LoaderCircle className="gx-spin" /> : <BadgeCheck />}{controlBusy ? "正在提交…" : "园区权利方确认实际交付"}</button>
-          </fieldset>
-        </form>}
+        {latestSiteControl?.status === "waiting_world" && <section className="plant-control-confirmation" aria-labelledby="plant-control-confirmation-title">
+          <div className="plant-control-world-badge"><BadgeCheck /><span><small>WORLD ENGINE · 园区权利方</small><strong id="plant-control-confirmation-title">场地已经准备交付</strong></span></div>
+          <p>协议、交接单、生效时间和占有权限由 World 引擎依据权威交付请求生成。你只需核对本次交付并确认接收，不需要填写系统编号或 JSON。</p>
+          <dl>
+            <div><dt>取得方式</dt><dd>{{ lease: "租赁", purchase: "购买", build_to_suit: "定制代建", use_agreement: "场地使用协议" }[latestSiteControl.request.agreement_mode]}</dd></div>
+            <div><dt>计划交付</dt><dd>{new Date(latestSiteControl.request.requested_handover_at).toLocaleString("zh-CN", { timeZone: "Asia/Shanghai", hour12: false })}</dd></div>
+            <div><dt>引擎将归档</dt><dd>已签协议 · 交接记录 · 占有与使用权限</dd></div>
+          </dl>
+          <button type="button" onClick={confirmSiteDelivery} disabled={controlBusy}>{controlBusy ? <LoaderCircle className="gx-spin" /> : <BadgeCheck />}{controlBusy ? "World 正在生成交付事实…" : "确认接收场地"}</button>
+          <small>确认后：World Journal 记录外部事实 → IAOS Capability 核验 → 关闭等待工作项。玩家不能修改这些权威证据。</small>
+        </section>}
         {latestSiteControl?.status === "controlled" && <div className="plant-control-complete"><BadgeCheck /><div><strong>场地控制权已形成权威事实</strong><p>{latestSiteControl.observation?.agreement_ref} · {latestSiteControl.observation?.handover_ref}</p><small>下一步：设施项目与 WBS 基线。该后续节点正在接入同一交付主流程，不会用固定剧情数据自动完成。</small></div></div>}
       </section>}
           </div>

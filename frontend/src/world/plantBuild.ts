@@ -409,13 +409,13 @@ export async function requestSiteControl(input: SiteControlRequest) {
   return response.json() as Promise<{ status: "waiting_world"; site_control_request: SiteControlRequest }>;
 }
 
-export async function submitSiteControlObservation(caseCode: string, worldRunID: string, observation: SiteControlObservation) {
+export async function confirmSiteControlDelivery(caseCode: string, controlRequestID: string) {
   const response = await fetch("/api/aese/v1/world/plant-build/site-controls/observations", {
     method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() },
-    body: JSON.stringify({ case_code: caseCode, world_run_id: worldRunID, observation }),
+    body: JSON.stringify({ schema_version: "1.0", case_code: caseCode, control_request_id: controlRequestID, action: "accept_delivery" }),
   });
-  if (!response.ok) throw new Error(`提交场地控制外部事实 ${response.status}: ${await response.text()}`);
-  return response.json() as Promise<{ status: "committed"; world_message_id: string; observation: SiteControlObservation }>;
+  if (!response.ok) throw new Error(`确认接收场地 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ status: "committed"; idempotent_replay: boolean; world_message_id: string; observation: SiteControlObservation }>;
 }
 export async function loadPlantBuild(
   signal?: AbortSignal,

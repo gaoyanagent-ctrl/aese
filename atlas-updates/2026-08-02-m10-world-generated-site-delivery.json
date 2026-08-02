@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m10.world-generated-site-delivery.2026-08-02",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M10 场址交付改为玩家一键确认和 World 引擎自动取证",
+  "detail": "浏览器不再填写协议、交接、生效时间或证据；AESE BFF 从 IAOS 权威场址控制请求生成可重放的完整 World Observation，再由 IAOS Capability 核验落账。",
+  "status_after": "building",
+  "current_state": "正式选址后的场址交付已符合游戏式选择与确认边界；项目/WBS 等后续 M10 节点仍在建设。",
+  "evidence_ref": "internal/plantbuild/interactive_test.go",
+  "occurred_at": "2026-08-02T09:00:00Z"
+}

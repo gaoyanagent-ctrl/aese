@@ -327,7 +327,7 @@ genesis.facility.accepted.v1
 5. 对已保存且审阅结论为“采纳调研”的候选，人员可发起外部调研。IAOS 创建 `facility.site.investigation.v1` 持久 `waiting_world` 工作项，并通过 World Bridge 写入带 correlation/subject 的 Intent。
 6. AESE 外部参与者使用结构化表单返回权属、可用面积、电力容量、正式报价、可用日期、许可、证据引用和备注。AESE 必须先写受信 World Journal Observation；IAOS 的 `site.investigation.observation.commit` 只消费与 Intent/correlation 匹配的 Journal 事实，保存权威 Observation 并完成工作项。
 7. 人员在可解释比较下选择合格候选并填写推荐理由、替代方案比较；AESE Command Gateway 调用 `site.selection.recommend`，IAOS 重算并创建统一审批。玩家进入 AESE 治理会议室，审阅 IAOS 冻结事项和实际 Assignment；当前受派审批人可在游戏内批准或驳回。批准后由项目负责人点击“批准已生效 · 正式选址”，通过 `site.selection.formalize` 原子消费审批。IAOS 审批中心只作为审计穿透入口。
-8. 正式选址后项目负责人在园区权利人场景发起场址控制请求，选择租赁、购买、代建或使用协议方式并声明期望交付日。园区/权利人是 World 外部参与者，必须提交协议、交接、占有授权与生效时间；AESE 先写 `site.control.delivered.v1` Observation，IAOS 再以 `site.control.observation.commit` 形成权威场址控制事实。
+8. 正式选址后项目负责人在园区权利人场景发起场址控制请求，选择租赁、购买、代建或使用协议方式并声明期望交付日。园区/权利人是 World 外部参与者；当交付事件到达时，玩家只核对方式、日期和待归档证据范围并点击“确认接收场地”。协议引用、交接引用、生效时间、占有授权证据和外部参与者身份全部由 AESE World 引擎从 IAOS 权威请求确定性生成，浏览器不得填写或覆盖。AESE 先写 `site.control.delivered.v1` Observation，IAOS 再以 `site.control.observation.commit` 形成权威场址控制事实。
 
 浏览器生成的 Intent/Observation/Recommendation 请求编码只承担幂等关联，不作为授权身份。
 LAN HTTP 浏览器可能不提供 secure-context-only 的 `crypto.randomUUID()`；前端必须通过统一
@@ -339,7 +339,7 @@ Requirement 到正式选址现已统一为 `facility.plant.planning.v1@1.0.0` �
 
 人工新增候选现已进入权威链：人员填写方案类型、理由、金额区间/依据、预计可用日期、假设、待核验事实和风险；AESE BFF 读取最新 Requirement 与可选 ProposalSet。若外部模型未启用且尚无候选集，IAOS 允许 `site.proposal.record` 创建只含一个人工候选的第 1 版；已有版本时只允许在下一 revision 追加一项，并逐项校验既有候选、人员来源和 hash。人工输入不冒充 Agent 输出或 World 外部事实。
 
-场址控制现由 `facility.plant.delivery.v1@1.0.0` 承载：人员发起后进入持久 World wait，只有可信协议/交接 Observation 才成功；延迟或拒绝会关闭本次 Run，并保留历史后允许重新发起。以下仍未实现：项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
+场址控制现由 `facility.plant.delivery.v1@1.0.0` 承载：人员发起后进入持久 World wait，只有可信协议/交接 Observation 才成功；延迟或拒绝会关闭本次 Run，并保留历史后允许重新发起。交付确认采用“最小玩家命令 + 服务端 World 事实”边界：玩家命令只有案件、控制请求和 `accept_delivery`，AESE 必须重读 IAOS 权威请求并按 `genesis-plant-delivery@1.1.0` 生成稳定 Observation ID、协议号、交接号、三类证据和模拟发生时间；同一请求重放必须得到同一 payload。以下仍未实现：项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
 
 ## 16. 用户配置、操作、验证与恢复
 
@@ -391,7 +391,7 @@ AESE 首页同时把原“世界地图”命名为 `企业生命周期 · M9–M
 7. 至少一个 Observation 完成后，页面显示“外部事实比较”。系统先逐行显示六类硬约束的 Requirement 门槛、Observation 实测、差额和通过状态；只有存在合格候选时，才允许调整成本、工期、容量和权属与许可权重并显示综合分。Agent 估算与 World 正式事实分栏显示，任何权重都不能抵消硬约束失败。若没有候选合格，点击失败摘要中的“修订设施需求”，系统带入当前版本并显示下一版本号；修改门槛/金额/日期、填写修订原因后保存，Agent 重新生成与新版本绑定的候选。
 8. 选择合格候选，填写至少 12 个字符的推荐理由和替代方案比较；少于两个合格候选时再填写至少 20 个字符的单一来源例外说明，提交 IAOS 选址审批。
 9. 前往“治理会议室”，打开林岚的当前事件。游戏内应显示 IAOS 冻结的事项、审批流版本、实际处理人、推荐理由、替代方案、评分、Observation 和输入 hash。若当前身份是受派审批人，填写审批意见并批准或驳回；非受派人只能查看。approved 只表示有权主体同意；再点击“批准已生效 · 正式选址”，看到正式选择 ID 才表示落地。“在 IAOS 查看审计详情”不是完成剧情的必经步骤。
-10. 切换到园区权利人场景，打开“取得实际场址控制权”任务。项目负责人先发起请求，World 外部参与者再填写协议引用、交接单引用、生效时间和证据。页面出现“场址控制已交付”且场景档案可见这些证据后，才可进入项目/WBS；正式选址本身不满足该门。
+10. 切换到园区权利人场景，打开“取得实际场址控制权”任务。项目负责人先发起请求；进入 `waiting_world` 后，界面只显示取得方式、计划交付时间和 World 将归档的三类证据，玩家点击“确认接收场地”。页面不得要求玩家输入协议号、交接号、生效时间、证据引用、备注或 JSON。页面出现“场址控制已交付”且场景档案可见引擎生成的证据后，才可进入项目/WBS；正式选址本身不满足该门。
 
 ### 16.3 关系与证据
 

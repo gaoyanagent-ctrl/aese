@@ -31,7 +31,7 @@
 16. 打开“流程运行”，确认流程键为 `facility.plant.planning.v1`、Run ID 从需求建立到正式选址不变、当前状态为 `succeeded`、节点为 `end`，trace 中依次可见 human/agent/world/approval。点击“打开流程运行”应在流程工作室直接打开该 Run；该流程的通用“运行”按钮必须禁用。
 17. 从左侧业务菜单或“数据模型工坊”依次打开设施需求、场址候选方案集、场址候选方案、人工评审、外部调研请求、外部调研事实、工厂规划工作项、场址选择推荐和正式场址决定；应看到同一案件的明细及存储写入所有者，但不应出现通用新增、修改或删除按钮。
 18. 正式选址后切换到园区权利人场景，打开“取得实际场址控制权”。项目负责人选择协议方式和期望交付日并发起请求；确认刷新后仍显示 `waiting_world`。
-19. 由 World 外部参与者填写协议引用、交接单引用、生效时间、证据引用和备注并确认交付。只有完整证据才应显示“场址控制已交付”；延迟或拒绝应关闭本次交付 Run 并允许重新发起新请求，旧请求/Observation 仍保留。
+19. 等待园区权利方准备交付。页面只显示取得方式、计划交付时间和“已签协议 / 交接记录 / 占有权限”归档预览；不得出现协议引用、交接引用、生效时间、证据引用、备注或 JSON 输入。玩家点击“确认接收场地”，AESE World 引擎生成完整交付事实。只有 IAOS 核验成功才应显示“场址控制已交付”；延迟或拒绝应关闭本次交付 Run 并允许重新发起新请求，旧请求/Observation 仍保留。
 20. 确认正式 AESE 玩家路由没有 reference replay、长表单或 JSON 常驻内容；关闭当前 NPC 任务后回到全屏机构场景，并可在园区权利人档案查看控制请求、协议和交接事实。IAOS 流程运行应另有 `facility.plant.delivery.v1` Run，先为 `waiting_event`，交付后为 `succeeded`。
 
 ### API 与权威证据
@@ -53,7 +53,7 @@
 | `POST /api/aese/v1/world/plant-build/site-selections/finalize` | 201，仅批准后成功 | 独立 Capability 消费批准并写正式选址决定 |
 | `GET /api/aese/v1/world/plant-build/site-controls?case_code=...` | 200，返回请求、状态与 Observation | 从 IAOS 恢复场址控制权威事实 |
 | `POST /api/aese/v1/world/plant-build/site-controls` | 201，`waiting_world` | 创建交付 Process Run、工作项和 World Intent |
-| `POST /api/aese/v1/world/plant-build/site-controls/observations` | 201，仅可信完整证据成功 | AESE 先写 Journal，IAOS 再提交控制事实和流程结果 |
+| `POST /api/aese/v1/world/plant-build/site-controls/observations` | 请求体仅含 `case_code`、`control_request_id`、`accept_delivery`；201 或幂等 200 | AESE 重读 IAOS 请求、生成确定性 World 证据并先写 Journal，IAOS 再提交控制事实和流程结果 |
 | `GET /api/v1/process-runs?process_key=facility.plant.planning.v1&case_code=...` | 200，返回单一 Run | IAOS 按案件返回完整 M10 运行，详情 API 可读取 context/trace |
 
 写操作不得从浏览器直接请求 IAOS `:8082`。AESE BFF 使用当前用户身份调用 IAOS

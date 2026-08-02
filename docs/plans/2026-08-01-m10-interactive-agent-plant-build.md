@@ -57,7 +57,7 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 - [x] S4.1 World 外部参与者通过结构化表单返回正式报价、权属、面积、电力容量、许可、可用日期和证据引用 Observation；AESE 先写 World Journal，再由 IAOS 受治理能力匹配 Intent/correlation 并完成持久工作项。
 - [x] S4.2 评分只消费已送达且同时匹配当前 ProposalSet ID、revision 和 proposal ID 的事实；Agent 估算与外部事实并列显示，不得互相覆盖。已交付 Observation-only 派生比较、六类 Requirement/Observation/差额逐项对照、四维可调权重、默认来源与公式解释和证据引用；无合格候选时权重禁用，并可从失败摘要直接带入当前 Requirement、创建下一 revision、重新生成候选。旧候选集 Observation 只进入历史档案，不推进阶段或进入推荐。评分策略/结果由 S2.3/选址审批纵切在 IAOS 权威固化。
 - [x] S4.2b 发布 `site.selection.recommend`、`site.selection.formalize`、`facility.site.selection.v1` 和 `genesis.site.selection.approval`；IAOS 重算评分并冻结推荐/审批证据，AESE 治理会议室通过只读审批详情与受控 Command Gateway 完成受派人批准/驳回，approved 后由独立 Capability 正式落地。
-- [x] S4.2c 正式选址后发布 `site.control.request`、`site.control.observation.commit` 与 `facility.plant.delivery.v1`；项目负责人发起协议/交接请求，园区权利人以可信 World Observation 返回协议、交接、占有授权和生效时间，延迟/拒绝失败关闭且允许保留历史后重新发起。
+- [x] S4.2c 正式选址后发布 `site.control.request`、`site.control.observation.commit` 与 `facility.plant.delivery.v1`；项目负责人发起协议/交接请求，玩家只确认接收，园区权利人的协议、交接、占有授权和生效时间由 World 引擎从权威请求确定性生成，延迟/拒绝失败关闭且允许保留历史后重新发起。
 - [ ] S4.3 空间、承包策略、WBS、延期缓解和投资变更均采用 Agent 建议 + 人员决定。
 - [x] S4.4a IAOS 从已过账银行科目与设立案件已批预算读取只读财务快照，返回来源引用和 snapshot hash；AESE BFF 不接受页面伪造该快照。
 - [ ] S4.4b 投资、合同、变更和付款金额可修订但必须重新校验/审批；资金变化使旧 Requirement snapshot 失效并要求修订。
@@ -96,6 +96,6 @@ S0、S1、S2、S3.0–S3.8a、S4.1、S4.2、S4.2b、S4.2c 和 S4.4a 已完成。
 | 提交场址推荐 | `POST /api/aese/v1/world/plant-build/site-selections` | 采集候选、权重、推荐理由和例外说明；不接收审批人 | `site.selection.recommend` 重算并固化评分，创建路由后的 Approval Request |
 | 正式选址 | `POST /api/aese/v1/world/plant-build/site-selections/finalize` | 只提交推荐和审批引用 | `site.selection.formalize` 校验/消费 approved 请求并写 `site_selection_decision` |
 | 发起场址控制 | `POST /api/aese/v1/world/plant-build/site-controls` | 服务端解析项目负责人并提交期望交付日、方式和必要证据范围 | `site.control.request` 创建权威请求、交付 Process Run、World wait 与 Intent |
-| 权利人交付场址 | `POST /api/aese/v1/world/plant-build/site-controls/observations` | 校验协议、交接、占有授权和生效时间，先写 World Journal | `site.control.observation.commit` 只消费受信 Observation，完成或失败关闭交付 Run 并投影 Entity |
+| 玩家确认接收场址 | `POST /api/aese/v1/world/plant-build/site-controls/observations` | 浏览器只提交案件、控制请求和 `accept_delivery`；BFF 重读 IAOS 权威请求，由 World 引擎生成稳定协议/交接/占有授权 Observation 后先写 Journal | `site.control.observation.commit` 只消费受信 Observation，完成或失败关闭交付 Run 并投影 Entity |
 
 上述 BFF 不是通用 IAOS 代理，也不拥有权威业务表。Requirement 和 ProposalSet 的 GET 只用于恢复 IAOS 已保存事实，不从 AESE 本地重建。外部模型未配置、财务快照不完整或变更、候选 Schema 不合法、权限不足、重复键输入不同、审阅版本冲突时均失败关闭。

@@ -546,6 +546,51 @@ func TestPlantSiteRecommendationUsesAuthenticatedCommandGateway(t *testing.T) {
 	}
 }
 
+func TestSiteControlConfirmationGeneratesWorldEvidenceServerSide(t *testing.T) {
+	var envelope map[string]any
+	var command map[string]any
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch {
+		case r.URL.Path == "/api/v1/profile":
+			_, _ = w.Write([]byte(`{"username":"project-owner","tenant_id":"tenant-a"}`))
+		case r.Method == http.MethodGet && r.URL.Path == "/api/v1/genesis/plant/interactive/site-controls":
+			_, _ = w.Write([]byte(`{"items":[{"request":{"schema_version":"1.0","control_request_id":"CTRL-1","selection_id":"SEL-1","case_code":"INC-1","selected_proposal_id":"SITE-1","world_run_id":"WORLD-1","agreement_mode":"lease","requested_handover_at":"2026-10-01T00:00:00Z","required_evidence":["executed_agreement","handover_record","possession_authority"],"requested_by":"project-owner","requested_at":"2026-08-02T10:00:00Z","status":"waiting_world"},"status":"waiting_world"}]}`))
+		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/world-bridge/observations":
+			if err := json.NewDecoder(r.Body).Decode(&envelope); err != nil {
+				t.Fatal(err)
+			}
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"status":"accepted"}`))
+		case r.Method == http.MethodPost && r.URL.Path == "/api/v1/genesis/plant/interactive/actions":
+			if err := json.NewDecoder(r.Body).Decode(&command); err != nil {
+				t.Fatal(err)
+			}
+			w.WriteHeader(http.StatusCreated)
+			_, _ = w.Write([]byte(`{"status":"committed"}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer iaos.Close()
+	server := New(Config{IAOSBaseURL: iaos.URL})
+	body := `{"schema_version":"1.0","case_code":"INC-1","control_request_id":"CTRL-1","action":"accept_delivery"}`
+	req := httptest.NewRequest(http.MethodPost, "/api/aese/v1/world/plant-build/site-controls/observations", strings.NewReader(body))
+	req.Header.Set("Authorization", "Bearer owner-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-a")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusCreated || !strings.Contains(res.Body.String(), `"agreement_ref":"agreement:LEASE-`) {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
+	payload := envelope["payload"].(map[string]any)
+	if payload["external_actor_id"] != "world-park-rights-holder" || payload["effective_at"] != "2026-10-01T00:00:00Z" {
+		t.Fatalf("world payload=%v", payload)
+	}
+	if command["capability_code"] != "site.control.observation.commit" || command["actor_id"] != "project-owner" {
+		t.Fatalf("command=%v", command)
+	}
+}
+
 func TestPlantApprovalDetailUsesAuthenticatedReadGateway(t *testing.T) {
 	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.URL.Path == "/api/v1/profile" {

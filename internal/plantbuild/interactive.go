@@ -191,6 +191,23 @@ type SiteControlObservation struct {
 	ObservedAt       string   `json:"observed_at"`
 }
 
+// SiteControlConfirmation is the only input a player supplies when the World
+// rights holder is ready to hand over a selected site. Business evidence is
+// deliberately absent: the World engine derives it from the authoritative
+// SiteControlRequest so a browser cannot invent agreement or handover facts.
+type SiteControlConfirmation struct {
+	SchemaVersion    string `json:"schema_version"`
+	CaseCode         string `json:"case_code"`
+	ControlRequestID string `json:"control_request_id"`
+	Action           string `json:"action"`
+}
+
+type SiteControlItem struct {
+	Request     SiteControlRequest      `json:"request"`
+	Status      string                  `json:"status"`
+	Observation *SiteControlObservation `json:"observation,omitempty"`
+}
+
 type PlanningProvider interface {
 	Status() PlanningProviderStatus
 	Generate(context.Context, FacilityRequirement) (ProposalSet, error)
@@ -487,6 +504,52 @@ func ValidateSiteControlObservation(v SiteControlObservation) error {
 		}
 	}
 	return nil
+}
+
+func ValidateSiteControlConfirmation(v SiteControlConfirmation) error {
+	if v.SchemaVersion != InteractiveSchemaVersion || strings.TrimSpace(v.CaseCode) == "" ||
+		strings.TrimSpace(v.ControlRequestID) == "" {
+		return errors.New("site control confirmation is incomplete")
+	}
+	if v.Action != "accept_delivery" {
+		return errors.New("site control confirmation action is invalid")
+	}
+	return nil
+}
+
+// GenerateSiteControlObservation turns an authoritative waiting request into a
+// deterministic World fact. The request's simulation handover time is used as
+// both occurrence and effective time, making retries and replay byte-stable.
+func GenerateSiteControlObservation(request SiteControlRequest) (SiteControlObservation, error) {
+	if err := ValidateSiteControlRequest(request); err != nil {
+		return SiteControlObservation{}, err
+	}
+	suffix := strings.ToUpper(strings.TrimPrefix(CanonicalHash(request), "sha256:")[:12])
+	mode := strings.ToUpper(strings.ReplaceAll(request.AgreementMode, "_", "-"))
+	agreementRef := "agreement:" + mode + "-" + suffix
+	handoverRef := "handover:HO-" + suffix
+	observation := SiteControlObservation{
+		SchemaVersion:    InteractiveSchemaVersion,
+		ObservationID:    "site-control-observation-" + strings.ToLower(suffix),
+		ControlRequestID: request.ControlRequestID,
+		SelectionID:      request.SelectionID,
+		Result:           "delivered",
+		AgreementRef:     agreementRef,
+		HandoverRef:      handoverRef,
+		EffectiveAt:      request.RequestedHandover,
+		EvidenceRefs: []string{
+			"world-document:" + agreementRef,
+			"world-document:" + handoverRef,
+			"world-evidence:possession-authority:" + request.ControlRequestID,
+		},
+		Notes:           "园区权利方已完成协议签署、现场交接和占有权限移交；事实由 AESE World 交付策略生成。",
+		ExternalActorID: "world-park-rights-holder",
+		ObservedAt:      request.RequestedHandover,
+	}
+	if err := ValidateSiteControlObservation(observation); err != nil {
+		return SiteControlObservation{}, err
+	}
+	return observation, nil
 }
 
 func validateMoney(v Money) error {

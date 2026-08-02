@@ -1143,17 +1143,13 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "site-controls" && rest[3] == "observations" && r.Method == http.MethodPost {
-			var input struct {
-				CaseCode    string                            `json:"case_code"`
-				WorldRunID  string                            `json:"world_run_id"`
-				Observation plantbuild.SiteControlObservation `json:"observation"`
-			}
+			var input plantbuild.SiteControlConfirmation
 			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil {
-				s.writeError(w, http.StatusBadRequest, "invalid_site_control_observation", err.Error(), false, "", "")
+				s.writeError(w, http.StatusBadRequest, "invalid_site_control_confirmation", err.Error(), false, "", "")
 				return
 			}
-			if err := plantbuild.ValidateSiteControlObservation(input.Observation); err != nil {
-				s.writeError(w, http.StatusUnprocessableEntity, "invalid_site_control_observation", err.Error(), false, "", "")
+			if err := plantbuild.ValidateSiteControlConfirmation(input); err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "invalid_site_control_confirmation", err.Error(), false, "", "")
 				return
 			}
 			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
@@ -1162,27 +1158,63 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 				s.writeError(w, http.StatusUnauthorized, "plant_site_control_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
 				return
 			}
+			rawControls, err := authority.PlantSiteControls(ctx, input.CaseCode)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_site_controls_unavailable")
+				return
+			}
+			var controls struct {
+				Items []plantbuild.SiteControlItem `json:"items"`
+			}
+			if err := json.Unmarshal(rawControls, &controls); err != nil {
+				s.writeError(w, http.StatusBadGateway, "plant_site_controls_invalid", "IAOS site control projection is invalid", true, "", "")
+				return
+			}
+			var selected *plantbuild.SiteControlItem
+			for index := range controls.Items {
+				if controls.Items[index].Request.ControlRequestID == input.ControlRequestID {
+					selected = &controls.Items[index]
+					break
+				}
+			}
+			if selected == nil || selected.Request.CaseCode != input.CaseCode {
+				s.writeError(w, http.StatusNotFound, "site_control_request_not_found", "authoritative site control request was not found", false, "", "")
+				return
+			}
+			if selected.Status == "controlled" && selected.Observation != nil {
+				s.writeJSON(w, http.StatusOK, map[string]any{"status": "committed", "idempotent_replay": true, "world_message_id": "world-" + selected.Observation.ObservationID, "observation": selected.Observation})
+				return
+			}
+			if selected.Status != "waiting_world" {
+				s.writeError(w, http.StatusConflict, "site_control_request_not_waiting", "site control request is not waiting for World delivery", false, "", "")
+				return
+			}
+			observation, err := plantbuild.GenerateSiteControlObservation(selected.Request)
+			if err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "site_control_world_generation_failed", err.Error(), false, "", "")
+				return
+			}
 			correlationID := "corr-m10-" + strings.TrimSpace(input.CaseCode)
-			messageID := "world-" + input.Observation.ObservationID
+			messageID := "world-" + observation.ObservationID
 			envelope := map[string]any{
 				"schema_version": "1.0", "message_id": messageID, "kind": "observation", "tenant_id": tenantID,
-				"world_pack_key": "genesis-plant-delivery", "world_pack_version": "1.0.0", "world_run_id": input.WorldRunID,
-				"branch_id": "main", "sim_occurred_at": input.Observation.ObservedAt, "correlation_id": correlationID,
+				"world_pack_key": "genesis-plant-delivery", "world_pack_version": "1.1.0", "world_run_id": selected.Request.WorldRunID,
+				"branch_id": "main", "sim_occurred_at": observation.ObservedAt, "correlation_id": correlationID,
 				"idempotency_key": messageID, "producer": map[string]string{"system": "aese", "component": "plant-site-control-world"},
-				"subject_ref":  map[string]string{"type": "site_control_request", "code": input.Observation.ControlRequestID},
-				"payload_type": "site.control.delivered.v1", "payload": input.Observation,
+				"subject_ref":  map[string]string{"type": "site_control_request", "code": observation.ControlRequestID},
+				"payload_type": "site.control.delivered.v1", "payload": observation,
 			}
 			rawEnvelope, _ := json.Marshal(envelope)
 			if _, err := authority.PostGovernedCommand(ctx, "api/v1/world-bridge/observations", rawEnvelope); err != nil {
 				s.writePlantAuthorityError(w, err, "site_control_world_observation_not_accepted")
 				return
 			}
-			commit := map[string]any{"schema_version": "1.0", "control_request_id": input.Observation.ControlRequestID, "world_message_id": messageID}
-			if err := postPlantAuthorityCommand(ctx, authority, "site.control.observation.commit", actorID, input.CaseCode, input.Observation.ObservationID, 1, commit); err != nil {
+			commit := map[string]any{"schema_version": "1.0", "control_request_id": observation.ControlRequestID, "world_message_id": messageID}
+			if err := postPlantAuthorityCommand(ctx, authority, "site.control.observation.commit", actorID, input.CaseCode, observation.ObservationID, 1, commit); err != nil {
 				s.writePlantAuthorityError(w, err, "site_control_observation_not_committed")
 				return
 			}
-			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "committed", "world_message_id": messageID, "observation": input.Observation})
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "committed", "idempotent_replay": false, "world_message_id": messageID, "observation": observation})
 			return
 		}
 		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "approvals" && r.Method == http.MethodGet {
