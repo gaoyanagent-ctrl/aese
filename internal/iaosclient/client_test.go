@@ -110,6 +110,19 @@ func TestAPIErrorDoesNotExposeToken(t *testing.T) {
 	}
 }
 
+func TestApprovalDetailUsesGovernedReadEndpoint(t *testing.T) {
+	client := testClient(t, func(r *http.Request) (*http.Response, error) {
+		if r.Method != http.MethodGet || r.URL.Path != "/api/v1/approvals/approval-1" {
+			t.Fatalf("request=%s %s", r.Method, r.URL.Path)
+		}
+		return response(http.StatusOK, `{"item":{"id":"approval-1","status":"pending"},"detail":{"can_decide":true,"assignments":[]}}`), nil
+	})
+	got, err := client.ApprovalDetail(context.Background(), "approval-1")
+	if err != nil || !strings.Contains(string(got), `"can_decide":true`) {
+		t.Fatalf("got=%s err=%v", got, err)
+	}
+}
+
 func TestDecomposeUsesGovernedEndpoint(t *testing.T) {
 	client := testClient(t, func(r *http.Request) (*http.Response, error) {
 		if r.Method != http.MethodPost || r.URL.Path != "/api/v1/entities/sales_order/id-1/decompose" {
@@ -332,6 +345,22 @@ func TestCallAIToolFailsClosedOnUnsuccessfulResponse(t *testing.T) {
 				t.Fatalf("token leaked: %v", err)
 			}
 		})
+	}
+}
+
+func TestPlantSiteControlsUsesAuthorityProjectionEndpoint(t *testing.T) {
+	client := testClient(t, func(r *http.Request) (*http.Response, error) {
+		if r.Method != http.MethodGet || r.URL.Path != "/api/v1/genesis/plant/interactive/site-controls" {
+			t.Fatalf("request = %s %s", r.Method, r.URL.Path)
+		}
+		if got := r.URL.Query().Get("case_code"); got != "INC-1" {
+			t.Fatalf("case_code = %q", got)
+		}
+		return response(http.StatusOK, `{"items":[{"status":"waiting_world","request":{"control_request_id":"CTRL-1"}}]}`), nil
+	})
+	got, err := client.PlantSiteControls(context.Background(), "INC-1")
+	if err != nil || !strings.Contains(string(got), `"CTRL-1"`) {
+		t.Fatalf("got=%s err=%v", got, err)
 	}
 }
 

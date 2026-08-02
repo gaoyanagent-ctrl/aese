@@ -161,6 +161,36 @@ type InvestigationObservation struct {
 	ObservedAt             string   `json:"observed_at"`
 }
 
+type SiteControlRequest struct {
+	SchemaVersion      string   `json:"schema_version"`
+	ControlRequestID   string   `json:"control_request_id"`
+	SelectionID        string   `json:"selection_id"`
+	CaseCode           string   `json:"case_code"`
+	SelectedProposalID string   `json:"selected_proposal_id"`
+	WorldRunID         string   `json:"world_run_id"`
+	AgreementMode      string   `json:"agreement_mode"`
+	RequestedHandover  string   `json:"requested_handover_at"`
+	RequiredEvidence   []string `json:"required_evidence"`
+	RequestedBy        string   `json:"requested_by"`
+	RequestedAt        string   `json:"requested_at"`
+	Status             string   `json:"status"`
+}
+
+type SiteControlObservation struct {
+	SchemaVersion    string   `json:"schema_version"`
+	ObservationID    string   `json:"observation_id"`
+	ControlRequestID string   `json:"control_request_id"`
+	SelectionID      string   `json:"selection_id"`
+	Result           string   `json:"result"`
+	AgreementRef     string   `json:"agreement_ref"`
+	HandoverRef      string   `json:"handover_ref"`
+	EffectiveAt      string   `json:"effective_at,omitempty"`
+	EvidenceRefs     []string `json:"evidence_refs"`
+	Notes            string   `json:"notes"`
+	ExternalActorID  string   `json:"external_actor_id"`
+	ObservedAt       string   `json:"observed_at"`
+}
+
 type PlanningProvider interface {
 	Status() PlanningProviderStatus
 	Generate(context.Context, FacilityRequirement) (ProposalSet, error)
@@ -400,6 +430,61 @@ func ValidateInvestigationObservation(v InvestigationObservation) error {
 	}
 	if _, err := time.Parse(time.RFC3339, v.ObservedAt); err != nil {
 		return fmt.Errorf("observed_at must be RFC3339: %w", err)
+	}
+	return nil
+}
+
+func ValidateSiteControlRequest(v SiteControlRequest) error {
+	if v.SchemaVersion != InteractiveSchemaVersion || strings.TrimSpace(v.ControlRequestID) == "" ||
+		strings.TrimSpace(v.SelectionID) == "" || strings.TrimSpace(v.CaseCode) == "" ||
+		strings.TrimSpace(v.SelectedProposalID) == "" || strings.TrimSpace(v.WorldRunID) == "" ||
+		strings.TrimSpace(v.RequestedBy) == "" || v.Status != "waiting_world" {
+		return errors.New("site control request is incomplete")
+	}
+	allowedModes := map[string]bool{"lease": true, "purchase": true, "build_to_suit": true, "use_agreement": true}
+	if !allowedModes[v.AgreementMode] {
+		return errors.New("site control agreement mode is invalid")
+	}
+	if _, err := time.Parse(time.RFC3339, v.RequestedHandover); err != nil {
+		return fmt.Errorf("requested_handover_at must be RFC3339: %w", err)
+	}
+	if _, err := time.Parse(time.RFC3339, v.RequestedAt); err != nil {
+		return fmt.Errorf("requested_at must be RFC3339: %w", err)
+	}
+	required := map[string]bool{"executed_agreement": false, "handover_record": false, "possession_authority": false}
+	for _, item := range v.RequiredEvidence {
+		if _, ok := required[item]; !ok || required[item] {
+			return errors.New("site control evidence scope is invalid")
+		}
+		required[item] = true
+	}
+	for _, present := range required {
+		if !present {
+			return errors.New("site control requires agreement, handover and possession evidence")
+		}
+	}
+	return nil
+}
+
+func ValidateSiteControlObservation(v SiteControlObservation) error {
+	if v.SchemaVersion != InteractiveSchemaVersion || strings.TrimSpace(v.ObservationID) == "" ||
+		strings.TrimSpace(v.ControlRequestID) == "" || strings.TrimSpace(v.SelectionID) == "" ||
+		strings.TrimSpace(v.ExternalActorID) == "" || len(v.EvidenceRefs) == 0 {
+		return errors.New("site control observation is incomplete")
+	}
+	if v.Result != "delivered" && v.Result != "delayed" && v.Result != "rejected" {
+		return errors.New("site control result is invalid")
+	}
+	if _, err := time.Parse(time.RFC3339, v.ObservedAt); err != nil {
+		return fmt.Errorf("observed_at must be RFC3339: %w", err)
+	}
+	if v.Result == "delivered" {
+		if strings.TrimSpace(v.AgreementRef) == "" || strings.TrimSpace(v.HandoverRef) == "" {
+			return errors.New("delivered site control requires agreement and handover references")
+		}
+		if _, err := time.Parse(time.RFC3339, v.EffectiveAt); err != nil {
+			return fmt.Errorf("effective_at must be RFC3339: %w", err)
+		}
 	}
 	return nil
 }

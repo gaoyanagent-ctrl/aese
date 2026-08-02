@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.site-assessment-explainability.2026-08-02",
+  "node_key": "aese.genesis.m10-plant-build",
+  "update_type": "implementation",
+  "summary": "M10 场址比较增加 Requirement 与 Observation 逐项差额解释",
+  "detail": "硬门槛逐行展示要求、实测、差额和来源；排序权重明确默认来源与公式且在没有合格候选时禁用；失败摘要可创建下一需求版本；Observation 必须匹配当前 ProposalSet ID、revision 和 proposal ID，旧事实只保留为历史档案。",
+  "status_after": "building",
+  "current_state": "选址纵切的事实比较已可解释且不存在修订死路，正式推荐继续由 IAOS site-assessment-v1 使用权威数据重算。",
+  "evidence_ref": "docs/designs/DES-011-genesis-plant-build.md",
+  "occurred_at": "2026-08-02T03:55:00Z"
+}

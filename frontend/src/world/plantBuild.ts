@@ -217,11 +217,94 @@ export type SiteSelectionItem = {
     eligible_count: number;
     status: string;
     recommended_by: string;
-    assessments: unknown[];
+    assessments: Array<{
+      proposal_id: string;
+      display_name: string;
+      observation_id: string;
+      eligible: boolean;
+      hard_failures: string[];
+      total_score: number | null;
+      evidence_refs: string[];
+    }>;
   };
   record_status: string;
   approval_status: "pending" | "approved" | "rejected" | "consumed";
   decision?: { selection_id: string; selected_proposal_id: string; formalized_at: string };
+};
+
+export type SiteControlRequest = {
+  schema_version: "1.0";
+  control_request_id: string;
+  selection_id: string;
+  case_code: string;
+  selected_proposal_id: string;
+  world_run_id: string;
+  agreement_mode: "lease" | "purchase" | "build_to_suit" | "use_agreement";
+  requested_handover_at: string;
+  required_evidence: Array<"executed_agreement" | "handover_record" | "possession_authority">;
+  requested_by: string;
+  requested_at: string;
+  status: "waiting_world";
+};
+
+export type SiteControlObservation = {
+  schema_version: "1.0";
+  observation_id: string;
+  control_request_id: string;
+  selection_id: string;
+  result: "delivered" | "delayed" | "rejected";
+  agreement_ref: string;
+  handover_ref: string;
+  effective_at?: string;
+  evidence_refs: string[];
+  notes: string;
+  external_actor_id: string;
+  observed_at: string;
+};
+
+export type SiteControlItem = {
+  request: SiteControlRequest;
+  status: "waiting_world" | "controlled" | "delayed" | "rejected" | "cancelled";
+  observation?: SiteControlObservation;
+};
+
+export type PlantApprovalDetail = {
+  item: {
+    id: string;
+    status: "pending" | "approved" | "rejected" | "cancelled" | "expired" | "consumed";
+    requester_id: string;
+    requester_display_name?: string;
+    decision_note?: string;
+    decided_by?: string;
+    decided_at?: string;
+  };
+  detail: {
+    flow_key: string;
+    flow_version: number;
+    flow_name: string;
+    subject: {
+      title: string;
+      summary: string;
+      operation: string;
+      fields?: Record<string, unknown>;
+      evidence?: string[];
+    };
+    requester_subject_id?: string;
+    requester_display_name?: string;
+    assignments: Array<{
+      id: string;
+      stage_code: string;
+      stage_name: string;
+      mode: string;
+      display_name: string;
+      selector_type: string;
+      selector_value: string;
+      status: string;
+      decision?: string;
+      decision_note?: string;
+    }>;
+    can_decide: boolean;
+  };
 };
 
 export async function submitPlantProposalReview(input: SiteProposalReviewInput) {
@@ -285,6 +368,22 @@ export async function submitSiteSelectionRecommendation(input: SiteSelectionReco
   return response.json() as Promise<{ status: "committed"; result: SiteSelectionItem["recommendation"] }>;
 }
 
+export async function loadPlantApprovalDetail(approvalRequestID: string, signal?: AbortSignal) {
+  const response = await fetch(`/api/aese/v1/world/plant-build/approvals/${encodeURIComponent(approvalRequestID)}`, {
+    headers: iaosHeaders(), signal,
+  });
+  if (!response.ok) throw new Error(`读取游戏内审批事项 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<PlantApprovalDetail>;
+}
+
+export async function decidePlantApproval(approvalRequestID: string, decision: "approve" | "reject", note: string) {
+  const response = await fetch(`/api/aese/v1/commands/iaos/approvals/${encodeURIComponent(approvalRequestID)}/${decision}`, {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() }, body: JSON.stringify({ note }),
+  });
+  if (!response.ok) throw new Error(`${decision === "approve" ? "批准" : "驳回"}选址审批 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ item: PlantApprovalDetail["item"] }>;
+}
+
 export async function finalizeSiteSelection(caseCode: string, recommendationID: string, approvalRequestID: string) {
   const response = await fetch("/api/aese/v1/world/plant-build/site-selections/finalize", {
     method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() },
@@ -292,6 +391,31 @@ export async function finalizeSiteSelection(caseCode: string, recommendationID: 
   });
   if (!response.ok) throw new Error(`正式选址落地 ${response.status}: ${await response.text()}`);
   return response.json() as Promise<{ status: "committed"; result: SiteSelectionItem["decision"] }>;
+}
+
+export async function loadSiteControls(caseCode: string, signal?: AbortSignal) {
+  const response = await fetch(`/api/aese/v1/world/plant-build/site-controls?case_code=${encodeURIComponent(caseCode)}`, {
+    headers: iaosHeaders(), signal,
+  });
+  if (!response.ok) throw new Error(`场地控制工作项 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ items: SiteControlItem[] }>;
+}
+
+export async function requestSiteControl(input: SiteControlRequest) {
+  const response = await fetch("/api/aese/v1/world/plant-build/site-controls", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() }, body: JSON.stringify(input),
+  });
+  if (!response.ok) throw new Error(`发起场地控制交付 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ status: "waiting_world"; site_control_request: SiteControlRequest }>;
+}
+
+export async function submitSiteControlObservation(caseCode: string, worldRunID: string, observation: SiteControlObservation) {
+  const response = await fetch("/api/aese/v1/world/plant-build/site-controls/observations", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() },
+    body: JSON.stringify({ case_code: caseCode, world_run_id: worldRunID, observation }),
+  });
+  if (!response.ok) throw new Error(`提交场地控制外部事实 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ status: "committed"; world_message_id: string; observation: SiteControlObservation }>;
 }
 export async function loadPlantBuild(
   signal?: AbortSignal,

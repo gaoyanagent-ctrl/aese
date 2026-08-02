@@ -61,3 +61,27 @@ func TestIAOSCommandGatewayRejectsArbitraryIAOSRoute(t *testing.T) {
 		t.Fatalf("status=%d body=%s", response.Code, response.Body.String())
 	}
 }
+
+func TestIAOSCommandGatewayAllowsAssignedApprovalRejection(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost || r.URL.Path != "/api/v1/approvals/approval-1/reject" {
+			t.Fatalf("request=%s %s", r.Method, r.URL.Path)
+		}
+		body, _ := io.ReadAll(r.Body)
+		if string(body) != `{"note":"现场条件不满足投产要求"}` {
+			t.Fatalf("body=%s", body)
+		}
+		_, _ = w.Write([]byte(`{"item":{"id":"approval-1","status":"rejected"}}`))
+	}))
+	defer upstream.Close()
+
+	server := New(Config{IAOSBaseURL: upstream.URL})
+	request := httptest.NewRequest(http.MethodPost, "/api/aese/v1/commands/iaos/approvals/approval-1/reject", strings.NewReader(`{"note":"现场条件不满足投产要求"}`))
+	request.Header.Set("Authorization", "Bearer founder-token")
+	request.Header.Set("X-IAOS-Tenant-Id", "tenant-gx-1")
+	response := httptest.NewRecorder()
+	server.ServeHTTP(response, request)
+	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), `"rejected"`) {
+		t.Fatalf("status=%d body=%s", response.Code, response.Body.String())
+	}
+}

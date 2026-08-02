@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.m10.site-control-world-closure.2026-08-02",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M10 正式选址后增加场址控制游戏闭环",
+  "detail": "AESE 在园区权利人场景增加场址控制请求与外部交付任务，通过命名 Command Gateway 提交协议方式、交接时间和必要证据；World Observation 先入 Journal，再由 IAOS Capability 形成权威场址控制事实和 Effective Process Run。",
+  "status_after": "building",
+  "current_state": "场址控制纵切已实现并通过定向测试；项目/WBS、合同、施工、工程财务和最终验收仍待实现。",
+  "evidence_ref": "docs/designs/DES-011-genesis-plant-build.md",
+  "occurred_at": "2026-08-02T08:30:00Z"
+}

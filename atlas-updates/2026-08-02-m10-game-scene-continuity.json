@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.game-scene-continuity.2026-08-02",
+  "node_key": "aese.genesis.m10-plant-build",
+  "update_type": "implementation",
+  "summary": "M10 交互纵切升级为全屏机构场景与事实档案",
+  "detail": "新增事实驱动的 M10 Game Projection、四个内部/外部机构地点、玩家与 NPC 临时任务入口及按地点事实档案；治理会议室读取 IAOS 冻结事项和实际 Assignment，由受派人在游戏内批准或驳回；地点与动画不拥有业务状态。",
+  "status_after": "building",
+  "current_state": "选址纵切已具备与 M9 连续的全屏机构切换、事实档案和游戏内审批体验；项目、施工、付款和验收场景等待对应权威业务对象实现。",
+  "evidence_ref": "docs/designs/DES-011-genesis-plant-build.md",
+  "occurred_at": "2026-08-02T03:10:00Z"
+}

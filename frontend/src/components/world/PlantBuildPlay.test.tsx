@@ -37,6 +37,11 @@ describe("PlantBuildPlay interactive planning", () => {
   });
   afterEach(() => vi.unstubAllGlobals());
 
+  const openNpcTask = async (name: RegExp) => {
+    fireEvent.click(await screen.findByRole("button", { name }));
+    await screen.findByRole("dialog", { name: "当前经营任务" });
+  };
+
   it("fails closed when the external planning model is unavailable", async () => {
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
       const path = String(input);
@@ -52,6 +57,12 @@ describe("PlantBuildPlay interactive planning", () => {
       };
     }));
     render(<PlantBuildPlay onExit={() => undefined} />);
+    await waitFor(() => expect(screen.getByRole("heading", { name: "在总部规划室明确工厂需要什么" })).toBeInTheDocument());
+    expect(screen.getByRole("navigation", { name: "M10 可进入地点" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /总部规划中心/ })).toHaveAttribute("aria-pressed", "true");
+    expect(screen.queryByRole("dialog", { name: "当前经营任务" })).not.toBeInTheDocument();
+    expect(screen.queryByLabelText(/目标区域/)).not.toBeInTheDocument();
+    await openNpcTask(/纪元：与规划 Agent 制定需求/);
     await waitFor(() => expect(screen.getByText("未启用外部模型")).toBeInTheDocument());
     expect(screen.getByRole("button", { name: /让 Agent 生成候选/ })).toBeDisabled();
     expect(screen.getByText(/不能生成虚拟固定候选/)).toBeInTheDocument();
@@ -76,10 +87,16 @@ describe("PlantBuildPlay interactive planning", () => {
       return { ok: true, json: async () => trace };
     }));
     render(<PlantBuildPlay onExit={() => undefined} />);
+    await openNpcTask(/纪元：继续填写需求并生成候选/);
     await waitFor(() => expect(screen.getByText("未启用外部模型")).toBeInTheDocument());
     fireEvent.click(screen.getByRole("button", { name: "人工新增候选" }));
     expect(screen.getByText(/建立第 1 版人工候选/)).toBeInTheDocument();
     expect(screen.getByRole("button", { name: /提交到 IAOS 候选集/ })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "关闭当前任务" }));
+    fireEvent.click(screen.getByRole("button", { name: /总部规划中心/ }));
+    await screen.findByRole("heading", { name: "企业总部规划中心" });
+    fireEvent.click(screen.getByRole("tab", { name: "场景档案" }));
+    expect(screen.getByText("设施需求 · 第 1 版")).toBeInTheDocument();
   });
 
   it("submits editable requirements and renders agent evidence for human review", async () => {
@@ -106,6 +123,7 @@ describe("PlantBuildPlay interactive planning", () => {
     });
     vi.stubGlobal("fetch", fetchMock);
     render(<PlantBuildPlay onExit={() => undefined} />);
+    await openNpcTask(/纪元：与规划 Agent 制定需求/);
     await waitFor(() => expect(screen.getByText(/MiniMax · MiniMax-M2.5/)).toBeInTheDocument());
     fireEvent.change(screen.getByLabelText(/目标区域/), { target: { value: "江苏省苏州市" } });
     fireEvent.change(screen.getByLabelText(/设施用途/), { target: { value: "冷却板制造基地" } });
@@ -138,23 +156,6 @@ describe("PlantBuildPlay interactive planning", () => {
     const investigation = JSON.parse(fetchMock.mock.calls.find(([path, init]) => String(path).endsWith("investigations") && init?.method === "POST")?.[1]?.body as string);
     expect(investigation.proposal_id).toBe("site-1");
     expect(investigation.scope).toContain("commercial_quote");
-    fireEvent.click(screen.getByRole("button", { name: "人工新增候选" }));
-    fireEvent.change(screen.getByLabelText("候选名称"), { target: { value: "人工园区候选" } });
-    fireEvent.change(screen.getByLabelText("方案类型"), { target: { value: "lease_and_retrofit" } });
-    fireEvent.change(screen.getByLabelText("业务理由"), { target: { value: "项目负责人基于招商线索补充候选" } });
-    fireEvent.change(screen.getByLabelText("最小估算（CNY）"), { target: { value: "7000000" } });
-    fireEvent.change(screen.getByLabelText("最可能估算（CNY）"), { target: { value: "8000000" } });
-    fireEvent.change(screen.getByLabelText("最大估算（CNY）"), { target: { value: "9000000" } });
-    fireEvent.change(screen.getByLabelText("估算依据"), { target: { value: "人工概念级估算" } });
-    fireEvent.change(screen.getByLabelText("预计可用日期"), { target: { value: "2026-11-01" } });
-    fireEvent.change(screen.getByLabelText(/假设/), { target: { value: "园区存在可租赁空间" } });
-    fireEvent.change(screen.getByLabelText(/待核验事实/), { target: { value: "权属与正式报价" } });
-    fireEvent.change(screen.getByLabelText(/主要风险/), { target: { value: "交付日期尚未核验" } });
-    fireEvent.click(screen.getByRole("button", { name: /提交到 IAOS 候选集/ }));
-    await waitFor(() => expect(fetchMock.mock.calls.some(([path, init]) => String(path).endsWith("proposals/manual") && init?.method === "POST")).toBe(true));
-    const manual = JSON.parse(fetchMock.mock.calls.find(([path]) => String(path).endsWith("proposals/manual"))?.[1]?.body as string);
-    expect(manual.expected_revision).toBe(1);
-    expect(manual.proposal.business_rationale).toContain("招商线索");
   });
 
   it("compares only delivered observations and keeps hard constraints visible", async () => {
@@ -165,12 +166,17 @@ describe("PlantBuildPlay interactive planning", () => {
       financial_constraint: { available_cash: { value: "20000000.00", currency: "CNY", scale: 2 }, approved_budget: { value: "15000000.00", currency: "CNY", scale: 2 }, cash_source_ref: "gl:BOOK:1002", budget_source_ref: "budget:BUD-1", snapshot_hash: "sha256:authority" },
       preferences: [], revision: 1, revision_reason: "test",
     };
+    const currentProposalSet = {
+      schema_version: "1.0", proposal_set_id: "SET-1", requirement_id: requirement.requirement_id, revision: 1, status: "candidate_only",
+      proposals: [{ proposal_id: "SITE-1", option_type: "lease_and_retrofit", display_name: "候选场址一", business_rationale: "测试", estimated_amount: { minimum: { value: "7000000.00", currency: "CNY", scale: 2 }, likely: { value: "8000000.00", currency: "CNY", scale: 2 }, maximum: { value: "9000000.00", currency: "CNY", scale: 2 }, basis: "测试" }, estimated_schedule: { earliest: "2026-09-01T00:00:00Z", likely: "2026-10-01T00:00:00Z", latest: "2026-11-01T00:00:00Z" }, assumptions: [], facts_required: [], risks: [], source_refs: [], confidence: "0.8", status: "proposed" }],
+      evidence: { provider: "MiniMax", model: "MiniMax-M2.5", prompt_version: "plant-planning-v2", input_hash: "sha256:in", output_hash: "sha256:out", validated_at: "2026-08-01T00:00:00Z" },
+    };
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
       const path = String(input);
       if (path.endsWith("planning-status")) return { ok: true, json: async () => ({ state: "connected", provider: "MiniMax", model: "MiniMax-M2.5", prompt_version: "plant-planning-v1" }) };
       if (path.includes("financial-constraints")) return { ok: true, json: async () => ({ case_code: "INC-GX-TEST", legal_entity_code: "LE-GX-TEST", financial_constraint: requirement.financial_constraint }) };
       if (path.includes("/requirements/")) return { ok: true, json: async () => requirement };
-      if (path.includes("/proposals?")) return { ok: false, status: 404, text: async () => "not found" };
+      if (path.includes("/proposals?")) return { ok: true, json: async () => currentProposalSet };
       if (path.includes("/investigations")) return { ok: true, json: async () => ({ items: [{
         request: { schema_version: "1.0", investigation_request_id: "INV-1", case_code: "INC-GX-TEST", proposal_set_id: "SET-1", proposal_id: "SITE-1", expected_revision: 1, world_run_id: "RUN-1", scope: [], requested_by: "owner", requested_at: "2026-08-01T00:00:00Z", status: "waiting_world" },
         status: "observed", work_item_status: "completed", observation: { schema_version: "1.0", observation_id: "OBS-1", investigation_request_id: "INV-1", proposal_id: "SITE-1", result: "completed", ownership_status: "verified", available_area_m2: 9000, electricity_kva: 1500, quoted_amount: { value: "8000000.00", currency: "CNY", scale: 2 }, available_at: "2026-10-01T00:00:00Z", permit_status: "eligible", evidence_refs: ["world-document:quote-1"], notes: "", external_actor_id: "park", observed_at: "2026-08-01T00:00:00Z" },
@@ -178,11 +184,58 @@ describe("PlantBuildPlay interactive planning", () => {
       return { ok: true, json: async () => trace };
     }));
     render(<PlantBuildPlay onExit={() => undefined} />);
+    await openNpcTask(/周衡：比较事实并提交推荐/);
     await waitFor(() => expect(screen.getByRole("heading", { name: "外部事实比较" })).toBeInTheDocument());
     expect(screen.getByText("硬约束不通过")).toBeInTheDocument();
     expect(screen.getByText("可用电力低于最低要求")).toBeInTheDocument();
+    expect(screen.getByText("最低要求 2,000 kVA")).toBeInTheDocument();
+    expect(screen.getByText("实测 1,500 kVA")).toBeInTheDocument();
+    expect(screen.getByText("短缺 500 kVA")).toBeInTheDocument();
+    expect(screen.getByText(/当前权重来源：界面默认比较偏好/)).toBeInTheDocument();
     expect(screen.getByText("world-document:quote-1")).toBeInTheDocument();
     expect(screen.getByLabelText("成本权重")).toHaveValue(35);
+    expect(screen.getByLabelText("成本权重")).toBeDisabled();
     expect(screen.getByText(/不是正式推荐、选址批准或投资批准/)).toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: "修订设施需求" }));
+    expect(screen.getByText("修订设施需求 · 将保存为第 2 版")).toBeInTheDocument();
+    expect(screen.getByLabelText(/目标区域/)).toHaveValue("苏州");
+    expect(screen.getByLabelText(/最小电力容量/)).toHaveValue(2000);
+    expect(screen.getByLabelText(/本次投资申请金额/)).toHaveValue(10000000);
+    expect(screen.getByLabelText(/本次修订原因/)).toHaveValue("");
+    expect(screen.getByRole("button", { name: "保存修订并让 Agent 重新生成候选" })).toBeEnabled();
+    fireEvent.click(screen.getByRole("button", { name: "返回外部事实比较" }));
+    expect(screen.getByRole("heading", { name: "外部事实比较" })).toBeInTheDocument();
+  });
+
+  it("lets the routed governance authority decide a site approval inside AESE", async () => {
+    let approved = false;
+    const requirement = {
+      schema_version: "1.0", requirement_id: "facility-requirement-INC-GX-TEST", tenant_id: "tenant-gx-test", case_code: "INC-GX-TEST", legal_entity_code: "LE-GX-TEST",
+      target_region: "苏州", facility_purpose: "制造基地", minimum_area_m2: 8000, minimum_electricity_kva: 2000, target_available_at: "2026-12-01T00:00:00Z", candidate_count: 2, allowed_option_types: ["lease_and_retrofit"], investment_request: { value: "10000000.00", currency: "CNY", scale: 2 }, minimum_cash_reserve: { value: "2000000.00", currency: "CNY", scale: 2 }, financial_constraint: { available_cash: { value: "20000000.00", currency: "CNY", scale: 2 }, approved_budget: { value: "15000000.00", currency: "CNY", scale: 2 }, cash_source_ref: "gl:BOOK:1002", budget_source_ref: "budget:BUD-1", snapshot_hash: "sha256:authority" }, preferences: [], revision: 1, revision_reason: "test",
+    };
+    const proposalSet = { schema_version: "1.0", proposal_set_id: "SET-1", requirement_id: requirement.requirement_id, revision: 1, status: "candidate_only", proposals: [{ proposal_id: "SITE-1", option_type: "lease_and_retrofit", display_name: "候选场址一", business_rationale: "测试", estimated_amount: { minimum: { value: "7000000.00", currency: "CNY", scale: 2 }, likely: { value: "8000000.00", currency: "CNY", scale: 2 }, maximum: { value: "9000000.00", currency: "CNY", scale: 2 }, basis: "测试" }, estimated_schedule: { earliest: "2026-09-01T00:00:00Z", likely: "2026-10-01T00:00:00Z", latest: "2026-11-01T00:00:00Z" }, assumptions: [], facts_required: [], risks: [], source_refs: [], confidence: "0.8", status: "proposed" }], evidence: { provider: "MiniMax", model: "MiniMax-M3", prompt_version: "plant-planning-v2", input_hash: "sha256:in", output_hash: "sha256:out", validated_at: "2026-08-01T00:00:00Z" } };
+    const recommendation = { schema_version: "1.0", recommendation_id: "REC-1", case_code: "INC-GX-TEST", proposal_set_id: "SET-1", proposal_set_revision: 1, selected_proposal_id: "SITE-1", assessment_policy_version: "site-assessment-v1", weights: { cost: 35, schedule: 25, capacity: 20, control: 20 }, recommendation_reason: "该场址满足当前经营与投产要求", alternative_comparison: "相较其他方案其交付时间和资金占用更优", recommended_at: "2026-08-01T12:00:00Z", requirement_id: requirement.requirement_id, input_hash: "sha256:recommendation", approval_flow_key: "genesis.site.selection.approval", approval_request_id: "APR-1", eligible_count: 1, status: "waiting_approval", recommended_by: "project-owner", assessments: [{ proposal_id: "SITE-1", display_name: "候选场址一", observation_id: "OBS-1", eligible: true, hard_failures: [], total_score: 86.2, evidence_refs: ["world-document:quote-1"] }] };
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = String(input);
+      if (path.endsWith("planning-status")) return { ok: true, json: async () => ({ state: "connected", provider: "MiniMax", model: "MiniMax-M3", prompt_version: "plant-planning-v2" }) };
+      if (path.includes("financial-constraints")) return { ok: true, json: async () => ({ case_code: "INC-GX-TEST", legal_entity_code: "LE-GX-TEST", financial_constraint: requirement.financial_constraint }) };
+      if (path.includes("/requirements/")) return { ok: true, json: async () => requirement };
+      if (path.includes("/proposals?")) return { ok: true, json: async () => proposalSet };
+      if (path.endsWith("/investigations")) return { ok: true, json: async () => ({ items: [] }) };
+      if (path.includes("/site-selections")) return { ok: true, json: async () => ({ items: [{ recommendation, record_status: "waiting_approval", approval_status: approved ? "approved" : "pending" }] }) };
+      if (path.includes("/plant-build/approvals/APR-1")) return { ok: true, json: async () => ({ item: { id: "APR-1", status: approved ? "approved" : "pending", requester_id: "project-owner" }, detail: { flow_key: "genesis.site.selection.approval", flow_version: 1, flow_name: "工厂场址正式选择审批", subject: { title: "INC-GX-TEST · 工厂场址正式选择", summary: "审阅调研事实和推荐理由", operation: "site.selection.formalize" }, assignments: [{ id: "ASG-1", stage_code: "governance_authority", stage_name: "企业治理权责审批", mode: "all", display_name: "创始董事长", selector_type: "position", selector_value: "chair", status: approved ? "approved" : "active" }], can_decide: !approved } }) };
+      if (path.includes("/commands/iaos/approvals/APR-1/approve") && init?.method === "POST") { approved = true; return { ok: true, json: async () => ({ item: { id: "APR-1", status: "approved" } }) }; }
+      return { ok: true, json: async () => trace };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<PlantBuildPlay onExit={() => undefined} />);
+    await openNpcTask(/林岚：查看审批与正式选址/);
+    await waitFor(() => expect(screen.getByText("INC-GX-TEST · 工厂场址正式选择")).toBeInTheDocument());
+    expect(screen.getByText(/创始董事长 · position:chair/)).toBeInTheDocument();
+    expect(screen.getByText("当前身份可决定")).toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/审批意见/), { target: { value: "同意该场址进入正式选址与后续合同阶段" } });
+    fireEvent.click(screen.getByRole("button", { name: "批准选址推荐" }));
+    await waitFor(() => expect(screen.getByRole("button", { name: "批准已生效 · 正式选址" })).toBeInTheDocument());
+    expect(fetchMock.mock.calls.some(([path]) => String(path).includes("/commands/iaos/approvals/APR-1/approve"))).toBe(true);
   });
 });

@@ -546,6 +546,30 @@ func TestPlantSiteRecommendationUsesAuthenticatedCommandGateway(t *testing.T) {
 	}
 }
 
+func TestPlantApprovalDetailUsesAuthenticatedReadGateway(t *testing.T) {
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path == "/api/v1/profile" {
+			_, _ = w.Write([]byte(`{"username":"chair-user","tenant_id":"tenant-a"}`))
+			return
+		}
+		if r.Method != http.MethodGet || r.URL.Path != "/api/v1/approvals/approval-1" {
+			http.NotFound(w, r)
+			return
+		}
+		_, _ = w.Write([]byte(`{"item":{"id":"approval-1","status":"pending"},"detail":{"can_decide":true,"assignments":[{"display_name":"创始董事长"}]}}`))
+	}))
+	defer iaos.Close()
+	server := New(Config{IAOSBaseURL: iaos.URL})
+	req := httptest.NewRequest(http.MethodGet, "/api/aese/v1/world/plant-build/approvals/approval-1", nil)
+	req.Header.Set("Authorization", "Bearer chair-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-a")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusOK || !strings.Contains(res.Body.String(), `"can_decide":true`) {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
+}
+
 func TestAESE3CompletionAPI(t *testing.T) {
 	server := New(Config{})
 	req := httptest.NewRequest(http.MethodGet, "/api/aese/v1/world/aese3", nil)

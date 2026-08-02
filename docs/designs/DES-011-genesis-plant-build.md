@@ -23,7 +23,7 @@ M9 终态在每个企业自己的账簿、预算和治理记录中提供运行�
 - 已批准预算 envelope、剩余额度和期间，由 IAOS 预算事实实时读取。
 - 已生效 CEO、CFO 和工厂项目负责人岗位及 mandate。
 
-用户必须能在受治理表单中填写或修订设施需求、计划投用日期、候选数量、目标区域、投资申请额、预算上限、现金保留下限和评估权重。所有金额采用 decimal string + ISO 4217 币种，保存修订版本、修改人、修改理由和审批状态；UI 不得把演示金额设为不可修改常量。
+用户必须能在受治理任务中填写或修订设施需求、计划投用日期、候选数量、目标区域、投资申请额、预算上限和现金保留下限；在形成推荐时可调整评估权重。所有金额采用 decimal string + ISO 4217 币种，保存修订版本、修改人、修改理由和审批状态；UI 不得把演示金额设为不可修改常量。
 
 候选方案不再由剧情固定为三种模式。`plant-planning-agent` 根据上述约束生成可解释的候选方案草稿；项目负责人可以要求补充、删除、重生成或人工新增候选，再选择进入正式调研的方案。Agent 可以建议绿地自建、租赁改造、定制代建或其他合理模式，但这些只是建议，不是预设必选项。
 
@@ -134,15 +134,32 @@ country / region / city（用户需求）
 
 1. 先检查正式报价币种与投资申请额、实际面积、实际电力、正式可用日期、权属结论和许可结论。
 2. 任一硬约束失败时标记为不合格，`total_score=null`；调整权重不能把不合格方案变成合格方案。
-3. 对合格方案计算成本、工期、容量、控制四个 0–100 分的可解释分项，并按用户当前输入的非负权重自动归一化。
+3. 对合格方案计算成本、工期、容量、权属与许可四个 0–100 分的可解释分项，并按用户当前输入的非负权重自动归一化。
 4. Agent 估算额和预计日期只与 Observation 并列展示；正式报价、可用日期、面积、电力、权属和许可始终来自 Observation，二者不得覆盖。
-5. 每个比较卡必须展示 Observation ID、硬约束结果、分项分数和证据引用。该比较不是推荐、选址批准或投资批准。
+5. 每个比较卡必须逐行展示 Requirement 门槛、Observation 实测值、差额、通过状态、Observation ID 和证据引用，不能只显示“低于要求”等结论。该比较不是推荐、选址批准或投资批准。
+6. 当没有候选通过硬约束时，失败摘要必须提供“修订设施需求”恢复动作。该动作带入当前权威 Requirement，要求人员填写新的修订原因，并保存为下一 revision 后重新调用 Agent 生成候选；不得覆盖旧版本，也不得让用户离开游戏场景后自行寻找隐藏配置入口。
+7. Observation 参与比较前必须同时匹配当前 `proposal_set_id`、`proposal_set_revision` 和集合内 `proposal_id`。需求或候选集修订后，旧 Observation 只能作为历史档案展示，不能推进当前游戏阶段、进入排序或提交正式推荐；AESE 的筛选范围必须与 IAOS `site.selection.recommend` 的权威查询完全一致。
+
+当前 `site-assessment-v1` 的界面初始偏好为成本 35%、工期 25%、容量 20%、权属与许可
+20%。这些值是显式的产品默认排序偏好，不是 Agent 输出、Requirement、World Observation
+或审批决定；界面必须标明来源并允许用户修改/恢复默认。权重只对已通过全部硬约束的候选生效；
+合格候选为 0 时必须禁用权重，避免暗示“调权重可抵消电力或面积不足”。四项分数计算方式必须
+在界面可展开查看：成本为投资申请额未占用比例；工期以目标日 50 分、最多提前 180 天线性增至
+100 分；容量为面积与电力裕量分的平均；权属/许可中已核验或满足为 100、有条件为 60。
 
 页面权重仍只控制预览，但正式推荐纵切已经交付：`site.selection.recommend` 不信任页面分数，
 而是在 IAOS 事务中从权威 Requirement、ProposalSet revision 和已提交 Observation 重算
 `site-assessment-v1`，冻结权重、结果、Observation IDs、证据、人员理由和输入 hash，再进入
 `genesis.site.selection.approval`。推荐、审批和正式落地分离；只有审批状态 approved 时，
 `site.selection.formalize` 才能消费该请求并写正式决定。少于两个合格候选必须填写单一来源例外说明。
+
+审批交互遵循 M9 DES-028/GX6 的同一边界：玩家不必离开 AESE 剧情去 IAOS 后台完成关键经营
+动作。进入治理会议室时，AESE 通过受认证只读 BFF 获取 IAOS 冻结的 Business Subject、Flow
+版本、Assignment 和 `can_decide`，在游戏内展示推荐理由、替代方案、硬约束结果、可信
+Observation、评分和输入 hash。只有 IAOS 路由出的当前受派人可点击批准或驳回；决定通过 AESE
+Command Gateway 调用 IAOS `/approvals/:id/{approve,reject}`，浏览器不能指定审批人或写批准状态。
+IAOS 审批中心保留为审计穿透入口，不再是完成 M10 剧情的必经操作页。批准后仍由独立
+`site.selection.formalize` 完成正式选址，驳回不能落地并须进入后续修订闭环。
 
 IAOS 同时把 Requirement、ProposalSet/Proposal Line、Review、Investigation Request/Observation、持久 Work Item、Recommendation 和 Decision 发布为九个 `domain_projection` Entity。它们只用于数据模型工坊、左侧业务菜单和穿透查询；权威写入仍分别属于七个 Capability 或调查 Process。投影与权威变化在同一事务同步，菜单不提供通用新增、修改和删除，避免用户或 Agent 绕过 M10 业务能力直接改事实。
 
@@ -309,19 +326,20 @@ genesis.facility.accepted.v1
 4. 项目负责人可对候选执行采纳调研、退回重生成或淘汰，并填写业务理由；AESE 从 IAOS profile 解析实际人员身份，再以 `site.proposal.review` 保存审阅，浏览器不能指定 `reviewed_by`。
 5. 对已保存且审阅结论为“采纳调研”的候选，人员可发起外部调研。IAOS 创建 `facility.site.investigation.v1` 持久 `waiting_world` 工作项，并通过 World Bridge 写入带 correlation/subject 的 Intent。
 6. AESE 外部参与者使用结构化表单返回权属、可用面积、电力容量、正式报价、可用日期、许可、证据引用和备注。AESE 必须先写受信 World Journal Observation；IAOS 的 `site.investigation.observation.commit` 只消费与 Intent/correlation 匹配的 Journal 事实，保存权威 Observation 并完成工作项。
-7. 人员在可解释比较下选择合格候选并填写推荐理由、替代方案比较；AESE Command Gateway 调用 `site.selection.recommend`，IAOS 重算并创建统一审批。用户从深链进入 IAOS 审批中心决定，批准后返回点击“同步批准并正式选址”，由 `site.selection.formalize` 原子消费审批。
+7. 人员在可解释比较下选择合格候选并填写推荐理由、替代方案比较；AESE Command Gateway 调用 `site.selection.recommend`，IAOS 重算并创建统一审批。玩家进入 AESE 治理会议室，审阅 IAOS 冻结事项和实际 Assignment；当前受派审批人可在游戏内批准或驳回。批准后由项目负责人点击“批准已生效 · 正式选址”，通过 `site.selection.formalize` 原子消费审批。IAOS 审批中心只作为审计穿透入口。
+8. 正式选址后项目负责人在园区权利人场景发起场址控制请求，选择租赁、购买、代建或使用协议方式并声明期望交付日。园区/权利人是 World 外部参与者，必须提交协议、交接、占有授权与生效时间；AESE 先写 `site.control.delivered.v1` Observation，IAOS 再以 `site.control.observation.commit` 形成权威场址控制事实。
 
 浏览器生成的 Intent/Observation/Recommendation 请求编码只承担幂等关联，不作为授权身份。
 LAN HTTP 浏览器可能不提供 secure-context-only 的 `crypto.randomUUID()`；前端必须通过统一
 兼容函数生成编码，优先 randomUUID、其次 getRandomValues UUID v4。任何页面不得直接调用
 randomUUID，以免点击在进入 AESE Command Gateway 前静默中断。
-8. 外部模型未配置、财务快照缺失或已变化、Agent 输出不满足 Schema、候选超过投资申请上限、身份/权限不足、revision 冲突、World Observation 不受信或审批不匹配时失败关闭，不用固定候选或页面 JSON 兜底。
+9. 外部模型未配置、财务快照缺失或已变化、Agent 输出不满足 Schema、候选超过投资申请上限、身份/权限不足、revision 冲突、World Observation 不受信、审批不匹配或场址交付证据不完整时失败关闭，不用固定候选或页面 JSON 兜底。
 
 Requirement 到正式选址现已统一为 `facility.plant.planning.v1@1.0.0` 单一持久 Effective Process Run。七个业务 Capability 成功时在同一事务追加人、Agent 或 World 节点证据；调查请求进入 `waiting_event`，推荐进入 `waiting_approval`，审批决定恢复到正式选址或失败结束，正式选择后为 `succeeded`。流程工作室只允许查看该业务命令驱动流程，不能一键运行而重复创建审批或伪造外部事实。
 
 人工新增候选现已进入权威链：人员填写方案类型、理由、金额区间/依据、预计可用日期、假设、待核验事实和风险；AESE BFF 读取最新 Requirement 与可选 ProposalSet。若外部模型未启用且尚无候选集，IAOS 允许 `site.proposal.record` 创建只含一个人工候选的第 1 版；已有版本时只允许在下一 revision 追加一项，并逐项校验既有候选、人员来源和 hash。人工输入不冒充 Agent 输出或 World 外部事实。
 
-以下仍未实现：场地控制、项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
+场址控制现由 `facility.plant.delivery.v1@1.0.0` 承载：人员发起后进入持久 World wait，只有可信协议/交接 Observation 才成功；延迟或拒绝会关闭本次 Run，并保留历史后允许重新发起。以下仍未实现：项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
 
 ## 16. 用户配置、操作、验证与恢复
 
@@ -370,9 +388,10 @@ AESE 首页同时把原“世界地图”命名为 `企业生命周期 · M9–M
 4. 阅读每个候选的业务理由、金额/工期区间、估算依据、假设、待验证事实、风险、来源和置信度。
 5. 选择“采纳调研”“退回重生成”或“淘汰”，填写至少 6 个字符的理由并提交。成功表示 Review 已保存；“采纳调研”仍不等于外部事实已确认。
 6. 对已采纳候选点击“发起外部调研工作项”。页面显示 `waiting_world` 后，模拟登记/园区/产权等外部角色填写权属、面积、电力、正式报价、可用日期、许可和证据引用并提交；只有 IAOS 显示工作项 `completed` 才代表事实已进入权威闭环。
-7. 至少一个 Observation 完成后，页面显示“外部事实比较”。用户可调整成本、工期、容量和控制权重；系统先显示六类硬约束，再显示分项与综合分。Agent 估算与 World 正式事实分栏显示，任何权重都不能抵消硬约束失败。
+7. 至少一个 Observation 完成后，页面显示“外部事实比较”。系统先逐行显示六类硬约束的 Requirement 门槛、Observation 实测、差额和通过状态；只有存在合格候选时，才允许调整成本、工期、容量和权属与许可权重并显示综合分。Agent 估算与 World 正式事实分栏显示，任何权重都不能抵消硬约束失败。若没有候选合格，点击失败摘要中的“修订设施需求”，系统带入当前版本并显示下一版本号；修改门槛/金额/日期、填写修订原因后保存，Agent 重新生成与新版本绑定的候选。
 8. 选择合格候选，填写至少 12 个字符的推荐理由和替代方案比较；少于两个合格候选时再填写至少 20 个字符的单一来源例外说明，提交 IAOS 选址审批。
-9. 点击“打开 IAOS 审批中心”查看事项、证据与冻结处理人并作出决定。approved 只表示有权主体同意；返回 AESE 点击“同步批准并正式选址”后，看到正式选择 ID 才表示落地。
+9. 前往“治理会议室”，打开林岚的当前事件。游戏内应显示 IAOS 冻结的事项、审批流版本、实际处理人、推荐理由、替代方案、评分、Observation 和输入 hash。若当前身份是受派审批人，填写审批意见并批准或驳回；非受派人只能查看。approved 只表示有权主体同意；再点击“批准已生效 · 正式选址”，看到正式选择 ID 才表示落地。“在 IAOS 查看审计详情”不是完成剧情的必经步骤。
+10. 切换到园区权利人场景，打开“取得实际场址控制权”任务。项目负责人先发起请求，World 外部参与者再填写协议引用、交接单引用、生效时间和证据。页面出现“场址控制已交付”且场景档案可见这些证据后，才可进入项目/WBS；正式选址本身不满足该门。
 
 ### 16.3 关系与证据
 
@@ -389,6 +408,8 @@ M9 已过账现金 + 已批预算
 -> genesis.site.selection.approval（冻结事项、版本和处理人）
 -> site.selection.formalize（消费批准并形成正式决定）
 -> facility.plant.planning.v1 Process Run（全程参与、等待、审批与 Artifact 证据）
+-> site.control.request / trusted World Observation
+-> facility.plant.delivery.v1（场址控制独立 Process Run）
 -> [待实现] Project / WBS / Contract / Payment / Acceptance / Finance
 ```
 
@@ -401,3 +422,84 @@ M9 已过账现金 + 已批预算
 - 重复点击：相同 object/revision 使用同一幂等键返回既有结果；同键不同输入必须 409 冲突。
 - 审阅版本冲突：刷新 ProposalSet/Review 后按最新 revision 重新决定，不能覆盖他人已提交审阅。
 - IAOS 不可用或权限不足：页面保持当前表单和候选展示，但不得显示“已保存”；恢复会话或权限后再次提交。
+
+## 17. M10 游戏场景与业务操作合同
+
+M10 必须延续 DES-028 的 Enterprise Genesis 游戏世界，不能把独立表单工作台称为
+“Plant Build Play”。IAOS 的 `M10 工厂规划` 继续作为配置、穿透和证据工作台；AESE
+`/#world-plant-build` 是玩家、人类角色、Agent 与 World 外部参与者共同工作的游戏入口。
+
+### 17.1 同一全屏游戏壳与机构场景图
+
+M9 交接到 M10 时必须保留 tenant、case、workspace、玩家身份和企业上下文。当前交互纵切
+使用占满浏览器可用视口的游戏壳；主画面不得向下接续工作台、长表单、JSON 或 reference
+replay 控件。玩家像 M9 一样在内部组织与外部世界之间切换，当前地点、人物、事件和地点档案
+始终属于同一个企业世界。当前交互纵切使用四个可进入地点：
+
+| 地点 | 承载的经营活动 | 主要人物 |
+| --- | --- | --- |
+| 企业总部规划中心 | 设施需求、资金边界、事实比较 | 玩家、设施规划 Agent、项目/财务负责人 |
+| 产业园区地图 | 候选场址、调研状态和路线 | 玩家、设施规划 Agent |
+| 候选场址现场 | 权属、面积、电力、报价、日期和许可 Observation | 玩家、园区外部参与者 |
+| 治理决策会议室 | 推荐、审批状态和正式选址 | 玩家、治理协调人、有权审批主体 |
+
+项目办公室、施工现场、付款里程碑和验收现场随 S4.3–S4.5 的权威业务对象实现后加入，不能用
+没有事实来源的空场景冒充建设进度。
+
+### 17.2 Game Projection 编译
+
+前端只从已读取的 IAOS/World 事实派生表现阶段，不保存第二套业务状态机：
+
+```text
+无 Requirement                 -> 总部规划室 / 定义需求
+Requirement 或 ProposalSet     -> 产业地图 / 生成与审阅候选
+已采纳 Review 或 Investigation -> 候选现场 / 等待 World
+已完成 Observation             -> 总部规划室 / 比较与推荐
+Recommendation                 -> 治理会议室 / 等待审批
+Formal Decision                -> 园区权利人 / 请求实际场址控制
+Site Control Request           -> 园区权利人 / 等待协议与交接 Observation
+Trusted Site Control           -> 项目准备 / 允许设计项目与 WBS
+```
+
+更晚阶段的已提交事实优先于较早阶段。地点切换、人物移动和对话只改变观察视角；只有 Capability、
+Approval 或受信 World Observation 成功后重新读取事实，才能改变章节、场景资产和旅程状态。
+
+### 17.3 场景、叙事与治理三层
+
+1. **场景层**展示玩家角色、当前地点、NPC、候选标记、World 事实数量和因果旅行反馈。
+2. **叙事层**用人物、岗位、任务目的和业务语言解释当前为什么需要玩家；技术编码不作为第一信息层。
+3. **治理层**复用现有 Requirement、Proposal、Review、Observation、Assessment、Approval
+   交互，但只在玩家点击当前 NPC 后，以临时“当前经营任务”对话框出现；关闭即返回场景，
+   不能把表单常驻在游戏主画面，也不能绕过 AESE Command Gateway。
+
+表单仍须提供可见 label、字段帮助、局部错误、异步状态和键盘操作。地点按钮与任务按钮最小
+点击高度 44px，焦点可见；场景图片失败时仍保留地点列表、人物对话和全部业务操作；
+`prefers-reduced-motion` 下取消移动与循环动画。
+
+### 17.4 场景档案与事实展示
+
+任务对话框只负责形成下一项输入或决定，不承担历史事实陈列。Capability、Human Review、
+受信 World Observation、Approval 或 Formal Decision 成功后，输入控件关闭；确认结果按事实
+发生和保管地点进入场景档案：
+
+| 已确认事实 | 归档地点 |
+| --- | --- |
+| Facility Requirement、资金边界 | 企业总部规划中心 |
+| ProposalSet、人工 Review | 产业园区地图 |
+| Investigation、World Observation、正式场址决定 | 候选场址现场 |
+| Recommendation、Approval | 治理决策会议室 |
+
+档案展示业务摘要、状态和 evidence reference，并可进一步穿透 IAOS；它是权威事实的只读投影，
+不是浏览器本地日志。旧 reference replay 只保留在 fixture、测试和证据工具中，禁止出现在正式
+玩家路由。
+
+### 17.5 当前验收口径
+
+- 首屏必须出现 M10 旅程、至少四个可进入地点、玩家人物、当前 NPC 和当前经营任务。
+- Requirement、Proposal、Investigation、Observation、Recommendation、Decision 任一事实变化后，
+  刷新页面可恢复相同阶段，并自动定位相应地点。
+- 未与 NPC 交互时 DOM 中不得存在业务输入表单；玩家可从 NPC 动作打开临时任务，关闭后回到
+  原地点。已确认结果只能在相应地点的“场景档案”中查询。
+- 所有既有 API、权限、幂等和失败关闭测试继续通过。
+- 375px、768px、1024px、1440px 不产生页面级横向滚动；键盘可以到达地点和主任务。
+- 当前纵切达到“选址游戏化可玩”，不等于项目/WBS、施工、付款、验收和工程财务已经完成。

@@ -1,53 +1,59 @@
 import {
   ArrowLeft,
   BadgeCheck,
-  Banknote,
   Bot,
-  Building2,
   CircleHelp,
-  Factory,
   FilePlus2,
+  Gavel,
   LoaderCircle,
-  Pause,
-  Play,
   RotateCcw,
   SearchCheck,
-  StepForward,
   TriangleAlert,
+  X,
   XCircle,
 } from "lucide-react";
 import { type FormEvent, useEffect, useMemo, useState } from "react";
 import {
   generatePlantProposals,
-  loadPlantBuild,
   loadPlantFinancialConstraint,
+  loadPlantApprovalDetail,
   loadPlantPlanningStatus,
   loadPlantProposalSet,
   loadPlantProposalReviews,
   loadPlantRequirement,
   loadSiteInvestigations,
   loadSiteSelections,
+  loadSiteControls,
   requestSiteInvestigation,
+  requestSiteControl,
   finalizeSiteSelection,
   submitSiteInvestigationObservation,
   submitSiteSelectionRecommendation,
+  submitSiteControlObservation,
+  decidePlantApproval,
   submitPlantProposalReview,
   submitManualPlantProposal,
   type FacilityRequirement,
-  type PlantBuildTrace,
   type PlantPlanningProviderStatus,
   type PlantFinancialConstraint,
+  type PlantApprovalDetail,
   type ProposalSet,
   type SiteOptionProposal,
   type SiteInvestigationItem,
   type SiteSelectionItem,
+  type SiteControlItem,
+  type SiteControlRequest,
 } from "../../world/plantBuild";
 import {
+  DEFAULT_SITE_ASSESSMENT_WEIGHTS,
   assessObservedSites,
+  currentProposalInvestigations,
   type SiteAssessment,
   type SiteAssessmentWeights,
 } from "../../world/siteAssessment";
 import { createClientRequestId } from "../../lib/clientRequestId";
+import { derivePlantGameStage } from "../../world/plantGame";
+import { PlantBuildGameScene, type PlantSceneArchiveEntry } from "./PlantBuildGameScene";
 import "./WorldPlay.css";
 
 const cny = (value: string) =>
@@ -96,6 +102,9 @@ const blankDraft: RequirementDraft = {
 
 const localDate = (value: string) =>
   value ? new Date(value).toISOString() : "";
+
+const localDateTimeInput = (value: string) =>
+  value ? new Date(value).toISOString().slice(0, 16) : "";
 
 function ProposalList({ title, values }: { title: string; values: string[] }) {
   return (
@@ -229,7 +238,7 @@ const SCORE_DIMENSIONS: Array<[keyof SiteAssessmentWeights, string, string]> = [
   ["cost", "成本", "正式报价相对投资申请额"],
   ["schedule", "工期", "正式可用日期相对目标日期"],
   ["capacity", "容量", "实际面积与电力容量"],
-  ["control", "控制", "权属与许可核验结论"],
+  ["control", "权属与许可", "权属与许可核验结论"],
 ];
 
 function AssessmentCard({ assessment }: { assessment: SiteAssessment }) {
@@ -239,18 +248,63 @@ function AssessmentCard({ assessment }: { assessment: SiteAssessment }) {
       <strong>{assessment.eligible ? `${assessment.total_score?.toFixed(1)} 分` : "硬约束不通过"}</strong>
     </header>
     {assessment.hard_failures.length > 0
-      ? <ul className="plant-hard-failures">{assessment.hard_failures.map((failure) => <li key={failure}>{failure}</li>)}</ul>
+      ? <div className="plant-hard-failures"><strong><XCircle />先解决 {assessment.hard_failures.length} 项硬约束</strong><ul>{assessment.hard_failures.map((failure) => <li key={failure}>{failure}</li>)}</ul></div>
       : <p className="plant-hard-pass"><BadgeCheck />投资、面积、电力、日期、权属和许可硬约束通过</p>}
+    <div className="plant-criteria-comparison" aria-label={`${assessment.display_name} 硬约束逐项比较`}>
+      {assessment.criteria.map((criterion) => <article key={criterion.key} className={criterion.passed ? "passed" : "failed"}>
+        <span className="plant-criterion-state">{criterion.passed ? <BadgeCheck /> : <XCircle />}<b>{criterion.label}</b><em>{criterion.passed ? "通过" : "不通过"}</em></span>
+        <div><small>需求门槛 · Facility Requirement</small><strong>{criterion.required}</strong></div>
+        <div><small>现场事实 · World Observation</small><strong>{criterion.observed}</strong></div>
+        <div className="plant-criterion-difference"><small>比较结果</small><strong>{criterion.difference}</strong></div>
+      </article>)}
+    </div>
     <div className="plant-estimate-observation">
       <section><span>Agent 估算 · 非正式事实</span><strong>{assessment.estimated ? cny(assessment.estimated.amount) : "当前会话未加载"}</strong><small>{assessment.estimated ? new Date(assessment.estimated.available_at).toLocaleDateString("zh-CN") : "以 Observation 为评分依据"}</small></section>
       <section><span>World Observation · 评分事实</span><strong>{cny(assessment.observed.quote)}</strong><small>{new Date(assessment.observed.available_at).toLocaleDateString("zh-CN")} · {assessment.observed.area_m2} m² · {assessment.observed.electricity_kva} kVA</small></section>
     </div>
-    <dl className="plant-score-components">{SCORE_DIMENSIONS.map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{assessment.component_scores[key].toFixed(1)}</dd></div>)}</dl>
+    {assessment.eligible && <dl className="plant-score-components">{SCORE_DIMENSIONS.map(([key, label]) => <div key={key}><dt>{label}</dt><dd>{assessment.component_scores[key].toFixed(1)}</dd></div>)}</dl>}
     <details className="plant-assessment-evidence"><summary>查看事实与证据引用</summary><dl><div><dt>权属</dt><dd>{assessment.observed.ownership}</dd></div><div><dt>许可</dt><dd>{assessment.observed.permit}</dd></div></dl><ul>{assessment.evidence_refs.map((reference) => <li key={reference}>{reference}</li>)}</ul></details>
   </article>;
 }
 
-function PlantPlanningWorkspace() {
+function PlantApprovalPanel({
+  selection,
+  detail,
+  loadError,
+  note,
+  busy,
+  approvalURL,
+  onNote,
+  onDecide,
+  onFormalize,
+}: {
+  selection: SiteSelectionItem;
+  detail: PlantApprovalDetail | null;
+  loadError: string;
+  note: string;
+  busy: boolean;
+  approvalURL: string;
+  onNote: (value: string) => void;
+  onDecide: (decision: "approve" | "reject") => void;
+  onFormalize: () => void;
+}) {
+  const recommendation = selection.recommendation;
+  const pending = selection.approval_status === "pending";
+  const selectedAssessment = recommendation.assessments.find((item) => item.proposal_id === recommendation.selected_proposal_id);
+  return <article id="plant-task-governance" className="plant-selection-status plant-game-approval" aria-live="polite">
+    <header><div><span>{recommendation.approval_flow_key}</span><h3>治理会议：审阅场址正式选择</h3></div><strong>{selection.decision ? "已正式选址" : selection.approval_status}</strong></header>
+    <section className="plant-approval-subject">
+      <div><small>待审批事项</small><h4>{detail?.detail.subject.title ?? `${recommendation.case_code} · 工厂场址正式选择`}</h4><p>{detail?.detail.subject.summary ?? "审阅可信调研事实、硬约束、评分和人员推荐，决定是否允许正式选址。"}</p></div>
+      <dl><div><dt>推荐候选</dt><dd>{recommendation.selected_proposal_id}</dd></div><div><dt>推荐理由</dt><dd>{recommendation.recommendation_reason}</dd></div><div><dt>替代方案比较</dt><dd>{recommendation.alternative_comparison}</dd></div>{recommendation.single_source_exception_reason && <div><dt>单一来源例外</dt><dd>{recommendation.single_source_exception_reason}</dd></div>}<div><dt>权威评分</dt><dd>{selectedAssessment?.total_score ?? "未返回"}</dd></div><div><dt>Observation</dt><dd>{selectedAssessment?.observation_id ?? "未返回"}</dd></div><div><dt>输入哈希</dt><dd>{recommendation.input_hash}</dd></div></dl>
+    </section>
+    {detail && <section className="plant-approval-routing"><header><div><small>IAOS 审批流</small><strong>{detail.detail.flow_name} · v{detail.detail.flow_version}</strong></div><span>{detail.detail.can_decide ? "当前身份可决定" : "当前身份仅可查看"}</span></header><div>{detail.detail.assignments.map((assignment) => <article key={assignment.id}><Gavel /><span><strong>{assignment.stage_name}</strong><small>{assignment.display_name} · {assignment.selector_type}:{assignment.selector_value}</small></span><em>{assignment.status}</em></article>)}</div></section>}
+    {loadError && <p className="plant-inline-error" role="alert">{loadError}</p>}
+    {pending && detail && <section className="plant-approval-decision"><label>审批意见 <small>批准或驳回都将由 IAOS 记录决定人、时间和意见</small><textarea required minLength={6} value={note} onChange={(event) => onNote(event.target.value)} placeholder="请说明同意的条件，或明确驳回原因" /></label>{detail.detail.can_decide ? <div><button type="button" disabled={busy || note.trim().length < 6} onClick={() => onDecide("approve")}><BadgeCheck />批准选址推荐</button><button type="button" className="danger" disabled={busy || note.trim().length < 6} onClick={() => onDecide("reject")}><XCircle />驳回并退回修订</button></div> : <p><TriangleAlert />当前登录身份不是该阶段的受派审批人。请由上方显示的治理主体进入本企业后，在本会议室作出决定。</p>}</section>}
+    <div className="plant-selection-actions"><a href={approvalURL} target="_blank" rel="noreferrer">在 IAOS 查看审计详情</a>{selection.approval_status === "approved" && !selection.decision && <button type="button" disabled={busy} onClick={onFormalize}>批准已生效 · 正式选址</button>}{selection.decision && <span><BadgeCheck />正式选择已落地</span>}{selection.approval_status === "rejected" && <span><XCircle />推荐已驳回，不能正式选址</span>}</div>
+  </article>;
+}
+
+function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
   const [status, setStatus] = useState<PlantPlanningProviderStatus | null>(null);
   const [financial, setFinancial] = useState<PlantFinancialConstraint | null>(null);
   const [activeRequirement, setActiveRequirement] = useState<FacilityRequirement | null>(null);
@@ -261,13 +315,24 @@ function PlantPlanningWorkspace() {
   const [reviewBusy, setReviewBusy] = useState("");
   const [investigations, setInvestigations] = useState<SiteInvestigationItem[]>([]);
   const [investigationBusy, setInvestigationBusy] = useState("");
-  const [assessmentWeights, setAssessmentWeights] = useState<SiteAssessmentWeights>({ cost: 35, schedule: 25, capacity: 20, control: 20 });
+  const [assessmentWeights, setAssessmentWeights] = useState<SiteAssessmentWeights>(DEFAULT_SITE_ASSESSMENT_WEIGHTS);
   const [siteSelections, setSiteSelections] = useState<SiteSelectionItem[]>([]);
+  const [siteControls, setSiteControls] = useState<SiteControlItem[]>([]);
+  const [controlMode, setControlMode] = useState<SiteControlRequest["agreement_mode"]>("lease");
+  const [controlHandoverAt, setControlHandoverAt] = useState("");
+  const [controlAgreementRef, setControlAgreementRef] = useState("");
+  const [controlHandoverRef, setControlHandoverRef] = useState("");
+  const [controlEffectiveAt, setControlEffectiveAt] = useState("");
+  const [controlNotes, setControlNotes] = useState("");
+  const [controlBusy, setControlBusy] = useState(false);
   const [selectedProposalID, setSelectedProposalID] = useState("");
   const [recommendationReason, setRecommendationReason] = useState("");
   const [alternativeComparison, setAlternativeComparison] = useState("");
   const [singleSourceReason, setSingleSourceReason] = useState("");
   const [selectionBusy, setSelectionBusy] = useState(false);
+  const [approvalDetail, setApprovalDetail] = useState<PlantApprovalDetail | null>(null);
+  const [approvalNote, setApprovalNote] = useState("");
+  const [approvalLoadError, setApprovalLoadError] = useState("");
   const [nextRevision, setNextRevision] = useState(1);
   const [manualOpen, setManualOpen] = useState(false);
   const [manualName, setManualName] = useState("");
@@ -284,12 +349,15 @@ function PlantPlanningWorkspace() {
   const [manualBusy, setManualBusy] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [taskOpen, setTaskOpen] = useState(false);
+  const [taskView, setTaskView] = useState<"current" | "requirement-revision">("current");
   const routeParams = new URLSearchParams(window.location.hash.split("?")[1] ?? "");
   const tenant = routeParams.get("tenant") ?? localStorage.getItem("aese_iaos_tenant_id") ?? localStorage.getItem("iaos_tenant_id") ?? "";
   const caseCode = routeParams.get("case") ?? localStorage.getItem("aese_genesis_case_code") ?? "";
   const requirementID = `facility-requirement-${caseCode || "draft"}`;
   const refreshInvestigations = async () => setInvestigations((await loadSiteInvestigations(caseCode)).items ?? []);
   const refreshSiteSelections = async () => setSiteSelections((await loadSiteSelections(caseCode)).items ?? []);
+  const refreshSiteControls = async () => setSiteControls((await loadSiteControls(caseCode)).items ?? []);
   useEffect(() => {
     const controller = new AbortController();
     Promise.all([
@@ -314,19 +382,128 @@ function PlantPlanningWorkspace() {
       }),
       loadSiteInvestigations(caseCode, controller.signal).then((result) => setInvestigations(result.items ?? [])),
       loadSiteSelections(caseCode, controller.signal).then((result) => setSiteSelections(result.items ?? [])),
+      loadSiteControls(caseCode, controller.signal).then((result) => setSiteControls(result.items ?? [])),
     ]).catch((reason) => { if (reason.name !== "AbortError") setError(String(reason)); });
     return () => controller.abort();
   }, [caseCode, requirementID]);
   const update = (name: keyof RequirementDraft, value: string | string[]) =>
     setDraft((current) => ({ ...current, [name]: value }));
+  const openRequirementRevision = () => {
+    if (!activeRequirement) return;
+    setDraft({
+      targetRegion: activeRequirement.target_region,
+      facilityPurpose: activeRequirement.facility_purpose,
+      minimumAreaM2: String(activeRequirement.minimum_area_m2),
+      minimumElectricKVA: String(activeRequirement.minimum_electricity_kva),
+      targetAvailableAt: localDateTimeInput(activeRequirement.target_available_at),
+      candidateCount: String(activeRequirement.candidate_count),
+      optionTypes: [...activeRequirement.allowed_option_types],
+      investmentRequest: activeRequirement.investment_request.value,
+      minimumCashReserve: activeRequirement.minimum_cash_reserve.value,
+      preferences: activeRequirement.preferences.join("\n"),
+      revisionReason: "",
+    });
+    setTaskView("requirement-revision");
+  };
   const entityCode = financial?.legal_entity_code ?? "";
+  const currentInvestigations = useMemo(() => currentProposalInvestigations(proposalSet, investigations), [investigations, proposalSet]);
+  const historicalInvestigationCount = investigations.length - currentInvestigations.length;
   const assessments = useMemo(
-    () => activeRequirement ? assessObservedSites(activeRequirement, proposalSet, investigations, assessmentWeights) : [],
-    [activeRequirement, assessmentWeights, investigations, proposalSet],
+    () => activeRequirement ? assessObservedSites(activeRequirement, proposalSet, currentInvestigations, assessmentWeights) : [],
+    [activeRequirement, assessmentWeights, currentInvestigations, proposalSet],
   );
   const normalizedWeightTotal = Object.values(assessmentWeights).reduce((sum, value) => sum + Math.max(0, value), 0);
   const eligibleAssessments = assessments.filter((item) => item.eligible);
   const latestSelection = siteSelections[0];
+  const latestSiteControl = siteControls[0];
+  useEffect(() => {
+    const approvalID = latestSelection?.recommendation.approval_request_id;
+    if (!approvalID) { setApprovalDetail(null); setApprovalLoadError(""); return; }
+    const controller = new AbortController();
+    setApprovalLoadError("");
+    loadPlantApprovalDetail(approvalID, controller.signal).then(setApprovalDetail).catch((reason) => {
+      if (reason.name !== "AbortError") setApprovalLoadError(reason instanceof Error ? reason.message : String(reason));
+    });
+    return () => controller.abort();
+  }, [latestSelection?.recommendation.approval_request_id, latestSelection?.approval_status]);
+  const observedCount = currentInvestigations.filter((item) => item.status === "observed").length;
+  const adoptedReviewCount = Object.values(reviews).filter((review) => review.action === "adopt_for_investigation").length;
+  const derivedGameStage = derivePlantGameStage({
+    hasRequirement: Boolean(activeRequirement),
+    proposalCount: proposalSet?.proposals.length ?? 0,
+    adoptedReviewCount,
+    investigationCount: investigations.length,
+    observedCount,
+    hasRecommendation: Boolean(latestSelection?.recommendation),
+    hasDecision: Boolean(latestSelection?.decision),
+    hasSiteControlRequest: Boolean(latestSiteControl?.request),
+    hasSiteControl: latestSiteControl?.status === "controlled",
+  });
+  const gameStage = derivedGameStage.key === "proposal" && !proposalSet
+    ? { ...derivedGameStage, anchor: "plant-task-requirement", actionLabel: "继续填写需求并生成候选" }
+    : derivedGameStage;
+  const archives: PlantSceneArchiveEntry[] = [
+    ...(activeRequirement ? [{
+      id: activeRequirement.requirement_id,
+      location: "headquarters" as const,
+      title: `设施需求 · 第 ${activeRequirement.revision} 版`,
+      state: "已确认",
+      summary: `${activeRequirement.target_region} · ${activeRequirement.facility_purpose} · 投资申请 ${cny(activeRequirement.investment_request.value)}`,
+      evidence: `${activeRequirement.requirement_id} · ${activeRequirement.financial_constraint.snapshot_hash}`,
+    }] : []),
+    ...(proposalSet ? [{
+      id: proposalSet.proposal_set_id,
+      location: "city" as const,
+      title: `场址候选集 · 第 ${proposalSet.revision} 版`,
+      state: proposalSet.status,
+      summary: `${proposalSet.proposals.length} 个候选 · ${proposalSet.evidence.provider} / ${proposalSet.evidence.model}`,
+      evidence: `${proposalSet.proposal_set_id} · ${proposalSet.evidence.output_hash}`,
+    }] : []),
+    ...Object.entries(savedReviews).filter(([, saved]) => saved).map(([proposalID]) => ({
+      id: `review-${proposalID}`,
+      location: "city" as const,
+      title: `候选评审 · ${proposalID}`,
+      state: reviews[proposalID]?.action ?? "已评审",
+      summary: reviews[proposalID]?.reason ?? "人员评审已经提交 IAOS",
+      evidence: `site.proposal.review:${proposalID}`,
+    })),
+    ...investigations.map((item) => {
+      const belongsToCurrentSet = currentInvestigations.some((current) => current.request.investigation_request_id === item.request.investigation_request_id);
+      return {
+        id: item.request.investigation_request_id,
+        location: "site" as const,
+        title: `场址调研 · ${item.request.proposal_id}`,
+        state: belongsToCurrentSet ? (item.status === "observed" ? "可信事实已提交" : "等待外部参与者") : "历史版本 · 不参与当前比较",
+        summary: `${belongsToCurrentSet ? "" : "旧候选集证据 · "}${item.observation ? `面积 ${item.observation.available_area_m2} m² · 电力 ${item.observation.electricity_kva} kVA · 报价 ${cny(item.observation.quoted_amount.value)}` : `调研范围：${item.request.scope.join("、")}`}`,
+        evidence: item.observation?.observation_id ?? item.request.investigation_request_id,
+      };
+    }),
+    ...(latestSelection ? [{
+      id: latestSelection.recommendation.recommendation_id,
+      location: "boardroom" as const,
+      title: latestSelection.decision ? "正式场址决定" : "场址推荐与审批",
+      state: latestSelection.decision ? "已正式选址" : latestSelection.approval_status,
+      summary: `推荐候选 ${latestSelection.recommendation.selected_proposal_id} · 审批请求 ${latestSelection.recommendation.approval_request_id}`,
+      evidence: `${latestSelection.recommendation.recommendation_id} · ${latestSelection.recommendation.input_hash}`,
+    }, ...(latestSelection.decision ? [{
+      id: `formal-${latestSelection.recommendation.recommendation_id}`,
+      location: "site" as const,
+      title: "正式场址已经落地",
+      state: "Committed",
+      summary: `已批准候选 ${latestSelection.recommendation.selected_proposal_id}，等待项目与 WBS 建设阶段。`,
+      evidence: `site.selection.formalize:${latestSelection.recommendation.recommendation_id}`,
+    }] : [])] : []),
+    ...(latestSiteControl ? [{
+      id: latestSiteControl.request.control_request_id,
+      location: "site" as const,
+      title: latestSiteControl.status === "controlled" ? "场地控制权已交付" : "场地控制交付工作项",
+      state: latestSiteControl.status,
+      summary: latestSiteControl.observation
+        ? `${latestSiteControl.observation.result} · ${latestSiteControl.observation.agreement_ref || "尚无协议引用"}`
+        : `${latestSiteControl.request.agreement_mode} · 等待园区权利方提交交付事实`,
+      evidence: latestSiteControl.observation?.observation_id ?? latestSiteControl.request.control_request_id,
+    }] : []),
+  ];
   useEffect(() => {
     if (!eligibleAssessments.some((item) => item.proposal_id === selectedProposalID)) {
       setSelectedProposalID(eligibleAssessments[0]?.proposal_id ?? "");
@@ -366,6 +543,7 @@ function PlantPlanningWorkspace() {
       setReviews({});
       setSavedReviews({});
       setNextRevision((current) => current + 1);
+      setTaskView("current");
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : String(reason));
 	  try {
@@ -489,11 +667,83 @@ function PlantPlanningWorkspace() {
     } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setSelectionBusy(false); }
   };
 
+  const startSiteControl = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!latestSelection?.decision || !controlHandoverAt) return;
+    setControlBusy(true); setError("");
+    try {
+      const requestID = createClientRequestId("site-control");
+      await requestSiteControl({
+        schema_version: "1.0",
+        control_request_id: requestID,
+        selection_id: latestSelection.decision.selection_id,
+        case_code: caseCode,
+        selected_proposal_id: latestSelection.decision.selected_proposal_id,
+        world_run_id: `world-run-m10-${caseCode}`,
+        agreement_mode: controlMode,
+        requested_handover_at: localDate(controlHandoverAt),
+        required_evidence: ["executed_agreement", "handover_record", "possession_authority"],
+        requested_by: "resolved-by-server",
+        requested_at: new Date().toISOString(),
+        status: "waiting_world",
+      });
+      await refreshSiteControls();
+    } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setControlBusy(false); }
+  };
+
+  const commitSiteControl = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!latestSiteControl || !controlAgreementRef || !controlHandoverRef || !controlEffectiveAt) return;
+    setControlBusy(true); setError("");
+    try {
+      await submitSiteControlObservation(caseCode, latestSiteControl.request.world_run_id, {
+        schema_version: "1.0",
+        observation_id: createClientRequestId("site-control-observation"),
+        control_request_id: latestSiteControl.request.control_request_id,
+        selection_id: latestSiteControl.request.selection_id,
+        result: "delivered",
+        agreement_ref: controlAgreementRef.trim(),
+        handover_ref: controlHandoverRef.trim(),
+        effective_at: localDate(controlEffectiveAt),
+        evidence_refs: [controlAgreementRef.trim(), controlHandoverRef.trim(), `possession:${latestSiteControl.request.selection_id}`],
+        notes: controlNotes.trim(),
+        external_actor_id: "world-park-rights-holder",
+        observed_at: new Date().toISOString(),
+      });
+      await refreshSiteControls();
+    } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setControlBusy(false); }
+  };
+
+  const decideApproval = async (decision: "approve" | "reject") => {
+    if (!latestSelection || approvalNote.trim().length < 6) return;
+    setSelectionBusy(true); setError("");
+    try {
+      await decidePlantApproval(latestSelection.recommendation.approval_request_id, decision, approvalNote.trim());
+      await refreshSiteSelections();
+      setApprovalDetail(await loadPlantApprovalDetail(latestSelection.recommendation.approval_request_id));
+      setApprovalNote("");
+    } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); } finally { setSelectionBusy(false); }
+  };
+
   const approvalURL = latestSelection && typeof window !== "undefined"
     ? `http://${window.location.hostname}:3000/#approvals?request=${encodeURIComponent(latestSelection.recommendation.approval_request_id)}` : "#";
 
   return (
-    <section className="plant-planning-workspace" aria-labelledby="plant-planning-title">
+    <section className="plant-planning-workspace plant-planning-game-mode">
+      <PlantBuildGameScene
+        stage={gameStage}
+        caseCode={caseCode}
+        companyCode={entityCode}
+        proposalNames={proposalSet?.proposals.map((proposal) => proposal.display_name) ?? []}
+        observedCount={observedCount}
+        archives={archives}
+        onExit={onExit}
+        onOpenTask={() => { setTaskView("current"); setTaskOpen(true); }}
+      />
+      {taskOpen && <div className="plant-task-scrim" role="presentation" onMouseDown={() => setTaskOpen(false)}>
+        <section className="plant-task-dialog" role="dialog" aria-modal="true" aria-label="当前经营任务" data-stage={taskView === "requirement-revision" ? "requirement-revision" : gameStage.key} data-has-proposals={Boolean(proposalSet)} onMouseDown={(event) => event.stopPropagation()}>
+          <header className="plant-task-dialog-header"><div><span>{taskView === "requirement-revision" ? "需求版本治理" : `${gameStage.npcRole} · ${gameStage.npc}`}</span><strong>{taskView === "requirement-revision" ? `修订设施需求 · 将保存为第 ${nextRevision} 版` : gameStage.actionLabel}</strong></div><nav>{taskView === "requirement-revision" && <button type="button" aria-label="返回外部事实比较" onClick={() => setTaskView("current")}><ArrowLeft /></button>}<button type="button" aria-label="关闭当前任务" onClick={() => setTaskOpen(false)}><X /></button></nav></header>
+          <div className="plant-task-dialog-body">
       <header className="plant-planning-heading">
         <div><span>M10 INTERACTIVE PLANNING</span><h2 id="plant-planning-title">设施需求与候选方案</h2><p>先由人员定义约束和可调整金额，再让设施规划 Agent 提出候选；人员负责调研、选择和治理决定。</p></div>
         <div className={`plant-model-state ${status?.state ?? "loading"}`}><Bot /> <span>规划模型</span><strong>{status?.state === "connected" ? `${status.provider} · ${status.model}` : status?.state === "not_configured" ? "未启用外部模型" : "正在检查"}</strong></div>
@@ -502,7 +752,7 @@ function PlantPlanningWorkspace() {
         <summary><CircleHelp />功能说明：这一步解决什么问题？</summary>
         <div><p>业务目的：把工厂需求、投资边界和工期转成可审阅的场址候选，不让系统用固定答案代替管理判断。</p><p>关系：M9 资格/资金与预算 → 设施需求 → Agent 候选 → 人工调研与选择 → IAOS 投资审批/合同/WBS → World 验收 → M11 能力建设资格。</p><p>Agent 只生成建议和待验证事实，不能批准投资、确认权属或伪造外部证明。可用现金和已批预算来自 IAOS 权威账务，只读且不能在本页面伪造。</p></div>
       </details>
-      <form className="plant-requirement-form" onSubmit={submit}>
+      <form id="plant-task-requirement" className="plant-requirement-form" onSubmit={submit}>
         <fieldset><legend>1 · 设施业务需求</legend>
           <label>目标区域 <small>Agent 搜索和比较方案的地理范围</small><input required value={draft.targetRegion} onChange={(e) => update("targetRegion", e.target.value)} placeholder="例如：江苏省苏州市及周边" /></label>
           <label>设施用途 <small>说明产品、工艺和运营目标</small><textarea required value={draft.facilityPurpose} onChange={(e) => update("facilityPurpose", e.target.value)} placeholder="例如：建设电池冷却板制造、质检与仓储基地" /></label>
@@ -522,17 +772,19 @@ function PlantPlanningWorkspace() {
           <label>业务偏好<small>每行一项，如交通、人才、扩展性；不是硬约束</small><textarea value={draft.preferences} onChange={(e) => update("preferences", e.target.value)} placeholder={"靠近主要客户\n便于后续扩建"} /></label>
           <label>本次修订原因<small>将保存为需求版本 {nextRevision}，用于解释为什么产生或变化</small><input required value={draft.revisionReason} onChange={(e) => update("revisionReason", e.target.value)} /></label>
         </fieldset>
-        <div className="plant-generation-actions"><button disabled={busy || status?.state !== "connected" || !financial || draft.optionTypes.length === 0}>{busy ? <LoaderCircle className="gx-spin" /> : <Bot />}{busy ? "Agent 正在生成…" : "保存需求并让 Agent 生成候选"}</button><button type="button" onClick={() => setManualOpen((value) => !value)}><FilePlus2 />人工新增候选</button><small>需求和候选将通过 IAOS Capability 留下审计证据，但不会自动批准投资。</small></div>
+        <div className="plant-generation-actions"><button disabled={busy || status?.state !== "connected" || !financial || draft.optionTypes.length === 0}>{busy ? <LoaderCircle className="gx-spin" /> : <Bot />}{busy ? "Agent 正在生成…" : taskView === "requirement-revision" ? "保存修订并让 Agent 重新生成候选" : "保存需求并让 Agent 生成候选"}</button><button type="button" onClick={() => setManualOpen((value) => !value)}><FilePlus2 />人工新增候选</button><small>需求和候选将通过 IAOS Capability 留下审计证据，但不会自动批准投资。</small></div>
       </form>
       {status?.state === "not_configured" && <p className="plant-inline-warning" role="status"><TriangleAlert />外部模型未启用，不能生成虚拟固定候选；请配置模型，或使用“人工新增候选”。</p>}
       {error && <p className="plant-inline-error" role="alert">{error}</p>}
       {manualOpen && <form className="plant-manual-form" onSubmit={addManual}><h3>人工新增权威候选</h3><p>{proposalSet ? `将在候选集第 ${proposalSet.revision} 版后追加一个不可覆盖的候选。` : "当前没有候选集；将由项目负责人建立第 1 版人工候选。"}</p><label>候选名称<input required value={manualName} onChange={(e) => setManualName(e.target.value)} /></label><label>方案类型<select required value={manualOptionType} onChange={(e) => setManualOptionType(e.target.value)}><option value="">请选择</option>{(activeRequirement?.allowed_option_types ?? draft.optionTypes).map((value) => <option key={value} value={value}>{OPTION_TYPES.find(([code]) => code === value)?.[1] ?? value}</option>)}</select></label><label>业务理由<textarea required minLength={6} value={manualRationale} onChange={(e) => setManualRationale(e.target.value)} /></label><label>最小估算（CNY）<input required min="0" step="0.01" type="number" value={manualMinimum} onChange={(e) => setManualMinimum(e.target.value)} /></label><label>最可能估算（CNY）<input required min="0" step="0.01" type="number" value={manualLikely} onChange={(e) => setManualLikely(e.target.value)} /></label><label>最大估算（CNY）<input required min="0" step="0.01" type="number" value={manualMaximum} onChange={(e) => setManualMaximum(e.target.value)} /></label><label>估算依据<textarea required value={manualBasis} onChange={(e) => setManualBasis(e.target.value)} /></label><label>预计可用日期<input required type="date" value={manualAvailableAt} onChange={(e) => setManualAvailableAt(e.target.value)} /></label><label>假设 <small>每行一项</small><textarea required value={manualAssumptions} onChange={(e) => setManualAssumptions(e.target.value)} /></label><label>待核验事实 <small>每行一项</small><textarea required value={manualFacts} onChange={(e) => setManualFacts(e.target.value)} /></label><label>主要风险 <small>每行一项</small><textarea required value={manualRisks} onChange={(e) => setManualRisks(e.target.value)} /></label><button disabled={manualBusy || !activeRequirement}>{manualBusy ? <LoaderCircle className="gx-spin" /> : <FilePlus2 />}{manualBusy ? "正在提交…" : "提交到 IAOS 候选集"}</button></form>}
-      {proposalSet && <section className="plant-proposals" aria-live="polite"><header><div><span>{proposalSet.status}</span><h2>候选方案 · {proposalSet.proposals.length}</h2></div><small>{proposalSet.evidence.provider} / {proposalSet.evidence.model} · {proposalSet.evidence.prompt_version}</small></header><div className="plant-proposal-grid">{proposalSet.proposals.map((proposal) => <ProposalCard key={proposal.proposal_id} proposal={proposal} review={reviews[proposal.proposal_id]} onReview={(review) => { setReviews((current) => ({ ...current, [proposal.proposal_id]: review })); setSavedReviews((current) => ({ ...current, [proposal.proposal_id]: false })); }} onSubmitReview={() => submitReview(proposal.proposal_id)} saved={Boolean(savedReviews[proposal.proposal_id])} busy={reviewBusy === proposal.proposal_id} investigation={investigations.find((item) => item.request.proposal_id === proposal.proposal_id)} investigationBusy={investigationBusy === proposal.proposal_id} onRequestInvestigation={() => startInvestigation(proposal.proposal_id)} />)}</div><p className="plant-persistence-note"><BadgeCheck />Agent 候选、人工新增候选和相应审阅都通过 IAOS Capability 保存并形成版本；“采纳调研”不等于投资批准或合同签署。</p></section>}
-      {investigations.length > 0 && <section className="plant-investigations" aria-live="polite"><header><div><span>facility.site.investigation.v1</span><h2>场址外部调研工作项</h2></div><small>{investigations.filter((item) => item.status === "waiting_world").length} 条等待 World</small></header>{investigations.map((item) => <InvestigationPanel key={item.request.investigation_request_id} item={item} caseCode={caseCode} onCommitted={refreshInvestigations} />)}</section>}
-      {assessments.length > 0 && <section className="plant-assessments" aria-labelledby="plant-assessment-title">
-        <header><div><span>OBSERVATION-ONLY COMPARISON</span><h2 id="plant-assessment-title">外部事实比较</h2><p>只有已送达的 World Observation 参与评分；Agent 估算只用于对照，不会覆盖正式报价或现场事实。</p></div><small>{assessments.filter((item) => item.eligible).length}/{assessments.length} 个候选通过硬约束</small></header>
-        <fieldset className="plant-assessment-weights"><legend>本次比较权重（自动归一化）</legend>{SCORE_DIMENSIONS.map(([key, label, help]) => <label key={key}>{label}<small>{help}</small><input aria-label={`${label}权重`} type="number" min="0" max="100" value={assessmentWeights[key]} onChange={(event) => setAssessmentWeights((current) => ({ ...current, [key]: Math.max(0, Number(event.target.value) || 0) }))} /></label>)}<p>当前权重合计 {normalizedWeightTotal}。权重只改变合格候选的比较视图；任何硬约束失败都不会被高分抵消。</p></fieldset>
+      {proposalSet && <section id="plant-task-proposals" className="plant-proposals" aria-live="polite"><header><div><span>{proposalSet.status}</span><h2>候选方案 · {proposalSet.proposals.length}</h2></div><small>{proposalSet.evidence.provider} / {proposalSet.evidence.model} · {proposalSet.evidence.prompt_version}</small></header>{historicalInvestigationCount > 0 && <p className="plant-inline-warning" role="status"><TriangleAlert />需求或候选集已修订，{historicalInvestigationCount} 条旧调研事实只保留在“候选场址 → 场景档案”，不会参与当前比较或正式推荐。请审阅当前候选并重新发起调研。</p>}<div className="plant-proposal-grid">{proposalSet.proposals.map((proposal) => <ProposalCard key={proposal.proposal_id} proposal={proposal} review={reviews[proposal.proposal_id]} onReview={(review) => { setReviews((current) => ({ ...current, [proposal.proposal_id]: review })); setSavedReviews((current) => ({ ...current, [proposal.proposal_id]: false })); }} onSubmitReview={() => submitReview(proposal.proposal_id)} saved={Boolean(savedReviews[proposal.proposal_id])} busy={reviewBusy === proposal.proposal_id} investigation={currentInvestigations.find((item) => item.request.proposal_id === proposal.proposal_id)} investigationBusy={investigationBusy === proposal.proposal_id} onRequestInvestigation={() => startInvestigation(proposal.proposal_id)} />)}</div><p className="plant-persistence-note"><BadgeCheck />Agent 候选、人工新增候选和相应审阅都通过 IAOS Capability 保存并形成版本；“采纳调研”不等于投资批准或合同签署。</p></section>}
+      {currentInvestigations.length > 0 && <section id="plant-task-investigation" className="plant-investigations" aria-live="polite"><header><div><span>facility.site.investigation.v1</span><h2>场址外部调研工作项</h2></div><small>{currentInvestigations.filter((item) => item.status === "waiting_world").length} 条等待 World</small></header>{currentInvestigations.map((item) => <InvestigationPanel key={item.request.investigation_request_id} item={item} caseCode={caseCode} onCommitted={refreshInvestigations} />)}</section>}
+      {assessments.length > 0 && <section id="plant-task-comparison" className="plant-assessments" aria-labelledby="plant-assessment-title">
+        <header><div><span>OBSERVATION-ONLY COMPARISON</span><h2 id="plant-assessment-title">外部事实比较</h2><p>第一步逐项比较需求门槛和现场事实；全部硬约束通过后，第二步才按经营偏好排序。Agent 估算不参与硬约束判定。</p></div><small>{eligibleAssessments.length}/{assessments.length} 个候选通过硬约束</small></header>
+        <div className={`plant-gate-summary ${eligibleAssessments.length ? "passed" : "blocked"}`}><span>{eligibleAssessments.length ? <BadgeCheck /> : <XCircle />}</span><div><strong>{eligibleAssessments.length ? "已有候选进入排序" : "当前没有候选可以进入排序"}</strong><p>{eligibleAssessments.length ? "下面的权重只用于比较这些合格候选。" : "请先根据红色差额补充场址或修订需求；无论怎样调整权重，都不能抵消硬约束失败。"}</p>{!eligibleAssessments.length && activeRequirement && <button type="button" className="plant-revise-requirement" onClick={openRequirementRevision}>修订设施需求</button>}</div></div>
         <div className="plant-assessment-grid">{assessments.map((assessment) => <AssessmentCard key={assessment.observation_id} assessment={assessment} />)}</div>
+        <fieldset className="plant-assessment-weights" disabled={eligibleAssessments.length === 0}><legend>第二步 · 调整合格候选的排序偏好</legend><header><div><strong>当前权重来源：界面默认比较偏好</strong><small>默认成本 35%、工期 25%、容量 20%、权属与许可 20%；不是 Agent 生成，也不是现场事实。</small></div><button type="button" onClick={() => setAssessmentWeights(DEFAULT_SITE_ASSESSMENT_WEIGHTS)}><RotateCcw />恢复默认</button></header>{SCORE_DIMENSIONS.map(([key, label, help]) => { const effective = normalizedWeightTotal ? assessmentWeights[key] / normalizedWeightTotal * 100 : 0; return <label key={key}><span>{label}<b>{effective.toFixed(0)}%</b></span><small>{help}</small><input aria-label={`${label}权重`} type="number" min="0" max="100" value={assessmentWeights[key]} onChange={(event) => setAssessmentWeights((current) => ({ ...current, [key]: Math.max(0, Number(event.target.value) || 0) }))} /></label>; })}<p>{eligibleAssessments.length ? `输入值合计 ${normalizedWeightTotal}，系统会自动换算为百分比。权重只影响合格候选的排序预览，提交推荐时 IAOS 按 site-assessment-v1 重新计算。` : "当前没有合格候选，因此排序偏好暂不生效。"}</p></fieldset>
+        <details className="plant-score-method"><summary><CircleHelp />这些分数具体怎样计算？</summary><div><p><strong>成本：</strong>投资申请额中尚未被正式报价占用的比例，越节省分数越高。</p><p><strong>工期：</strong>在目标日期当天可用为 50 分；每提前一天加分，提前 180 天达到 100 分。</p><p><strong>容量：</strong>分别计算面积和电力相对最低门槛的裕量，再取平均。</p><p><strong>权属与许可：</strong>已核验/满足为 100 分，有条件结论为 60 分。</p><p>综合分 = 四项分数 × 自动归一化后的权重。该公式来自版本化策略 <code>site-assessment-v1</code>，提交推荐时 IAOS 会用权威数据重新计算。</p></div></details>
         <p className="plant-assessment-governance"><TriangleAlert />页面分数只是预览，不是正式推荐、选址批准或投资批准。提交推荐时 IAOS 会从权威需求、候选版本和 Observation 重新计算；浏览器不能指定审批人或篡改批准结果。</p>
         {!latestSelection?.decision && <form className="plant-selection-form" onSubmit={submitRecommendation}>
           <fieldset><legend>提交人工场址推荐</legend>
@@ -543,32 +795,37 @@ function PlantPlanningWorkspace() {
             <button disabled={selectionBusy || !selectedProposalID}>{selectionBusy ? <LoaderCircle className="gx-spin" /> : <BadgeCheck />}{selectionBusy ? "正在提交…" : "提交 IAOS 选址审批"}</button>
           </fieldset>
         </form>}
-        {latestSelection && <article className="plant-selection-status" aria-live="polite"><header><div><span>{latestSelection.recommendation.approval_flow_key}</span><h3>推荐与审批状态</h3></div><strong>{latestSelection.decision ? "已正式选址" : latestSelection.approval_status}</strong></header><dl><div><dt>推荐候选</dt><dd>{latestSelection.recommendation.selected_proposal_id}</dd></div><div><dt>推荐编号</dt><dd>{latestSelection.recommendation.recommendation_id}</dd></div><div><dt>审批请求</dt><dd>{latestSelection.recommendation.approval_request_id}</dd></div><div><dt>权威输入哈希</dt><dd>{latestSelection.recommendation.input_hash}</dd></div></dl><div className="plant-selection-actions"><a href={approvalURL} target="_blank" rel="noreferrer">打开 IAOS 审批中心</a><button type="button" disabled={selectionBusy || latestSelection.approval_status !== "approved" || Boolean(latestSelection.decision)} onClick={() => formalizeSelection(latestSelection)}>{latestSelection.decision ? "正式选择已落地" : latestSelection.approval_status === "approved" ? "同步批准并正式选址" : "等待审批决定"}</button></div></article>}
       </section>}
+      {latestSelection && <PlantApprovalPanel selection={latestSelection} detail={approvalDetail} loadError={approvalLoadError} note={approvalNote} busy={selectionBusy} approvalURL={approvalURL} onNote={setApprovalNote} onDecide={decideApproval} onFormalize={() => formalizeSelection(latestSelection)} />}
+      {latestSelection?.decision && <section id="plant-task-site-control" className="plant-site-control">
+        <header><div><span>facility.plant.delivery.v1</span><h2>场地控制与实际交付</h2><p>正式选址只证明企业批准了哪个场址；必须取得已签协议、交付记录和占有权限，才能建立可执行设施项目。</p></div><strong>{latestSiteControl?.status ?? "尚未发起"}</strong></header>
+        {!latestSiteControl && <form onSubmit={startSiteControl}>
+          <fieldset><legend>由工厂项目负责人发起交付请求</legend>
+            <label>场地取得方式<select value={controlMode} onChange={(event) => setControlMode(event.target.value as SiteControlRequest["agreement_mode"])}><option value="lease">租赁</option><option value="purchase">购买</option><option value="build_to_suit">定制代建</option><option value="use_agreement">场地使用协议</option></select></label>
+            <label>期望交付时间<input required type="datetime-local" value={controlHandoverAt} onChange={(event) => setControlHandoverAt(event.target.value)} /></label>
+            <div className="plant-control-evidence"><strong>系统强制核验</strong><span>已签协议</span><span>交付记录</span><span>占有与使用权限</span></div>
+            <button disabled={controlBusy || !controlHandoverAt}>{controlBusy ? <LoaderCircle className="gx-spin" /> : <SearchCheck />}{controlBusy ? "正在发起…" : "发起场地控制交付工作项"}</button>
+          </fieldset>
+        </form>}
+        {latestSiteControl?.status === "waiting_world" && <form onSubmit={commitSiteControl}>
+          <fieldset><legend>园区权利方提交可信交付事实</legend>
+            <p>这里代表外部园区/出租方角色；提交后先进入 World Journal，再由 IAOS Capability 核验并关闭等待工作项。</p>
+            <label>已签协议引用<input required value={controlAgreementRef} onChange={(event) => setControlAgreementRef(event.target.value)} placeholder="例如 agreement:LEASE-2026-001" /></label>
+            <label>交付记录引用<input required value={controlHandoverRef} onChange={(event) => setControlHandoverRef(event.target.value)} placeholder="例如 handover:HO-2026-001" /></label>
+            <label>控制权生效时间<input required type="datetime-local" value={controlEffectiveAt} onChange={(event) => setControlEffectiveAt(event.target.value)} /></label>
+            <label>交付说明<textarea value={controlNotes} onChange={(event) => setControlNotes(event.target.value)} placeholder="钥匙、门禁、占有范围和遗留事项" /></label>
+            <button disabled={controlBusy || !controlAgreementRef || !controlHandoverRef || !controlEffectiveAt}>{controlBusy ? <LoaderCircle className="gx-spin" /> : <BadgeCheck />}{controlBusy ? "正在提交…" : "园区权利方确认实际交付"}</button>
+          </fieldset>
+        </form>}
+        {latestSiteControl?.status === "controlled" && <div className="plant-control-complete"><BadgeCheck /><div><strong>场地控制权已形成权威事实</strong><p>{latestSiteControl.observation?.agreement_ref} · {latestSiteControl.observation?.handover_ref}</p><small>下一步：设施项目与 WBS 基线。该后续节点正在接入同一交付主流程，不会用固定剧情数据自动完成。</small></div></div>}
+      </section>}
+          </div>
+        </section>
+      </div>}
     </section>
   );
 }
 
 export function PlantBuildPlay({ onExit }: { onExit: () => void }) {
-  const [trace, setTrace] = useState<PlantBuildTrace | null>(null);
-  const [step, setStep] = useState(0);
-  const [playing, setPlaying] = useState(false);
-  const [error, setError] = useState("");
-  useEffect(() => { const controller = new AbortController(); loadPlantBuild(controller.signal).then(setTrace).catch((reason) => { if (reason.name !== "AbortError") setError(String(reason)); }); return () => controller.abort(); }, []);
-  useEffect(() => { if (!playing || !trace) return; const id = setInterval(() => setStep((value) => { if (value >= trace.frames.length - 1) { setPlaying(false); return value; } return value + 1; }), 750); return () => clearInterval(id); }, [playing, trace]);
-  const frame = useMemo(() => trace?.frames[step], [trace, step]);
-  if (error) return <main className="world-error" role="alert">Plant Build 加载失败：{error}</main>;
-  if (!trace || !frame) return <main className="world-loading">正在加载设施建设世界…</main>;
-  return <div className="world-play">
-    <header className="world-toolbar"><button className="world-back" onClick={onExit}><ArrowLeft />企业成立</button><div><span>PROJECT GENESIS · PLANT BUILD</span><h1>M10 工厂选址与设施建设</h1></div><div className="world-clock"><small>虚拟时间 · Asia/Shanghai</small><strong>{new Date(frame.sim_time).toLocaleString("zh-CN", { timeZone: "Asia/Shanghai", hour12: false })}</strong></div></header>
-    <main className="world-main"><PlantPlanningWorkspace />
-      <details className="plant-reference-replay"><summary>查看已封存的确定性参考回放（fixture-only）</summary><p>以下场址和金额仅用于历史回归测试，不会进入上方需求表单，也不能作为新企业的真实候选或预算。</p>
-        <nav className="world-controls"><button onClick={() => setPlaying((value) => !value)}>{playing ? <Pause /> : <Play />}{playing ? "暂停" : "运行"}</button><button onClick={() => setStep((value) => Math.min(value + 1, trace.frames.length - 1))} disabled={step === trace.frames.length - 1}><StepForward />单步</button><button onClick={() => { setPlaying(false); setStep(0); }}><RotateCcw />复位</button><button onClick={() => (window.location.hash = "world-capability-build")}><Factory />生产能力 Campaign</button><span>{step + 1}/{trace.frames.length} · {frame.phase}</span></nav>
-        <section className="world-status"><span className={`world-state-badge ${frame.capability_build_eligible ? "closed" : "active"}`}>{frame.capability_build_eligible ? <BadgeCheck /> : <Factory />}{frame.capability_build_eligible ? "M11 eligible" : frame.phase}</span><h2>{frame.title}</h2><p>World {frame.world_progress}% / IAOS plan {frame.iaos_plan_progress}% · {frame.discrepancy} · cursor {frame.iaos_cursor}</p></section>
-        <section className="three-state-grid"><article><header><Building2 />场址与项目 <small>World owns reality</small></header><dl><div><dt>选中场址</dt><dd>{frame.selected_site || "尚未批准"}</dd></div>{frame.assessments.map((assessment) => <div key={assessment.site_code}><dt>{assessment.site_code.replace("SITE-SZ-", "")}</dt><dd>{assessment.feasible ? "可行" : "不可行"} · {assessment.weighted_score}<small>{assessment.hard_failures.join(", ") || "硬约束通过"}</small></dd></div>)}</dl></article><article><header><Banknote />治理资金 <small>IAOS owns approvals</small></header><dl><div><dt>可用现金</dt><dd>{cny(frame.cash.value)}</dd></div><div><dt>合同承诺</dt><dd>{cny(frame.committed.value)}</dd></div><div><dt>里程碑应付</dt><dd>{cny(frame.payable.value)}</dd></div><div><dt>已付款</dt><dd>{cny(frame.paid.value)}</dd></div></dl></article><article><header><TriangleAlert />Knowledge / discrepancy <small>actor scoped</small></header><dl><div><dt>项目负责人已知</dt><dd>{frame.knowledge.length} 条</dd></div><div><dt>差异</dt><dd>{frame.discrepancy}</dd></div><div><dt>因果</dt><dd>{frame.causation_id}</dd></div></dl></article></section>
-        {frame.zones.length > 0 && <section className="facility-zones">{frame.zones.filter((zone) => !["site", "building"].includes(zone.purpose)).map((zone) => <article key={zone.code}><Factory /><strong>{zone.purpose}</strong><code>{zone.code}</code><small>{zone.area_m2} m² · {zone.status}</small></article>)}</section>}
-        <section className="world-timeline">{trace.frames.map((item, index) => <button key={item.step} className={index === step ? "current" : ""} onClick={() => { setPlaying(false); setStep(index); }}><span>{index + 1}</span><strong>{item.phase}</strong><small>{item.title}</small></button>)}</section>
-      </details>
-    </main>
-  </div>;
+  return <PlantPlanningWorkspace onExit={onExit} />;
 }

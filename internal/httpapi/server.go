@@ -1100,6 +1100,108 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			_, _ = w.Write(result)
 			return
 		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "site-controls" && r.Method == http.MethodGet {
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, _, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_site_control_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			result, err := authority.PlantSiteControls(ctx, r.URL.Query().Get("case_code"))
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_site_controls_unavailable")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(result)
+			return
+		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "site-controls" && r.Method == http.MethodPost {
+			var request plantbuild.SiteControlRequest
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &request); err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_site_control_request", err.Error(), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_site_control_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			request.RequestedBy = actorID
+			request.Status = "waiting_world"
+			if err := plantbuild.ValidateSiteControlRequest(request); err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "invalid_site_control_request", err.Error(), false, "", "")
+				return
+			}
+			if err := postPlantAuthorityCommand(ctx, authority, "site.control.request", actorID, request.CaseCode, request.ControlRequestID, 1, request); err != nil {
+				s.writePlantAuthorityError(w, err, "site_control_request_not_committed")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "waiting_world", "site_control_request": request})
+			return
+		}
+		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "site-controls" && rest[3] == "observations" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode    string                            `json:"case_code"`
+				WorldRunID  string                            `json:"world_run_id"`
+				Observation plantbuild.SiteControlObservation `json:"observation"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil {
+				s.writeError(w, http.StatusBadRequest, "invalid_site_control_observation", err.Error(), false, "", "")
+				return
+			}
+			if err := plantbuild.ValidateSiteControlObservation(input.Observation); err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "invalid_site_control_observation", err.Error(), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_site_control_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			correlationID := "corr-m10-" + strings.TrimSpace(input.CaseCode)
+			messageID := "world-" + input.Observation.ObservationID
+			envelope := map[string]any{
+				"schema_version": "1.0", "message_id": messageID, "kind": "observation", "tenant_id": tenantID,
+				"world_pack_key": "genesis-plant-delivery", "world_pack_version": "1.0.0", "world_run_id": input.WorldRunID,
+				"branch_id": "main", "sim_occurred_at": input.Observation.ObservedAt, "correlation_id": correlationID,
+				"idempotency_key": messageID, "producer": map[string]string{"system": "aese", "component": "plant-site-control-world"},
+				"subject_ref":  map[string]string{"type": "site_control_request", "code": input.Observation.ControlRequestID},
+				"payload_type": "site.control.delivered.v1", "payload": input.Observation,
+			}
+			rawEnvelope, _ := json.Marshal(envelope)
+			if _, err := authority.PostGovernedCommand(ctx, "api/v1/world-bridge/observations", rawEnvelope); err != nil {
+				s.writePlantAuthorityError(w, err, "site_control_world_observation_not_accepted")
+				return
+			}
+			commit := map[string]any{"schema_version": "1.0", "control_request_id": input.Observation.ControlRequestID, "world_message_id": messageID}
+			if err := postPlantAuthorityCommand(ctx, authority, "site.control.observation.commit", actorID, input.CaseCode, input.Observation.ObservationID, 1, commit); err != nil {
+				s.writePlantAuthorityError(w, err, "site_control_observation_not_committed")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "committed", "world_message_id": messageID, "observation": input.Observation})
+			return
+		}
+		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "approvals" && r.Method == http.MethodGet {
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, _, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_approval_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			result, err := authority.ApprovalDetail(ctx, rest[3])
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_approval_unavailable")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(result)
+			return
+		}
 		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "site-selections" && r.Method == http.MethodPost {
 			var input struct {
 				SchemaVersion               string         `json:"schema_version"`
@@ -1376,7 +1478,7 @@ func allowedIAOSCommandPath(parts []string) bool {
 		parts[2] == "gates" && parts[4] == "submit" {
 		return parts[1] != "" && parts[3] != ""
 	}
-	if len(parts) == 3 && parts[0] == "approvals" && parts[2] == "approve" {
+	if len(parts) == 3 && parts[0] == "approvals" && (parts[2] == "approve" || parts[2] == "reject") {
 		return parts[1] != ""
 	}
 	return len(parts) == 2 && parts[0] == "world-bridge" && parts[1] == "observations"
@@ -1462,6 +1564,10 @@ func postPlantAuthorityCommandResultWithAgentRun(ctx context.Context, client *ia
 		field = "site_selection_recommendation"
 	case "site.selection.formalize":
 		field = "site_selection_formalization"
+	case "site.control.request":
+		field = "site_control_request"
+	case "site.control.observation.commit":
+		field = "site_control_observation"
 	default:
 		return nil, fmt.Errorf("unsupported M10 capability %q", capabilityCode)
 	}

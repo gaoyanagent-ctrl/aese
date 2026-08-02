@@ -2015,3 +2015,42 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：人员决定可恢复、不可覆盖且可安全重复点击；成功采纳的候选刷新后直接展示外部调研入口，不需要再次审阅。
 - 验证：新增完全重复 Review 幂等测试；AESE 全仓 Go test/vet、前端 25 文件/74 项测试、TypeScript 与 Vite 生产构建通过。8090 已部署，线上 BFF 读回故障候选的 `adopt_for_investigation / genesis-owner / revision 1`。System Atlas tracking 通过，同步端点仍返回 404，声明保留待补录。
 - 后续：执行全量回归和发布记录后由用户刷新并发起 World 调研工作项。
+
+## 2026-08-02 - M10 全屏机构场景与事实档案
+
+- 变更：DES-011 与 active M10 plan 新增全屏游戏场景合同；Plant Build Play 增加总部规划中心、产业园地图、候选现场和治理会议室四个内部/外部机构地点、玩家人物、NPC 对话、事实驱动旅程和按地点档案。正式路由移除 reference replay 和常驻表单，业务输入只在点击当前 NPC 后以临时经营任务出现。
+- 原因：M10 路由直接进入或在场景下方继续展示表单工作台，绕开 M9 的世界、人物、机构切换和场景档案框架，不符合 DES-028 的模拟游戏体验循环。
+- 影响：Requirement、Proposal/Review、Investigation/Observation、Recommendation/Approval 和正式 Decision 会确定性恢复相应场景并进入地点档案；关闭任务立即返回全屏世界。地点切换与动画不写业务事实，项目/WBS/施工等未实现范围也不会用虚假场景冒充完成。
+- 验证：新增 M10 Game Projection 8 组阶段优先级测试；Plant Build 组件验证默认 DOM 无表单、NPC 打开/关闭任务、四地点导航和阶段操作；全量 26 文件/83 项 Vitest、TypeScript/Vite 生产构建、定向 ESLint、Atlas tracking 和 diff 检查通过。Playwright 在 1440×900、1280×720、390×844 三个视口共 6 项验证 M9→M10 交接、场景/NPC/玩家可见、任务仅按需出现和无页面级横向溢出。
+- 后续：S4.3–S4.5 实现权威项目、WBS、合同、施工、付款和验收后，再加入项目办公室、施工现场和验收移交场景。
+
+## 2026-08-02 - M10 场址比较逐项可解释
+
+- 变更：外部事实比较改为“先硬门槛、后排序偏好”；每个候选逐行展示 Facility Requirement 门槛、World Observation 实测值、差额和通过状态。成本/工期/容量/权属与许可的 35/25/20/20 默认来源、有效百分比和计算公式可见，0 个合格候选时禁用权重，并在失败摘要提供“修订设施需求”直达入口。
+- 原因：旧界面只显示“可用电力低于最低要求”和四个裸数字，用户看不到最低值、实测值、短缺量，也无法判断权重来自 Agent、配置还是代码；提示要求修订却没有入口，又形成操作死路。
+- 影响：例如最低电力 2,000 kVA、实测 1,500 kVA 现在明确显示短缺 500 kVA；修订入口会带入当前需求、显示下一版本号并要求修订原因，成功后重新生成绑定新版本的候选。旧需求和 Observation 不被覆盖；Agent 估算仍只作对照，硬约束和正式推荐仍由 `site-assessment-v1` 在 IAOS 使用权威事实重算。
+- 验证：评分单元测试新增逐项差额合同，组件测试覆盖数值来源、短缺量、默认权重说明、无合格候选禁用及从比较返回预填修订表单；前端全量测试、TypeScript、生产构建、定向 ESLint、多视口 Playwright、diff 和 Atlas tracking 通过。
+- 后续：未来如开放租户级评分策略编辑，默认权重必须来自 Published Policy Artifact，而不是增加第二处隐藏常量。
+
+## 2026-08-02 - M10 修订后旧 Observation 隔离
+
+- 变更：场址比较和游戏阶段只消费同时匹配当前 ProposalSet ID、revision 与 proposal ID 的 Investigation/Observation；历史调研继续保存在候选场址档案中，但明确标记“不参与当前比较”。新候选页面提示人员必须重新审阅并发起调研。
+- 原因：线上案件当前 Requirement 已从第 4 版修订为第 5 版并生成新候选集，但 AESE 仍用第 4 版旧 Observation 计算合格状态，允许提交 IAOS 必须拒绝的推荐，最终出现 `selected proposal has no eligible trusted observation`。
+- 影响：AESE 派生视图与 IAOS `site.selection.recommend` 权威查询现在使用相同版本边界；需求修订不会借用旧事实推进阶段或形成推荐，IAOS 原有失败关闭规则保持不变。
+- 验证：数据库只读核对确认故障案件的新旧 ProposalSet/Observation 版本错位；评分测试新增旧候选集事实隔离回归，组件测试使用匹配候选集事实，TypeScript 与定向测试通过；全量前端、构建及三视口端到端验证见本轮交付结果。
+- 后续：若业务希望沿用旧现场事实，应新增显式“重新核验/继承事实”治理能力并记录适用性判断，不能在浏览器静默复用。
+
+## 2026-08-02 - M10 选址审批回归游戏内角色协作
+
+- 变更：M10 治理会议室新增 IAOS 审批详情读取，展示冻结 Business Subject、Flow 版本、实际 Assignment、推荐理由、替代比较、权威评分、Observation 和输入 hash；当前受派人可在 AESE 内填写意见并批准或驳回，批准后再由独立正式选址动作落地。IAOS 审批中心降为审计穿透入口。
+- 原因：原实现要求玩家提交推荐后跳转 IAOS 后台审批，偏离 M9 GX6“游戏内角色行动、IAOS 权威治理与落账”的交互原则，也让 AESE 治理会议室成为只有状态没有行为的空场景。
+- 影响：用户可在同一企业仿真世界完成推荐、审批和正式选址；AESE 仍不能指定审批人或直接写批准状态，非受派身份只读，IAOS 继续执行权限、SoD、Assignment、状态机、审计和流程恢复。
+- 验证：AESE Go 测试覆盖审批详情定向 BFF 和 reject Command allowlist；前端组件测试覆盖受派 chair 在游戏内审阅并批准；全量 Go/前端、生产构建、多视口 E2E 与 Atlas tracking 见本轮交付结果。
+- 后续：S4.3–S4.5 的投资、合同、变更和付款审批均复用同一游戏内审批壳，不再新增跳后台才能推进的关键剧情。
+## 2026-08-02 - M10 场址控制 World 交付闭环
+
+- 变更：正式选址后新增场址控制请求与外部交付 Observation；AESE 园区权利人场景采集协议方式、期望交付日、协议/交接/占有授权证据和生效时间，全部写操作经过命名 Command Gateway。IAOS 发布 `site.control.request`、`site.control.observation.commit`、两个只读 Entity 以及 `facility.plant.delivery.v1` 持久 Process Run。
+- 原因：正式选址只是一项治理决定，不证明企业已经签署协议、取得钥匙或拥有实际占有权；旧游戏在正式场址落地后无操作，错误地把选址终点当作建设起点。
+- 影响：请求后必须等待园区/权利人 World 参与者；只有可信且完整的协议、交接和占有授权 Observation 才形成 `site_controlled`。延迟或拒绝失败关闭本次 Run，并允许保留历史后重新发起；项目/WBS 仍不会自动完成。
+- 验证：IAOS Go 全仓与 vet、治理写检查、Code Map/Atlas tracking 通过；AESE Go 全仓与 vet、26 个前端测试文件/88 项测试、TypeScript 和 Vite 生产构建通过。8082、8090、4173 已重启且健康，四个 active 租户均升级到平台 Edition `1.16.0`；IAOS 与 AESE 新 site-controls 只读端点在故障案件返回 200，当前无控制请求符合既有事实。两仓本次 Atlas 声明均已成功同步。
+- 后续：实现项目立项、Agent WBS/空间/承包方案、人类确认与审批，再接施工 Observation、工程财务和最终验收。

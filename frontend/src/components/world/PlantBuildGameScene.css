@@ -1,0 +1,822 @@
+.plant-game-shell {
+  height: 100dvh;
+  min-height: 680px;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  overflow: hidden;
+  color: #edf5f2;
+  background: #071716;
+}
+.plant-game-header {
+  min-height: 80px;
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 20px;
+  padding: 10px 20px;
+  border-bottom: 1px solid #36534c;
+  background: #081b1c;
+}
+.plant-game-header > button {
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 0 13px;
+  border: 1px solid #3b5b55;
+  border-radius: 8px;
+  color: #e7f0ed;
+  background: #102725;
+  cursor: pointer;
+}
+.plant-game-header > button svg {
+  width: 17px;
+}
+.plant-game-header span {
+  color: #81c7a6;
+  font-size: 10px;
+  letter-spacing: 0.1em;
+}
+.plant-game-header h1 {
+  margin: 4px 0 0;
+  font-size: 19px;
+}
+.plant-game-founder {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 5px 10px;
+  border: 1px solid #385951;
+  border-radius: 9px;
+  background: #102725;
+}
+.plant-game-founder img {
+  width: 35px;
+  height: 44px;
+  object-fit: contain;
+}
+.plant-game-founder span {
+  display: grid;
+  letter-spacing: 0;
+}
+.plant-game-founder small {
+  color: #8da89f;
+  font-size: 9px;
+}
+.plant-game-founder strong {
+  max-width: 190px;
+  color: #edf5f2;
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+.plant-game-journey {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  border-bottom: 1px solid #36534c;
+  background: #0b2423;
+}
+.plant-game-journey div {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 12px;
+  border-right: 1px solid #29443f;
+  color: #6e8a82;
+}
+.plant-game-journey div:last-child {
+  border-right: 0;
+}
+.plant-game-journey span {
+  display: grid;
+  width: 23px;
+  height: 23px;
+  place-items: center;
+  flex: 0 0 auto;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-size: 10px;
+}
+.plant-game-journey strong {
+  font-size: 10px;
+  overflow-wrap: anywhere;
+}
+.plant-game-journey [data-state="completed"] {
+  color: #82c7a5;
+}
+.plant-game-journey [data-state="current"] {
+  color: #fff0b8;
+  background: #70581738;
+}
+.plant-game-main {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 330px;
+}
+.plant-game-world {
+  min-width: 0;
+  min-height: 0;
+}
+.plant-game-scene {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  background-color: #17312d;
+  background-position: center;
+  background-size: cover;
+  isolation: isolate;
+}
+.plant-game-scene--city {
+  background-image: url("/assets/enterprise-genesis/enterprise-city-v1.png");
+}
+.plant-game-scene--headquarters,
+.plant-game-scene--boardroom {
+  background-image: url("/assets/enterprise-genesis/locations/enterprise-headquarters-v1.png");
+}
+.plant-game-scene--site {
+  background-image:
+    linear-gradient(#17383a33, #15342f99),
+    url("/assets/enterprise-genesis/enterprise-city-v1.png");
+  background-position: center 62%;
+}
+.plant-game-scene-shade {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, #0615131a, #06151300 56%, #06151370),
+    linear-gradient(0deg, #061513d9 0, #06151300 46%);
+}
+.plant-game-scene-title {
+  position: absolute;
+  top: 20px;
+  left: 22px;
+  padding: 13px 16px;
+  border-left: 3px solid #e6c76d;
+  color: #f3f8f6;
+  background: #081b1cd9;
+  box-shadow: 0 12px 30px #0005;
+}
+.plant-game-scene-title span {
+  color: #8fd1b2;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+.plant-game-scene-title h2 {
+  margin: 4px 0;
+  font-size: 21px;
+}
+.plant-game-scene-title p {
+  margin: 0;
+  color: #a9bdb6;
+  font-size: 10px;
+}
+.plant-game-player {
+  position: absolute;
+  z-index: 3;
+  bottom: 112px;
+  left: 8%;
+  display: grid;
+  justify-items: center;
+  filter: drop-shadow(0 12px 8px #0007);
+  transition: transform 0.28s ease;
+}
+.plant-game-player.travelling {
+  transform: translateX(90px);
+}
+.plant-game-player img {
+  width: 105px;
+  height: 172px;
+  object-fit: contain;
+  object-position: bottom;
+}
+.plant-game-player span {
+  margin-top: -10px;
+  padding: 4px 8px;
+  border-radius: 99px;
+  color: #f2f8f5;
+  background: #102d29e8;
+  font-size: 10px;
+}
+.plant-game-npc {
+  position: absolute;
+  z-index: 5;
+  right: 5%;
+  bottom: 128px;
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  color: #edf5f2;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.plant-game-npc-avatar {
+  display: grid;
+  width: 88px;
+  height: 142px;
+  place-items: center;
+  border: 1px solid #739789;
+  border-radius: 44px 44px 18px 18px;
+  color: #d7eee4;
+  background: linear-gradient(#253c39 0 28%, #bd8867 29% 49%, #315f58 50%);
+  box-shadow: 0 16px 28px #0007;
+}
+.plant-game-npc-avatar svg {
+  width: 38px;
+}
+.plant-game-npc-bubble {
+  position: relative;
+  width: min(340px, 36vw);
+  display: block;
+  padding: 14px 15px;
+  border: 1px solid #76988b;
+  border-radius: 14px;
+  background: #0a201fef;
+  box-shadow: 0 16px 36px #0007;
+}
+.plant-game-npc-bubble small,
+.plant-game-npc-bubble strong,
+.plant-game-npc-bubble em,
+.plant-game-npc-bubble b {
+  display: block;
+}
+.plant-game-npc-bubble small {
+  color: #8dcbb0;
+  font-size: 9px;
+}
+.plant-game-npc-bubble strong {
+  margin-top: 3px;
+  font-size: 15px;
+}
+.plant-game-npc-bubble em {
+  margin: 7px 0 10px;
+  color: #c1d2cc;
+  font-size: 11px;
+  font-style: normal;
+  line-height: 1.5;
+}
+.plant-game-npc-bubble b {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  color: #f5d98f;
+  font-size: 11px;
+}
+.plant-game-npc-bubble b svg {
+  width: 16px;
+}
+.plant-game-npc:hover .plant-game-npc-bubble {
+  border-color: #e6c76d;
+  background: #102c29;
+}
+.plant-game-npc:focus-visible,
+.plant-game-location-switcher button:focus-visible,
+.plant-game-candidate-pins button:focus-visible,
+.plant-game-tabs button:focus-visible,
+.plant-game-event button:focus-visible,
+.plant-game-header button:focus-visible {
+  outline: 3px solid #f4cf75;
+  outline-offset: 2px;
+}
+.plant-game-location-switcher {
+  position: absolute;
+  right: 16px;
+  bottom: 16px;
+  left: 16px;
+  z-index: 7;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+.plant-game-location-switcher button {
+  position: relative;
+  min-height: 66px;
+  display: grid;
+  grid-template-columns: 24px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid #4c6d63;
+  border-radius: 10px;
+  color: #bed1ca;
+  background: #0a201fea;
+  text-align: left;
+  cursor: pointer;
+}
+.plant-game-location-switcher button.selected,
+.plant-game-location-switcher button:hover {
+  border-color: #8ddab4;
+  color: #f1f8f5;
+  background: #173c36f2;
+}
+.plant-game-location-switcher svg {
+  width: 22px;
+  color: #83cbaa;
+}
+.plant-game-location-switcher span {
+  display: grid;
+}
+.plant-game-location-switcher strong {
+  font-size: 10px;
+}
+.plant-game-location-switcher small {
+  color: #8fa69e;
+  font-size: 8px;
+}
+.plant-game-location-switcher i {
+  display: grid;
+  width: 20px;
+  height: 20px;
+  place-items: center;
+  border-radius: 50%;
+  color: #182219;
+  background: #e7c966;
+  font-style: normal;
+  font-weight: 900;
+}
+.plant-game-candidate-pins button {
+  --x: calc(24% + var(--pin-index) * 16%);
+  position: absolute;
+  z-index: 2;
+  left: var(--x);
+  display: grid;
+  justify-items: center;
+  border: 0;
+  color: #f4cf75;
+  background: transparent;
+  cursor: pointer;
+  filter: drop-shadow(0 5px 5px #0008);
+}
+.plant-game-candidate-pins svg {
+  width: 36px;
+  height: 36px;
+  fill: #604b19;
+}
+.plant-game-candidate-pins span {
+  max-width: 130px;
+  padding: 4px 7px;
+  border-radius: 6px;
+  color: #fff;
+  background: #0b2423e8;
+  font-size: 9px;
+  overflow-wrap: anywhere;
+}
+.plant-game-site-assets {
+  position: absolute;
+  top: 28%;
+  left: 30%;
+  display: flex;
+  align-items: end;
+  gap: 26px;
+  color: #d8dfc8;
+  filter: drop-shadow(0 10px 9px #0007);
+}
+.plant-game-site-assets svg:nth-child(1) {
+  width: 64px;
+  height: 64px;
+  color: #7fa478;
+}
+.plant-game-site-assets svg:nth-child(2) {
+  width: 116px;
+  height: 116px;
+}
+.plant-game-site-assets svg:nth-child(3) {
+  width: 44px;
+  height: 44px;
+  color: #e7c866;
+}
+.plant-game-board {
+  position: absolute;
+  top: 27%;
+  left: 28%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 22px;
+  border: 2px solid #b3955f;
+  color: #f1ddb7;
+  background: #173a35dd;
+  box-shadow: 0 8px 30px #0006;
+}
+.plant-game-board svg {
+  width: 28px;
+}
+.plant-game-board span {
+  font-size: 12px;
+  letter-spacing: 0.12em;
+}
+.plant-game-scene-quiet {
+  position: absolute;
+  right: 28px;
+  bottom: 112px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  max-width: 350px;
+  padding: 12px 14px;
+  border: 1px solid #55766c;
+  border-radius: 12px;
+  background: #0a201fe8;
+}
+.plant-game-scene-quiet svg {
+  width: 25px;
+  color: #80c5a5;
+}
+.plant-game-scene-quiet strong {
+  font-size: 12px;
+}
+.plant-game-scene-quiet p {
+  margin: 4px 0 0;
+  color: #9db2aa;
+  font-size: 10px;
+  line-height: 1.45;
+}
+.plant-game-travel {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  color: #f3f8f6;
+  background: #071817e8;
+  animation: plant-scene-fade 0.28s ease both;
+}
+.plant-game-travel svg {
+  width: 44px;
+  color: #8ddab4;
+}
+.plant-game-desk {
+  min-width: 0;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  border-left: 1px solid #36534c;
+  background: #0a1e1f;
+}
+.plant-game-place {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  border-bottom: 1px solid #304c47;
+}
+.plant-game-place > svg {
+  width: 25px;
+  color: #8bcbae;
+}
+.plant-game-place > div {
+  min-width: 0;
+  display: grid;
+}
+.plant-game-place small {
+  color: #7e9b91;
+  font-size: 9px;
+}
+.plant-game-place strong {
+  font-size: 12px;
+}
+.plant-game-place code {
+  margin-top: 3px;
+  color: #abc0b8;
+  font-size: 9px;
+  overflow-wrap: anywhere;
+}
+.plant-game-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-bottom: 1px solid #304c47;
+}
+.plant-game-tabs button {
+  min-height: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  border: 0;
+  border-right: 1px solid #29433e;
+  color: #819d94;
+  background: #0d2423;
+  font-size: 9px;
+  cursor: pointer;
+}
+.plant-game-tabs button:last-child {
+  border-right: 0;
+}
+.plant-game-tabs button[aria-selected="true"] {
+  color: #f3d987;
+  background: #17342f;
+}
+.plant-game-tabs svg {
+  width: 15px;
+}
+.plant-game-panel {
+  min-height: 0;
+  overflow: auto;
+  padding: 14px;
+}
+.plant-game-event span {
+  color: #89ccb0;
+  font-size: 9px;
+  letter-spacing: 0.1em;
+}
+.plant-game-event h2 {
+  margin: 6px 0 8px;
+  font-size: 18px;
+}
+.plant-game-event p {
+  color: #afc1bb;
+  font-size: 11px;
+  line-height: 1.6;
+}
+.plant-game-event button {
+  min-height: 44px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+  border: 1px solid #8ac8aa;
+  border-radius: 8px;
+  color: #effaf5;
+  background: #1b5948;
+  cursor: pointer;
+}
+.plant-game-event button svg {
+  width: 17px;
+}
+.plant-game-event > small {
+  display: block;
+  margin-top: 9px;
+  color: #78958b;
+  font-size: 9px;
+  line-height: 1.45;
+}
+.plant-game-people {
+  display: grid;
+  gap: 8px;
+}
+.plant-game-people article {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 10px;
+  border: 1px solid #2d4943;
+  border-radius: 8px;
+  background: #102725;
+}
+.plant-game-people svg {
+  width: 22px;
+  color: #86c6a9;
+}
+.plant-game-people span {
+  display: grid;
+}
+.plant-game-people strong {
+  font-size: 11px;
+}
+.plant-game-people small {
+  margin-top: 3px;
+  color: #8ca69d;
+  font-size: 9px;
+  line-height: 1.4;
+}
+.plant-game-archives {
+  display: grid;
+  gap: 9px;
+}
+.plant-game-archives article {
+  padding: 10px;
+  border: 1px solid #315047;
+  border-radius: 8px;
+  background: #102725;
+}
+.plant-game-archives header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+.plant-game-archives header span {
+  padding: 2px 6px;
+  border-radius: 99px;
+  color: #bdebd3;
+  background: #24513f;
+  font-size: 8px;
+}
+.plant-game-archives header strong {
+  font-size: 11px;
+  text-align: right;
+}
+.plant-game-archives p {
+  margin: 7px 0;
+  color: #aac0b8;
+  font-size: 9px;
+  line-height: 1.5;
+}
+.plant-game-archives code {
+  display: block;
+  color: #759a8d;
+  font-size: 8px;
+  overflow-wrap: anywhere;
+}
+.plant-game-empty {
+  display: grid;
+  justify-items: center;
+  padding: 28px 12px;
+  color: #8ba49a;
+  text-align: center;
+}
+.plant-game-empty svg {
+  width: 32px;
+  margin-bottom: 9px;
+}
+.plant-game-empty strong {
+  color: #c2d2cc;
+  font-size: 11px;
+}
+.plant-game-empty p {
+  max-width: 240px;
+  margin: 7px 0;
+  font-size: 9px;
+  line-height: 1.5;
+}
+.plant-game-facts {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  border-top: 1px solid #304c47;
+}
+.plant-game-facts span {
+  min-width: 0;
+  display: grid;
+  justify-items: center;
+  gap: 3px;
+  padding: 9px 4px;
+  border-right: 1px solid #29433e;
+  color: #8fa89f;
+  font-size: 8px;
+  text-align: center;
+}
+.plant-game-facts span:last-child {
+  border-right: 0;
+}
+.plant-game-facts svg {
+  width: 15px;
+  color: #83c7a8;
+}
+@keyframes plant-scene-fade {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@media (max-width: 1000px) {
+  .plant-game-main {
+    grid-template-columns: minmax(0, 1fr) 290px;
+  }
+  .plant-game-npc-bubble {
+    width: min(290px, 40vw);
+  }
+}
+@media (max-width: 760px) {
+  .plant-game-shell {
+    height: auto;
+    min-height: 100dvh;
+    overflow: auto;
+  }
+  .plant-game-header {
+    grid-template-columns: auto 1fr;
+  }
+  .plant-game-header > div:nth-child(2) {
+    grid-column: 2;
+  }
+  .plant-game-founder {
+    display: none;
+  }
+  .plant-game-journey {
+    grid-template-columns: repeat(3, 1fr);
+  }
+  .plant-game-main {
+    display: flex;
+    flex-direction: column;
+  }
+  .plant-game-world {
+    height: 68dvh;
+    min-height: 590px;
+  }
+  .plant-game-desk {
+    min-height: 440px;
+    border-top: 1px solid #36534c;
+    border-left: 0;
+  }
+  .plant-game-location-switcher {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .plant-game-player {
+    bottom: 178px;
+  }
+  .plant-game-npc {
+    right: 12px;
+    bottom: 185px;
+    left: 12px;
+  }
+  .plant-game-npc-avatar {
+    width: 62px;
+    height: 102px;
+  }
+  .plant-game-npc-bubble {
+    width: auto;
+    min-width: 0;
+    flex: 1;
+  }
+  .plant-game-scene-quiet {
+    bottom: 180px;
+  }
+  .plant-game-candidate-pins span {
+    max-width: 90px;
+  }
+}
+@media (max-width: 480px) {
+  .plant-game-header {
+    padding: 8px 10px;
+    gap: 10px;
+  }
+  .plant-game-header > button {
+    width: 44px;
+    padding: 0;
+    justify-content: center;
+    font-size: 0;
+  }
+  .plant-game-header h1 {
+    font-size: 14px;
+  }
+  .plant-game-journey {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .plant-game-world {
+    height: 720px;
+  }
+  .plant-game-scene-title {
+    top: 12px;
+    left: 12px;
+  }
+  .plant-game-scene-title h2 {
+    font-size: 17px;
+  }
+  .plant-game-player {
+    left: 2%;
+    bottom: 190px;
+  }
+  .plant-game-player img {
+    width: 75px;
+    height: 125px;
+  }
+  .plant-game-npc-avatar {
+    display: none;
+  }
+  .plant-game-npc-bubble em {
+    font-size: 10px;
+  }
+  .plant-game-location-switcher {
+    right: 10px;
+    bottom: 10px;
+    left: 10px;
+  }
+  .plant-game-location-switcher button {
+    min-height: 58px;
+  }
+  .plant-game-board {
+    left: 15%;
+    transform: scale(0.75);
+    transform-origin: left;
+  }
+  .plant-game-site-assets {
+    left: 18%;
+    transform: scale(0.75);
+    transform-origin: left;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .plant-game-shell * {
+    animation: none !important;
+    transition: none !important;
+  }
+  .plant-game-player.travelling {
+    transform: none;
+  }
+}
+@media (min-width: 761px) {
+  .plant-game-shell {
+    height: calc(100dvh - 53px);
+    min-height: 600px;
+  }
+}

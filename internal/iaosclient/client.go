@@ -200,6 +200,37 @@ func (c *Client) PlantSiteSelections(ctx context.Context, caseCode string) (json
 	return out, nil
 }
 
+// PlantSiteControls returns the post-selection external possession request and
+// trusted World observation. A formal site decision alone is not site control.
+func (c *Client) PlantSiteControls(ctx context.Context, caseCode string) (json.RawMessage, error) {
+	caseCode = strings.TrimSpace(caseCode)
+	if caseCode == "" {
+		return nil, fmt.Errorf("case_code is required")
+	}
+	query := url.Values{}
+	query.Set("case_code", caseCode)
+	var out json.RawMessage
+	if err := c.request(ctx, http.MethodGet, "api/v1/genesis/plant/interactive/site-controls?"+query.Encode(), nil, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+// ApprovalDetail returns the IAOS-routed subject and immutable assignments for
+// an approval request. AESE uses it only to render the in-world review; the
+// decision still goes through the governed IAOS approval endpoint.
+func (c *Client) ApprovalDetail(ctx context.Context, approvalID string) (json.RawMessage, error) {
+	approvalID = strings.TrimSpace(approvalID)
+	if approvalID == "" {
+		return nil, fmt.Errorf("approval_id is required")
+	}
+	var out json.RawMessage
+	if err := c.request(ctx, http.MethodGet, "api/v1/approvals/"+url.PathEscape(approvalID), nil, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 type UpsertAction string
 
 const (
