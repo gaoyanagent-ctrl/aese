@@ -232,6 +232,22 @@ func (c *Client) PlantFacilityProjects(ctx context.Context, caseCode string) (js
 	return out, nil
 }
 
+// PlantContractAwards returns RFQs, trusted World bids, Agent recommendation,
+// routed approval state and awarded contracts for one Genesis case.
+func (c *Client) PlantContractAwards(ctx context.Context, caseCode string) (json.RawMessage, error) {
+	caseCode = strings.TrimSpace(caseCode)
+	if caseCode == "" {
+		return nil, fmt.Errorf("case_code is required")
+	}
+	query := url.Values{}
+	query.Set("case_code", caseCode)
+	var out json.RawMessage
+	if err := c.request(ctx, http.MethodGet, "api/v1/genesis/plant/interactive/contract-awards?"+query.Encode(), nil, &out); err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // ApprovalDetail returns the IAOS-routed subject and immutable assignments for
 // an approval request. AESE uses it only to render the in-world review; the
 // decision still goes through the governed IAOS approval endpoint.

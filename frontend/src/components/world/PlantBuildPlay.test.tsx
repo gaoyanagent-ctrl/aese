@@ -306,4 +306,27 @@ describe("PlantBuildPlay interactive planning", () => {
     await waitFor(() => expect(screen.getByRole("button", { name: "批准已生效 · 正式选址" })).toBeInTheDocument());
     expect(fetchMock.mock.calls.some(([path]) => String(path).includes("/commands/iaos/approvals/APR-1/approve"))).toBe(true);
   });
+
+  it("starts contractor sourcing from the approved WBS without price or evidence inputs", async () => {
+    const project = { project_id: "PROJECT-1", project_name: "苏州制造基地项目", status: "active", wbs_items: [{ wbs_code: "WBS-02", name: "现场施工", phase: "construction", sequence: 2, owner_position: "plant-project-lead", planned_start_at: "2026-10-01T00:00:00Z", planned_finish_at: "2027-02-01T00:00:00Z", budget_share_bps: 3500, acceptance_criteria: "施工验收" }] };
+    const fetchMock = vi.fn(async (input: RequestInfo | URL, init?: RequestInit) => {
+      const path = String(input);
+      if (path.endsWith("planning-status")) return { ok: true, json: async () => ({ state: "connected", provider: "MiniMax", model: "MiniMax-M3", prompt_version: "plant-planning-v2" }) };
+      if (path.includes("financial-constraints")) return { ok: true, json: async () => ({ case_code: "INC-GX-TEST", legal_entity_code: "LE-GX-TEST", financial_constraint: { available_cash: { value: "20000000.00", currency: "CNY", scale: 2 }, approved_budget: { value: "15000000.00", currency: "CNY", scale: 2 }, cash_source_ref: "gl:BOOK:1002", budget_source_ref: "budget:BUD-1", snapshot_hash: "sha256:authority" } }) };
+      if (path.includes("/requirements/") || path.includes("/proposals?")) return { ok: false, status: 404, text: async () => "not found" };
+      if (path.includes("/facility-projects")) return { ok: true, json: async () => ({ items: [{ plan: { plan_id: "PLAN-1", case_code: "INC-GX-TEST", project_name: project.project_name, delivery_strategy: "design_build", budget_ceiling: { value: "12000000.00", currency: "CNY", scale: 2 }, target_start_at: "2026-09-01T00:00:00Z", target_ready_at: "2027-03-01T00:00:00Z", wbs_items: project.wbs_items, status: "approved" }, plan_hash: "sha256:plan", status: "active", approval_request_id: "APR-PROJECT", approval_status: "consumed", project }] }) };
+      if (path.includes("/contract-awards")) return { ok: true, json: async () => ({ items: [] }) };
+      if (path.endsWith("/contract-rfqs") && init?.method === "POST") return { ok: true, status: 201, json: async () => ({ status: "waiting_world" }) };
+      return { ok: true, json: async () => path.includes("/plant-build/") ? { items: [] } : trace };
+    });
+    vi.stubGlobal("fetch", fetchMock);
+    render(<PlantBuildPlay onExit={() => undefined} />);
+    await openNpcTask(/顾远：选择采购包并发布 RFQ/);
+    expect(screen.queryByLabelText(/合同金额|承包商|证据/)).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /WBS-02 · 现场施工/ }));
+    fireEvent.click(screen.getByRole("button", { name: "确认采购包并发布 RFQ" }));
+    await waitFor(() => expect(fetchMock.mock.calls.some(([path, init]) => String(path).endsWith("/contract-rfqs") && init?.method === "POST")).toBe(true));
+    const request = JSON.parse(fetchMock.mock.calls.find(([path, init]) => String(path).endsWith("/contract-rfqs") && init?.method === "POST")?.[1]?.body as string);
+    expect(request).toEqual({ case_code: "INC-GX-TEST", package_code: "WBS-02", sourcing_strategy: "specialist_packages" });
+  });
 });

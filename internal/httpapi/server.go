@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"math/big"
 	"net/http"
 	"strconv"
 	"strings"
@@ -287,6 +288,12 @@ func (s *Server) handleReady(w http.ResponseWriter, r *http.Request) {
 			"/api/aese/v1/world/plant-build/observations",
 			"/api/aese/v1/world/plant-build/site-selections",
 			"/api/aese/v1/world/plant-build/site-selections/finalize",
+			"/api/aese/v1/world/plant-build/facility-projects",
+			"/api/aese/v1/world/plant-build/contract-awards",
+			"/api/aese/v1/world/plant-build/contract-rfqs",
+			"/api/aese/v1/world/plant-build/contract-bids/confirm",
+			"/api/aese/v1/world/plant-build/contract-recommendations",
+			"/api/aese/v1/world/plant-build/contracts/award",
 			"/api/aese/v1/world/capability-build",
 			"/api/aese/v1/world/industrialization",
 			"/api/aese/v1/world/first-delivery",
@@ -1312,6 +1319,264 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			_, _ = w.Write(result)
 			return
 		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "contract-awards" && r.Method == http.MethodGet {
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, _, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_contract_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			result, err := authority.PlantContractAwards(ctx, r.URL.Query().Get("case_code"))
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_contract_awards_unavailable")
+				return
+			}
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusOK)
+			_, _ = w.Write(result)
+			return
+		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "contract-rfqs" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode         string `json:"case_code"`
+				PackageCode      string `json:"package_code"`
+				SourcingStrategy string `json:"sourcing_strategy"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil || input.CaseCode == "" || input.PackageCode == "" {
+				s.writeError(w, http.StatusBadRequest, "invalid_contract_rfq", firstNonEmptyString(errorString(err), "case_code and package_code are required"), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_contract_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			projectRaw, err := authority.PlantFacilityProjects(ctx, input.CaseCode)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "facility_projects_unavailable")
+				return
+			}
+			var projects struct {
+				Items []plantbuild.FacilityProjectItem `json:"items"`
+			}
+			if json.Unmarshal(projectRaw, &projects) != nil {
+				s.writeError(w, http.StatusBadGateway, "facility_projects_invalid", "IAOS facility project projection is invalid", true, "", "")
+				return
+			}
+			var project *plantbuild.FacilityProject
+			for index := len(projects.Items) - 1; index >= 0; index-- {
+				if projects.Items[index].Project.ProjectID != "" && projects.Items[index].Project.Status == "active" {
+					project = &projects.Items[index].Project
+					break
+				}
+			}
+			if project == nil {
+				s.writeError(w, http.StatusConflict, "active_facility_project_required", "必须先激活设施项目与 WBS 基线", false, "", "")
+				return
+			}
+			var pkg *plantbuild.ProjectWBSItem
+			for index := range project.WBSItems {
+				if project.WBSItems[index].WBSCode == input.PackageCode {
+					pkg = &project.WBSItems[index]
+					break
+				}
+			}
+			if pkg == nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "contract_package_not_in_wbs", "所选采购包不属于已批准 WBS", false, "", "")
+				return
+			}
+			budget, ok := new(big.Rat).SetString(project.BudgetCeiling.Value)
+			if !ok {
+				s.writeError(w, http.StatusBadGateway, "facility_project_budget_invalid", "IAOS project budget is invalid", true, "", "")
+				return
+			}
+			budget.Mul(budget, big.NewRat(int64(pkg.BudgetShareBPS), 10000))
+			now := time.Now().UTC()
+			suffix := strings.TrimPrefix(plantbuild.CanonicalHash(map[string]any{"project_id": project.ProjectID, "package_code": pkg.WBSCode}), "sha256:")[:16]
+			rfq := plantbuild.ContractRFQ{SchemaVersion: "1.0", RFQID: "rfq-" + suffix, CaseCode: input.CaseCode, ProjectID: project.ProjectID,
+				PackageCode: pkg.WBSCode, PackageName: pkg.Name, SourcingStrategy: firstNonEmptyString(input.SourcingStrategy, "specialist_packages"), BidCount: 3,
+				ContractCeiling: plantbuild.Money{Value: budget.FloatString(project.BudgetCeiling.Scale), Currency: project.BudgetCeiling.Currency, Scale: project.BudgetCeiling.Scale},
+				RequiredReadyAt: pkg.PlannedFinishAt, WorldRunID: "world-run-" + input.CaseCode, RequestedBy: actorID, RequestedAt: now.Format(time.RFC3339), Status: "waiting_world"}
+			result, err := postPlantAuthorityCommandResult(ctx, authority, "contractor.rfq.issue", actorID, input.CaseCode, rfq.RFQID, 1, rfq)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "contract_rfq_not_issued")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "waiting_world", "rfq": rfq, "result": json.RawMessage(result)})
+			return
+		}
+		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "contract-bids" && rest[3] == "confirm" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode string `json:"case_code"`
+				RFQID    string `json:"rfq_id"`
+				Action   string `json:"action"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil || input.CaseCode == "" || input.RFQID == "" || input.Action != "accept_bids" {
+				s.writeError(w, http.StatusBadRequest, "invalid_contract_bid_confirmation", firstNonEmptyString(errorString(err), "case_code, rfq_id and accept_bids are required"), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_contract_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			rawItems, err := authority.PlantContractAwards(ctx, input.CaseCode)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_contract_awards_unavailable")
+				return
+			}
+			var items struct {
+				Items []plantbuild.ContractAwardItem `json:"items"`
+			}
+			if json.Unmarshal(rawItems, &items) != nil {
+				s.writeError(w, http.StatusBadGateway, "plant_contract_awards_invalid", "IAOS contract projection is invalid", true, "", "")
+				return
+			}
+			var selected *plantbuild.ContractAwardItem
+			for index := range items.Items {
+				if items.Items[index].RFQ.RFQID == input.RFQID {
+					selected = &items.Items[index]
+					break
+				}
+			}
+			if selected == nil {
+				s.writeError(w, http.StatusNotFound, "contract_rfq_not_found", "authoritative RFQ was not found", false, "", "")
+				return
+			}
+			if selected.Observation.ObservationID != "" {
+				s.writeJSON(w, http.StatusOK, map[string]any{"status": "committed", "idempotent_replay": true, "observation": selected.Observation})
+				return
+			}
+			observation, err := plantbuild.GenerateContractBidObservation(selected.RFQ)
+			if err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "contract_bid_world_generation_failed", err.Error(), false, "", "")
+				return
+			}
+			messageID := "world-" + observation.ObservationID
+			envelope := map[string]any{"schema_version": "1.0", "message_id": messageID, "kind": "observation", "tenant_id": tenantID,
+				"world_pack_key": "genesis-contractor-market", "world_pack_version": "1.0.0", "world_run_id": selected.RFQ.WorldRunID, "branch_id": "main",
+				"sim_occurred_at": observation.ObservedAt, "correlation_id": "corr-m10-" + input.CaseCode, "idempotency_key": messageID,
+				"producer": map[string]string{"system": "aese", "component": "contractor-market-world"}, "subject_ref": map[string]string{"type": "contractor_rfq", "code": selected.RFQ.RFQID},
+				"payload_type": "contractor.bids.received.v1", "payload": observation}
+			rawEnvelope, _ := json.Marshal(envelope)
+			if _, err := authority.PostGovernedCommand(ctx, "api/v1/world-bridge/observations", rawEnvelope); err != nil {
+				s.writePlantAuthorityError(w, err, "contract_bid_world_observation_not_accepted")
+				return
+			}
+			commit := map[string]any{"schema_version": "1.0", "rfq_id": selected.RFQ.RFQID, "world_message_id": messageID}
+			if err := postPlantAuthorityCommand(ctx, authority, "contractor.bid.observation.commit", actorID, input.CaseCode, observation.ObservationID, 1, commit); err != nil {
+				s.writePlantAuthorityError(w, err, "contract_bid_observation_not_committed")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "committed", "idempotent_replay": false, "observation": observation})
+			return
+		}
+		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "contract-recommendations" && rest[3] == "agent" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode string `json:"case_code"`
+				RFQID    string `json:"rfq_id"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil || input.CaseCode == "" || input.RFQID == "" {
+				s.writeError(w, http.StatusBadRequest, "invalid_contract_recommendation_seed", firstNonEmptyString(errorString(err), "case_code and rfq_id are required"), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, _, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_contract_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			rawItems, err := authority.PlantContractAwards(ctx, input.CaseCode)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "plant_contract_awards_unavailable")
+				return
+			}
+			var items struct {
+				Items []plantbuild.ContractAwardItem `json:"items"`
+			}
+			if json.Unmarshal(rawItems, &items) != nil {
+				s.writeError(w, http.StatusBadGateway, "plant_contract_awards_invalid", "IAOS contract projection is invalid", true, "", "")
+				return
+			}
+			var selected *plantbuild.ContractAwardItem
+			for index := range items.Items {
+				if items.Items[index].RFQ.RFQID == input.RFQID {
+					selected = &items.Items[index]
+					break
+				}
+			}
+			if selected == nil || selected.Observation.ObservationID == "" {
+				s.writeError(w, http.StatusConflict, "trusted_contract_bids_required", "必须先取得可信投标事实", false, "", "")
+				return
+			}
+			adviser, ok := s.plantPlanningProvider.(plantbuild.ContractAwardAdviser)
+			if !ok {
+				s.writeError(w, http.StatusServiceUnavailable, "contract_award_agent_unavailable", "工程采购评审 Agent 未启用", true, "", "")
+				return
+			}
+			advice, err := adviser.GenerateContractRecommendation(ctx, plantbuild.ContractRecommendationSeed{RFQ: selected.RFQ, Observation: selected.Observation})
+			if err != nil {
+				s.writeError(w, http.StatusUnprocessableEntity, "contract_award_agent_failed", err.Error(), false, "", "")
+				return
+			}
+			s.writeJSON(w, http.StatusOK, advice)
+			return
+		}
+		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "contract-recommendations" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode string                                  `json:"case_code"`
+				RFQID    string                                  `json:"rfq_id"`
+				Advice   plantbuild.ContractRecommendationAdvice `json:"advice"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil || input.CaseCode == "" || input.RFQID == "" {
+				s.writeError(w, http.StatusBadRequest, "invalid_contract_recommendation", firstNonEmptyString(errorString(err), "case_code, rfq_id and advice are required"), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_contract_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			suffix := strings.TrimPrefix(plantbuild.CanonicalHash(map[string]any{"rfq_id": input.RFQID, "output_hash": input.Advice.Evidence.OutputHash}), "sha256:")[:16]
+			payload := map[string]any{"schema_version": "1.0", "recommendation_id": "contract-rec-" + suffix, "rfq_id": input.RFQID, "selected_bid_id": input.Advice.SelectedBidID,
+				"recommendation_reason": input.Advice.RecommendationReason, "alternative_comparison": input.Advice.AlternativeComparison, "recommended_at": time.Now().UTC().Format(time.RFC3339),
+				"agent_evidence": map[string]any{"provider": input.Advice.Evidence.Provider, "model": input.Advice.Evidence.Model, "prompt_version": input.Advice.Evidence.PromptVersion, "request_id": input.Advice.Evidence.RequestID, "input_hash": input.Advice.Evidence.InputHash, "output_hash": input.Advice.Evidence.OutputHash, "generated_at": input.Advice.Evidence.ValidatedAt}}
+			result, err := postPlantAuthorityCommandResult(ctx, authority, "contractor.award.recommend", actorID, input.CaseCode, "contract-rec-"+suffix, 1, payload)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "contract_award_recommendation_not_committed")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "waiting_approval", "result": json.RawMessage(result)})
+			return
+		}
+		if len(rest) == 4 && rest[1] == "plant-build" && rest[2] == "contracts" && rest[3] == "award" && r.Method == http.MethodPost {
+			var input struct {
+				CaseCode          string `json:"case_code"`
+				RecommendationID  string `json:"recommendation_id"`
+				ApprovalRequestID string `json:"approval_request_id"`
+			}
+			if err := decodeStrictRequestBody(r, s.cfg.BodyLimit, &input); err != nil || input.CaseCode == "" || input.RecommendationID == "" || input.ApprovalRequestID == "" {
+				s.writeError(w, http.StatusBadRequest, "invalid_contract_award", firstNonEmptyString(errorString(err), "case_code, recommendation_id and approval_request_id are required"), false, "", "")
+				return
+			}
+			tenantID := firstNonEmptyString(r.Header.Get("X-IAOS-Tenant-Id"), r.Header.Get("X-Tenant-ID"))
+			authority, actorID, err := s.plantAuthorityClient(ctx, r, tenantID)
+			if err != nil || authority == nil {
+				s.writeError(w, http.StatusUnauthorized, "plant_contract_identity_invalid", firstNonEmptyString(errorString(err), "IAOS authority is required"), false, "", "")
+				return
+			}
+			payload := map[string]any{"schema_version": "1.0", "recommendation_id": input.RecommendationID, "approval_request_id": input.ApprovalRequestID, "awarded_at": time.Now().UTC().Format(time.RFC3339)}
+			result, err := postPlantAuthorityCommandResult(ctx, authority, "contractor.contract.award", actorID, input.CaseCode, input.RecommendationID, 1, payload)
+			if err != nil {
+				s.writePlantAuthorityError(w, err, "contract_award_not_committed")
+				return
+			}
+			s.writeJSON(w, http.StatusCreated, map[string]any{"status": "awarded", "result": json.RawMessage(result)})
+			return
+		}
 		if len(rest) == 3 && rest[1] == "plant-build" && rest[2] == "facility-projects" && r.Method == http.MethodPost {
 			var input struct {
 				CaseCode string                       `json:"case_code"`
@@ -1928,6 +2193,14 @@ func postPlantAuthorityCommandResultWithAgentRun(ctx context.Context, client *ia
 		field = "facility_project_baseline_submission"
 	case "facility.project.baseline.activate":
 		field = "facility_project_baseline_activation"
+	case "contractor.rfq.issue":
+		field = "contract_rfq"
+	case "contractor.bid.observation.commit":
+		field = "contract_bid_observation"
+	case "contractor.award.recommend":
+		field = "contract_award_recommendation"
+	case "contractor.contract.award":
+		field = "contract_award"
 	default:
 		return nil, fmt.Errorf("unsupported M10 capability %q", capabilityCode)
 	}

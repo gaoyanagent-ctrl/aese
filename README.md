@@ -58,7 +58,7 @@ IAOS 是企业操作系统，AESE 是运行在 IAOS 上的行业仿真世界。
 - M7 受治理场景运行控制台：完成；业务用户可从页面完成预检、初始化、逐幕运行、Agent 分析、验证和安全复位，CLI/UI 与 IAOS 审计副作用已完成对账。
 - M8 AESE 2.0 基础：Completed；F0-F5 已交付机器合同、确定性内核、三态 tracer、受治理 IAOS bridge、Genesis pack 与 World Play。
 - M9 Project Genesis 企业成立与治理：Completed；成立、登记、开户、资本、三岗位、mandate、预算与 `plant_project_eligible` 已通过两仓和三视口验收。
-- M10 Project Genesis 工厂选址与设施建设：Reference Replay Complete；交互版已贯通权威资金、需求、Agent 候选、人工审阅、World Observation、推荐、统一审批和正式选址，项目/WBS、施工与工程财务仍在建设。
+- M10 Project Genesis 工厂选址与设施建设：Reference Replay Complete；交互版已贯通权威资金、需求、Agent 候选、人工审阅、World Observation、选址、场地控制、项目/WBS 基线，以及首个承包商寻源与合同授予闭环；施工、变更、工程财务和验收仍在建设。
 - M11 Project Genesis 生产能力建设：Completed；设备、人员、技能、班次、资金与治理联合门已输出 `industrialization_eligible`。
 - M12 Project Genesis 产品工业化与量产批准：Completed；RFQ、版本、APQP、两轮试制、PPAP 与治理门已输出 `serial_production_eligible`。
 - M13 Project Genesis 第一次完整商业交付：Completed；12,000 件交付、开票回款、实际成本与毛利已输出 `first_commercial_cycle_closed`。

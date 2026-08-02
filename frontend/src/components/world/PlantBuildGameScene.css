@@ -135,11 +135,15 @@
 .plant-game-scene--boardroom {
   background-image: url("/assets/enterprise-genesis/locations/enterprise-headquarters-v1.png");
 }
-.plant-game-scene--site {
+.plant-game-scene--site,
+.plant-game-scene--contractor {
   background-image:
     linear-gradient(#17383a33, #15342f99),
     url("/assets/enterprise-genesis/enterprise-city-v1.png");
   background-position: center 62%;
+}
+.plant-game-scene--contractor {
+  filter: saturate(0.86) contrast(1.04);
 }
 .plant-game-scene-shade {
   position: absolute;

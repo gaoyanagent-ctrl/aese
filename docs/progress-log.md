@@ -2085,3 +2085,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：M10 在线纵切已从场址取得延伸至项目/WBS 基线。玩家只作方案选择、审批和激活决定，专业拆分默认折叠；IAOS 保存 Agent 草案、审批请求、项目、WBS、Audit、Outbox、Process trace 和只读投影。合同、施工、变更、工程财务与验收仍未宣称完成。
 - 验证：IAOS 相关包测试、API 测试、Go vet、Code Map/Atlas/governed-write 检查通过；AESE Go 全仓测试/vet、前端 26 文件/96 项测试、TypeScript 与生产构建通过；M9→M10、需求简化、硬约束解释和场址交付→项目办公室在 1440/1280/390 三视口共 15 项 Playwright 通过。8082 实际日志已返回目标案件的设施项目和审批详情；完整新租户从零验收仍归 S5。
 - 后续：按 DES-038 继续交付合同与施工纵切；每个新节点必须同时具备 Effective Artifact、场景主动作、权威档案和无死路测试。
+
+## 2026-08-02 - M10 承包商市场与合同授予游戏闭环
+
+- 变更：IAOS 发布 RFQ、可信投标 Observation、Agent 推荐、合同审批和权威合同四项 Capability 及 `facility.contract.award.v1`；AESE 增加工程承包商市场场景、五个事实驱动游戏阶段和命名 Command Gateway。
+- 原因：项目基线激活后没有可操作剧情；让玩家手工录入承包商、报价、资质和证据既违背 World 事实所有权，也会把模拟游戏退化为合同管理后台。
+- 影响：玩家只选择已批准 WBS 包和寻源策略、确认接收投标、确认 Agent 推荐、作出受派审批决定并归档合同；金额/日期由项目基线推导，外部投标由 World 生成，合同不会自动形成发票、应付或付款。
+- 验证：IAOS 全仓 Go/vet 与治理门已通过并部署 8082；AESE 全仓 Go/vet、101 项前端测试、TypeScript 和生产构建通过。完整新案件 UI/API/DB 现场验收仍归 S5。
+- 后续：继续实现施工进度/质量 Observation、变更与里程碑验收，再接工程财务和最终设施验收。

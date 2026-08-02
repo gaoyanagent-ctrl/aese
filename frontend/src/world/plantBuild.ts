@@ -325,6 +325,44 @@ export type FacilityProjectItem = {
   project?: { project_id?: string; project_name?: string; status?: string; wbs_items?: ProjectWBSItem[] };
 };
 
+export type ContractRFQ = {
+  schema_version: "1.0"; rfq_id: string; case_code: string; project_id: string;
+  package_code: string; package_name: string;
+  sourcing_strategy: "general_contract" | "specialist_packages" | "epcm_managed";
+  bid_count: number; contract_ceiling: PBMoney; required_ready_at: string;
+  world_run_id: string; requested_by: string; requested_at: string; status: string;
+};
+
+export type ContractBid = {
+  schema_version: "1.0"; bid_id: string; rfq_id: string; contractor_code: string;
+  contractor_name: string; quoted_amount: PBMoney; promised_ready_at: string;
+  qualification: string; warranty_months: number; milestone_count: number;
+  evidence_refs: string[]; observed_at: string;
+};
+
+export type ContractBidObservation = {
+  schema_version: "1.0"; observation_id: string; rfq_id: string;
+  external_actor_id: string; bids: ContractBid[]; observed_at: string;
+};
+
+export type ContractRecommendationAdvice = {
+  selected_bid_id: string; recommendation_reason: string; alternative_comparison: string;
+  evidence: ProposalSet["evidence"];
+};
+
+export type ContractAwardRecommendation = {
+  schema_version: "1.0"; recommendation_id: string; rfq_id: string;
+  selected_bid_id: string; recommendation_reason: string; alternative_comparison: string;
+  recommended_at: string;
+};
+
+export type ContractAwardItem = {
+  rfq: ContractRFQ; status: string; observation?: ContractBidObservation;
+  recommendation?: ContractAwardRecommendation; approval_request_id: string;
+  approval_status: "" | "pending" | "approved" | "rejected" | "consumed";
+  contract?: { contract_id?: string; contractor_name?: string; committed_amount?: PBMoney; status?: string; package_name?: string };
+};
+
 export type PlantApprovalDetail = {
   item: {
     id: string;
@@ -511,6 +549,55 @@ export async function submitFacilityProjectBaseline(caseCode: string, planID: st
     body: JSON.stringify({ case_code: caseCode, plan_id: planID, expected_hash: expectedHash }),
   });
   if (!response.ok) throw new Error(`提交设施项目审批 ${response.status}: ${await response.text()}`);
+  return response.json();
+}
+
+export async function loadContractAwards(caseCode: string, signal?: AbortSignal) {
+  const response = await fetch(`/api/aese/v1/world/plant-build/contract-awards?case_code=${encodeURIComponent(caseCode)}`, { headers: iaosHeaders(), signal });
+  if (!response.ok) throw new Error(`承包商寻源档案 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<{ items: ContractAwardItem[] }>;
+}
+
+export async function issueContractRFQ(caseCode: string, packageCode: string, sourcingStrategy: ContractRFQ["sourcing_strategy"]) {
+  const response = await fetch("/api/aese/v1/world/plant-build/contract-rfqs", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() },
+    body: JSON.stringify({ case_code: caseCode, package_code: packageCode, sourcing_strategy: sourcingStrategy }),
+  });
+  if (!response.ok) throw new Error(`发布工程采购邀请 ${response.status}: ${await response.text()}`);
+  return response.json();
+}
+
+export async function confirmContractBids(caseCode: string, rfqID: string) {
+  const response = await fetch("/api/aese/v1/world/plant-build/contract-bids/confirm", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() },
+    body: JSON.stringify({ case_code: caseCode, rfq_id: rfqID, action: "accept_bids" }),
+  });
+  if (!response.ok) throw new Error(`收取承包商正式投标 ${response.status}: ${await response.text()}`);
+  return response.json();
+}
+
+export async function generateContractRecommendation(caseCode: string, rfqID: string) {
+  const response = await fetch("/api/aese/v1/world/plant-build/contract-recommendations/agent", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() }, body: JSON.stringify({ case_code: caseCode, rfq_id: rfqID }),
+  });
+  if (!response.ok) throw new Error(`工程采购 Agent 评审 ${response.status}: ${await response.text()}`);
+  return response.json() as Promise<ContractRecommendationAdvice>;
+}
+
+export async function submitContractRecommendation(caseCode: string, rfqID: string, advice: ContractRecommendationAdvice) {
+  const response = await fetch("/api/aese/v1/world/plant-build/contract-recommendations", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() }, body: JSON.stringify({ case_code: caseCode, rfq_id: rfqID, advice }),
+  });
+  if (!response.ok) throw new Error(`提交合同授予审批 ${response.status}: ${await response.text()}`);
+  return response.json();
+}
+
+export async function awardContract(caseCode: string, recommendationID: string, approvalRequestID: string) {
+  const response = await fetch("/api/aese/v1/world/plant-build/contracts/award", {
+    method: "POST", headers: { "content-type": "application/json", ...iaosHeaders() },
+    body: JSON.stringify({ case_code: caseCode, recommendation_id: recommendationID, approval_request_id: approvalRequestID }),
+  });
+  if (!response.ok) throw new Error(`归档正式工程合同 ${response.status}: ${await response.text()}`);
   return response.json();
 }
 export async function loadPlantBuild(

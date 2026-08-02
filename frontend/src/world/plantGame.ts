@@ -8,7 +8,12 @@ export type PlantGameStage =
   | "site_control"
   | "project_planning"
   | "project_approval"
-  | "project_baselined";
+  | "project_baselined"
+  | "contract_sourcing"
+  | "contract_world"
+  | "contract_comparison"
+  | "contract_approval"
+  | "contract_awarded";
 
 export type PlantGameFacts = {
   hasRequirement: boolean;
@@ -23,12 +28,17 @@ export type PlantGameFacts = {
   hasProjectPlan: boolean;
   projectApprovalStatus: string;
   hasActiveProject: boolean;
+  hasContractRFQ: boolean;
+  hasContractBids: boolean;
+  hasContractRecommendation: boolean;
+  contractApprovalStatus: string;
+  hasAwardedContract: boolean;
 };
 
 export type PlantGameStageDefinition = {
   key: PlantGameStage;
   label: string;
-  location: "headquarters" | "city" | "site" | "boardroom";
+  location: "headquarters" | "city" | "site" | "boardroom" | "contractor";
   npc: string;
   npcRole: string;
   mission: string;
@@ -144,14 +154,73 @@ export const PLANT_GAME_STAGES: PlantGameStageDefinition[] = [
     npc: "顾远",
     npcRole: "工厂项目负责人",
     mission: "查验项目与 WBS 档案",
-    dialogue: "项目和 WBS 已进入 IAOS 权威账。接下来的合同、施工和工程财务都必须引用这条基线。",
-    actionLabel: "查看项目基线档案",
-    anchor: "plant-task-project",
+    dialogue: "项目和 WBS 已进入 IAOS 权威账。现在选择一个专业工作包，启动受治理的承包商寻源。",
+    actionLabel: "进入工程采购寻源",
+    anchor: "plant-task-contract",
+  },
+  {
+    key: "contract_sourcing",
+    label: "发布工程采购邀请",
+    location: "headquarters",
+    npc: "顾远",
+    npcRole: "工厂项目负责人",
+    mission: "从已批准 WBS 选择采购包",
+    dialogue: "采购包、合同上限和交付日期全部来自已激活项目基线。你只需选择包和寻源策略。",
+    actionLabel: "选择采购包并发布 RFQ",
+    anchor: "plant-task-contract",
+  },
+  {
+    key: "contract_world",
+    label: "收取可信投标",
+    location: "contractor",
+    npc: "市场协调人",
+    npcRole: "World 承包商市场",
+    mission: "让外部承包商提交密封报价",
+    dialogue: "承包商、报价、资质、工期和证据由 World 生成。你只需要确认接收本轮正式投标。",
+    actionLabel: "收取正式投标",
+    anchor: "plant-task-contract",
+  },
+  {
+    key: "contract_comparison",
+    label: "Agent 比选推荐",
+    location: "headquarters",
+    npc: "纪元",
+    npcRole: "工程采购评审 Agent",
+    mission: "比较可信报价并形成授予建议",
+    dialogue: "我只使用 World 已提交的正式投标，解释成本、工期、质保与履约权衡；最终仍由你确认并提交审批。",
+    actionLabel: "让 Agent 评审投标",
+    anchor: "plant-task-contract",
+  },
+  {
+    key: "contract_approval",
+    label: "审批合同授予",
+    location: "boardroom",
+    npc: "林岚",
+    npcRole: "治理与审批协调人",
+    mission: "审阅合同承诺与中选依据",
+    dialogue: "审批流决定有权主体。批准后仍需项目负责人显式归档合同，系统不会自动付款或生成发票。",
+    actionLabel: "进入合同授予审批",
+    anchor: "plant-task-contract",
+  },
+  {
+    key: "contract_awarded",
+    label: "正式合同已归档",
+    location: "headquarters",
+    npc: "顾远",
+    npcRole: "工厂项目负责人",
+    mission: "查验工程合同与承诺金额",
+    dialogue: "正式合同已进入 IAOS 权威账。后续施工进度、变更、发票和付款只能引用这份合同。",
+    actionLabel: "查看合同档案",
+    anchor: "plant-task-contract",
   },
 ];
 
 export function derivePlantGameStage(facts: PlantGameFacts): PlantGameStageDefinition {
-  if (facts.hasActiveProject) return PLANT_GAME_STAGES[9];
+  if (facts.hasAwardedContract) return PLANT_GAME_STAGES[14];
+  if (facts.hasContractRecommendation) return PLANT_GAME_STAGES[13];
+  if (facts.hasContractBids) return PLANT_GAME_STAGES[12];
+  if (facts.hasContractRFQ) return PLANT_GAME_STAGES[11];
+  if (facts.hasActiveProject) return PLANT_GAME_STAGES[10];
   if (facts.hasProjectPlan && facts.projectApprovalStatus !== "rejected") return PLANT_GAME_STAGES[8];
   if (facts.projectApprovalStatus === "rejected") return PLANT_GAME_STAGES[7];
   if (facts.hasSiteControl) return PLANT_GAME_STAGES[7];

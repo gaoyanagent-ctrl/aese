@@ -1166,7 +1166,8 @@
   display: none;
 }
 .plant-task-dialog .plant-site-control,
-.plant-task-dialog .plant-project-baseline { display: none; }
+.plant-task-dialog .plant-project-baseline,
+.plant-task-dialog .plant-contract-award { display: none; }
 .plant-task-dialog[data-stage="requirement"] .plant-requirement-form,
 .plant-task-dialog[data-stage="proposal"] .plant-requirement-form,
 .plant-task-dialog[data-stage="requirement-revision"] .plant-requirement-form {
@@ -1190,6 +1191,11 @@
 .plant-task-dialog[data-stage="project_planning"] .plant-project-baseline,
 .plant-task-dialog[data-stage="project_approval"] .plant-project-baseline,
 .plant-task-dialog[data-stage="project_baselined"] .plant-project-baseline { display: grid; }
+.plant-task-dialog[data-stage="contract_sourcing"] .plant-contract-award,
+.plant-task-dialog[data-stage="contract_world"] .plant-contract-award,
+.plant-task-dialog[data-stage="contract_comparison"] .plant-contract-award,
+.plant-task-dialog[data-stage="contract_approval"] .plant-contract-award,
+.plant-task-dialog[data-stage="contract_awarded"] .plant-contract-award { display: grid; }
 .plant-site-control { gap: 14px; }
 .plant-site-control > header { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; padding: 14px; border: 1px solid #8d7341; border-radius: 10px; background: rgba(74, 56, 25, .22); }
 .plant-site-control > header span { color: #d9bd78; font-size: 10px; letter-spacing: .12em; text-transform: uppercase; }
@@ -1298,6 +1304,27 @@
 .plant-project-decision > div { display: flex; gap: 10px; }
 .plant-project-decision button { min-height: 43px; display: inline-flex; align-items: center; gap: 7px; padding: 0 14px; border: 1px solid #41896d; border-radius: 8px; color: #e8fff5; background: #17614d; font: inherit; font-weight: 750; cursor: pointer; }
 .plant-project-decision button.danger { border-color: #965956; background: #6c302f; }
+.plant-contract-award { gap: 14px; }
+.plant-contract-award > header, .plant-contract-bids > header { display: flex; justify-content: space-between; gap: 14px; align-items: flex-start; padding: 14px; border: 1px solid #6f6848; border-radius: 10px; background: rgba(65, 54, 29, .24); }
+.plant-contract-award > header span { color: #d9bd78; font-size: 10px; letter-spacing: .12em; }
+.plant-contract-award > header h2 { margin: 4px 0; color: #fff1c8; font-size: 18px; }
+.plant-contract-award > header p, .plant-contract-bids > header p { margin: 0; color: var(--text-muted); }
+.plant-contract-source, .plant-contract-bids { display: grid; gap: 14px; }
+.plant-contract-package-grid, .plant-contract-bid-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+.plant-contract-package-grid button, .plant-contract-bid-grid article { display: grid; gap: 7px; padding: 13px; text-align: left; border: 1px solid #43534e; border-radius: 9px; color: var(--text); background: rgba(9, 25, 27, .76); }
+.plant-contract-package-grid button { cursor: pointer; font: inherit; }
+.plant-contract-package-grid button.selected, .plant-contract-bid-grid article.selected { border-color: #e3c66d; box-shadow: inset 0 0 0 1px #e3c66d; }
+.plant-contract-package-grid span, .plant-contract-bid-grid span { color: #9bd1b9; font-size: 10px; text-transform: uppercase; }
+.plant-contract-package-grid small, .plant-contract-bid-grid p { margin: 0; color: var(--text-muted); font-size: 11px; }
+.plant-contract-bid-grid b { color: #f1d783; font-size: 18px; }
+.plant-contract-strategy { display: flex; flex-wrap: wrap; gap: 8px; }
+.plant-contract-strategy button { padding: 8px 12px; border: 1px solid #475b54; border-radius: 999px; color: #dcebe5; background: #162925; cursor: pointer; }
+.plant-contract-strategy button.selected { border-color: #e3c66d; color: #fff2bb; background: #4a3e20; }
+.plant-contract-advice { display: grid; grid-template-columns: auto 1fr auto; gap: 12px; align-items: start; padding: 15px; border: 1px solid #3f826c; border-radius: 10px; background: rgba(20, 74, 61, .28); }
+.plant-contract-advice > svg { color: #83d5b5; }
+.plant-contract-advice div { display: grid; gap: 5px; }
+.plant-contract-advice p, .plant-contract-advice em { margin: 0; color: #d4e4dd; font-style: normal; line-height: 1.5; }
+.plant-contract-advice button { min-height: 42px; padding: 0 13px; border: 1px solid #4a9a79; border-radius: 8px; color: #effff7; background: #17614d; font-weight: 750; cursor: pointer; }
 @media (max-width: 760px) {
   .plant-project-agent-start { grid-template-columns: auto minmax(0, 1fr); }
   .plant-project-agent-start button { grid-column: 1 / -1; }

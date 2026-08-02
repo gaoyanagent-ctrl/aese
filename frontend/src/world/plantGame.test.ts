@@ -14,6 +14,11 @@ const empty: PlantGameFacts = {
   hasProjectPlan: false,
   projectApprovalStatus: "",
   hasActiveProject: false,
+  hasContractRFQ: false,
+  hasContractBids: false,
+  hasContractRecommendation: false,
+  contractApprovalStatus: "",
+  hasAwardedContract: false,
 };
 
 describe("M10 game projection stage", () => {
@@ -30,7 +35,11 @@ describe("M10 game projection stage", () => {
     [{ hasDecision: true, hasSiteControlRequest: true, hasSiteControl: true }, "project_planning"],
     [{ hasProjectPlan: true }, "project_approval"],
     [{ hasProjectPlan: true, projectApprovalStatus: "rejected" }, "project_planning"],
-    [{ hasActiveProject: true }, "project_baselined"],
+    [{ hasActiveProject: true }, "contract_sourcing"],
+    [{ hasContractRFQ: true }, "contract_world"],
+    [{ hasContractBids: true }, "contract_comparison"],
+    [{ hasContractRecommendation: true }, "contract_approval"],
+    [{ hasAwardedContract: true }, "contract_awarded"],
   ])("derives committed facts %o as %s", (partial, expected) => {
     expect(derivePlantGameStage({ ...empty, ...partial }).key).toBe(expected);
   });

@@ -5,6 +5,7 @@ import {
   CircleHelp,
   FilePlus2,
   Gavel,
+  Handshake,
   LoaderCircle,
   RotateCcw,
   SearchCheck,
@@ -36,6 +37,12 @@ import {
   loadFacilityProjects,
   activateFacilityProject,
   submitFacilityProjectBaseline,
+  loadContractAwards,
+  issueContractRFQ,
+  confirmContractBids,
+  generateContractRecommendation,
+  submitContractRecommendation,
+  awardContract,
   decidePlantApproval,
   submitPlantProposalReview,
   submitManualPlantProposal,
@@ -54,6 +61,9 @@ import {
   type ProjectPlanOption,
   type ProjectPlanOptionSet,
   type FacilityProjectItem,
+  type ContractAwardItem,
+  type ContractRecommendationAdvice,
+  type ContractRFQ,
 } from "../../world/plantBuild";
 import {
   DEFAULT_SITE_ASSESSMENT_WEIGHTS,
@@ -313,6 +323,12 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
   const [projectApprovalDetail, setProjectApprovalDetail] = useState<PlantApprovalDetail | null>(null);
   const [projectApprovalNote, setProjectApprovalNote] = useState("");
   const [projectBusy, setProjectBusy] = useState(false);
+  const [contractAwards, setContractAwards] = useState<ContractAwardItem[]>([]);
+  const [contractAdvice, setContractAdvice] = useState<ContractRecommendationAdvice | null>(null);
+  const [contractApprovalDetail, setContractApprovalDetail] = useState<PlantApprovalDetail | null>(null);
+  const [selectedPackageCode, setSelectedPackageCode] = useState("");
+  const [sourcingStrategy, setSourcingStrategy] = useState<ContractRFQ["sourcing_strategy"]>("specialist_packages");
+  const [contractBusy, setContractBusy] = useState(false);
   const [controlMode, setControlMode] = useState<SiteControlRequest["agreement_mode"]>("lease");
   const [controlHandoverAt, setControlHandoverAt] = useState("");
   const [controlBusy, setControlBusy] = useState(false);
@@ -350,6 +366,7 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
   const refreshSiteSelections = async () => setSiteSelections((await loadSiteSelections(caseCode)).items ?? []);
   const refreshSiteControls = async () => setSiteControls((await loadSiteControls(caseCode)).items ?? []);
   const refreshFacilityProjects = async () => setFacilityProjects((await loadFacilityProjects(caseCode)).items ?? []);
+  const refreshContractAwards = async () => setContractAwards((await loadContractAwards(caseCode)).items ?? []);
   useEffect(() => {
     const controller = new AbortController();
     Promise.all([
@@ -376,6 +393,7 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
       loadSiteSelections(caseCode, controller.signal).then((result) => setSiteSelections(result.items ?? [])),
       loadSiteControls(caseCode, controller.signal).then((result) => setSiteControls(result.items ?? [])),
       loadFacilityProjects(caseCode, controller.signal).then((result) => setFacilityProjects(result.items ?? [])),
+      loadContractAwards(caseCode, controller.signal).then((result) => setContractAwards(result.items ?? [])),
     ]).catch((reason) => { if (reason.name !== "AbortError") setError(String(reason)); });
     return () => controller.abort();
   }, [caseCode, requirementID]);
@@ -438,6 +456,7 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
   const latestSelection = siteSelections[0];
   const latestSiteControl = siteControls[0];
   const latestFacilityProject = facilityProjects.at(-1);
+  const latestContractAward = contractAwards.at(-1);
   const projectCanRevise = latestFacilityProject?.approval_status === "rejected";
   useEffect(() => {
     const approvalID = latestSelection?.recommendation.approval_request_id;
@@ -458,6 +477,15 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
     });
     return () => controller.abort();
   }, [latestFacilityProject?.approval_request_id, latestFacilityProject?.approval_status]);
+  useEffect(() => {
+    const approvalID = latestContractAward?.approval_request_id;
+    if (!approvalID) { setContractApprovalDetail(null); return; }
+    const controller = new AbortController();
+    loadPlantApprovalDetail(approvalID, controller.signal).then(setContractApprovalDetail).catch((reason) => {
+      if (reason.name !== "AbortError") setError(reason instanceof Error ? reason.message : String(reason));
+    });
+    return () => controller.abort();
+  }, [latestContractAward?.approval_request_id, latestContractAward?.approval_status]);
   const observedCount = currentInvestigations.filter((item) => item.status === "observed").length;
   const adoptedReviewCount = Object.values(reviews).filter((review) => review.action === "adopt_for_investigation").length;
   const derivedGameStage = derivePlantGameStage({
@@ -473,6 +501,11 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
     hasProjectPlan: Boolean(latestFacilityProject?.plan?.plan_id),
     projectApprovalStatus: latestFacilityProject?.approval_status ?? "",
     hasActiveProject: Boolean(latestFacilityProject?.project?.project_id),
+    hasContractRFQ: Boolean(latestContractAward?.rfq?.rfq_id),
+    hasContractBids: Boolean(latestContractAward?.observation?.observation_id),
+    hasContractRecommendation: Boolean(latestContractAward?.recommendation?.recommendation_id),
+    contractApprovalStatus: latestContractAward?.approval_status ?? "",
+    hasAwardedContract: Boolean(latestContractAward?.contract?.contract_id),
   });
   const gameStage = derivedGameStage.key === "proposal" && !proposalSet
     ? { ...derivedGameStage, anchor: "plant-task-requirement", actionLabel: "继续填写需求并生成候选" }
@@ -545,6 +578,38 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
       state: latestFacilityProject.project?.project_id ? "已激活" : latestFacilityProject.approval_status || latestFacilityProject.status,
       summary: `${latestFacilityProject.plan.project_name} · ${latestFacilityProject.plan.wbs_items?.length ?? 0} 个工作包`,
       evidence: latestFacilityProject.project?.project_id ?? latestFacilityProject.plan_hash,
+    }] : []),
+    ...(latestContractAward?.rfq?.rfq_id ? [{
+      id: latestContractAward.rfq.rfq_id,
+      location: "contractor" as const,
+      title: `工程采购邀请 · ${latestContractAward.rfq.package_name}`,
+      state: latestContractAward.status,
+      summary: `${latestContractAward.rfq.sourcing_strategy} · 上限 ${cny(latestContractAward.rfq.contract_ceiling.value)}`,
+      evidence: `contractor.rfq.issue:${latestContractAward.rfq.rfq_id}`,
+    }] : []),
+    ...(latestContractAward?.observation?.observation_id ? [{
+      id: latestContractAward.observation.observation_id,
+      location: "contractor" as const,
+      title: "承包商可信投标",
+      state: "World Observation",
+      summary: `${latestContractAward.observation.bids.length} 份密封报价与资质事实`,
+      evidence: latestContractAward.observation.observation_id,
+    }] : []),
+    ...(latestContractAward?.recommendation?.recommendation_id ? [{
+      id: latestContractAward.recommendation.recommendation_id,
+      location: "boardroom" as const,
+      title: "合同授予推荐与审批",
+      state: latestContractAward.approval_status,
+      summary: `推荐投标 ${latestContractAward.recommendation.selected_bid_id}`,
+      evidence: latestContractAward.approval_request_id,
+    }] : []),
+    ...(latestContractAward?.contract?.contract_id ? [{
+      id: latestContractAward.contract.contract_id,
+      location: "headquarters" as const,
+      title: "正式工程合同",
+      state: latestContractAward.contract.status ?? "active",
+      summary: `${latestContractAward.contract.contractor_name} · ${latestContractAward.contract.committed_amount ? cny(latestContractAward.contract.committed_amount.value) : "已承诺"}`,
+      evidence: latestContractAward.contract.contract_id,
     }] : []),
   ];
   useEffect(() => {
@@ -795,6 +860,67 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
     finally { setProjectBusy(false); }
   };
 
+  const issueRFQ = async () => {
+    if (!selectedPackageCode) return;
+    setContractBusy(true); setError("");
+    try {
+      await issueContractRFQ(caseCode, selectedPackageCode, sourcingStrategy);
+      await refreshContractAwards();
+    } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }
+    finally { setContractBusy(false); }
+  };
+
+  const receiveContractBids = async () => {
+    if (!latestContractAward?.rfq.rfq_id) return;
+    setContractBusy(true); setError("");
+    try {
+      await confirmContractBids(caseCode, latestContractAward.rfq.rfq_id);
+      await refreshContractAwards();
+    } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }
+    finally { setContractBusy(false); }
+  };
+
+  const askContractAgent = async () => {
+    if (!latestContractAward?.rfq.rfq_id) return;
+    setContractBusy(true); setError("");
+    try { setContractAdvice(await generateContractRecommendation(caseCode, latestContractAward.rfq.rfq_id)); }
+    catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }
+    finally { setContractBusy(false); }
+  };
+
+  const confirmContractRecommendation = async () => {
+    if (!latestContractAward?.rfq.rfq_id || !contractAdvice) return;
+    setContractBusy(true); setError("");
+    try {
+      await submitContractRecommendation(caseCode, latestContractAward.rfq.rfq_id, contractAdvice);
+      setContractAdvice(null); await refreshContractAwards();
+    } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }
+    finally { setContractBusy(false); }
+  };
+
+  const decideContractApproval = async (decision: "approve" | "reject") => {
+    if (!latestContractAward?.approval_request_id) return;
+    setContractBusy(true); setError("");
+    try {
+      const note = decision === "approve" ? "已核对可信投标、Agent 比选依据和合同承诺金额，同意授予。" : "当前投标或合同条件不满足项目治理要求，退回重新寻源。";
+      await decidePlantApproval(latestContractAward.approval_request_id, decision, note);
+      await refreshContractAwards();
+      setContractApprovalDetail(await loadPlantApprovalDetail(latestContractAward.approval_request_id));
+    } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }
+    finally { setContractBusy(false); }
+  };
+
+  const finalizeContractAward = async () => {
+    const recommendationID = latestContractAward?.recommendation?.recommendation_id;
+    if (!recommendationID || !latestContractAward?.approval_request_id) return;
+    setContractBusy(true); setError("");
+    try {
+      await awardContract(caseCode, recommendationID, latestContractAward.approval_request_id);
+      await refreshContractAwards();
+    } catch (reason) { setError(reason instanceof Error ? reason.message : String(reason)); }
+    finally { setContractBusy(false); }
+  };
+
   const decideApproval = async (decision: "approve" | "reject") => {
     if (!latestSelection || approvalNote.trim().length < 6) return;
     setSelectionBusy(true); setError("");
@@ -924,6 +1050,14 @@ function PlantPlanningWorkspace({ onExit }: { onExit: () => void }) {
           {latestFacilityProject.approval_status === "rejected" && <p className="plant-inline-error"><XCircle />项目基线已驳回；本版保留审计，请返回项目办公室让 Agent 根据审批意见形成新草案。</p>}
         </section>}
         {latestFacilityProject?.project?.project_id && <div className="plant-control-complete"><BadgeCheck /><div><strong>设施项目与 WBS 基线已激活</strong><p>{latestFacilityProject.project.project_id} · {latestFacilityProject.project.wbs_items?.length ?? latestFacilityProject.plan.wbs_items.length} 个工作包</p><small>项目办公室档案已写入 IAOS。合同、施工、工程财务和验收将引用该稳定基线继续推进。</small></div></div>}
+      </section>}
+      {latestFacilityProject?.project?.project_id && <section id="plant-task-contract" className="plant-contract-award">
+        <header><div><span>facility.contract.award.v1</span><h2>工程承包商寻源与合同授予</h2><p>WBS 决定采购范围；World 提供可信报价；Agent 负责比较；审批主体决定；项目负责人归档合同。</p></div><strong>{latestContractAward?.contract?.contract_id ? "已授予" : latestContractAward?.approval_status || latestContractAward?.status || "准备寻源"}</strong></header>
+        {!latestContractAward && <div className="plant-contract-source"><Handshake /><div><strong>选择一个已批准 WBS 采购包</strong><p>合同上限由项目预算 × WBS 预算份额自动计算，交付日期来自 WBS；玩家不能手填金额、承包商或证据。</p></div><div className="plant-contract-package-grid">{(latestFacilityProject.project.wbs_items ?? latestFacilityProject.plan.wbs_items).map((item) => <button type="button" key={item.wbs_code} className={selectedPackageCode === item.wbs_code ? "selected" : ""} onClick={() => setSelectedPackageCode(item.wbs_code)}><span>{item.phase}</span><strong>{item.wbs_code} · {item.name}</strong><small>预算份额 {(item.budget_share_bps / 100).toFixed(0)}% · {new Date(item.planned_finish_at).toLocaleDateString("zh-CN")}</small></button>)}</div><div className="plant-contract-strategy"><button type="button" className={sourcingStrategy === "general_contract" ? "selected" : ""} onClick={() => setSourcingStrategy("general_contract")}>总承包寻源</button><button type="button" className={sourcingStrategy === "specialist_packages" ? "selected" : ""} onClick={() => setSourcingStrategy("specialist_packages")}>专业分包寻源</button><button type="button" className={sourcingStrategy === "epcm_managed" ? "selected" : ""} onClick={() => setSourcingStrategy("epcm_managed")}>EPCM 管理寻源</button></div><button type="button" className="plant-project-confirm" disabled={!selectedPackageCode || contractBusy} onClick={issueRFQ}>{contractBusy ? <LoaderCircle className="gx-spin" /> : <Handshake />}{contractBusy ? "正在发布采购邀请…" : "确认采购包并发布 RFQ"}</button></div>}
+        {latestContractAward?.rfq && !latestContractAward.observation?.observation_id && <div className="plant-control-confirmation"><div className="plant-control-world-badge"><Handshake /><span><small>WORLD ENGINE · 承包商市场</small><strong>三家虚构承包商已准备密封投标</strong></span></div><p>系统会依据 RFQ 上限和交付要求生成报价、资质、质保、里程碑与证据。你只需确认收取，不填写任何外部事实。</p><dl><div><dt>采购包</dt><dd>{latestContractAward.rfq.package_name}</dd></div><div><dt>合同上限</dt><dd>{cny(latestContractAward.rfq.contract_ceiling.value)}</dd></div><div><dt>要求完成</dt><dd>{new Date(latestContractAward.rfq.required_ready_at).toLocaleDateString("zh-CN")}</dd></div></dl><button type="button" disabled={contractBusy} onClick={receiveContractBids}>{contractBusy ? <LoaderCircle className="gx-spin" /> : <Handshake />}{contractBusy ? "World 正在封存投标…" : "确认收取正式投标"}</button></div>}
+        {latestContractAward?.observation?.observation_id && <div className="plant-contract-bids"><header><div><strong>可信投标已送达</strong><p>以下价格和条件来自 World Observation，不是 Agent 估算。</p></div><small>{latestContractAward.observation.bids.length} 份合格投标</small></header><div className="plant-contract-bid-grid">{latestContractAward.observation.bids.map((bid) => <article key={bid.bid_id} className={(contractAdvice?.selected_bid_id ?? latestContractAward.recommendation?.selected_bid_id) === bid.bid_id ? "selected" : ""}><span>{bid.qualification === "eligible" ? "资质通过" : bid.qualification}</span><strong>{bid.contractor_name}</strong><b>{cny(bid.quoted_amount.value)}</b><p>承诺 {new Date(bid.promised_ready_at).toLocaleDateString("zh-CN")} · 质保 {bid.warranty_months} 月 · {bid.milestone_count} 个里程碑</p></article>)}</div>{!latestContractAward.recommendation?.recommendation_id && !contractAdvice && <button type="button" className="plant-project-confirm" disabled={contractBusy || status?.state !== "connected"} onClick={askContractAgent}>{contractBusy ? <LoaderCircle className="gx-spin" /> : <Bot />}{contractBusy ? "Agent 正在比选…" : "让 Agent 评审正式投标"}</button>}{contractAdvice && <div className="plant-contract-advice"><Bot /><div><small>{contractAdvice.evidence.provider} · {contractAdvice.evidence.model}</small><strong>Agent 推荐 {latestContractAward.observation.bids.find((bid) => bid.bid_id === contractAdvice.selected_bid_id)?.contractor_name}</strong><p>{contractAdvice.recommendation_reason}</p><em>{contractAdvice.alternative_comparison}</em></div><button type="button" disabled={contractBusy} onClick={confirmContractRecommendation}><BadgeCheck />确认推荐并提交审批</button></div>}</div>}
+        {latestContractAward?.recommendation?.recommendation_id && !latestContractAward.contract?.contract_id && <div className="plant-project-governance"><div className="plant-project-summary"><Gavel /><div><small>{contractApprovalDetail?.detail.flow_name ?? "genesis.facility.contract.award.approval"}</small><strong>{contractApprovalDetail?.detail.subject.title ?? latestContractAward.rfq.package_name}</strong><p>{contractApprovalDetail?.detail.subject.summary ?? latestContractAward.recommendation.recommendation_reason}</p></div><em>{latestContractAward.approval_status}</em></div>{contractApprovalDetail && <div className="plant-approval-routing">{contractApprovalDetail.detail.assignments.map((assignment) => <article key={assignment.id}><Gavel /><span><strong>{assignment.stage_name}</strong><small>{assignment.display_name}</small></span><em>{assignment.status}</em></article>)}</div>}{latestContractAward.approval_status === "pending" && contractApprovalDetail?.detail.can_decide && <div className="plant-project-decision"><p>点击即提交预置、可审计的审批意见；无需输入 JSON 或系统编号。</p><div><button type="button" disabled={contractBusy} onClick={() => decideContractApproval("approve")}><BadgeCheck />批准合同授予</button><button type="button" className="danger" disabled={contractBusy} onClick={() => decideContractApproval("reject")}><XCircle />驳回并重新寻源</button></div></div>}{latestContractAward.approval_status === "approved" && <button type="button" className="plant-project-confirm" disabled={contractBusy} onClick={finalizeContractAward}><BadgeCheck />批准已生效 · 归档正式合同</button>}{latestContractAward.approval_status === "rejected" && <p className="plant-inline-error"><XCircle />合同授予已驳回，本轮 RFQ 与投标保留审计；下一版本将重新寻源。</p>}</div>}
+        {latestContractAward?.contract?.contract_id && <div className="plant-control-complete"><BadgeCheck /><div><strong>正式工程合同已归档</strong><p>{latestContractAward.contract.contractor_name} · {latestContractAward.contract.committed_amount ? cny(latestContractAward.contract.committed_amount.value) : "金额已承诺"}</p><small>{latestContractAward.contract.contract_id} · 当前只形成合同承诺，不会自动生成发票、应付或付款。</small></div></div>}
       </section>}
           </div>
         </section>

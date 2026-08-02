@@ -18,6 +18,7 @@ const (
 	PlanningPromptVersion    = "plant-planning-v2"
 	RequirementPromptVersion = "plant-requirement-adviser-v1"
 	ProjectPromptVersion     = "facility-project-wbs-v1"
+	ContractPromptVersion    = "facility-contract-award-v1"
 )
 
 var ErrPlanningModelNotConfigured = errors.New("external planning model not configured")
@@ -110,6 +111,82 @@ type ProjectPlanOptionSet struct {
 	SchemaVersion string              `json:"schema_version"`
 	Options       []ProjectPlanOption `json:"options"`
 	Evidence      ProposalEvidence    `json:"evidence"`
+}
+
+type ContractRFQ struct {
+	SchemaVersion    string `json:"schema_version"`
+	RFQID            string `json:"rfq_id"`
+	CaseCode         string `json:"case_code"`
+	ProjectID        string `json:"project_id"`
+	PackageCode      string `json:"package_code"`
+	PackageName      string `json:"package_name"`
+	SourcingStrategy string `json:"sourcing_strategy"`
+	BidCount         int    `json:"bid_count"`
+	ContractCeiling  Money  `json:"contract_ceiling"`
+	RequiredReadyAt  string `json:"required_ready_at"`
+	WorldRunID       string `json:"world_run_id"`
+	RequestedBy      string `json:"requested_by"`
+	RequestedAt      string `json:"requested_at"`
+	Status           string `json:"status"`
+}
+
+type ContractBid struct {
+	SchemaVersion   string   `json:"schema_version"`
+	BidID           string   `json:"bid_id"`
+	RFQID           string   `json:"rfq_id"`
+	ContractorCode  string   `json:"contractor_code"`
+	ContractorName  string   `json:"contractor_name"`
+	QuotedAmount    Money    `json:"quoted_amount"`
+	PromisedReadyAt string   `json:"promised_ready_at"`
+	Qualification   string   `json:"qualification"`
+	WarrantyMonths  int      `json:"warranty_months"`
+	MilestoneCount  int      `json:"milestone_count"`
+	EvidenceRefs    []string `json:"evidence_refs"`
+	ObservedAt      string   `json:"observed_at"`
+}
+
+type ContractBidObservation struct {
+	SchemaVersion   string        `json:"schema_version"`
+	ObservationID   string        `json:"observation_id"`
+	RFQID           string        `json:"rfq_id"`
+	ExternalActorID string        `json:"external_actor_id"`
+	Bids            []ContractBid `json:"bids"`
+	ObservedAt      string        `json:"observed_at"`
+}
+
+type ContractRecommendationSeed struct {
+	RFQ         ContractRFQ            `json:"rfq"`
+	Observation ContractBidObservation `json:"observation"`
+}
+type ContractRecommendationAdvice struct {
+	SelectedBidID         string           `json:"selected_bid_id"`
+	RecommendationReason  string           `json:"recommendation_reason"`
+	AlternativeComparison string           `json:"alternative_comparison"`
+	Evidence              ProposalEvidence `json:"evidence"`
+}
+
+type FacilityProject struct {
+	ProjectID     string           `json:"project_id"`
+	CaseCode      string           `json:"case_code"`
+	ProjectName   string           `json:"project_name"`
+	BudgetCeiling Money            `json:"budget_ceiling"`
+	TargetReadyAt string           `json:"target_ready_at"`
+	WBSItems      []ProjectWBSItem `json:"wbs_items"`
+	Status        string           `json:"status"`
+}
+
+type FacilityProjectItem struct {
+	Project FacilityProject `json:"project"`
+}
+
+type ContractAwardItem struct {
+	RFQ               ContractRFQ            `json:"rfq"`
+	Status            string                 `json:"status"`
+	Observation       ContractBidObservation `json:"observation"`
+	Recommendation    map[string]any         `json:"recommendation"`
+	ApprovalRequestID string                 `json:"approval_request_id"`
+	ApprovalStatus    string                 `json:"approval_status"`
+	Contract          map[string]any         `json:"contract"`
 }
 
 type FinancialConstraint struct {
@@ -304,6 +381,10 @@ type ProjectBaselinePlanner interface {
 	GenerateProjectPlanOptions(context.Context, ProjectPlanSeed) (ProjectPlanOptionSet, error)
 }
 
+type ContractAwardAdviser interface {
+	GenerateContractRecommendation(context.Context, ContractRecommendationSeed) (ContractRecommendationAdvice, error)
+}
+
 type JSONCompleter interface {
 	CompleteJSON(context.Context, string, string, float64, int) (string, string, map[string]int, error)
 }
@@ -417,6 +498,43 @@ func (p AIPlanningProvider) GenerateProjectPlanOptions(ctx context.Context, seed
 	return ProjectPlanOptionSet{SchemaVersion: InteractiveSchemaVersion, Options: decoded.Options,
 		Evidence: ProposalEvidence{Provider: p.Provider, Model: p.Model, PromptVersion: ProjectPromptVersion,
 			RequestID: requestID, InputHash: CanonicalHash(seed), OutputHash: CanonicalHash(decoded.Options), TokenUsage: usage, ValidatedAt: now.Format(time.RFC3339)}}, nil
+}
+
+func (p AIPlanningProvider) GenerateContractRecommendation(ctx context.Context, seed ContractRecommendationSeed) (ContractRecommendationAdvice, error) {
+	if p.Completer == nil {
+		return ContractRecommendationAdvice{}, ErrPlanningModelNotConfigured
+	}
+	if seed.RFQ.RFQID == "" || len(seed.Observation.Bids) < 2 {
+		return ContractRecommendationAdvice{}, errors.New("contract recommendation seed is incomplete")
+	}
+	input, _ := json.Marshal(seed)
+	user := `你是制造企业工程采购评审 Agent。只比较输入中的可信投标，推荐一个 bid_id，并解释成本、交付、质保和履约权衡。只返回严格 JSON：{"selected_bid_id":"","recommendation_reason":"","alternative_comparison":""}。不得发明承包商、报价或证据，不得自行批准。prompt_version=` + ContractPromptVersion + "\nseed=" + string(input)
+	content, requestID, usage, err := p.Completer.CompleteJSON(ctx, "Return strict JSON only. Use only trusted bids and never approve the recommendation.", user, 0.25, 2048)
+	if err != nil {
+		return ContractRecommendationAdvice{}, err
+	}
+	var out ContractRecommendationAdvice
+	decoder := json.NewDecoder(strings.NewReader(content))
+	decoder.DisallowUnknownFields()
+	if err := decoder.Decode(&out); err != nil {
+		return out, fmt.Errorf("decode contract recommendation: %w", err)
+	}
+	found := false
+	for _, bid := range seed.Observation.Bids {
+		if bid.BidID == out.SelectedBidID {
+			found = true
+			break
+		}
+	}
+	if !found || len(strings.TrimSpace(out.RecommendationReason)) < 6 || len(strings.TrimSpace(out.AlternativeComparison)) < 6 {
+		return out, errors.New("contract recommendation is incomplete or selects an unknown bid")
+	}
+	now := time.Now().UTC()
+	if p.Now != nil {
+		now = p.Now().UTC()
+	}
+	out.Evidence = ProposalEvidence{Provider: p.Provider, Model: p.Model, PromptVersion: ContractPromptVersion, RequestID: requestID, InputHash: CanonicalHash(map[string]any{"rfq": seed.RFQ, "observation": seed.Observation}), OutputHash: CanonicalHash(map[string]any{"selected_bid_id": out.SelectedBidID, "reason": out.RecommendationReason, "alternatives": out.AlternativeComparison}), TokenUsage: usage, ValidatedAt: now.Format(time.RFC3339)}
+	return out, nil
 }
 
 func ValidateProjectPlanOption(option ProjectPlanOption, requirement FacilityRequirement) error {
@@ -790,6 +908,56 @@ func GenerateSiteControlObservation(request SiteControlRequest) (SiteControlObse
 		return SiteControlObservation{}, err
 	}
 	return observation, nil
+}
+
+// GenerateContractBidObservation models the external contractor market. It
+// consumes only the authoritative RFQ and deterministically creates fictional
+// quotations below its ceiling. The browser can acknowledge receipt but cannot
+// provide contractor names, prices, dates, qualifications or evidence.
+func GenerateContractBidObservation(rfq ContractRFQ) (ContractBidObservation, error) {
+	if rfq.SchemaVersion != InteractiveSchemaVersion || rfq.RFQID == "" || rfq.CaseCode == "" ||
+		rfq.BidCount < 2 || rfq.BidCount > 5 || rfq.ContractCeiling.Currency == "" {
+		return ContractBidObservation{}, errors.New("contract RFQ is incomplete")
+	}
+	ceiling, ok := new(big.Rat).SetString(rfq.ContractCeiling.Value)
+	if !ok || ceiling.Sign() <= 0 {
+		return ContractBidObservation{}, errors.New("contract RFQ ceiling is invalid")
+	}
+	ready, err := time.Parse(time.RFC3339, rfq.RequiredReadyAt)
+	if err != nil {
+		return ContractBidObservation{}, errors.New("contract RFQ required_ready_at is invalid")
+	}
+	requested, err := time.Parse(time.RFC3339, rfq.RequestedAt)
+	if err != nil {
+		return ContractBidObservation{}, errors.New("contract RFQ requested_at is invalid")
+	}
+	hash := strings.TrimPrefix(CanonicalHash(rfq), "sha256:")
+	suffix := strings.ToUpper(hash[:12])
+	names := []struct{ code, name string }{
+		{"WORLD-CONTRACTOR-01", "澄岳工程（虚构）"},
+		{"WORLD-CONTRACTOR-02", "远拓建设（虚构）"},
+		{"WORLD-CONTRACTOR-03", "岚川工业工程（虚构）"},
+		{"WORLD-CONTRACTOR-04", "衡筑设施（虚构）"},
+		{"WORLD-CONTRACTOR-05", "启辰项目服务（虚构）"},
+	}
+	ratios := []int64{92, 96, 89, 98, 94}
+	bids := make([]ContractBid, 0, rfq.BidCount)
+	for index := 0; index < rfq.BidCount; index++ {
+		amount := new(big.Rat).Mul(ceiling, big.NewRat(ratios[(index+int(hash[0]))%len(ratios)], 100))
+		promised := ready.AddDate(0, 0, (index%3)-1)
+		observed := requested.Add(time.Duration(index+1) * time.Hour)
+		bidID := fmt.Sprintf("bid-%s-%02d", strings.ToLower(suffix), index+1)
+		bids = append(bids, ContractBid{
+			SchemaVersion: InteractiveSchemaVersion, BidID: bidID, RFQID: rfq.RFQID,
+			ContractorCode: names[index].code, ContractorName: names[index].name,
+			QuotedAmount:    Money{Value: amount.FloatString(rfq.ContractCeiling.Scale), Currency: rfq.ContractCeiling.Currency, Scale: rfq.ContractCeiling.Scale},
+			PromisedReadyAt: promised.Format(time.RFC3339), Qualification: "eligible",
+			WarrantyMonths: 18 + index*6, MilestoneCount: 4 + index,
+			EvidenceRefs: []string{"world-document:sealed-bid-" + bidID, "world-evidence:qualification-" + names[index].code},
+			ObservedAt:   observed.Format(time.RFC3339),
+		})
+	}
+	return ContractBidObservation{SchemaVersion: InteractiveSchemaVersion, ObservationID: "contract-bid-observation-" + strings.ToLower(suffix), RFQID: rfq.RFQID, ExternalActorID: "world-contractor-market", Bids: bids, ObservedAt: requested.Add(6 * time.Hour).Format(time.RFC3339)}, nil
 }
 
 // GenerateInvestigationObservation produces a replay-stable external report

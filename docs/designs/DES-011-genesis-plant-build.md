@@ -329,6 +329,7 @@ genesis.facility.accepted.v1
 7. 人员在可解释比较下选择合格候选并填写推荐理由、替代方案比较；AESE Command Gateway 调用 `site.selection.recommend`，IAOS 重算并创建统一审批。玩家进入 AESE 治理会议室，审阅 IAOS 冻结事项和实际 Assignment；当前受派审批人可在游戏内批准或驳回。批准后由项目负责人点击“批准已生效 · 正式选址”，通过 `site.selection.formalize` 原子消费审批。IAOS 审批中心只作为审计穿透入口。
 8. 正式选址后项目负责人在园区权利人场景发起场址控制请求，选择租赁、购买、代建或使用协议方式并声明期望交付日。园区/权利人是 World 外部参与者；当交付事件到达时，玩家只核对方式、日期和待归档证据范围并点击“确认接收场地”。协议引用、交接引用、生效时间、占有授权证据和外部参与者身份全部由 AESE World 引擎从 IAOS 权威请求确定性生成，浏览器不得填写或覆盖。AESE 先写 `site.control.delivered.v1` Observation，IAOS 再以 `site.control.observation.commit` 形成权威场址控制事实。
 9. 场址控制形成后，设施项目 Agent 从权威 Requirement、正式选址和交付 Observation 生成 2–3 套交付策略、预算上限、日期和 WBS 方案。玩家只选择方案，不手工编 WBS；`facility.project.plan.record` 固化 Agent 草案，`facility.project.baseline.submit` 按 `genesis.facility.project.approval` 路由审批，批准后由 `facility.project.baseline.activate` 原子写入设施项目与 WBS。三步由 Effective Process `facility.project.baseline.v1` 追踪，项目办公室、治理会议室和项目档案分别承担选择、审批和查询。
+10. 项目基线激活后，玩家只从已批准 WBS 选择采购包和寻源策略；AESE 从项目预算与 WBS 份额推导合同上限和要求完成日，调用 `contractor.rfq.issue`。承包商市场 World 从权威 RFQ 确定性形成虚构密封投标，玩家只确认收取；`contractor.bid.observation.commit` 仅消费匹配 Intent、correlation 和 subject 的 Journal Observation。工程采购 Agent 只比较这些可信投标，玩家确认建议后由 `contractor.award.recommend` 路由审批；受派审批人在游戏会议室决定，批准后以 `contractor.contract.award` 显式归档合同。该链由 `facility.contract.award.v1` 追踪，且不自动生成发票、应付或付款。
 
 浏览器生成的 Intent/Observation/Recommendation 请求编码只承担幂等关联，不作为授权身份。
 LAN HTTP 浏览器可能不提供 secure-context-only 的 `crypto.randomUUID()`；前端必须通过统一
@@ -340,7 +341,7 @@ Requirement 到正式选址现已统一为 `facility.plant.planning.v1@1.0.0` �
 
 人工新增候选现已进入权威链：人员填写方案类型、理由、金额区间/依据、预计可用日期、假设、待核验事实和风险；AESE BFF 读取最新 Requirement 与可选 ProposalSet。若外部模型未启用且尚无候选集，IAOS 允许 `site.proposal.record` 创建只含一个人工候选的第 1 版；已有版本时只允许在下一 revision 追加一项，并逐项校验既有候选、人员来源和 hash。人工输入不冒充 Agent 输出或 World 外部事实。
 
-场址控制现由 `facility.plant.delivery.v1@1.0.0` 承载：人员发起后进入持久 World wait，只有可信协议/交接 Observation 才成功；延迟或拒绝会关闭本次 Run，并保留历史后允许重新发起。交付确认采用“最小玩家命令 + 服务端 World 事实”边界：玩家命令只有案件、控制请求和 `accept_delivery`，AESE 必须重读 IAOS 权威请求并按 `genesis-plant-delivery@1.1.0` 生成稳定 Observation ID、协议号、交接号、三类证据和模拟发生时间；同一请求重放必须得到同一 payload。以下仍未实现：项目/WBS/合同/施工/变更/付款/验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
+场址控制现由 `facility.plant.delivery.v1@1.0.0` 承载：人员发起后进入持久 World wait，只有可信协议/交接 Observation 才成功；延迟或拒绝会关闭本次 Run，并保留历史后允许重新发起。交付确认采用“最小玩家命令 + 服务端 World 事实”边界：玩家命令只有案件、控制请求和 `accept_delivery`，AESE 必须重读 IAOS 权威请求并按 `genesis-plant-delivery@1.1.0` 生成稳定 Observation ID、协议号、交接号、三类证据和模拟发生时间；同一请求重放必须得到同一 payload。项目/WBS 与首个工程合同授予纵切现已实现；仍未实现的是施工/进度、变更、里程碑、付款、验收，以及 AP/CIP/总账财务闭环。因此 M10 状态仍只能表述为“Reference Replay Complete; Interactive Revision Pending”，不能声明完整 M10 已完成。
 
 ## 16. 用户配置、操作、验证与恢复
 
@@ -393,6 +394,11 @@ AESE 首页同时把原“世界地图”命名为 `企业生命周期 · M9–M
 8. 选择合格候选，填写至少 12 个字符的推荐理由和替代方案比较；少于两个合格候选时再填写至少 20 个字符的单一来源例外说明，提交 IAOS 选址审批。
 9. 前往“治理会议室”，打开林岚的当前事件。游戏内应显示 IAOS 冻结的事项、审批流版本、实际处理人、推荐理由、替代方案、评分、Observation 和输入 hash。若当前身份是受派审批人，填写审批意见并批准或驳回；非受派人只能查看。approved 只表示有权主体同意；再点击“批准已生效 · 正式选址”，看到正式选择 ID 才表示落地。“在 IAOS 查看审计详情”不是完成剧情的必经步骤。
 10. 切换到园区权利人场景，打开“取得实际场址控制权”任务。项目负责人先发起请求；进入 `waiting_world` 后，界面只显示取得方式、计划交付时间和 World 将归档的三类证据，玩家点击“确认接收场地”。页面不得要求玩家输入协议号、交接号、生效时间、证据引用、备注或 JSON。页面出现“场址控制已交付”且场景档案可见引擎生成的证据后，才可进入项目/WBS；正式选址本身不满足该门。
+11. 回到总部项目办公室，让设施项目 Agent 生成项目/WBS 方案，选择一套并提交审批；在治理会议室批准后显式激活项目基线。
+12. 打开“工程承包商寻源”，从 WBS 卡片选择一个采购包，并选择总承包、专业分包或 EPCM 管理策略。页面自动展示 WBS 预算份额和完成日，不允许输入合同金额或系统编码。
+13. 前往“工程承包商市场”，点击“确认收取正式投标”。World 生成虚构承包商、报价、资质、质保、里程碑和证据，页面仅展示结果。
+14. 回到总部让工程采购 Agent 比选，查看推荐及替代比较后点击确认；在治理会议室由实际受派审批人批准或驳回，无需填写 JSON。
+15. 审批通过后点击“归档正式合同”。合同进入 IAOS 权威账和地点档案；此时只形成合同承诺，不产生发票、应付或付款。
 
 ### 16.3 关系与证据
 
@@ -411,7 +417,10 @@ M9 已过账现金 + 已批预算
 -> facility.plant.planning.v1 Process Run（全程参与、等待、审批与 Artifact 证据）
 -> site.control.request / trusted World Observation
 -> facility.plant.delivery.v1（场址控制独立 Process Run）
--> [待实现] Project / WBS / Contract / Payment / Acceptance / Finance
+-> Facility Project / WBS
+-> Contractor RFQ / trusted bid Observation / Agent recommendation
+-> facility.contract.award.v1 / Approval / authoritative Contract
+-> [待实现] Construction / Change / Payment / Acceptance / Finance
 ```
 
 页面上的 Agent 估算不是报价，Review 不是审批，派生评分不是推荐或批准，reference replay 不是当前企业运行事实。验收时必须分别核对 AESE CreativeJob 技术证据、IAOS Requirement/Proposal/Review/Audit/Outbox 业务证据和 Observation 的 Journal/工作项证据。
@@ -448,14 +457,15 @@ M10 全部玩家任务遵循 DES-038，不再把“结构化合同完整”误�
 M9 交接到 M10 时必须保留 tenant、case、workspace、玩家身份和企业上下文。当前交互纵切
 使用占满浏览器可用视口的游戏壳；主画面不得向下接续工作台、长表单、JSON 或 reference
 replay 控件。玩家像 M9 一样在内部组织与外部世界之间切换，当前地点、人物、事件和地点档案
-始终属于同一个企业世界。当前交互纵切使用四个可进入地点：
+始终属于同一个企业世界。当前交互纵切使用五个可进入地点：
 
 | 地点 | 承载的经营活动 | 主要人物 |
 | --- | --- | --- |
 | 企业总部规划中心 | 设施需求、资金边界、事实比较 | 玩家、设施规划 Agent、项目/财务负责人 |
 | 产业园区地图 | 候选场址、调研状态和路线 | 玩家、设施规划 Agent |
 | 候选场址现场 | 权属、面积、电力、报价、日期和许可 Observation | 玩家、园区外部参与者 |
-| 治理决策会议室 | 推荐、审批状态和正式选址 | 玩家、治理协调人、有权审批主体 |
+| 治理决策会议室 | 场址、项目基线与合同授予审批 | 玩家、治理协调人、有权审批主体 |
+| 工程承包商市场 | RFQ、虚构承包商密封投标与资质 Observation | 玩家、World 市场协调人 |
 
 项目办公室、施工现场、付款里程碑和验收现场随 S4.3–S4.5 的权威业务对象实现后加入，不能用
 没有事实来源的空场景冒充建设进度。
@@ -476,6 +486,11 @@ Trusted Site Control           -> 项目准备 / 允许设计项目与 WBS
 Project Plan                   -> 治理会议室 / 等待项目基线审批
 Approved Project Plan          -> 项目办公室 / 激活权威项目与 WBS
 Active Facility Project        -> 项目办公室 / 查询项目基线档案
+Contract RFQ                   -> 承包商市场 / 等待可信投标
+Trusted Contract Bids          -> 总部 / Agent 比选并由人员确认
+Contract Recommendation        -> 治理会议室 / 等待合同授予审批
+Approved Recommendation        -> 总部 / 显式归档正式合同
+Active Contractor Contract     -> 总部 / 查询合同承诺档案
 ```
 
 更晚阶段的已提交事实优先于较早阶段。地点切换、人物移动和对话只改变观察视角；只有 Capability、

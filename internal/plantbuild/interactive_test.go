@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"math/big"
 	"strings"
 	"testing"
 	"time"
@@ -278,5 +279,50 @@ func TestAIPlanningProviderProducesGovernedProjectWBSOptions(t *testing.T) {
 	invalid.WBSItems[0].BudgetShareBPS++
 	if ValidateProjectPlanOption(invalid, requirement) == nil {
 		t.Fatal("unbalanced WBS budget shares accepted")
+	}
+}
+
+func TestGenerateContractBidObservationIsReplayStableAndBounded(t *testing.T) {
+	rfq := ContractRFQ{SchemaVersion: "1.0", RFQID: "RFQ-1", CaseCode: "INC-1", ProjectID: "PROJECT-1",
+		PackageCode: "WBS-02", PackageName: "厂房施工", SourcingStrategy: "specialist_packages", BidCount: 3,
+		ContractCeiling: Money{Value: "12000000.00", Currency: "CNY", Scale: 2}, RequiredReadyAt: "2027-05-01T00:00:00Z",
+		WorldRunID: "world-run-1", RequestedBy: "founder-principal", RequestedAt: "2026-08-02T12:00:00Z", Status: "waiting_world"}
+	first, err := GenerateContractBidObservation(rfq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	second, err := GenerateContractBidObservation(rfq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if CanonicalHash(first) != CanonicalHash(second) || len(first.Bids) != rfq.BidCount {
+		t.Fatalf("contractor market fact is not replay stable: first=%+v second=%+v", first, second)
+	}
+	ceiling, _ := new(big.Rat).SetString(rfq.ContractCeiling.Value)
+	for _, bid := range first.Bids {
+		amount, _ := new(big.Rat).SetString(bid.QuotedAmount.Value)
+		if amount.Cmp(ceiling) > 0 || bid.Qualification != "eligible" || len(bid.EvidenceRefs) < 2 || !strings.Contains(bid.ContractorName, "虚构") {
+			t.Fatalf("generated bid is not governed and bounded: %+v", bid)
+		}
+	}
+}
+
+func TestContractRecommendationEvidenceMatchesIAOSCanonicalContract(t *testing.T) {
+	rfq := ContractRFQ{SchemaVersion: "1.0", RFQID: "RFQ-2", CaseCode: "INC-2", ProjectID: "PROJECT-2", PackageCode: "WBS-03", PackageName: "现场施工", SourcingStrategy: "specialist_packages", BidCount: 3, ContractCeiling: Money{Value: "9000000.00", Currency: "CNY", Scale: 2}, RequiredReadyAt: "2027-03-01T00:00:00Z", WorldRunID: "world-run-2", RequestedBy: "founder-principal", RequestedAt: "2026-08-02T12:00:00Z", Status: "waiting_world"}
+	observation, err := GenerateContractBidObservation(rfq)
+	if err != nil {
+		t.Fatal(err)
+	}
+	selected := observation.Bids[0].BidID
+	content := `{"selected_bid_id":"` + selected + `","recommendation_reason":"成本、工期和质保条件综合最优","alternative_comparison":"其余方案报价或交付条件相对较弱"}`
+	provider := AIPlanningProvider{Completer: planningCompleterStub{content: content}, Provider: "MiniMax", Model: "MiniMax-M3", Now: func() time.Time { return time.Date(2026, 8, 2, 16, 0, 0, 0, time.UTC) }}
+	seed := ContractRecommendationSeed{RFQ: rfq, Observation: observation}
+	advice, err := provider.GenerateContractRecommendation(context.Background(), seed)
+	if err != nil {
+		t.Fatal(err)
+	}
+	want := CanonicalHash(map[string]any{"rfq": rfq, "observation": observation})
+	if advice.Evidence.InputHash != want || advice.Evidence.PromptVersion != ContractPromptVersion {
+		t.Fatalf("evidence=%+v want_input_hash=%s", advice.Evidence, want)
 	}
 }

@@ -9,7 +9,10 @@
     { "$ref": "#/$defs/investigation_request" },
     { "$ref": "#/$defs/investigation_observation" },
     { "$ref": "#/$defs/investigation_confirmation" },
-    { "$ref": "#/$defs/project_plan_option_set" }
+    { "$ref": "#/$defs/project_plan_option_set" },
+    { "$ref": "#/$defs/contract_rfq" },
+    { "$ref": "#/$defs/contract_bid_observation" },
+    { "$ref": "#/$defs/contract_recommendation_advice" }
   ],
   "$defs": {
     "money": {
@@ -184,6 +187,70 @@
       "properties": {
         "schema_version": { "const": "1.0" },
         "options": { "type": "array", "minItems": 2, "maxItems": 3, "items": { "$ref": "#/$defs/project_plan_option" } },
+        "evidence": { "type": "object" }
+      }
+    },
+    "contract_rfq": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "rfq_id", "case_code", "project_id", "package_code", "package_name", "sourcing_strategy", "bid_count", "contract_ceiling", "required_ready_at", "world_run_id", "requested_by", "requested_at", "status"],
+      "properties": {
+        "schema_version": { "const": "1.0" },
+        "rfq_id": { "type": "string", "minLength": 1 },
+        "case_code": { "type": "string", "minLength": 1 },
+        "project_id": { "type": "string", "minLength": 1 },
+        "package_code": { "type": "string", "minLength": 1 },
+        "package_name": { "type": "string", "minLength": 1 },
+        "sourcing_strategy": { "enum": ["general_contract", "specialist_packages", "epcm_managed"] },
+        "bid_count": { "type": "integer", "minimum": 2, "maximum": 5 },
+        "contract_ceiling": { "$ref": "#/$defs/money" },
+        "required_ready_at": { "type": "string", "format": "date-time" },
+        "world_run_id": { "type": "string", "minLength": 1 },
+        "requested_by": { "type": "string", "minLength": 1 },
+        "requested_at": { "type": "string", "format": "date-time" },
+        "status": { "const": "waiting_world" }
+      }
+    },
+    "contract_bid": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "bid_id", "rfq_id", "contractor_code", "contractor_name", "quoted_amount", "promised_ready_at", "qualification", "warranty_months", "milestone_count", "evidence_refs", "observed_at"],
+      "properties": {
+        "schema_version": { "const": "1.0" },
+        "bid_id": { "type": "string", "minLength": 1 },
+        "rfq_id": { "type": "string", "minLength": 1 },
+        "contractor_code": { "type": "string", "minLength": 1 },
+        "contractor_name": { "type": "string", "minLength": 1 },
+        "quoted_amount": { "$ref": "#/$defs/money" },
+        "promised_ready_at": { "type": "string", "format": "date-time" },
+        "qualification": { "const": "eligible" },
+        "warranty_months": { "type": "integer", "minimum": 12 },
+        "milestone_count": { "type": "integer", "minimum": 2 },
+        "evidence_refs": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "minLength": 1 } },
+        "observed_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "contract_bid_observation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["schema_version", "observation_id", "rfq_id", "external_actor_id", "bids", "observed_at"],
+      "properties": {
+        "schema_version": { "const": "1.0" },
+        "observation_id": { "type": "string", "minLength": 1 },
+        "rfq_id": { "type": "string", "minLength": 1 },
+        "external_actor_id": { "type": "string", "minLength": 1 },
+        "bids": { "type": "array", "minItems": 2, "maxItems": 5, "items": { "$ref": "#/$defs/contract_bid" } },
+        "observed_at": { "type": "string", "format": "date-time" }
+      }
+    },
+    "contract_recommendation_advice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["selected_bid_id", "recommendation_reason", "alternative_comparison", "evidence"],
+      "properties": {
+        "selected_bid_id": { "type": "string", "minLength": 1 },
+        "recommendation_reason": { "type": "string", "minLength": 6 },
+        "alternative_comparison": { "type": "string", "minLength": 6 },
         "evidence": { "type": "object" }
       }
     }

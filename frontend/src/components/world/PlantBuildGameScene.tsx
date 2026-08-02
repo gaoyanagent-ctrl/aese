@@ -6,6 +6,7 @@ import {
   Factory,
   FileCheck2,
   HardHat,
+  Handshake,
   Landmark,
   MapPinned,
   ShieldCheck,
@@ -32,6 +33,7 @@ const locations: Array<{ key: PlantLocation; label: string; shortLabel: string; 
   { key: "city", label: "苏州产业园区地图", shortLabel: "产业园区", description: "候选场址与调研路线", kind: "外部", icon: MapPinned },
   { key: "site", label: "候选场址与园区服务中心", shortLabel: "候选场址", description: "现场调研与外部事实", kind: "外部", icon: Factory },
   { key: "boardroom", label: "企业治理决策会议室", shortLabel: "治理会议室", description: "推荐、审批与正式决定", kind: "内部", icon: Landmark },
+  { key: "contractor", label: "工程承包商市场", shortLabel: "承包商市场", description: "正式邀标、密封报价与外部资质事实", kind: "外部", icon: Handshake },
 ];
 
 export function PlantBuildGameScene({ stage, caseCode, companyCode, proposalNames, observedCount, archives, onExit, onOpenTask }: {
@@ -50,7 +52,7 @@ export function PlantBuildGameScene({ stage, caseCode, companyCode, proposalName
   useEffect(() => { setLocation(stage.location); setTravelling(false); setTab("event"); }, [stage.key, stage.location]);
   const currentLocation = useMemo(() => locations.find((item) => item.key === location) ?? locations[0], [location]);
   const locationArchives = archives.filter((item) => item.location === location);
-  const NPCIcon = stage.key === "investigation" ? UserRound : stage.key === "selected" ? HardHat : Bot;
+  const NPCIcon = stage.key === "investigation" || stage.key === "contract_world" ? UserRound : stage.key === "selected" || stage.key === "contract_sourcing" ? HardHat : Bot;
   const LocationIcon = currentLocation.icon;
   const enter = (next: PlantLocation) => {
     if (next === location) return;
@@ -87,6 +89,7 @@ export function PlantBuildGameScene({ stage, caseCode, companyCode, proposalName
           {location === "city" && <div className="plant-game-candidate-pins" aria-label={`${proposalNames.length} 个候选场址`}>{proposalNames.slice(0, 4).map((name, index) => <button key={name} type="button" title={name} style={{ "--pin-index": index, top: index % 2 === 0 ? "30%" : "49%" } as CSSProperties}><MapPinned /><span>{name}</span></button>)}</div>}
           {location === "site" && <div className="plant-game-site-assets" aria-hidden="true"><Trees /><Factory /><HardHat /></div>}
           {location === "boardroom" && <div className="plant-game-board" aria-hidden="true"><ShieldCheck /><span>INVESTMENT & SITE GOVERNANCE</span></div>}
+          {location === "contractor" && <div className="plant-game-site-assets" aria-hidden="true"><Handshake /><Building2 /><HardHat /></div>}
           <div className={`plant-game-player ${travelling ? "travelling" : ""}`}><img src="/assets/enterprise-genesis/sprites/founder-v1.png" alt="你的创始人角色" /><span>你</span></div>
           {missionHere && <button type="button" className="plant-game-npc" onClick={openMission} aria-label={`${stage.npc}：${stage.actionLabel}`}><span className="plant-game-npc-avatar"><NPCIcon /></span><span className="plant-game-npc-bubble"><small>{stage.npcRole}</small><strong>{stage.npc}</strong><em>{stage.dialogue}</em><b>{stage.actionLabel}<ChevronRight /></b></span></button>}
           {!missionHere && <div className="plant-game-scene-quiet"><LocationIcon /><div><strong>这里目前没有待处理事件</strong><p>可检查本地点已经确认的事实档案，或前往带有事件标记的地点。</p></div></div>}
@@ -103,7 +106,7 @@ export function PlantBuildGameScene({ stage, caseCode, companyCode, proposalName
         </div>
         <div className="plant-game-panel">
           {tab === "event" && (missionHere ? <article className="plant-game-event"><span>{stage.label}</span><h2>{stage.mission}</h2><p>{stage.dialogue}</p><button type="button" onClick={openMission}>{stage.actionLabel}<ChevronRight /></button><small>正式结果只来自 IAOS Capability、审批或受信 World Observation。</small></article> : <div className="plant-game-empty"><LocationIcon /><strong>当前地点没有待处理事件</strong><p>前往带有黄色事件标记的地点，或者查看这里已经形成的档案。</p></div>)}
-          {tab === "people" && <div className="plant-game-people"><article><Bot /><span><strong>纪元</strong><small>设施规划 Agent · 生成建议，不批准</small></span></article><article><UserRound /><span><strong>园区顾问</strong><small>外部参与者 · 提供 World Observation</small></span></article><article><HardHat /><span><strong>顾远</strong><small>项目负责人 · 调研、比较与推荐</small></span></article><article><ShieldCheck /><span><strong>治理审批主体</strong><small>由 IAOS 审批流确定，不由玩家指定</small></span></article></div>}
+          {tab === "people" && <div className="plant-game-people"><article><Bot /><span><strong>纪元</strong><small>设施与工程采购 Agent · 生成建议，不批准</small></span></article><article><UserRound /><span><strong>园区顾问</strong><small>外部参与者 · 提供场址 Observation</small></span></article><article><Handshake /><span><strong>承包商市场</strong><small>外部参与者 · 提供可信投标 Observation</small></span></article><article><HardHat /><span><strong>顾远</strong><small>项目负责人 · 选择、确认与归档</small></span></article><article><ShieldCheck /><span><strong>治理审批主体</strong><small>由 IAOS 审批流确定，不由玩家指定</small></span></article></div>}
           {tab === "archive" && <div className="plant-game-archives">{locationArchives.length ? locationArchives.map((entry) => <article key={entry.id}><header><span>{entry.state}</span><strong>{entry.title}</strong></header><p>{entry.summary}</p><code>{entry.evidence}</code></article>) : <div className="plant-game-empty"><ShieldCheck /><strong>本场景尚无已确认档案</strong><p>完成受治理任务后，需求、候选、外部事实、审批和决定会按地点归档。</p></div>}</div>}
         </div>
         <footer className="plant-game-facts"><span><Factory />{proposalNames.length} 个候选</span><span><MapPinned />{observedCount} 条外部事实</span><span><ShieldCheck />{archives.length} 条档案</span></footer>

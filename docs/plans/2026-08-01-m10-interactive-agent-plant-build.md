@@ -62,6 +62,7 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 - [x] S4.3a 按 DES-038 把首次需求改为 Agent 草案、人员选择和少量调整；完整专业参数只在人工接管中展开。
 - [x] S4.3b 把场址调研 Observation 改为最小玩家确认命令，由 World 引擎从 IAOS 权威请求确定性生成并归档全部外部事实。
 - [x] S4.3c 发布设施项目/WBS 的 Effective Capability/Process Artifact 后再解锁下一 NPC；`facility.project.baseline.v1` 依次执行 Agent 草案、人员确认、审批和人员激活，形成项目与 WBS 权威投影；AESE 项目办公室只让玩家生成、选择和确认方案，治理会议室完成审批。
+- [x] S4.3d 发布首个工程合同授予纵切：从 active WBS 生成 RFQ，World 提供可信投标，Agent 给出可解释推荐，玩家确认并在游戏会议室审批，随后显式归档权威合同；全链由 `facility.contract.award.v1`、四项 Capability、Approval、Audit、Outbox 和 Entity 投影承载。
 - [x] S4.4a IAOS 从已过账银行科目与设立案件已批预算读取只读财务快照，返回来源引用和 snapshot hash；AESE BFF 不接受页面伪造该快照。
 - [ ] S4.4b 投资、合同、变更和付款金额可修订但必须重新校验/审批；资金变化使旧 Requirement snapshot 失效并要求修订。
 - [ ] S4.5 AP/CIP/付款/验收按财务 DES-033/034 接通，不以治理 JSON 冒充会计事实。
@@ -82,7 +83,7 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 
 ## 4. 当前执行
 
-S0、S1、S2、S3.0–S3.8a、S4.1、S4.2、S4.2b、S4.2c、S4.3a–S4.3c 和 S4.4a 已完成。当前在线纵切在正式选址后继续到：场址控制 World wait/Observation → 设施项目 Agent 生成项目与 WBS 方案 → 人员选择并提交 → 游戏会议室审批 → 人员激活权威项目基线。选址、场址控制和项目基线均通过 Effective Capability/Process、Approval、Audit、Outbox 与只读 Entity 投影穿透。该纵切不等于完整 M10：合同、施工、变更、工程财务、验收、对应后续场景和 S5 全链验收仍未完成。既有未跟踪 M7 验收产物不属于本计划，不修改、不提交。
+S0、S1、S2、S3.0–S3.8a、S4.1、S4.2、S4.2b、S4.2c、S4.3a–S4.3d 和 S4.4a 已完成。当前在线纵切已从正式选址延伸到场址控制、设施项目/WBS 基线和首个工程合同授予。合同闭环包含 RFQ、World 可信投标、Agent 推荐、人员确认、游戏内审批和权威合同归档。该纵切不等于完整 M10：施工、变更、工程财务、验收、对应后续场景和 S5 全链验收仍未完成。既有未跟踪 M7 验收产物不属于本计划，不修改、不提交。
 
 ## 5. 当前接口与事实所有权
 
@@ -103,5 +104,9 @@ S0、S1、S2、S3.0–S3.8a、S4.1、S4.2、S4.2b、S4.2c、S4.3a–S4.3c 和 S4
 | 让 Agent 生成项目方案 | `POST /api/aese/v1/world/plant-build/project-options` | 浏览器只提交案件；BFF 重读 Requirement 与可信 Site Control，生成 2–3 套项目/WBS 方案 | 暂不写业务事实；返回模型、prompt、request 和输入/输出 hash 证据 |
 | 选择并提交项目基线 | `POST /api/aese/v1/world/plant-build/facility-projects` | 玩家只选择 Agent 方案；BFF 固化 plan 后依次调用 record 与 submit | `facility.project.plan.record` 写 Agent 草案，`facility.project.baseline.submit` 创建并路由项目审批 |
 | 激活项目基线 | `POST /api/aese/v1/world/plant-build/facility-projects/activate` | 只提交案件、plan 和已批准请求 | `facility.project.baseline.activate` 消费 approved 请求，原子写设施项目和 WBS，并形成 Audit、Outbox、Process trace 与只读 Entity 投影 |
+| 发布工程采购邀请 | `POST /api/aese/v1/world/plant-build/contract-rfqs` | 玩家只选择 WBS 包和策略；BFF 重读 active project 并推导合同上限/日期 | `contractor.rfq.issue` 创建 RFQ、World Intent 和 `facility.contract.award.v1` wait |
+| 收取正式投标 | `POST /api/aese/v1/world/plant-build/contract-bids/confirm` | 玩家只确认；World 从权威 RFQ 生成可重放虚构投标 | Journal Observation 经 `contractor.bid.observation.commit` 核验并保存 |
+| Agent 比选并提交 | `POST /api/aese/v1/world/plant-build/contract-recommendations/agent`、`.../contract-recommendations` | Agent 仅比较可信投标；玩家确认建议 | `contractor.award.recommend` 校验 Evidence hash 并路由合同审批 |
+| 归档正式合同 | `POST /api/aese/v1/world/plant-build/contracts/award` | 只提交推荐和批准请求 | `contractor.contract.award` 消费批准并写权威合同；不自动开票、应付或付款 |
 
 上述 BFF 不是通用 IAOS 代理，也不拥有权威业务表。Requirement 和 ProposalSet 的 GET 只用于恢复 IAOS 已保存事实，不从 AESE 本地重建。外部模型未配置、财务快照不完整或变更、候选 Schema 不合法、权限不足、重复键输入不同、审阅版本冲突时均失败关闭。
