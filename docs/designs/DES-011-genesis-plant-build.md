@@ -222,8 +222,9 @@ IAOS 原子提交 Proposal 与 Agent Run 成功后，CreativeJob 才能进入 `c
 
 Agent 候选输出必须同时受 Schema、业务边界和输出完整性约束。Provider 的
 `finish_reason=length|max_tokens`、空 content 或 JSON 截断不得被当作成功候选。项目/WBS
-可在保留原 IAOS 权威输入的前提下进行一次更精简的受控修订，两次调用的
-request/token/validation 证据必须保留；修订后仍不合法则失败关闭，不得回退到静态方案。
+把“输出完整性恢复”和“业务治理纠正”作为两个独立且各最多一次的受控动作：前者修复截断或坏
+JSON，后者只根据具体字段错误纠正日期、序号、阶段、责任岗位、验收标准或预算分摊。所有调用的
+request/token/validation 证据必须保留；任一恢复预算耗尽后仍不合法则失败关闭，不得回退到静态方案。
 
 任何 Agent 建议都必须留下“为什么、基于什么、还不知道什么、谁选择了什么”的穿透证据。系统规则可以固定合规门和数据结构，不能固定业务人员应选择的方案。
 

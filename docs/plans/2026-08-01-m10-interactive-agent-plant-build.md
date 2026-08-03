@@ -61,7 +61,7 @@ AESE 拥有 Agent 候选生成适配、World 调研/施工事实和游戏交互�
 - [ ] S4.3 空间、承包策略、WBS、延期缓解和投资变更均采用 Agent 建议 + 人员决定。
 - [x] S4.3a 按 DES-038 把首次需求改为 Agent 草案、人员选择和少量调整；完整专业参数只在人工接管中展开。
 - [x] S4.3b 把场址调研 Observation 改为最小玩家确认命令，由 World 引擎从 IAOS 权威请求确定性生成并归档全部外部事实。
-- [x] S4.3c 发布设施项目/WBS 的 Effective Capability/Process Artifact 后再解锁下一 NPC；`facility.project.baseline.v1` 依次执行 Agent 草案、人员确认、审批和人员激活，形成项目与 WBS 权威投影；AESE 项目办公室只让玩家生成、选择和确认方案，治理会议室完成审批；MiniMax 项目候选会识别 completion 截断并仅进行一次保留权威边界的精简修订。
+- [x] S4.3c 发布设施项目/WBS 的 Effective Capability/Process Artifact 后再解锁下一 NPC；`facility.project.baseline.v1` 依次执行 Agent 草案、人员确认、审批和人员激活，形成项目与 WBS 权威投影；AESE 项目办公室只让玩家生成、选择和确认方案，治理会议室完成审批；MiniMax 项目候选分别提供一次输出完整性恢复和一次具体治理字段纠正，均保留权威边界并失败关闭。
 - [x] S4.3d 发布首个工程合同授予纵切：从 active WBS 生成 RFQ，World 提供可信投标，Agent 给出可解释推荐，玩家确认并在游戏会议室审批，随后显式归档权威合同；全链由 `facility.contract.award.v1`、四项 Capability、Approval、Audit、Outbox 和 Entity 投影承载。
 - [x] S4.3e 发布首个施工里程碑纵切：正式合同启动施工包，施工现场 World 确定性生成进度/质量/安全/证据 Observation，项目负责人另行验收；`facility.construction.milestone.v1` 明确验收不等于付款。
 - [x] S4.4a IAOS 从已过账银行科目与设立案件已批预算读取只读财务快照，返回来源引用和 snapshot hash；AESE BFF 不接受页面伪造该快照。

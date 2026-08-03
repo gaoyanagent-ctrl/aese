@@ -17,7 +17,7 @@ const (
 	InteractiveSchemaVersion = "1.0"
 	PlanningPromptVersion    = "plant-planning-v2"
 	RequirementPromptVersion = "plant-requirement-adviser-v1"
-	ProjectPromptVersion     = "facility-project-wbs-v2"
+	ProjectPromptVersion     = "facility-project-wbs-v3"
 	ContractPromptVersion    = "facility-contract-award-v1"
 )
 
@@ -516,19 +516,20 @@ func (p AIPlanningProvider) GenerateProjectPlanOptions(ctx context.Context, seed
 	var requestID string
 	var validationErr error
 	totalUsage := map[string]int{}
-	for attempt := 0; attempt < 2; attempt++ {
-		attemptUser := user
-		if attempt > 0 {
-			attemptUser = `上一次设施项目方案输出被截断或未通过治理校验。重新返回完整严格 JSON，不要解释、Markdown 或思考过程。恰好生成 2 个方案，每个方案恰好 4 个 WBS，四个 phase 各一个，budget_share_bps 合计 10000，文字保持精简。错误摘要：` + validationErr.Error() + "\nJSON形状：" + schema + "\n权威输入：" + string(input)
-		}
-		content, currentRequestID, usage, err := p.Completer.CompleteJSON(ctx, "Return one complete strict JSON object only. Keep the WBS concise and inside authority limits.", attemptUser, 0.35, 8192)
+	attemptUser := user
+	completionRepairUsed := false
+	governanceRepairUsed := false
+	for attempt := 0; attempt < 3; attempt++ {
+		content, currentRequestID, usage, err := p.Completer.CompleteJSON(ctx, "Return one complete strict JSON object only. Keep the WBS concise and inside authority limits.", attemptUser, 0.25, 8192)
 		requestID = currentRequestID
 		for key, value := range usage {
 			totalUsage[key] += value
 		}
 		if err != nil {
 			validationErr = err
-			if attempt == 0 && (strings.Contains(err.Error(), "truncated") || strings.Contains(err.Error(), "empty completion")) {
+			if !completionRepairUsed && (strings.Contains(err.Error(), "truncated") || strings.Contains(err.Error(), "empty completion")) {
+				completionRepairUsed = true
+				attemptUser = facilityProjectRepairPrompt(validationErr, schema, string(input))
 				continue
 			}
 			return ProjectPlanOptionSet{}, fmt.Errorf("facility project agent generation failed: %w", err)
@@ -538,26 +539,37 @@ func (p AIPlanningProvider) GenerateProjectPlanOptions(ctx context.Context, seed
 		decoder.DisallowUnknownFields()
 		if err := decoder.Decode(&decoded); err != nil {
 			validationErr = fmt.Errorf("decode facility project options: %w", err)
-			continue
+			if !completionRepairUsed {
+				completionRepairUsed = true
+				attemptUser = facilityProjectRepairPrompt(validationErr, schema, string(input))
+				continue
+			}
+			return ProjectPlanOptionSet{}, fmt.Errorf("facility project output remained incomplete after completion repair: %w", validationErr)
 		}
 		if len(decoded.Options) < 2 || len(decoded.Options) > 3 {
 			validationErr = errors.New("facility project planner must return two or three options")
-			continue
-		}
-		validationErr = nil
-		for index := range decoded.Options {
-			decoded.Options[index].OptionID = fmt.Sprintf("project-option-%d", index+1)
-			if err := ValidateProjectPlanOption(decoded.Options[index], seed.Requirement); err != nil {
-				validationErr = fmt.Errorf("project option %d: %w", index+1, err)
-				break
+		} else {
+			validationErr = nil
+			for index := range decoded.Options {
+				decoded.Options[index].OptionID = fmt.Sprintf("project-option-%d", index+1)
+				if err := ValidateProjectPlanOption(decoded.Options[index], seed.Requirement); err != nil {
+					validationErr = fmt.Errorf("project option %d: %w", index+1, err)
+					break
+				}
 			}
 		}
 		if validationErr == nil {
 			break
 		}
+		if !governanceRepairUsed {
+			governanceRepairUsed = true
+			attemptUser = facilityProjectRepairPrompt(validationErr, schema, string(input))
+			continue
+		}
+		return ProjectPlanOptionSet{}, fmt.Errorf("facility project output invalid after governance repair: %w", validationErr)
 	}
 	if validationErr != nil {
-		return ProjectPlanOptionSet{}, fmt.Errorf("facility project output invalid after one repair: %w", validationErr)
+		return ProjectPlanOptionSet{}, fmt.Errorf("facility project output invalid after bounded repairs: %w", validationErr)
 	}
 	now := time.Now().UTC()
 	if p.Now != nil {
@@ -566,6 +578,10 @@ func (p AIPlanningProvider) GenerateProjectPlanOptions(ctx context.Context, seed
 	return ProjectPlanOptionSet{SchemaVersion: InteractiveSchemaVersion, Options: decoded.Options,
 		Evidence: ProposalEvidence{Provider: p.Provider, Model: p.Model, PromptVersion: ProjectPromptVersion,
 			RequestID: requestID, InputHash: CanonicalHash(seed), OutputHash: CanonicalHash(decoded.Options), TokenUsage: totalUsage, ValidatedAt: now.Format(time.RFC3339)}}, nil
+}
+
+func facilityProjectRepairPrompt(problem error, schema, input string) string {
+	return `上一次设施项目方案输出被截断或未通过治理校验。只返回一个完整严格 JSON 对象，不要解释、Markdown 或思考过程。恰好生成 2 个方案，每个方案恰好 4 个 WBS；数组顺序和 sequence 必须固定为 design=1、procurement=2、construction=3、commissioning=4；WBS 编码依次为 WBS-01 至 WBS-04。所有日期必须是 RFC3339，工作包日期必须位于同一方案的 target_start_at 与 target_ready_at 之内。owner_position、acceptance_criteria 和 tradeoffs 不得为空；四个 budget_share_bps 必须均大于 0 且合计 10000。错误摘要：` + problem.Error() + "\nJSON形状：" + schema + "\n权威输入：" + input
 }
 
 func (p AIPlanningProvider) GenerateContractRecommendation(ctx context.Context, seed ContractRecommendationSeed) (ContractRecommendationAdvice, error) {
@@ -632,8 +648,44 @@ func ValidateProjectPlanOption(option ProjectPlanOption, requirement FacilityReq
 	for index, item := range option.WBSItems {
 		itemStart, e1 := time.Parse(time.RFC3339, item.PlannedStartAt)
 		itemFinish, e2 := time.Parse(time.RFC3339, item.PlannedFinishAt)
-		if item.WBSCode == "" || item.Name == "" || seen[item.WBSCode] || !phases[item.Phase] || item.Sequence != index+1 || item.OwnerPosition == "" || item.AcceptanceCriteria == "" || e1 != nil || e2 != nil || itemFinish.Before(itemStart) || itemStart.Before(start) || itemFinish.After(ready) || item.BudgetShareBPS <= 0 {
-			return fmt.Errorf("WBS item %q is invalid", item.WBSCode)
+		if strings.TrimSpace(item.WBSCode) == "" {
+			return fmt.Errorf("WBS item %d has no wbs_code", index+1)
+		}
+		if strings.TrimSpace(item.Name) == "" {
+			return fmt.Errorf("WBS item %q has no name", item.WBSCode)
+		}
+		if seen[item.WBSCode] {
+			return fmt.Errorf("WBS item %q duplicates an earlier wbs_code", item.WBSCode)
+		}
+		if !phases[item.Phase] {
+			return fmt.Errorf("WBS item %q phase %q is not allowed", item.WBSCode, item.Phase)
+		}
+		if item.Sequence != index+1 {
+			return fmt.Errorf("WBS item %q sequence=%d, want %d", item.WBSCode, item.Sequence, index+1)
+		}
+		if strings.TrimSpace(item.OwnerPosition) == "" {
+			return fmt.Errorf("WBS item %q has no owner_position", item.WBSCode)
+		}
+		if strings.TrimSpace(item.AcceptanceCriteria) == "" {
+			return fmt.Errorf("WBS item %q has no acceptance_criteria", item.WBSCode)
+		}
+		if e1 != nil {
+			return fmt.Errorf("WBS item %q planned_start_at is not RFC3339", item.WBSCode)
+		}
+		if e2 != nil {
+			return fmt.Errorf("WBS item %q planned_finish_at is not RFC3339", item.WBSCode)
+		}
+		if itemFinish.Before(itemStart) {
+			return fmt.Errorf("WBS item %q finishes before it starts", item.WBSCode)
+		}
+		if itemStart.Before(start) {
+			return fmt.Errorf("WBS item %q starts before project target_start_at", item.WBSCode)
+		}
+		if itemFinish.After(ready) {
+			return fmt.Errorf("WBS item %q finishes after project target_ready_at", item.WBSCode)
+		}
+		if item.BudgetShareBPS <= 0 {
+			return fmt.Errorf("WBS item %q budget_share_bps=%d, want a positive value", item.WBSCode, item.BudgetShareBPS)
 		}
 		seen[item.WBSCode] = true
 		share += item.BudgetShareBPS

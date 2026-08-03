@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.project-wbs-governance-repair.2026-08-03",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M10 设施项目 Agent 分离输出完整性恢复与 WBS 治理字段纠正",
+  "detail": "项目方案生成最多分别执行一次 completion 恢复和一次具体治理字段纠正；WBS 校验会指出日期、序号、阶段、责任岗位、验收标准或预算分摊的精确原因，仍继续消费 IAOS 权威输入并失败关闭。",
+  "status_after": "building",
+  "current_state": "M10 项目方案可从截断后出现的单项 WBS 治理错误继续进行一次有界纠正，不循环重试或回退固定方案。",
+  "evidence_ref": "docs/solutions/SOL-015-m10-project-wbs-governance-repair.md",
+  "occurred_at": "2026-08-03T03:15:00Z"
+}

@@ -307,6 +307,48 @@ func TestAIPlanningProviderRepairsTruncatedProjectOptionsOnce(t *testing.T) {
 	}
 }
 
+func TestAIPlanningProviderSeparatesCompletionAndGovernanceRepairs(t *testing.T) {
+	first := projectOptionFixture("快速总承包")
+	second := projectOptionFixture("分段受控交付")
+	invalid := first
+	invalid.WBSItems = append([]ProjectWBSItem(nil), first.WBSItems...)
+	invalid.WBSItems[1].Sequence = 1
+	invalidRaw, err := json.Marshal(map[string]any{"options": []ProjectPlanOption{invalid, second}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	validRaw, err := json.Marshal(map[string]any{"options": []ProjectPlanOption{first, second}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	completer := &planningSequenceCompleterStub{contents: []string{
+		`{"options":[{"title":"被截断`,
+		string(invalidRaw),
+		string(validRaw),
+	}}
+	provider := AIPlanningProvider{Completer: completer, Provider: "MiniMax", Model: "MiniMax-M3"}
+	requirement := requirementFixture()
+	set, err := provider.GenerateProjectPlanOptions(context.Background(), ProjectPlanSeed{
+		TenantID: requirement.TenantID, CaseCode: requirement.CaseCode,
+		SelectionID: "SEL-1", ControlObservationID: "OBS-CTRL-1", Requirement: requirement,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if completer.calls != 3 || len(set.Options) != 2 || set.Evidence.RequestID != "request-3" {
+		t.Fatalf("calls=%d set=%+v", completer.calls, set)
+	}
+}
+
+func TestValidateProjectPlanOptionExplainsInvalidWBSField(t *testing.T) {
+	option := projectOptionFixture("可解释校验")
+	option.WBSItems[1].Sequence = 1
+	err := ValidateProjectPlanOption(option, requirementFixture())
+	if err == nil || !strings.Contains(err.Error(), `WBS item "WBS-02" sequence=1, want 2`) {
+		t.Fatalf("error=%v", err)
+	}
+}
+
 func TestGenerateContractBidObservationIsReplayStableAndBounded(t *testing.T) {
 	rfq := ContractRFQ{SchemaVersion: "1.0", RFQID: "RFQ-1", CaseCode: "INC-1", ProjectID: "PROJECT-1",
 		PackageCode: "WBS-02", PackageName: "厂房施工", SourcingStrategy: "specialist_packages", BidCount: 3,
