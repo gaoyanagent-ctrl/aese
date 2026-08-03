@@ -17,7 +17,7 @@ const (
 	InteractiveSchemaVersion = "1.0"
 	PlanningPromptVersion    = "plant-planning-v2"
 	RequirementPromptVersion = "plant-requirement-adviser-v1"
-	ProjectPromptVersion     = "facility-project-wbs-v4"
+	ProjectPromptVersion     = "facility-project-wbs-v5"
 	ContractPromptVersion    = "facility-contract-award-v1"
 )
 

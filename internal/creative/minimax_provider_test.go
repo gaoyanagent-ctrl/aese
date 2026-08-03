@@ -20,6 +20,33 @@ func TestMiniMaxDefaultTimeoutPreservesRetryWindow(t *testing.T) {
 	}
 }
 
+func TestMiniMaxCompleteJSONDisablesM3Thinking(t *testing.T) {
+	var thinkingType string
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var request struct {
+			Thinking struct {
+				Type string `json:"type"`
+			} `json:"thinking"`
+		}
+		if err := decodeJSON(r, &request); err != nil {
+			t.Fatal(err)
+		}
+		thinkingType = request.Thinking.Type
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"{\"ok\":true}"},"finish_reason":"stop"}]}`))
+	}))
+	defer upstream.Close()
+	provider, err := NewMiniMaxProvider(MiniMaxConfig{BaseURL: upstream.URL, APIKey: "secret", Model: "MiniMax-M3", Client: upstream.Client()})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if _, _, _, err := provider.CompleteJSON(context.Background(), "system", "user", 0.25, 4096); err != nil {
+		t.Fatal(err)
+	}
+	if thinkingType != "disabled" {
+		t.Fatalf("thinking.type=%q, want disabled for strict structured generation", thinkingType)
+	}
+}
+
 func TestMiniMaxProviderGeneratesModelCandidates(t *testing.T) {
 	var requestedModel string
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

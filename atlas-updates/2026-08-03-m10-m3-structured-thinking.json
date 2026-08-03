@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.m3-structured-thinking.2026-08-03",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M10 严格结构化候选生成显式禁用 MiniMax-M3 自适应 thinking",
+  "detail": "CompleteJSON 对 MiniMax-M3 发送 thinking.type=disabled；结构化 WBS 候选延迟下降，同时继续通过 Schema、业务治理、人工选择和审批门。",
+  "status_after": "building",
+  "current_state": "M10 项目 Agent 不再为严格 JSON 填表任务隐式执行长链自适应推理，既有有界恢复与失败关闭规则保持有效。",
+  "evidence_ref": "docs/solutions/SOL-017-m10-m3-structured-generation-thinking.md",
+  "occurred_at": "2026-08-03T04:17:03Z"
+}

@@ -2133,3 +2133,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：瞬时慢响应不会先重复同一份大请求；恢复调用拥有独立时间窗口，仍未响应时明确保证未写入项目事实并允许玩家重试。
 - 验证：MiniMax 最长单次等待、项目 token 上限、timeout 精简恢复和 HTTP 503 语义四个回归测试均先失败后通过；直连 MiniMax 探针 HTTP 200、首字节约 2.17 秒，排除持续断网。
 - 后续：部署后以原 Genesis Player 会话重试；若 provider 再次持续超过两个 40 秒窗口，保留 503 作为外部服务降级证据。
+
+## 2026-08-03 - M10 M3 结构化生成禁用自适应思考
+
+- 变更：MiniMax adapter 对 `CompleteJSON` 且模型为 `MiniMax-M3*` 的请求显式发送 `thinking.type=disabled`；自由创意调用仍保留原模式。
+- 原因：真实项目请求在两个 40 秒窗口内持续超时；M3 默认自适应 thinking 会为严格 JSON 填表任务产生不必要的推理和明显波动。
+- 影响：关闭 thinking 不跳过任何项目治理；模型结果仍须通过 Schema、WBS 业务校验、人工选择、审批和 Effective Process 后才能写入事实。
+- 验证：同规模独立探针中 disabled thinking 8.17 秒完成、2682 字符、1030 completion tokens；默认模式同次对照为 15.09 秒、5909 字符、1786 completion tokens。新增 wire payload 测试先失败后通过。
+- 后续：部署 8090 并用原 Genesis Player 会话完成真实项目方案生成验收。

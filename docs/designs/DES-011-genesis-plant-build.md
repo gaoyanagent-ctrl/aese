@@ -231,6 +231,11 @@ completion token 上限；单次 provider deadline 不得占满 AESE 整体请�
 一次输出完整性恢复预算并改用精简提示，不得重复同一份大请求。最终仍超时时返回 retryable 503，
 明确说明尚未写入项目事实；超时不是业务治理 422。
 
+`MiniMax-M3` 的严格结构化候选生成必须显式使用 `thinking.type=disabled`。该任务是把 IAOS 权威输入
+映射为受 Schema 和治理规则验证的候选，不是需要长链自主推理的 Agent 任务；禁用自适应 thinking
+只减少隐藏推理与延迟，不绕过 `ValidateProjectPlanOption`、人工选择、审批或 Effective Process。
+自由创意或真正的复杂分析调用可保留 adaptive thinking，但不得与低延迟 JSON adapter 隐式共用模式。
+
 任何 Agent 建议都必须留下“为什么、基于什么、还不知道什么、谁选择了什么”的穿透证据。系统规则可以固定合规门和数据结构，不能固定业务人员应选择的方案。
 
 ## 8. 工期、资金和项目不变量

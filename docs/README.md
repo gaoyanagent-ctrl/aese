@@ -171,6 +171,7 @@
 | SOL-014 | [M10 设施项目 Agent JSON 截断与受控修订](solutions/SOL-014-m10-project-agent-truncated-json.md) | Completed |
 | SOL-015 | [M10 项目 WBS 治理字段二次纠正](solutions/SOL-015-m10-project-wbs-governance-repair.md) | Completed |
 | SOL-016 | [M10 项目 Agent 模型超时预算](solutions/SOL-016-m10-project-agent-timeout-budget.md) | Completed |
+| SOL-017 | [M10 M3 结构化生成禁用自适应思考](solutions/SOL-017-m10-m3-structured-generation-thinking.md) | Completed |
 | M9N Risk Register | [IAOS-native M9 risk register](reports/m9-native-risk-register.json) | Active |
 | M10 Runbook | [Genesis Plant Build Runbook](runbooks/genesis-plant-build.md) | Active（交互纵切 + 历史 reference replay） |
 | M10 Evidence | [Genesis Plant Build Evidence](reports/m10-genesis-plant-build-evidence.md) | Reference Replay Complete；交互验收待补 |
