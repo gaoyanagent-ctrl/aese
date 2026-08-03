@@ -198,6 +198,21 @@ func (p *MiniMaxProvider) completeOnce(ctx context.Context, messages []map[strin
 		return "", false, fmt.Errorf("MiniMax returned an invalid completion envelope")
 	}
 	content := strings.TrimSpace(completion.Choices[0].Message.Content)
+	finishReason := strings.ToLower(strings.TrimSpace(completion.Choices[0].FinishReason))
+	recordGenerationEvidence(ctx, GenerationEvidence{
+		RequestID:    firstNonEmpty(resp.Header.Get("x-request-id"), resp.Header.Get("request-id")),
+		FinishReason: completion.Choices[0].FinishReason,
+		TokenUsage: map[string]int{
+			"prompt_tokens": completion.Usage.PromptTokens, "completion_tokens": completion.Usage.CompletionTokens,
+			"total_tokens": completion.Usage.TotalTokens,
+		},
+	})
+	if finishReason == "length" || finishReason == "max_tokens" {
+		return "", false, fmt.Errorf("MiniMax completion truncated (finish_reason=%s)", finishReason)
+	}
+	if content == "" {
+		return "", false, fmt.Errorf("MiniMax returned empty completion content")
+	}
 	if strings.HasPrefix(content, "<think>") {
 		end := strings.Index(content, "</think>")
 		if end < 0 {
@@ -208,14 +223,6 @@ func (p *MiniMaxProvider) completeOnce(ctx context.Context, messages []map[strin
 	if strings.Contains(content, "<think>") || strings.Contains(content, "```") {
 		return "", false, fmt.Errorf("MiniMax returned non-JSON reasoning or markdown")
 	}
-	recordGenerationEvidence(ctx, GenerationEvidence{
-		RequestID:    firstNonEmpty(resp.Header.Get("x-request-id"), resp.Header.Get("request-id")),
-		FinishReason: completion.Choices[0].FinishReason,
-		TokenUsage: map[string]int{
-			"prompt_tokens": completion.Usage.PromptTokens, "completion_tokens": completion.Usage.CompletionTokens,
-			"total_tokens": completion.Usage.TotalTokens,
-		},
-	})
 	return content, false, nil
 }
 

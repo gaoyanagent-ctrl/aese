@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.project-agent-truncation-repair.2026-08-03",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M10 设施项目 Agent 增加 MiniMax 截断识别与一次受控 JSON 修订",
+  "detail": "Provider 现在对 finish_reason=length|max_tokens 和空 content 失败关闭；项目/WBS 候选在截断或治理校验失败时只修订一次，继续消费 IAOS 权威输入，并合并两轮 Token 证据。",
+  "status_after": "building",
+  "current_state": "M10 项目方案生成不再把截断 JSON 直接暴露为 unexpected EOF，修订后仍非法则明确失败。",
+  "evidence_ref": "docs/solutions/SOL-014-m10-project-agent-truncated-json.md",
+  "occurred_at": "2026-08-03T01:00:00Z"
+}

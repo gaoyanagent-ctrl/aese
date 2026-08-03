@@ -220,6 +220,11 @@ IAOS 原子提交 Proposal 与 Agent Run 成功后，CreativeJob 才能进入 `c
 | 延期缓解方案 | 生成重排、临时供给或范围调整建议 | 评估风险、金额并决定提交 | World discrepancy 与最新 Observation |
 | 投资/变更方案 | 比较金额、现金和工期影响 | 选择申请额并承担审批责任 | IAOS 现金、预算、承诺和报价 |
 
+Agent 候选输出必须同时受 Schema、业务边界和输出完整性约束。Provider 的
+`finish_reason=length|max_tokens`、空 content 或 JSON 截断不得被当作成功候选。项目/WBS
+可在保留原 IAOS 权威输入的前提下进行一次更精简的受控修订，两次调用的
+request/token/validation 证据必须保留；修订后仍不合法则失败关闭，不得回退到静态方案。
+
 任何 Agent 建议都必须留下“为什么、基于什么、还不知道什么、谁选择了什么”的穿透证据。系统规则可以固定合规门和数据结构，不能固定业务人员应选择的方案。
 
 ## 8. 工期、资金和项目不变量

@@ -102,6 +102,23 @@ func TestMiniMaxProviderRetriesTransientBadGateway(t *testing.T) {
 	}
 }
 
+func TestMiniMaxCompleteJSONRejectsLengthTruncation(t *testing.T) {
+	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
+		_, _ = w.Write([]byte(`{"choices":[{"message":{"content":"{\"options\":[{\"title\":\"被截断\""},"finish_reason":"length"}],"usage":{"completion_tokens":8192,"total_tokens":8200}}`))
+	}))
+	defer upstream.Close()
+	provider, err := NewMiniMaxProvider(MiniMaxConfig{
+		BaseURL: upstream.URL, APIKey: "secret", Model: "MiniMax-M3", Client: upstream.Client(),
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	_, _, _, err = provider.CompleteJSON(context.Background(), "system", "user", 0.5, 8192)
+	if err == nil || !strings.Contains(err.Error(), "truncated") {
+		t.Fatalf("expected explicit truncation error, got %v", err)
+	}
+}
+
 func TestMiniMaxProviderRepairsTruncatedJSONOnce(t *testing.T) {
 	calls := 0
 	upstream := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {

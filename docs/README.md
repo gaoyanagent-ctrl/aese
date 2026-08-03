@@ -163,6 +163,12 @@
 | SOL-006 | [银行开户审批后 Work Item Execute 400](solutions/SOL-006-bank-opening-execute-strict-input.md) | Completed |
 | SOL-007 | [实缴资本核验差异 422 与纠正审批](solutions/SOL-007-capital-contribution-mismatch-422.md) | Completed |
 | SOL-008 | [MiniMax 企业名称生成未启用](solutions/SOL-008-minimax-provider-startup-config.md) | Completed |
+| SOL-009 | [Genesis 投影、会话与 Runtime 恢复](solutions/SOL-009-genesis-projection-session-and-runtime-recovery.md) | Completed |
+| SOL-010 | [M9 Command Gateway 与 Process Artifact 权威](solutions/SOL-010-m9-command-gateway-and-process-artifact-authority.md) | Completed |
+| SOL-011 | [M10 Agent 候选投资上限](solutions/SOL-011-m10-agent-proposal-investment-ceiling.md) | Completed |
+| SOL-012 | [M10 LAN HTTP UUID 兼容](solutions/SOL-012-m10-lan-http-random-uuid.md) | Completed |
+| SOL-013 | [M10 Review 恢复与幂等提交](solutions/SOL-013-m10-review-recovery-and-idempotency.md) | Completed |
+| SOL-014 | [M10 设施项目 Agent JSON 截断与受控修订](solutions/SOL-014-m10-project-agent-truncated-json.md) | Completed |
 | M9N Risk Register | [IAOS-native M9 risk register](reports/m9-native-risk-register.json) | Active |
 | M10 Runbook | [Genesis Plant Build Runbook](runbooks/genesis-plant-build.md) | Active（交互纵切 + 历史 reference replay） |
 | M10 Evidence | [Genesis Plant Build Evidence](reports/m10-genesis-plant-build-evidence.md) | Reference Replay Complete；交互验收待补 |

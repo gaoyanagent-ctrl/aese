@@ -2109,3 +2109,11 @@ published。原 `finance.opening.foundation.v1` 只作为旧版本兼容编排�
 - 影响：当前 M10 测试企业可直接执行施工包、World 现场事实和里程碑验收 Capability；以后 Genesis 企业每次创建会话时仍会自动对齐当前 Runtime。
 - 验证：Runtime Install 返回 HTTP 201 且 `platform_asset_writes=1118`；数据库读回 Runtime 2.25.0 和已发布施工 Process；IAOS Atlas 声明已同步。
 - 后续：重新同步 AESE Atlas 声明，并完成 8082/8090/4173 与线上 BFF 路由验收。
+
+## 2026-08-03 - M10 项目 Agent 截断 JSON 恢复
+
+- 变更：MiniMax adapter 开始失败关闭 `finish_reason=length|max_tokens` 和空 content；设施项目/WBS Agent 增加一次精简、受控的完整 JSON 修订，合并两轮 Token 证据。
+- 原因：首轮多套方案及其 WBS 容易触发 completion 上限，旧 adapter 把半截 JSON 当成功返回，导致 `unexpected EOF`。
+- 影响：项目候选仍由外部 Agent 基于 IAOS 权威需求与场址事实生成；不使用固定备选、不降低投资边界，修订后仍非法时明确失败。
+- 验证：新增 MiniMax 截断识别和 Project Option 修订两个先失败后通过的回归测试；`go test ./...` 与 `go vet ./...` 通过。
+- 后续：部署 8090，用原 Genesis Player 会话重试“让 Agent 准备项目方案”并核对 request/token 证据。

@@ -17,7 +17,7 @@ const (
 	InteractiveSchemaVersion = "1.0"
 	PlanningPromptVersion    = "plant-planning-v2"
 	RequirementPromptVersion = "plant-requirement-adviser-v1"
-	ProjectPromptVersion     = "facility-project-wbs-v1"
+	ProjectPromptVersion     = "facility-project-wbs-v2"
 	ContractPromptVersion    = "facility-contract-award-v1"
 )
 
@@ -508,27 +508,56 @@ func (p AIPlanningProvider) GenerateProjectPlanOptions(ctx context.Context, seed
 		return ProjectPlanOptionSet{}, errors.New("facility project planning seed is incomplete")
 	}
 	input, _ := json.Marshal(seed)
-	user := `你是制造企业设施项目总师。基于已交付场址和设施需求，生成 3 个不同的项目/WBS 管理方案。只返回严格 JSON：{"options":[{"title":"","business_rationale":"","project_name":"","delivery_strategy":"design_build","budget_ceiling":{"value":"0.00","currency":"CNY","scale":2},"target_start_at":"RFC3339","target_ready_at":"RFC3339","wbs_items":[{"wbs_code":"WBS-01","name":"","phase":"design","sequence":1,"owner_position":"plant-project-lead","planned_start_at":"RFC3339","planned_finish_at":"RFC3339","budget_share_bps":2500,"acceptance_criteria":""}],"tradeoffs":[""]}]}。delivery_strategy 只能是 design_bid_build、design_build、epcm。每个方案 4–12 个 WBS，phase 只能是 design、procurement、construction、commissioning，sequence 从 1 连续，budget_share_bps 合计 10000。日期必须在项目开始和投产之间；budget_ceiling 不得超过 facility_requirement.investment_request。不要 Markdown。prompt_version=` + ProjectPromptVersion + "\nseed=" + string(input)
-	content, requestID, usage, err := p.Completer.CompleteJSON(ctx, "Return strict JSON only. Build a professional but concise manufacturing-facility WBS inside authority limits.", user, 0.5, 8192)
-	if err != nil {
-		return ProjectPlanOptionSet{}, err
-	}
+	schema := `{"options":[{"title":"","business_rationale":"","project_name":"","delivery_strategy":"design_build","budget_ceiling":{"value":"0.00","currency":"CNY","scale":2},"target_start_at":"RFC3339","target_ready_at":"RFC3339","wbs_items":[{"wbs_code":"WBS-01","name":"","phase":"design","sequence":1,"owner_position":"plant-project-lead","planned_start_at":"RFC3339","planned_finish_at":"RFC3339","budget_share_bps":2500,"acceptance_criteria":""}],"tradeoffs":[""]}]}`
+	user := `你是制造企业设施项目总师。基于已交付场址和设施需求，生成 2–3 个不同的项目/WBS 管理方案，每个方案优先使用 4–6 个精简工作包。只返回严格 JSON，形状为：` + schema + `。delivery_strategy 只能是 design_bid_build、design_build、epcm。每个方案 4–12 个 WBS，phase 只能是 design、procurement、construction、commissioning，sequence 从 1 连续，budget_share_bps 合计 10000。文字字段应简洁，日期必须在项目开始和投产之间；budget_ceiling 不得超过 facility_requirement.investment_request。不要 Markdown。prompt_version=` + ProjectPromptVersion + "\nseed=" + string(input)
 	var decoded struct {
 		Options []ProjectPlanOption `json:"options"`
 	}
-	decoder := json.NewDecoder(strings.NewReader(content))
-	decoder.DisallowUnknownFields()
-	if err := decoder.Decode(&decoded); err != nil {
-		return ProjectPlanOptionSet{}, fmt.Errorf("decode facility project options: %w", err)
-	}
-	if len(decoded.Options) < 2 || len(decoded.Options) > 3 {
-		return ProjectPlanOptionSet{}, errors.New("facility project planner must return two or three options")
-	}
-	for index := range decoded.Options {
-		decoded.Options[index].OptionID = fmt.Sprintf("project-option-%d", index+1)
-		if err := ValidateProjectPlanOption(decoded.Options[index], seed.Requirement); err != nil {
-			return ProjectPlanOptionSet{}, fmt.Errorf("project option %d: %w", index+1, err)
+	var requestID string
+	var validationErr error
+	totalUsage := map[string]int{}
+	for attempt := 0; attempt < 2; attempt++ {
+		attemptUser := user
+		if attempt > 0 {
+			attemptUser = `上一次设施项目方案输出被截断或未通过治理校验。重新返回完整严格 JSON，不要解释、Markdown 或思考过程。恰好生成 2 个方案，每个方案恰好 4 个 WBS，四个 phase 各一个，budget_share_bps 合计 10000，文字保持精简。错误摘要：` + validationErr.Error() + "\nJSON形状：" + schema + "\n权威输入：" + string(input)
 		}
+		content, currentRequestID, usage, err := p.Completer.CompleteJSON(ctx, "Return one complete strict JSON object only. Keep the WBS concise and inside authority limits.", attemptUser, 0.35, 8192)
+		requestID = currentRequestID
+		for key, value := range usage {
+			totalUsage[key] += value
+		}
+		if err != nil {
+			validationErr = err
+			if attempt == 0 && (strings.Contains(err.Error(), "truncated") || strings.Contains(err.Error(), "empty completion")) {
+				continue
+			}
+			return ProjectPlanOptionSet{}, fmt.Errorf("facility project agent generation failed: %w", err)
+		}
+		decoded.Options = nil
+		decoder := json.NewDecoder(strings.NewReader(content))
+		decoder.DisallowUnknownFields()
+		if err := decoder.Decode(&decoded); err != nil {
+			validationErr = fmt.Errorf("decode facility project options: %w", err)
+			continue
+		}
+		if len(decoded.Options) < 2 || len(decoded.Options) > 3 {
+			validationErr = errors.New("facility project planner must return two or three options")
+			continue
+		}
+		validationErr = nil
+		for index := range decoded.Options {
+			decoded.Options[index].OptionID = fmt.Sprintf("project-option-%d", index+1)
+			if err := ValidateProjectPlanOption(decoded.Options[index], seed.Requirement); err != nil {
+				validationErr = fmt.Errorf("project option %d: %w", index+1, err)
+				break
+			}
+		}
+		if validationErr == nil {
+			break
+		}
+	}
+	if validationErr != nil {
+		return ProjectPlanOptionSet{}, fmt.Errorf("facility project output invalid after one repair: %w", validationErr)
 	}
 	now := time.Now().UTC()
 	if p.Now != nil {
@@ -536,7 +565,7 @@ func (p AIPlanningProvider) GenerateProjectPlanOptions(ctx context.Context, seed
 	}
 	return ProjectPlanOptionSet{SchemaVersion: InteractiveSchemaVersion, Options: decoded.Options,
 		Evidence: ProposalEvidence{Provider: p.Provider, Model: p.Model, PromptVersion: ProjectPromptVersion,
-			RequestID: requestID, InputHash: CanonicalHash(seed), OutputHash: CanonicalHash(decoded.Options), TokenUsage: usage, ValidatedAt: now.Format(time.RFC3339)}}, nil
+			RequestID: requestID, InputHash: CanonicalHash(seed), OutputHash: CanonicalHash(decoded.Options), TokenUsage: totalUsage, ValidatedAt: now.Format(time.RFC3339)}}, nil
 }
 
 func (p AIPlanningProvider) GenerateContractRecommendation(ctx context.Context, seed ContractRecommendationSeed) (ContractRecommendationAdvice, error) {
