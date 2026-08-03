@@ -1300,6 +1300,11 @@ func (s *Server) handleAPI(w http.ResponseWriter, r *http.Request) {
 			result, err := planner.GenerateProjectPlanOptions(ctx, plantbuild.ProjectPlanSeed{TenantID: tenantID, CaseCode: input.CaseCode,
 				SelectionID: controlled.Request.SelectionID, ControlObservationID: controlled.Observation.ObservationID, Requirement: requirement})
 			if err != nil {
+				message := strings.ToLower(err.Error())
+				if errors.Is(err, context.DeadlineExceeded) || strings.Contains(message, "deadline exceeded") || strings.Contains(message, "timeout") {
+					s.writeError(w, http.StatusServiceUnavailable, "facility_project_agent_timeout", "设施项目 Agent 响应超时，未写入项目事实；请重试", true, "", "")
+					return
+				}
 				s.writeError(w, http.StatusUnprocessableEntity, "facility_project_agent_failed", err.Error(), false, "", "")
 				return
 			}

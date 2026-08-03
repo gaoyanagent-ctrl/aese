@@ -17,7 +17,7 @@ const (
 	InteractiveSchemaVersion = "1.0"
 	PlanningPromptVersion    = "plant-planning-v2"
 	RequirementPromptVersion = "plant-requirement-adviser-v1"
-	ProjectPromptVersion     = "facility-project-wbs-v3"
+	ProjectPromptVersion     = "facility-project-wbs-v4"
 	ContractPromptVersion    = "facility-contract-award-v1"
 )
 
@@ -520,14 +520,14 @@ func (p AIPlanningProvider) GenerateProjectPlanOptions(ctx context.Context, seed
 	completionRepairUsed := false
 	governanceRepairUsed := false
 	for attempt := 0; attempt < 3; attempt++ {
-		content, currentRequestID, usage, err := p.Completer.CompleteJSON(ctx, "Return one complete strict JSON object only. Keep the WBS concise and inside authority limits.", attemptUser, 0.25, 8192)
+		content, currentRequestID, usage, err := p.Completer.CompleteJSON(ctx, "Return one complete strict JSON object only. Keep the WBS concise and inside authority limits.", attemptUser, 0.25, 4096)
 		requestID = currentRequestID
 		for key, value := range usage {
 			totalUsage[key] += value
 		}
 		if err != nil {
 			validationErr = err
-			if !completionRepairUsed && (strings.Contains(err.Error(), "truncated") || strings.Contains(err.Error(), "empty completion")) {
+			if !completionRepairUsed && isProjectCompletionRecoverable(err) {
 				completionRepairUsed = true
 				attemptUser = facilityProjectRepairPrompt(validationErr, schema, string(input))
 				continue
@@ -578,6 +578,14 @@ func (p AIPlanningProvider) GenerateProjectPlanOptions(ctx context.Context, seed
 	return ProjectPlanOptionSet{SchemaVersion: InteractiveSchemaVersion, Options: decoded.Options,
 		Evidence: ProposalEvidence{Provider: p.Provider, Model: p.Model, PromptVersion: ProjectPromptVersion,
 			RequestID: requestID, InputHash: CanonicalHash(seed), OutputHash: CanonicalHash(decoded.Options), TokenUsage: totalUsage, ValidatedAt: now.Format(time.RFC3339)}}, nil
+}
+
+func isProjectCompletionRecoverable(err error) bool {
+	if errors.Is(err, context.DeadlineExceeded) {
+		return true
+	}
+	message := strings.ToLower(err.Error())
+	return strings.Contains(message, "truncated") || strings.Contains(message, "empty completion") || strings.Contains(message, "timeout") || strings.Contains(message, "deadline exceeded")
 }
 
 func facilityProjectRepairPrompt(problem error, schema, input string) string {

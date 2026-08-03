@@ -4,8 +4,10 @@ import (
 	"bytes"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"regexp"
@@ -44,7 +46,7 @@ func NewMiniMaxProvider(cfg MiniMaxConfig) (*MiniMaxProvider, error) {
 	}
 	client := cfg.Client
 	if client == nil {
-		client = &http.Client{Timeout: 75 * time.Second}
+		client = &http.Client{Timeout: 40 * time.Second}
 	}
 	return &MiniMaxProvider{
 		baseURL: base,
@@ -81,7 +83,7 @@ founder_intent=` + string(intentJSON)
 		{"role": "system", "content": "Return strict JSON only. Never include chain-of-thought."},
 		{"role": "user", "content": prompt},
 	}
-	content, err := p.complete(ctx, messages, 0.8, 8192)
+	content, err := p.complete(ctx, messages, 0.8, 8192, true)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +93,7 @@ founder_intent=` + string(intentJSON)
 			{"role": "system", "content": "Return one complete strict JSON object only. Do not include markdown or reasoning."},
 			{"role": "user", "content": "重新生成完整的公司身份候选 JSON。上一次输出不完整或非法。必须严格符合原格式并返回4个候选。\n原始创业意图：" + string(intentJSON)},
 		}
-		repaired, repairErr := p.complete(ctx, repairMessages, 0.3, 8192)
+		repaired, repairErr := p.complete(ctx, repairMessages, 0.3, 8192, true)
 		if repairErr != nil {
 			return nil, fmt.Errorf("MiniMax naming repair failed after invalid response: %w", repairErr)
 		}
@@ -130,11 +132,11 @@ founder_intent=` + string(intentJSON)
 func (p *MiniMaxProvider) CompleteJSON(ctx context.Context, system, user string, temperature float64, maxTokens int) (string, string, map[string]int, error) {
 	evidence := GenerationEvidence{TokenUsage: map[string]int{}}
 	generationCtx := WithGenerationEvidence(ctx, func(value GenerationEvidence) { evidence = value })
-	content, err := p.complete(generationCtx, []map[string]string{{"role": "system", "content": system}, {"role": "user", "content": user}}, temperature, maxTokens)
+	content, err := p.complete(generationCtx, []map[string]string{{"role": "system", "content": system}, {"role": "user", "content": user}}, temperature, maxTokens, false)
 	return content, evidence.RequestID, evidence.TokenUsage, err
 }
 
-func (p *MiniMaxProvider) complete(ctx context.Context, messages []map[string]string, temperature float64, maxTokens int) (string, error) {
+func (p *MiniMaxProvider) complete(ctx context.Context, messages []map[string]string, temperature float64, maxTokens int, retryTimeout bool) (string, error) {
 	var lastErr error
 	for attempt := 0; attempt < 2; attempt++ {
 		content, transient, err := p.completeOnce(ctx, messages, temperature, maxTokens)
@@ -142,7 +144,7 @@ func (p *MiniMaxProvider) complete(ctx context.Context, messages []map[string]st
 			return content, nil
 		}
 		lastErr = err
-		if !transient || attempt == 1 {
+		if !transient || attempt == 1 || (!retryTimeout && isTimeoutError(err)) {
 			break
 		}
 		timer := time.NewTimer(180 * time.Millisecond)
@@ -154,6 +156,14 @@ func (p *MiniMaxProvider) complete(ctx context.Context, messages []map[string]st
 		}
 	}
 	return "", lastErr
+}
+
+func isTimeoutError(err error) bool {
+	if errors.Is(err, context.DeadlineExceeded) {
+		return true
+	}
+	var netErr net.Error
+	return errors.As(err, &netErr) && netErr.Timeout()
 }
 
 func (p *MiniMaxProvider) completeOnce(ctx context.Context, messages []map[string]string, temperature float64, maxTokens int) (string, bool, error) {

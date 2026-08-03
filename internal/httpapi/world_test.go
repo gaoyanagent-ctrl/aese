@@ -12,7 +12,10 @@ import (
 	"github.com/industrial-ai/iaos-aese/internal/plantbuild"
 )
 
-type planningProviderStub struct{ calls int }
+type planningProviderStub struct {
+	calls      int
+	projectErr error
+}
 
 func (p *planningProviderStub) Status() plantbuild.PlanningProviderStatus {
 	return plantbuild.PlanningProviderStatus{State: "connected", Provider: "MiniMax", Model: "MiniMax-M3", PromptVersion: plantbuild.PlanningPromptVersion}
@@ -35,6 +38,9 @@ func (p *planningProviderStub) GenerateRequirementOptions(_ context.Context, see
 	return plantbuild.RequirementOptionSet{SchemaVersion: "1.0", Options: []plantbuild.RequirementOption{{OptionID: "requirement-option-1", Title: "快速投产", BusinessRationale: "控制现金并缩短周期", TargetRegion: "苏州", FacilityPurpose: "制造基地", MinimumAreaM2: 9000, MinimumElectricKVA: 1800, TargetAvailableAt: "2026-12-01T00:00:00Z", CandidateCount: 3, AllowedOptionTypes: []string{"lease_and_retrofit"}, InvestmentRequest: plantbuild.Money{Value: "12000000.00", Currency: "CNY", Scale: 2}, MinimumCashReserve: plantbuild.Money{Value: "5000000.00", Currency: "CNY", Scale: 2}, Preferences: []string{"快速投产"}, Tradeoffs: []string{"扩展空间有限"}}}, Evidence: plantbuild.ProposalEvidence{Provider: "MiniMax", Model: "MiniMax-M3", PromptVersion: plantbuild.RequirementPromptVersion, InputHash: plantbuild.CanonicalHash(seed), OutputHash: "sha256:output", ValidatedAt: "2026-08-02T10:00:00Z"}}, nil
 }
 func (p *planningProviderStub) GenerateProjectPlanOptions(_ context.Context, seed plantbuild.ProjectPlanSeed) (plantbuild.ProjectPlanOptionSet, error) {
+	if p.projectErr != nil {
+		return plantbuild.ProjectPlanOptionSet{}, p.projectErr
+	}
 	items := []plantbuild.ProjectWBSItem{
 		{WBSCode: "WBS-01", Name: "设计", Phase: "design", Sequence: 1, OwnerPosition: "project-lead", PlannedStartAt: "2026-09-01T00:00:00Z", PlannedFinishAt: "2026-09-30T00:00:00Z", BudgetShareBPS: 2000, AcceptanceCriteria: "设计批准"},
 		{WBSCode: "WBS-02", Name: "采购", Phase: "procurement", Sequence: 2, OwnerPosition: "buyer", PlannedStartAt: "2026-10-01T00:00:00Z", PlannedFinishAt: "2026-11-30T00:00:00Z", BudgetShareBPS: 3000, AcceptanceCriteria: "到货"},
@@ -43,6 +49,31 @@ func (p *planningProviderStub) GenerateProjectPlanOptions(_ context.Context, see
 	}
 	option := plantbuild.ProjectPlanOption{OptionID: "project-option-1", Title: "快速总承包", BusinessRationale: "缩短投产周期", ProjectName: "苏州制造基地建设", DeliveryStrategy: "design_build", BudgetCeiling: plantbuild.Money{Value: "12000000.00", Currency: "CNY", Scale: 2}, TargetStartAt: "2026-09-01T00:00:00Z", TargetReadyAt: "2027-02-28T00:00:00Z", WBSItems: items, Tradeoffs: []string{"集中履约风险"}}
 	return plantbuild.ProjectPlanOptionSet{SchemaVersion: "1.0", Options: []plantbuild.ProjectPlanOption{option, option}, Evidence: plantbuild.ProposalEvidence{Provider: "MiniMax", Model: "MiniMax-M3", PromptVersion: plantbuild.ProjectPromptVersion, InputHash: plantbuild.CanonicalHash(seed), OutputHash: "sha256:project-output", ValidatedAt: "2026-08-02T10:00:00Z"}}, nil
+}
+
+func TestPlantProjectOptionsReportsProviderTimeoutAsRetryable(t *testing.T) {
+	iaos := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		switch r.URL.Path {
+		case "/api/v1/profile":
+			_, _ = w.Write([]byte(`{"username":"founder","tenant_id":"tenant-live"}`))
+		case "/api/v1/genesis/plant/interactive/requirements/facility-requirement-INC-LIVE":
+			_, _ = w.Write([]byte(`{"schema_version":"1.0","requirement_id":"facility-requirement-INC-LIVE","tenant_id":"tenant-live","case_code":"INC-LIVE","investment_request":{"value":"15000000.00","currency":"CNY","scale":2}}`))
+		case "/api/v1/genesis/plant/interactive/site-controls":
+			_, _ = w.Write([]byte(`{"items":[{"request":{"selection_id":"SEL-1"},"status":"controlled","observation":{"observation_id":"OBS-CTRL-1"}}]}`))
+		default:
+			http.NotFound(w, r)
+		}
+	}))
+	defer iaos.Close()
+	server := New(Config{IAOSBaseURL: iaos.URL, PlantPlanningProvider: &planningProviderStub{projectErr: context.DeadlineExceeded}})
+	req := httptest.NewRequest(http.MethodPost, "/api/aese/v1/world/plant-build/project-options", strings.NewReader(`{"case_code":"INC-LIVE"}`))
+	req.Header.Set("Authorization", "Bearer founder-token")
+	req.Header.Set("X-IAOS-Tenant-Id", "tenant-live")
+	res := httptest.NewRecorder()
+	server.ServeHTTP(res, req)
+	if res.Code != http.StatusServiceUnavailable || !strings.Contains(res.Body.String(), `"retryable":true`) || !strings.Contains(res.Body.String(), `facility_project_agent_timeout`) {
+		t.Fatalf("status=%d body=%s", res.Code, res.Body.String())
+	}
 }
 
 func TestGenesisWorldAPI(t *testing.T) {

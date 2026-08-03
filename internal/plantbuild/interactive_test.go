@@ -27,16 +27,31 @@ func (s planningCompleterStub) CompleteJSON(context.Context, string, string, flo
 }
 
 type planningSequenceCompleterStub struct {
-	contents []string
-	calls    int
+	contents  []string
+	calls     int
+	maxTokens []int
 }
 
-func (s *planningSequenceCompleterStub) CompleteJSON(context.Context, string, string, float64, int) (string, string, map[string]int, error) {
+type planningTimeoutThenContentCompleterStub struct {
+	content string
+	calls   int
+}
+
+func (s *planningTimeoutThenContentCompleterStub) CompleteJSON(_ context.Context, _ string, _ string, _ float64, _ int) (string, string, map[string]int, error) {
+	s.calls++
+	if s.calls == 1 {
+		return "", "request-timeout", nil, context.DeadlineExceeded
+	}
+	return s.content, "request-recovery", map[string]int{"total_tokens": 20}, nil
+}
+
+func (s *planningSequenceCompleterStub) CompleteJSON(_ context.Context, _ string, _ string, _ float64, maxTokens int) (string, string, map[string]int, error) {
 	index := s.calls
 	if index >= len(s.contents) {
 		index = len(s.contents) - 1
 	}
 	s.calls++
+	s.maxTokens = append(s.maxTokens, maxTokens)
 	return s.contents[index], "request-" + string(rune('1'+index)), map[string]int{"total_tokens": 10 + index}, nil
 }
 
@@ -336,6 +351,33 @@ func TestAIPlanningProviderSeparatesCompletionAndGovernanceRepairs(t *testing.T)
 		t.Fatal(err)
 	}
 	if completer.calls != 3 || len(set.Options) != 2 || set.Evidence.RequestID != "request-3" {
+		t.Fatalf("calls=%d set=%+v", completer.calls, set)
+	}
+	for _, maxTokens := range completer.maxTokens {
+		if maxTokens > 4096 {
+			t.Fatalf("project completion max_tokens=%d, want <=4096", maxTokens)
+		}
+	}
+}
+
+func TestAIPlanningProviderUsesCompletionRepairForTimeout(t *testing.T) {
+	first := projectOptionFixture("快速总承包")
+	second := projectOptionFixture("分段受控交付")
+	validRaw, err := json.Marshal(map[string]any{"options": []ProjectPlanOption{first, second}})
+	if err != nil {
+		t.Fatal(err)
+	}
+	completer := &planningTimeoutThenContentCompleterStub{content: string(validRaw)}
+	provider := AIPlanningProvider{Completer: completer, Provider: "MiniMax", Model: "MiniMax-M3"}
+	requirement := requirementFixture()
+	set, err := provider.GenerateProjectPlanOptions(context.Background(), ProjectPlanSeed{
+		TenantID: requirement.TenantID, CaseCode: requirement.CaseCode,
+		SelectionID: "SEL-1", ControlObservationID: "OBS-CTRL-1", Requirement: requirement,
+	})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if completer.calls != 2 || len(set.Options) != 2 || set.Evidence.RequestID != "request-recovery" {
 		t.Fatalf("calls=%d set=%+v", completer.calls, set)
 	}
 }

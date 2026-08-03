@@ -7,7 +7,18 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+	"time"
 )
+
+func TestMiniMaxDefaultTimeoutPreservesRetryWindow(t *testing.T) {
+	provider, err := NewMiniMaxProvider(MiniMaxConfig{BaseURL: "https://api.minimax.chat/v1", APIKey: "secret", Model: "MiniMax-M3"})
+	if err != nil {
+		t.Fatal(err)
+	}
+	if provider.client.Timeout > 40*time.Second {
+		t.Fatalf("single attempt timeout %s leaves no bounded retry window", provider.client.Timeout)
+	}
+}
 
 func TestMiniMaxProviderGeneratesModelCandidates(t *testing.T) {
 	var requestedModel string

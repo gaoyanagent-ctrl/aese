@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "update_key": "aese.genesis.m10.project-agent-timeout-budget.2026-08-03",
+  "node_key": "aese.world.genesis",
+  "update_type": "implementation",
+  "summary": "M10 设施项目 Agent 为 MiniMax 慢响应建立有界 timeout 与恢复预算",
+  "detail": "单次 MiniMax 调用限制为 40 秒，项目输出使用 4096 token；timeout 由精简项目提示恢复一次，最终失败以 retryable 503 返回且不写业务事实。",
+  "status_after": "building",
+  "current_state": "M10 项目方案不会再让一次 75 秒慢调用耗尽整个请求，也不会把外部模型超时误报为业务治理 422。",
+  "evidence_ref": "docs/solutions/SOL-016-m10-project-agent-timeout-budget.md",
+  "occurred_at": "2026-08-03T03:53:26Z"
+}
